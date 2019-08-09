@@ -3,7 +3,6 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Bootstrap 4 with React</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" />
         <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='jsme/jsme.nocache.js')}}"></script>
         <script>
@@ -12,12 +11,9 @@
                 jsmeApplet = new JSApplet.JSME("jsme_container", "380px", "340px");
             }
         </script>
-	<script type="text/js" src="{{ url_for('static', filename='node_modules/react/dist/react.min.js')}}"></script>
-	<script type="text/js" src="{{ url_for('static', filename='node_modules/react-dom/dist/react-dom.min.js')}}"></script>
+	<!--<script type="text/js" src="{{ url_for('static', filename='node_modules/react/dist/react.min.js')}}"></script>-->
+	<!--<script type="text/js" src="{{ url_for('static', filename='node_modules/react-dom/dist/react-dom.min.js')}}"></script>-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js')}}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/tether/dist/js/tether.min.js')}}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js')}}"></script>
         {% if title %}
         <title> {{ title }} - Molecule Shopping Cart</title>
         {% else %}
@@ -25,7 +21,31 @@
         {% endif %}
     </head>
     <body>
-        <h1>Hello, {{ user.username }}!</h1>
-        <div id="jsme_container"></div>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js')}}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/tether/dist/js/tether.min.js')}}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+	<!--<script type="text/javascript" src="{{ url_for('static', filename='node_modules/react/dist/react.min.js')}}"></script>-->
+	<!--<script type="text/javascript" src="{{ url_for('static', filename='node_modules/react-dom/dist/react-dom.min.js')}}"></script>-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
+	<script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+        <div id="jumbotronExample"></div>
+        <div id="jumbotronExample"></div>
+        <script type="text/babel">
+        var jumbotronHTML =
+        <div className="container">
+        <div className="jumbotron bg-info">
+	<h1 className="display-3">Hello, {{user.username}}</h1>
+        <p className="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <hr className="my-4" />
+        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+        <p className="lead">
+        <a className="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+        </p>
+        </div>
+        </div>
+        ReactDOM.render( jumbotronHTML, document.getElementById('jumbotronExample') );
+        </script>
+	<div id="jsme_container"></div>
     </body>
 </html>
