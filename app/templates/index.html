@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Bootstrap 4 with React</title>
-        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css')}}" />
         <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='jsme/jsme.nocache.js')}}"></script>
         <script>
             //this function will be called after the JavaScriptApplet code has been loaded.
@@ -12,6 +12,9 @@
                 jsmeApplet = new JSApplet.JSME("jsme_container", "380px", "340px");
             }
         </script>
+	<script type="text/js" src="{{ url_for('static', filename='node_modules/react/dist/react.min.js')}}"></script>
+	<script type="text/js" src="{{ url_for('static', filename='node_modules/react-dom/dist/react-dom.min.js')}}"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
         {% if title %}
         <title> {{ title }} - Molecule Shopping Cart</title>
         {% else %}
@@ -21,8 +24,8 @@
     <body>
         <h1>Hello, {{ user.username }}!</h1>
         <div id="jsme_container"></div>
-        <script type="text/javascript" src="node_modules/jquery/dist/jquery.slim.min.js"></script>
-        <script type="text/javascript" src="node_modules/tether/dist/js/tether.min.js"></script>
-        <script type="text/javascript" src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js')}}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/tether/dist/js/tether.min.js')}}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js')}}"></script>
     </body>
 </html>
