@@ -15,6 +15,9 @@
 	<script type="text/js" src="{{ url_for('static', filename='node_modules/react/dist/react.min.js')}}"></script>
 	<script type="text/js" src="{{ url_for('static', filename='node_modules/react-dom/dist/react-dom.min.js')}}"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js')}}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/tether/dist/js/tether.min.js')}}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js')}}"></script>
         {% if title %}
         <title> {{ title }} - Molecule Shopping Cart</title>
         {% else %}
@@ -24,8 +27,5 @@
     <body>
         <h1>Hello, {{ user.username }}!</h1>
         <div id="jsme_container"></div>
-	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js')}}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/tether/dist/js/tether.min.js')}}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js')}}"></script>
     </body>
 </html>
