@@ -87,36 +87,35 @@
                        <p class="lead">Draw a molecule and search for analogs using SmallWorld.</p>
                </div>
             </div>
-        <div id="jsme_container"></div>
-        <div id="like_button_container"></div>
+        <div id="jsme_container" style="float:left"></div>
+        <div id="smiles_box_container" style="float:right" style="padding-left:40px">
+            <table align="left">
+                {#<tr>
+                    <td colspan="3" style="font-weight:bold;">Export chemical structure from applet:</td>
+                </tr>#}
+                <tr>
+                    <!--<td>
+                     <button type="button" onclick='getMolfile(false);'>Get molfile</button>
+                    </td>
+                  <td>/
+                   <button type="button" onclick='getMolfile(true);'>Get molfile V3000</button>
+                  </td>
+              -->
+                    <td>
+                        <button type="button" onclick='getSmiles();'>Get smiles</button>
+                    </td>
+                    <!--<td>
+                     <button type="button" onclick='getJMEstring();'>Get JME string</button>
+                    </td>
+              -->
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <TEXTAREA id="jme_output" ROWS=15 COLS=80></TEXTAREA>
+                    </td>
+                </tr>
 
-        <table align="left">
-            <tr>
-                <td colspan="3" style="font-weight:bold;">Export chemical structure from applet:</td>
-            </tr>
-            <tr>
-                <!--<td>
-                 <button type="button" onclick='getMolfile(false);'>Get molfile</button>
-                </td>
-              <td>
-               <button type="button" onclick='getMolfile(true);'>Get molfile V3000</button>
-              </td>
-          -->
-                <td>
-                    <button type="button" onclick='getSmiles();'>Get smiles</button>
-                </td>
-                <!--<td>
-                 <button type="button" onclick='getJMEstring();'>Get JME string</button>
-                </td>
-          -->
-            </tr>
-            <tr>
-                <td colspan="3">
-                    <TEXTAREA id="jme_output" ROWS=20 COLS=80></TEXTAREA>
-                </td>
-            </tr>
-
-        </table>
-        <script src="{{ url_for('static', filename='like_button.js') }}"></script>
+            </table>
+        </div>
     </body>
 </html>
