@@ -60,8 +60,48 @@
                 jsmeApplet.readGenericMolecularInput(mol);
             }
         </script>
+        <script type="text/javascript">
+            function do_ajax() {
+            var req = new XMLHttpRequest();
+            var result = document.getElementById('result');
+            req.onreadystatechange = function()
+            {
+              if(this.readyState == 4 && this.status == 200) {
+                result.innerHTML = this.responseText;
+              } else {
+                result.innerHTML = "inner html";
+              }
+            }
+            req.open('POST', '/', true);
+            req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+            req.send("name=" + document.getElementById('name').value);
+      }
+        </script>
+    <script type="text/javascript">
+        function getJSONP(url, success) {
+
+            var ud = '_' + +new Date,
+                script = document.createElement('script'),
+                head = document.getElementsByTagName('head')[0]
+                       || document.documentElement;
+
+            window[ud] = function(data) {
+                head.removeChild(script);
+                success && success(data);
+            };
+
+            script.src = url.replace('callback=?', 'callback=' + ud);
+            head.appendChild(script);
+
+        }
+
+        getJSONP('http://sw.docking.org//search/submit?smi=c1ccccc1&db=ZINC-Interesting-297K&dist=4&tdn=4&tup=4&rdn=4&rup=4&ldn=4&lup=4&maj=4&min=4&sub=4&scores=Atom%20Alignment,ECFP4,Daylight%27', function(data){
+        console.log(data);
+        });
+    </script>
     </head>
     <body>
+        <div id="root">
         <div>Molecule Shopping Cart: 
             <a href="{{ url_for('index') }}">Home</a>
             <a href="{{ url_for('login') }}">Login</a>
@@ -73,6 +113,8 @@
             </div>
         </noscript>
         <script type="text/javascript" src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js')}}"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="{{ url_for('static', filename='node_modules/tether/dist/js/tether.min.js')}}"></script>
         <script type="text/javascript" src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js')}}"></script>
         <!--<script type="text/javascript" src="{{ url_for('static', filename='node_modules/react/dist/react.min.js')}}"></script>-->
@@ -81,6 +123,8 @@
         <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
         <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
         <hr>
-        {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
+        </div>
     </body>
 </html>
