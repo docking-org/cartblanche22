@@ -66,15 +66,15 @@
           }
         };
         xhr.send();
-    };
-getJSON('http://sw.docking.org//search/submit?smi=c1ccccc1&db=ZINC-Interesting-297K&dist=4&tdn=4&tup=4&rdn=4&rup=4&ldn=4&lup=4&maj=4&min=4&sub=4&scores=Atom%20Alignment,ECFP4,Daylight%27', function(err, data) {
-    if (err != null) {
-        alert('Something went wrong: ' + err);
-    } else {
-        alert('Your data: '+ data);
-        console.log(data);
-   }
-});
+        };
+        getJSON('http://sw.docking.org//search/submit?smi=c1ccccc1&db=ZINC-Interesting-297K&dist=4&tdn=4&tup=4&rdn=4&rup=4&ldn=4&lup=4&maj=4&min=4&sub=4&scores=Atom%20Alignment,ECFP4,Daylight%27', function(err, data) {
+        if (err != null) {
+            alert('Something went wrong: ' + err);
+        } else {
+            alert('Your data: '+ data);
+            console.log(data[0]["status"]);
+        }
+        });
     </script>
-     <button type="button" class="smallworld">SmallWorld</button>
+    <button type="button" class="smallworld">SmallWorld</button>
 {% endblock %}
