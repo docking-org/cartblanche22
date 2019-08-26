@@ -1,51 +1,51 @@
 {% extends "base.html" %}
 
-{%  block content %}
-            <div class="jumbotron jumbotron-fluid">
-               <div class="container">
-               <h1 class="display-4">Hello, {{current_user.username}}!</h1>
-               <h1 class="display-4">Welcome to Molecule Shopping Cart</h1>
-                       <p class="lead">Draw a molecule and search for analogs using SmallWorld.</p>
-               </div>
-            </div>
-        <div id="jsme_container" style="float:left"></div>
-        <div id="smiles_box_container" style="float:right" style="padding-left:40px">
-            <table align="left">
-                {#<tr>
+{% block content %}
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">Hello, {{ current_user.username }}!</h1>
+            <h1 class="display-4">Welcome to Molecule Shopping Cart</h1>
+            <p class="lead">Draw a molecule and search for analogs using SmallWorld.</p>
+        </div>
+    </div>
+    <div id="jsme_container" style="float:left"></div>
+    <div id="smiles_box_container" style="float:right" style="padding-left:40px">
+        <table align="left">
+            {#<tr>
                     <td colspan="3" style="font-weight:bold;">Export chemical structure from applet:</td>
                 </tr>#}
-                <tr>
-                    <!--<td>
-                     <button type="button" onclick='getMolfile(false);'>Get molfile</button>
-                    </td>
-                  <td>/
-                   <button type="button" onclick='getMolfile(true);'>Get molfile V3000</button>
-                  </td>
-              -->
-                    <td>
-                        <button type="button" onclick='getSmiles();'>Get smiles</button>
-                    </td> <td>
-                        <button type="button" onclick='callSmallWorld();'>Call SmallWorld</button>
-                    </td>
-                    <!--<td>
-                     <button type="button" onclick='getJMEstring();'>Get JME string</button>
-                    </td>
-              -->
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <TEXTAREA id="jme_output" ROWS=15 COLS=80></TEXTAREA>
-                    </td>
-                </tr>
+            <tr>
+                <!--<td>
+                 <button type="button" onclick='getMolfile(false);'>Get molfile</button>
+                </td>
+              <td>/
+               <button type="button" onclick='getMolfile(true);'>Get molfile V3000</button>
+              </td>
+          -->
+                <td>
+                    <button type="button" onclick='getSmiles();'>Get smiles</button>
+                </td>
+                <td>
+                    <button type="button" onclick='callSmallWorld();'>Call SmallWorld</button>
+                </td>
+                <td>
+                    <button type="button" onclick='recoverStorage();'>Recover Data</button>
+                </td>
+                <!--<td>
+                 <button type="button" onclick='getJMEstring();'>Get JME string</button>
+                </td>
+          -->
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <TEXTAREA id="jme_output" ROWS=15 COLS=80></TEXTAREA>
+                </td>
+            </tr>
 
-            </table>
-        </div>
-    <script type="text/javascript">
+        </table>
+    </div>
+{#    <script type="text/javascript">
         $(document).ready(function () {
-            $(".smallworld").on('click', function (event) {
-                console.log("hi1");
-                callSmallWorld();
-            });
 
             function callSmallWorld() {
                 console.log("in function callSmallWorld()");
@@ -54,55 +54,23 @@
                     format: "json"
                 })
                     .done(function (data) {
-                        alert('success');
+                        alert('Called SmallWorld!');
+                        var stringify_initial_request = JSON.stringify(data);
+                        console.log('Stringify');
+                        console.log(stringify_initial_request);
+                        stringify_initial_request = btoa(stringify_initial_request);
+                        localStorage.setItem('_string_initial_request', stringify_initial_request);
                         console.log(data);
                     });
             }
-        });
-  {#  </script>
-        <script type="text/javascript">
-        $(document).ready(function () {
-            $(".smallworld").on('click', function (event) {
-                console.log("hi1");
-                callSmallWorld();
-            });
 
-            function callSmallWorld() {
-                console.log("in function callSmallWorld()");
-                let smallWorldAPI = "http://sw.docking.org//search/submit?smi=c1ccccc1&db=ZINC-Interesting-297K&dist=4&tdn=4&tup=4&rdn=4&rup=4&ldn=4&lup=4&maj=4&min=4&sub=4&scores=Atom%20Alignment,ECFP4,Daylight%27";
-                $.ajax({
-                    dataType: "json",
-                    url: smallWorldAPI,
-                    success: function(data){
-                        alert('success');
-                    }
-                });
+            function recoverStorage() {
+                var recover_initial_request = localStorage.getItem('_string_initial_request');
+                recover_initial_request = atob(recover_initial_request);
+                recover_initial_request = JSON.parse(recover_initial_request);
+                console.log('Recover Initial Request');
+                console.log(recover_initial_request);
             }
         });
-    </script>
-    <script type="text/javascript">
-        var getJSON = function(url, callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'application/json';
-        xhr.onload = function() {
-          var status = xhr.status;
-          if (status === 200) {
-            callback(null, xhr.response);
-          } else {
-            callback(status, xhr.response);
-          }
-        };
-        xhr.send();
-        };
-        getJSON('http://sw.docking.org//search/submit?smi=c1ccccc1&db=ZINC-Interesting-297K&dist=4&tdn=4&tup=4&rdn=4&rup=4&ldn=4&lup=4&maj=4&min=4&sub=4&scores=Atom%20Alignment,ECFP4,Daylight%27', function(err, data) {
-        if (err != null) {
-            alert('Something went wrong: ' + err);
-        } else {
-            alert('Your data: '+ data);
-            //console.log(data[0]["status"]);
-        }
-        });
     </script>#}
-    <button type="button" class="smallworld">SmallWorld</button>
 {% endblock %}

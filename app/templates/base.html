@@ -86,10 +86,23 @@
                 if (err != null) {
                     alert('Something went wrong: ' + err);
                 } else {
-                    alert('Success!');
+                    alert('Called SmallWorld!');
+                    var stringify_initial_request = JSON.stringify(data);
+                    console.log('Stringify');
+                    console.log(stringify_initial_request);
+                    stringify_initial_request = btoa(stringify_initial_request);
+                    localStorage.setItem('_string_initial_request', stringify_initial_request);
                     console.log(data);
                 }
             });
+        }
+
+        function recoverStorage() {
+            var recover_initial_request = localStorage.getItem('_string_initial_request');
+            recover_initial_request = atob(recover_initial_request);
+            recover_initial_request = JSON.parse(recover_initial_request);
+            console.log('Recover Initial Request');
+            console.log(recover_initial_request);
         }
     </script>
 </head>
@@ -98,9 +111,9 @@
     <div>Molecule Shopping Cart:
         <a href="{{ url_for('index') }}">Home</a>
         {% if current_user.is_anonymous %}
-        <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('login') }}">Login</a>
         {% else %}
-        <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
         {% endif %}
     </div>
     <noscript>
