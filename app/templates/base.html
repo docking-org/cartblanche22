@@ -87,6 +87,7 @@
                     alert('Something went wrong: ' + err);
                 } else {
                     alert('Called SmallWorld!');
+                    var local_data = data;
                     var stringify_initial_request = JSON.stringify(data);
                     console.log('Stringify');
                     console.log(stringify_initial_request);
