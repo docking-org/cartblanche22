@@ -12,6 +12,20 @@
     <script type="text/javascript" language="javascript"
             src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
     <script>
+        var sw_parameters = {
+            smiles: 'c1ccccc1',
+            db: 'ZINC-Interesting-297K',
+            dist: 4,
+            tdn: 4,
+            tup: 4,
+            rdn: 4,
+            rup: 4,
+            ldn: 4,
+            lup: 4,
+            maj: 4,
+            min: 4,
+            sub: 4
+        };
         //this function will be called after the JavaScriptApplet code has been loaded.
         function jsmeOnLoad() {
             jsmeApplet = new JSApplet.JSME("jsme_container", "600px", "440px");
@@ -65,7 +79,6 @@
             var mol = document.getElementById("jme_output").value;
             jsmeApplet.readGenericMolecularInput(mol);
         }
-
         function callSmallWorld() {
             console.log("in function callSmallWorld()");
             var getJSON = function (url, callback) {
@@ -87,7 +100,6 @@
                     alert('Something went wrong: ' + err);
                 } else {
                     alert('Called SmallWorld!');
-                    var local_data = data;
                     var stringify_initial_request = JSON.stringify(data);
                     console.log('Stringify');
                     console.log(stringify_initial_request);
