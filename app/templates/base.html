@@ -58,6 +58,8 @@
         function getSmiles() {
             var data = document.JME.smiles();
             document.getElementById("jme_output").value = data;
+            sw_parameters["smiles"] = data;
+            console.log(sw_parameters);
         }
 
         function getJMEstring() {
@@ -95,7 +97,7 @@
                 };
                 xhr.send();
             };
-            var sw_url = 'http://sw.docking.org/search/submit?smi='.concat(String(sw_parameters["smiles"]),'&db=',String(sw_parameters["db"]), '&dist=4&tdn=4&tup=4&rdn=4&rup=4&ldn=4&lup=4&maj=4&min=4&sub=4&scores=Atom%20Alignment,ECFP4,Daylight%27');
+            var sw_url = 'http://sw.docking.org/search/submit?smi='.concat(String(sw_parameters["smiles"]),'&db=',String(sw_parameters["db"]), '&dist=', String(sw_parameters["dist"]), '&tdn=', String(sw_parameters["tdn"]),'&tup=', String(sw_parameters["tup"]), '&rdn=', String(sw_parameters["rdn"]), '&rup=', String(sw_parameters["rup"]), '&ldn=', String(sw_parameters["ldn"]), '&lup=', String(sw_parameters["lup"]), '&maj=', String(sw_parameters["maj"]), '&min=', String(sw_parameters["min"]), '&sub=', String(sw_parameters["sub"]),'&scores=Atom%20Alignment,ECFP4,Daylight%27');
             console.log(sw_url);
             getJSON(sw_url, function (err, data) {
                 if (err != null) {
