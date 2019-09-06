@@ -12,6 +12,7 @@
     <script type="text/javascript" language="javascript"
             src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
     <script>
+        //Initial parameters to call SmallWorld API. These will be updated when changes are made in the molecule editor
         var sw_parameters = {
             smiles: 'c1ccccc1',
             db: 'ZINC-Interesting-297K',
@@ -26,6 +27,11 @@
             min: 4,
             sub: 4
         };
+
+        var hlid;
+        var split_hlid_string;
+        var clean_split_string = [];
+
         //this function will be called after the JavaScriptApplet code has been loaded.
         function jsmeOnLoad() {
             jsmeApplet = new JSApplet.JSME("jsme_container", "600px", "440px");
@@ -111,6 +117,17 @@
                     stringify_initial_request = btoa(stringify_initial_request);
                     localStorage.setItem('_string_initial_request', stringify_initial_request);
                     console.log(data);
+                    hlid = data;
+                    split_hlid_string = hlid.split("\n");
+                    for (i = 0; i < split_hlid_string.length; i++)
+                    {
+                        if (split_hlid_string[i] !== '')
+                        {
+                           clean_split_string.push(split_hlid_string[i]);
+                        }
+                    }
+                    console.log(split_hlid_string);
+                    console.log(clean_split_string);
                 }
             });
         }
