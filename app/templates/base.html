@@ -29,8 +29,11 @@
         };
 
         var hlid;
+        var sw_response;
         var split_hlid_string;
         var clean_split_string = [];
+        var first_data_string;
+        var parsed_response_obj = {};
 
         //this function will be called after the JavaScriptApplet code has been loaded.
         function jsmeOnLoad() {
@@ -117,8 +120,8 @@
                     stringify_initial_request = btoa(stringify_initial_request);
                     localStorage.setItem('_string_initial_request', stringify_initial_request);
                     console.log(data);
-                    hlid = data;
-                    split_hlid_string = hlid.split("\n");
+                    sw_response = data;
+                    split_hlid_string = sw_response.split("\n");
                     for (i = 0; i < split_hlid_string.length; i++)
                     {
                         if (split_hlid_string[i] !== '')
@@ -128,6 +131,12 @@
                     }
                     console.log(split_hlid_string);
                     console.log(clean_split_string);
+                    first_data_string = clean_split_string[0].slice(5);
+                    console.log(first_data_string);
+                    parsed_response_obj = JSON.parse(first_data_string);
+                    console.log(parsed_response_obj);
+                    hlid = parsed_response_obj["hlid"];
+                    console.log(hlid);
                 }
             });
         }
