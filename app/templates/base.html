@@ -34,6 +34,7 @@
         var clean_split_string = [];
         var first_data_string;
         var parsed_response_obj = {};
+        var sw_view = String();
 
         //this function will be called after the JavaScriptApplet code has been loaded.
         function jsmeOnLoad() {
@@ -90,6 +91,7 @@
             var mol = document.getElementById("jme_output").value;
             jsmeApplet.readGenericMolecularInput(mol);
         }
+
         function callSmallWorld() {
             console.log("in function callSmallWorld()");
             var getJSON = function (url, callback) {
@@ -107,7 +109,7 @@
                 xhr.send();
             };
             getSmiles();
-            var sw_url = 'http://sw.docking.org/search/submit?smi='.concat(String(sw_parameters["smiles"]),'&db=',String(sw_parameters["db"]), '&dist=', String(sw_parameters["dist"]), '&tdn=', String(sw_parameters["tdn"]),'&tup=', String(sw_parameters["tup"]), '&rdn=', String(sw_parameters["rdn"]), '&rup=', String(sw_parameters["rup"]), '&ldn=', String(sw_parameters["ldn"]), '&lup=', String(sw_parameters["lup"]), '&maj=', String(sw_parameters["maj"]), '&min=', String(sw_parameters["min"]), '&sub=', String(sw_parameters["sub"]),'&scores=Atom%20Alignment,ECFP4,Daylight%27');
+            var sw_url = 'http://sw.docking.org/search/submit?smi='.concat(String(sw_parameters["smiles"]), '&db=', String(sw_parameters["db"]), '&dist=', String(sw_parameters["dist"]), '&tdn=', String(sw_parameters["tdn"]), '&tup=', String(sw_parameters["tup"]), '&rdn=', String(sw_parameters["rdn"]), '&rup=', String(sw_parameters["rup"]), '&ldn=', String(sw_parameters["ldn"]), '&lup=', String(sw_parameters["lup"]), '&maj=', String(sw_parameters["maj"]), '&min=', String(sw_parameters["min"]), '&sub=', String(sw_parameters["sub"]), '&scores=Atom%20Alignment,ECFP4,Daylight%27');
             console.log(sw_url);
             getJSON(sw_url, function (err, data) {
                 if (err != null) {
@@ -123,11 +125,9 @@
                     sw_response = data;
                     split_hlid_string = sw_response.split("\n");
                     clean_split_string = [];
-                    for (i = 0; i < split_hlid_string.length; i++)
-                    {
-                        if (split_hlid_string[i] !== '')
-                        {
-                           clean_split_string.push(split_hlid_string[i]);
+                    for (i = 0; i < split_hlid_string.length; i++) {
+                        if (split_hlid_string[i] !== '') {
+                            clean_split_string.push(split_hlid_string[i]);
                         }
                     }
                     console.log(split_hlid_string);
@@ -138,6 +138,43 @@
                     console.log(parsed_response_obj);
                     hlid = parsed_response_obj["hlid"];
                     console.log(hlid);
+                }
+            });
+            sw_view = 'http://sw.docking.org/search/view?hlid='.concat(String(hlid), '&columns%5B0%5D%5Bname%5D=alignment&start=1&length=5&draw=1');
+            console.log(sw_view);
+            {#            getJSON(sw_view, function (err, data) {
+                            if (err != null) {
+                                alert('Something went wrong: ' + err);
+                            } else {
+                                alert('Called SmallWorld View!');
+                                console.log(data);
+                            }
+                        });#}
+        }
+
+        function callSWView() {
+            console.log('In callSWView function');
+            sw_view = 'http://sw.docking.org/search/view?hlid='.concat(String(hlid), '&columns%5B0%5D%5Bname%5D=alignment&start=1&length=5&draw=1');
+            var getJSON = function (url, callback) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'application/json';
+                xhr.onload = function () {
+                    var status = xhr.status;
+                    if (status === 200) {
+                        callback(null, xhr.response);
+                    } else {
+                        callback(status, xhr.response);
+                    }
+                };
+                xhr.send();
+            };
+            getJSON(sw_view, function (err, data) {
+                if (err != null) {
+                    alert('Something went wrong: ' + err);
+                } else {
+                    alert('Called SmallWorld View!');
+                    console.log(data);
                 }
             });
         }
