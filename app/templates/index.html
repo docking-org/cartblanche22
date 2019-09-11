@@ -10,7 +10,7 @@
     </div>
     <div id="jsme_container" style="float:left"></div>
     <div id="smiles_box_container" style="float:right" style="padding-left:40px">
-        <table align="left">
+        <table align="center">
             {#<tr>
                     <td colspan="3" style="font-weight:bold;">Export chemical structure from applet:</td>
                 </tr>#}
@@ -33,6 +33,9 @@
                 </td>
                 <td>
                     <button type="button" onclick='callSWView();'>Call SW View</button>
+                </td>
+                <td>
+                    <button type="button" onclick='callSWExport();'>Call SW Export</button>
                 </td>
                 <!--<td>
                  <button type="button" onclick='getJMEstring();'>Get JME string</button>
