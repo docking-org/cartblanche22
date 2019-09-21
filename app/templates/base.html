@@ -11,11 +11,14 @@
           href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css') }}"/>
     <script type="text/javascript" language="javascript"
             src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8"
+            src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
     <script>
         //Initial parameters to call SmallWorld API. These will be updated when changes are made in the molecule editor
         var sw_parameters = {
             smiles: 'c1ccccc1',
-            db: 'ZINC-All-1.2B',
+            db: 'ZINC-Interesting-297K',
             dist: 4,
             tdn: 4,
             tup: 4,
@@ -202,6 +205,62 @@
                     alert('Something went wrong: ' + err);
                 } else {
                     alert('Called SmallWorld Export!');
+                    console.log(data);
+                }
+            });
+        }
+
+        function callSWMaps() {
+            console.log('In callSWMap function');
+            sw_map_url = 'http://sw.docking.org/search/maps';
+            console.log(sw_map_url);
+            var getJSON = function (url, callback) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'application/json';
+                xhr.onload = function () {
+                    var status = xhr.status;
+                    if (status === 200) {
+                        callback(null, xhr.response);
+                    } else {
+                        callback(status, xhr.response);
+                    }
+                };
+                xhr.send();
+            };
+            getJSON(sw_map_url, function (err, data) {
+                if (err != null) {
+                    alert('Something went wrong: ' + err);
+                } else {
+                    alert('Called SmallWorld Map!');
+                    console.log(data);
+                }
+            });
+        }
+
+        function callSWConfig() {
+            console.log('In callSWMap function');
+            sw_config_url = 'http://sw.docking.org/search/config';
+            console.log(sw_config_url);
+            var getJSON = function (url, callback) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'application/json';
+                xhr.onload = function () {
+                    var status = xhr.status;
+                    if (status === 200) {
+                        callback(null, xhr.response);
+                    } else {
+                        callback(status, xhr.response);
+                    }
+                };
+                xhr.send();
+            };
+            getJSON(sw_config_url, function (err, data) {
+                if (err != null) {
+                    alert('Something went wrong: ' + err);
+                } else {
+                    alert('Called SmallWorld Config!');
                     console.log(data);
                 }
             });

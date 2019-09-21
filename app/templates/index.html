@@ -10,7 +10,7 @@
     </div>
     <div id="jsme_container" style="float:left"></div>
     <div id="smiles_box_container" style="float:right" style="padding-left:40px">
-        <table align="center">
+        <table id="SmallWorldResults" align="center">
             {#<tr>
                     <td colspan="3" style="font-weight:bold;">Export chemical structure from applet:</td>
                 </tr>#}
@@ -26,6 +26,9 @@
                     <button type="button" onclick='getSmiles();'>Get smiles</button>
                 </td>
                 <td>
+                    <button type="button" onclick='callSWMaps();'>Get maps list</button>
+                </td>
+                <td>
                     <button type="button" onclick='callSmallWorld();'>Call SmallWorld</button>
                 </td>
                 <td>
@@ -36,6 +39,8 @@
                 </td>
                 <td>
                     <button type="button" onclick='callSWExport();'>Call SW Export</button>
+                </td>
+                <button type="button" onclick='callSWConfig();'>Call SW Config</button>
                 </td>
                 <!--<td>
                  <button type="button" onclick='getJMEstring();'>Get JME string</button>
@@ -50,33 +55,13 @@
 
         </table>
     </div>
-{#    <script type="text/javascript">
+    <script type="text/javascript"
+            src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js') }}"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript">
         $(document).ready(function () {
-
-            function callSmallWorld() {
-                console.log("in function callSmallWorld()");
-                let smallWorldAPI = "http://sw.docking.org//search/submit?smi=c1ccccc1&db=ZINC-Interesting-297K&dist=4&tdn=4&tup=4&rdn=4&rup=4&ldn=4&lup=4&maj=4&min=4&sub=4&scores=Atom%20Alignment,ECFP4,Daylight%27";
-                $.getJSON(smallWorldAPI, {
-                    format: "json"
-                })
-                    .done(function (data) {
-                        alert('Called SmallWorld!');
-                        var stringify_initial_request = JSON.stringify(data);
-                        console.log('Stringify');
-                        console.log(stringify_initial_request);
-                        stringify_initial_request = btoa(stringify_initial_request);
-                        localStorage.setItem('_string_initial_request', stringify_initial_request);
-                        console.log(data);
-                    });
-            }
-
-            function recoverStorage() {
-                var recover_initial_request = localStorage.getItem('_string_initial_request');
-                recover_initial_request = atob(recover_initial_request);
-                recover_initial_request = JSON.parse(recover_initial_request);
-                console.log('Recover Initial Request');
-                console.log(recover_initial_request);
-            }
+            $('#SmallWorldResults').DataTable();
         });
-    </script>#}
+    </script>
+
 {% endblock %}
