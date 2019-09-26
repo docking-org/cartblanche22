@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.min.css"/>
+{% endblock %}
+
 {% block content %}
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
@@ -54,13 +58,72 @@
             </tr>
 
         </table>
+
+    </div>
+
+    <div id="test_datatable">
+        {#        <table id="example" class="display", style="width:85%">
+{#            <thead>#}
+        {#                <tr>#}
+        {#                    <th>name</th>#}
+        {#                    <th>prefix</th>#}
+        {#                    <th>cfgPath</th>#}
+        {#                    <th>numEntries</th>#}
+        {#                    <th>numMapped</th>#}
+        {#                </tr>#}
+        {#            </thead>#}
+        {#        </table>#}
+
+        <table id="example" class="display" style="width:85%">
+            <thead>
+            <tr>
+                <th>name</th>
+                <th>prefix</th>
+                <th>cfgPath</th>
+                <th>numEntries</th>
+                <th>numMapped</th>
+                <th>numUnmapped</th>
+                <th>numSkipped</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <th>name</th>
+                <th>prefix</th>
+                <th>cfgPath</th>
+                <th>numEntries</th>
+                <th>numMapped</th>
+                <th>numUnmapped</th>
+                <th>numSkipped</th>
+            </tr>
+            </tfoot>
+        </table>
+
     </div>
     <script type="text/javascript"
             src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js') }}"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script type="text/javascript">
+    <!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>-->
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
+    <script>
         $(document).ready(function () {
-            $('#SmallWorldResults').DataTable();
+            $('#example').DataTable({
+                    "ajax": {
+                        "url": "http://sw.docking.org/search/maps",
+                        "dataType": "json",
+                        "dataSrc": "1.anon",
+                    },
+                    "columns": [
+                        {"data": "name"},
+                        {"data": "prefix"},
+                        {"data": "cfgPath"},
+                        {"data": "numEntries"},
+                        {"data": "numMapped"},
+                        {"data": "numUnmapped"},
+                        {"data": "numSkipped"}
+                    ]
+                }
+            );
         });
     </script>
 
