@@ -74,7 +74,7 @@
         {#            </thead>#}
         {#        </table>#}
 
-        <table id="example" class="display" style="width:85%">
+        {#        <table id="example" class="display" style="width:85%">
             <thead>
             <tr>
                 <th>name</th>
@@ -97,34 +97,31 @@
                 <th>numSkipped</th>
             </tr>
             </tfoot>
-        </table>
+        </table>#}
 
     </div>
-{#    <script type="text/javascript"#}
-{#            src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js') }}"></script>#}
-    <!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>-->
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
     <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#example').DataTable({
-                    "ajax": {
-                        "url": "http://sw.docking.org/search/maps",
-                        "dataType": "json",
-                        "dataSrc": "1.anon",
-                    },
-                    "columns": [
-                        {"data": "name"},
-                        {"data": "prefix"},
-                        {"data": "cfgPath"},
-                        {"data": "numEntries"},
-                        {"data": "numMapped"},
-                        {"data": "numUnmapped"},
-                        {"data": "numSkipped"}
-                    ]
-                }
-            );
-        });
+        {#    $(document).ready(function () {
+                $('#example').DataTable({
+                        "ajax": {
+                            "url": "http://sw.docking.org/search/maps",
+                            "dataType": "json",
+                            "dataSrc": "1.anon",
+                        },
+                        "columns": [
+                            {"data": "name"},
+                            {"data": "prefix"},
+                            {"data": "cfgPath"},
+                            {"data": "numEntries"},
+                            {"data": "numMapped"},
+                            {"data": "numUnmapped"},
+                            {"data": "numSkipped"}
+                        ]
+                    }
+                );
+            });#}
     </script>
 
 {% endblock %}

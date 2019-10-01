@@ -41,7 +41,6 @@
         function jsmeOnLoad() {
             jsmeApplet = new JSApplet.JSME("jsme_container", "600px", "440px");
             document.JME = jsmeApplet;
-            document.getElementById("button").disabled = false;
         }
 
         function readMolecule() {
@@ -141,16 +140,6 @@
                     console.log(hlid);
                 }
             });
-            //sw_view = 'http://sw.docking.org/search/view?hlid='.concat(String(hlid), '&columns%5B0%5D%5Bname%5D=alignment&start=1&length=5&draw=1');
-            //console.log(sw_view);
-            {#            getJSON(sw_view, function (err, data) {
-                            if (err != null) {
-                                alert('Something went wrong: ' + err);
-                            } else {
-                                alert('Called SmallWorld View!');
-                                console.log(data);
-                            }
-                        });#}
         }
 
         function callSWView() {
@@ -290,20 +279,12 @@
             in order for this application to display correctly.
         </div>
     </noscript>
-{#    <script type="text/javascript"#}
-{#            src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.slim.min.js') }}"></script>#}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script type="text/javascript" language="javascript"
             src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
     <script type="text/javascript" charset="utf8"
             src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-{#    <script type="text/javascript"#}
-{#            src="{{ url_for('static', filename='node_modules/tether/dist/js/tether.min.js') }}"></script>#}
-{#    <script type="text/javascript"#}
-{#            src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js') }}"></script>#}
-{#    <!--<script type="text/javascript" src="{{ url_for('static', filename='node_modules/react/dist/react.min.js')}}"></script>-->#}
-{#    <!--<script type="text/javascript" src="{{ url_for('static', filename='node_modules/react-dom/dist/react-dom.min.js')}}"></script>-->#}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
     <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
