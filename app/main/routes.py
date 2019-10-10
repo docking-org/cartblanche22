@@ -12,7 +12,7 @@ from app.forms import RegistrationForm
 
 @bp.route('/')
 @bp.route('/index', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def index():
     return render_template('index.html')
 

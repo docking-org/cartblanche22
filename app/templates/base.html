@@ -1,41 +1,48 @@
 <html>
+
 <head>
     {% if title %}
-        <title>{{ title }} - Molecule Shopping Cart</title>
+    <title>{{ title }} - Molecule Shopping Cart</title>
     {% else %}
-        <title>Welcome to Molecule Shopping Cart</title>
+    <title>Welcome to Molecule Shopping Cart</title>
     {% endif %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
 </head>
+
 <body>
-<div id="root">
-    <div>Molecule Shopping Cart:
-        <a href="{{ url_for('main.index') }}">Home</a>
-        {% if current_user.is_anonymous %}
+    <div id="root">
+        <div>Molecule Shopping Cart:
+            <a href="{{ url_for('main.search') }}">Search</a>
+            <a href="{{ url_for('main.index') }}">Home</a>
+            {% if current_user.is_anonymous %}
             <a href="{{ url_for('main.login') }}">Login</a>
-        {% else %}
+            {% else %}
             <a href="{{ url_for('main.logout') }}">Logout</a>
-        {% endif %}
-    </div>
-    <noscript>
-        <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-            Your web browser must have JavaScript enabled
-            in order for this application to display correctly.
+            {% endif %}
         </div>
-    </noscript>
-    <script src="{{ url_for('static', filename='jsme_and_smallworldAPI.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script type="text/javascript" language="javascript"
+        <noscript>
+            <div
+                style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+                Your web browser must have JavaScript enabled
+                in order for this application to display correctly.
+            </div>
+        </noscript>
+        <script src="{{ url_for('static', filename='jsme_and_smallworldAPI.js') }}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" language="javascript"
             src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
-    <script type="text/javascript" charset="utf8"
+
+        <script src="{{ url_for('static', filename='eventSource.js') }}"></script>
+        <script type="text/javascript" charset="utf8"
             src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
-    <hr>
-    {% block content %}
-    {% endblock %}
-</div> <!-- end div root-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
+        <hr>
+        {% block content %}
+        {% endblock %}
+    </div> <!-- end div root-->
 </body>
+
 </html>
