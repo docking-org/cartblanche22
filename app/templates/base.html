@@ -14,7 +14,6 @@
 <body>
     <div id="root">
         <div>Molecule Shopping Cart:
-            <a href="{{ url_for('main.search') }}">Search</a>
             <a href="{{ url_for('main.index') }}">Home</a>
             {% if current_user.is_anonymous %}
             <a href="{{ url_for('main.login') }}">Login</a>
@@ -30,6 +29,7 @@
             </div>
         </noscript>
         <script src="{{ url_for('static', filename='jsme_and_smallworldAPI.js') }}"></script>
+        <!-- <script src="{{ url_for('static', filename='sketcher.js') }}"></script> -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script type="text/javascript" language="javascript"
             src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>

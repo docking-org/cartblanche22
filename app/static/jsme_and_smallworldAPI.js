@@ -1,5 +1,5 @@
 //Initial parameters to call SmallWorld API. These will be updated when changes are made in the molecule editor
-let source = false;
+
 var sw_parameters = {
     smiles: 'c1ccccc1',
     db: 'ZINC-Interesting-297K',
@@ -15,18 +15,25 @@ var sw_parameters = {
     sub: 4
 };
 const sw_server = 'http://sw.docking.org'
-var hlid;
-var sw_response;
-var split_hlid_string;
-var clean_split_string = [];
-var first_data_string;
-var parsed_response_obj = {};
-var sw_view = String();
+let hlid;
+let sw_response;
+let split_hlid_string;
+let clean_split_string = [];
+let first_data_string;
+let parsed_response_obj = {};
+let sw_view = String();
+let source = false;
+let datasets = [];
+let dtable = null;
 
 //this function will be called after the JavaScriptApplet code has been loaded.
 function jsmeOnLoad() {
-    jsmeApplet = new JSApplet.JSME("jsme_container", "600px", "440px");
+    jsmeApplet = new JSApplet.JSME("sketcher", "420px", "300px");
     document.JME = jsmeApplet;
+    jsmeApplet.setAfterStructureModifiedCallback(function (event) {
+        console.log('from setaAFter')
+        getSmiles()
+    });
 }
 
 function readMolecule() {
@@ -53,7 +60,7 @@ function getMolfile(isV3000) {
 
 function getSmiles() {
     var data = document.JME.smiles();
-    document.getElementById("jme_output").value = data;
+    document.getElementById("smiles-in").value = data;
     sw_parameters["smiles"] = data;
     console.log(sw_parameters);
 }
@@ -77,29 +84,25 @@ function readAnyFromTextArea() {
     var mol = document.getElementById("jme_output").value;
     jsmeApplet.readGenericMolecularInput(mol);
 }
+
 function stopStreaming() {
     if (source) source.close();
 }
 
+function redraw() {
+    if (!dtable)
+        return;
+    if ($('#results').dataTable().fnSettings() && $('#results').dataTable().fnSettings().oScroller) {
+        var s = $('#results').dataTable().fnSettings().oScroller.s;
+        s.dt.oApi._fnDraw(s.dt);
+    } else {
+        dtable.draw('full-hold');
+    }
+}
+
 function callSmallWorld() {
     console.log("in function callSmallWorld()");
-    // var getJSON = function (url, callback) {
-    //     var xhr = new XMLHttpRequest();
-    //     xhr.open('GET', url, true);
-    //     xhr.responseType = 'application/json';
-    //     xhr.onload = function () {
-    //         var status = xhr.status;
-    //         if (status === 200) {
-    //             callback(null, xhr.response);
-    //         } else {
-    //             callback(status, xhr.response);
-    //         }
-    //     };
-    //     xhr.send();
-    // };
-    getSmiles();
     var sw_url = 'http://sw.docking.org/search/submit?smi='.concat(String(sw_parameters["smiles"]), '&db=', String(sw_parameters["db"]), '&dist=', String(sw_parameters["dist"]), '&tdn=', String(sw_parameters["tdn"]), '&tup=', String(sw_parameters["tup"]), '&rdn=', String(sw_parameters["rdn"]), '&rup=', String(sw_parameters["rup"]), '&ldn=', String(sw_parameters["ldn"]), '&lup=', String(sw_parameters["lup"]), '&maj=', String(sw_parameters["maj"]), '&min=', String(sw_parameters["min"]), '&sub=', String(sw_parameters["sub"]), '&scores=Atom%20Alignment,ECFP4,Daylight%27');
-
     console.log(sw_url);
 
     source = new EventSource(sw_url);
@@ -116,6 +119,11 @@ function callSmallWorld() {
                 console.log("from first " + d.hlid)
                 hlid = d.hlid
                 console.log(hlid + 'just checking')
+                sw_view = 'http://sw.docking.org/search/view?hlid='.concat(String(hlid), '&columns%5B0%5D%5Bname%5D=alignment&start=1&length=5&draw=1');
+                console.log(typeof sw_view)
+
+                // init_table($('#results'), sw_view);
+                // $('.dataTables_scrollBody').css('background', 'repeating-linear-gradient(45deg, #edeeff, #edeeff 10px, #fff 10px, #fff 20px)');
                 // let url = sw_server + '/search/view/?hlid=' + d.hlid;
 
                 // $('#statusspan').html("Searching... (" + format_search_stats(d) + ")");
@@ -138,36 +146,6 @@ function callSmallWorld() {
             }
         }
     }, false);
-
-    // getJSON(sw_url, function (err, data) {
-    //     if (err != null) {
-    //         alert('Something went wrong: ' + err);
-    //     } else {
-    //         alert('Called SmallWorld!');
-    //         var stringify_initial_request = JSON.stringify(data);
-    //         console.log('Stringify');
-    //         console.log(stringify_initial_request);
-    //         stringify_initial_request = btoa(stringify_initial_request);
-    //         localStorage.setItem('_string_initial_request', stringify_initial_request);
-    //         console.log(data);
-    //         sw_response = data;
-    //         split_hlid_string = sw_response.split("\n");
-    //         clean_split_string = [];
-    //         for (i = 0; i < split_hlid_string.length; i++) {
-    //             if (split_hlid_string[i] !== '') {
-    //                 clean_split_string.push(split_hlid_string[i]);
-    //             }
-    //         }
-    //         console.log(split_hlid_string);
-    //         console.log(clean_split_string);
-    //         first_data_string = clean_split_string[0].slice(5);
-    //         console.log(first_data_string);
-    //         parsed_response_obj = JSON.parse(first_data_string);
-    //         console.log(parsed_response_obj);
-    //         hlid = parsed_response_obj["hlid"];
-    //         console.log(hlid);
-    //     }
-    // });
 }
 
 function callSWView() {
@@ -194,6 +172,9 @@ function callSWView() {
         } else {
             alert('Called SmallWorld View!');
             console.log(data);
+            // $(document).ready(function () {
+            //     $('#myTable').DataTable();
+            // });
         }
     });
 }
@@ -221,7 +202,8 @@ function callSWExport() {
             alert('Something went wrong: ' + err);
         } else {
             alert('Called SmallWorld Export!');
-            console.log(data);
+            console.log(typeof data);
+
         }
     });
 }
