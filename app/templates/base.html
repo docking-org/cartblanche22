@@ -8,7 +8,19 @@
     {% endif %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+    <script type="text/javascript" language="javascript"
+        src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+
+
+    <script type="text/javascript" language="javascript"
+        src="{{ url_for('static', filename='dataTable.js') }}"></script>
+    <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='sketch.js') }}"></script>
+    <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='sw.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
 </head>
 
 <body>
@@ -30,15 +42,8 @@
         </noscript>
         <script src="{{ url_for('static', filename='jsme_and_smallworldAPI.js') }}"></script>
         <!-- <script src="{{ url_for('static', filename='sketcher.js') }}"></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <script type="text/javascript" language="javascript"
-            src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
 
-        <script src="{{ url_for('static', filename='eventSource.js') }}"></script>
-        <script type="text/javascript" charset="utf8"
-            src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.25.0/babel.js"></script>
+
         <hr>
         {% block content %}
         {% endblock %}
