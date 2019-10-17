@@ -1,7 +1,0 @@
-#container {
-    display: flex; 
-    justify-content: space-between;
-  }
-#result{
-    border:1px solid;
-}

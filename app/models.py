@@ -8,6 +8,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    cart = db.relationship("Cart", uselist=False, back_populates="user")
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -21,3 +22,22 @@ class User(UserMixin, db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship("User", back_populates="cart")
+    items = db.relationship('Item', backref='cart', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<Cart {self.id} {self.user_id}>'
+
+class Item(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cart_id = db.Column(db.Integer, db.ForeignKey('cart.id'))
+    zinc_id = db.Column(db.String(120), index=True)
+
+    def __repr__(self):
+        return f'<Item {self.zinc_id} {self.cart_id}>'
+
+
