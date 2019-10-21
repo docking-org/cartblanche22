@@ -5,7 +5,7 @@ from flask_login import current_user, login_user
 from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
-from app.models import User, Cart, Item, Vendor
+from app.models import User, Cart, Item
 from app import db
 from app.forms import RegistrationForm
 import json
@@ -72,8 +72,8 @@ def addToCart():
 
 @bp.route('/cart', methods= ['GET',  'POST'])
 def cart():
-    print('in cart')
-    return current_user.cart.getCart()
-     
+    data = current_user.cart.getCart()
+    # print(type(data))
+    return render_template('table.html', data=data)
 
 
