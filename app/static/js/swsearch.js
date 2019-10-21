@@ -333,7 +333,7 @@ function newSearch(smiles) {
 		return;
 	}
 	source.addEventListener('message', function (e) {
-		console.log(e)
+		// console.log(e)
 		var d = JSON.parse(e.data);
 		if (d.status === "END") {
 			redraw();
@@ -341,7 +341,7 @@ function newSearch(smiles) {
 			$('#statusspan').html("Finished (" + format_search_stats(d) + ")");
 		} else {
 			if (d.status === "FIRST") {
-				console.log(d);
+				// console.log(d);
 				$('#statusspan').html("Searching... (" + format_search_stats(d) + ")");
 				var url = sw_server + '/search/view/?hlid=' + d.hlid;
 				init_table($('#results'), url);
@@ -574,6 +574,8 @@ function hit_renderer(data, type, row) {
 	var id = datasets[search_state.db].prefix + data.id;
 	var href = datasets[search_state.db].url.replace("%s", data.id);
 	button.attr('id', id);
+	button.attr('db', search_state.db);
+	button.attr('img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
 	button.attr('onclick', 'addToCart(this)');
 	if (href) {
 		div.append("<b><a target='_blank' href='" + href + "'>" + id + "</a></b>");
@@ -600,6 +602,14 @@ function hit_renderer(data, type, row) {
 	return $('<div>').append(table).html();
 }
 
-function addToCart(button) {
-	alert("add to cart: " + button.id)
+function addToCart(btn) {
+	$.getJSON('/addToCart', {
+		'id': btn.id,
+		'database': btn.getAttribute('db'),
+		'img_url': btn.getAttribute('img')
+	},
+		function (res) {
+			alert(res)
+		});
+	return false;
 }
