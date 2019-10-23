@@ -2,7 +2,85 @@
 <html>
 
 <head>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+        }
 
+        table {
+            border-collapse: collapse;
+        }
+
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button,
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            margin: 2px 2px;
+            cursor: pointer;
+        }
+
+        /* The Modal (background) */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            padding-top: 100px;
+            /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,7 +94,7 @@
             <th>Compound</th>
             <th>Identifier</th>
             <th>Database</th>
-            <th>Nominated Supplier</th>
+            <th>Suppliers</th>
             <th>Price</th>
             <th>Utility</th>
         </tr>
@@ -28,25 +106,89 @@
             <td>{{ i.identifier }}</td>
             <td> {{ i.database }}</td>
             <td>
-                <select identifier={{i.identifier}} onclick="getVendors(this)" id="vendor">
-                    <option>{{i.company_name}}</option>
-                </select>
+                {{i.company_name}}
             </td>
             <td>{{ i.price }}</td>
             <td>
-                <button id={{i.id}} onclick='deleteItem(this)'> Delete </button>
-                <!-- <button identifier={{i.identifier}} onclick='getVendors(this)'> Update Vendor </button> -->
-                <button identifier={{i.identifier}} onclick='duplicate(this)'> Duplicate </button>
+                <!-- <button id={{i.id}} onclick='deleteItem(this)'> Delete </button> -->
+                <form action="{{ url_for('main.deleteItem', item_id=i.item_id) }}" method=post>
+                    <input type=submit value=Delete class="button">
+                </form>
+                <!-- <a href=""><button identifier={{i.identifier}} onclick="getVendors(this)">Update
+                        Vendor</button></a> -->
+                <button identifier={{i.identifier}} onclick='getVendors(this)'> Update Vendor </button>
+                <!-- <button identifier={{i.identifier}} onclick='duplicate(this)'> Duplicate </button> -->
             </td>
         </tr>
 
         {% endfor %}
 
     </table>
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <table>
+                <tr>
+                    <th>Company name</th>
+                    <th>Supplier code</th>
+                    <th>Quantity</th>
+                    <th>Delivery Time</th>
+                    <th>Price</th>
+                </tr>
+                <tr>
+                    <td>sialbb</td>
+                    <td>SPC00007</td>
+                    <td><input value="0"> mg</td>
+                    <td>2 weeks</td>
+                    <td>10 $</td>
+                </tr>
+                <tr>
+                    <td>sialbb</td>
+                    <td>SPC23007</td>
+                    <td><input value="0"> mg</td>
+                    <td>4 weeks</td>
+                    <td>100 $</td>
+                </tr>
+                <tr>
+                    <td>sialdfgdsbb</td>
+                    <td>SPC00456007</td>
+                    <td><input value="0"> mg</td>
+                    <td>0.5 weeks</td>
+                    <td>300 $</td>
+                </tr>
+            </table>
+            <button>Choose</button>
+        </div>
+
+    </div>
     <script>
+        var modal = document.getElementById("myModal");
+
+        // Get the button that opens the modal
+
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
 
 
         function getVendors(id) {
+            modal.style.display = "block";
 
         }
 
