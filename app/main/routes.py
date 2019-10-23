@@ -71,6 +71,12 @@ def deleteItem(item_id):
     print('item deleted')
     return redirect(url_for('main.cart'))
 
+@bp.route('/vendorModal/<item_id>', methods= ['POST'])
+def vendorModal(item_id):
+    item = Items.query.get(item_id)
+    print(item)
+    return redirect(url_for('main.cart'))
+
 @bp.route('/cart', methods= ['GET',  'POST'])
 def cart():
     data = current_user.cart_fk.getCart()

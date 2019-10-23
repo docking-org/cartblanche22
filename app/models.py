@@ -73,12 +73,9 @@ class Items(db.Model):
     vendors = db.relationship('Vendors', backref='item', lazy='dynamic')
 
     def __repr__(self):
-        # return f'<Item {self.identifier} {self.quantity}{self.unit} from {self.database} database...Vendor is {self.company_name} with {self.price} $>'
         data = {'item_id':self.item_id,'identifier':self.identifier, 'quantity':self.quantity, 
                 'unit':self.unit, 'compound_img':self.compound_img, 
-                'database':self.database, 'company_name':self.company_name,
-                'delivery_time':self.delivery_time, 'price':self.price,
-                'supplier_code':self.supplier_code, 'cat_id_fk':self.cat_id_fk
+                'database':self.database, 'price':self.price
                 }
         return json.dumps(data)
     
@@ -88,11 +85,9 @@ class Items(db.Model):
         print('item deleted')
 
     def getItem(self):
-        data = {'identifier':self.identifier, 'quantity':self.quantity, 
-                'unit':self.unit, 'compound_img':self.compound_img, 
-                'database':self.database, 'company_name':self.company_name,
-                'delivery_time':self.delivery_time, 'price':self.price,
-                'supplier_code':self.supplier_code, 'cat_id_fk':self.cat_id_fk
+        data = {'item_id':self.item_id,'identifier':self.identifier, 'quantity':self.quantity,
+                'unit':self.unit, 'compound_img':self.compound_img,
+                'database':self.database, 'price':self.price
                 }
         return json.dumps(data)
 
