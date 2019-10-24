@@ -55,7 +55,7 @@ def register():
 
 @bp.route('/addToCart', methods= ['GET',  'POST'])
 def addToCart():
-    item = Items.query.filter_by(identifier=request.args.get('id')).first()
+    item = Items.query.filter_by(cart_fk=current_user.cart_fk.cart_id, identifier=request.args.get('id')).first()
     if item is None:
         item = Items(cart_fk = current_user.cart_fk.cart_id, identifier=request.args.get('id'), 
                 compound_img=request.args.get('img_url'), database= request.args.get('database'))
