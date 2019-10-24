@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <style>
         table,
         th,
@@ -106,7 +107,11 @@
             <td>{{ i.identifier }}</td>
             <td> {{ i.database }}</td>
             <td>
-                {{i.company_name}}
+                {% for v in i.vendors %}
+                <ul>
+                    <li>{{v.company_name}} -- {{v.supplier_code}} -- {{v.quantity}} -- {{v.price}}</li>
+                </ul>
+                {% endfor %}
             </td>
             <td>{{ i.price }}</td>
             <td>
@@ -115,12 +120,10 @@
                     <input type=submit value=Delete class="button">
                 </form>
 
-                <!-- <a href=""><button identifier={{i.identifier}} onclick="getVendors(this)">Update
-                        Vendor</button></a> -->
-                <form action="{{ url_for('main.vendorModal', item_id=i.item_id) }}" method=post>
-                    <input type=submit value='Update Vendor' class="button">
-                </form>
-{#                <button identifier={{i.identifier}} onclick='getVendors(this)'> Update Vendor </button>#}
+                <button id={{i.item_id}} identifier={{i.identifier}} onclick="openModal(this)">Update
+                    Vendor</button>
+
+                {#                <button identifier={{i.identifier}} onclick='getVendors(this)'> Update Vendor </button>#}
                 <!-- <button identifier={{i.identifier}} onclick='duplicate(this)'> Duplicate </button> -->
             </td>
         </tr>
@@ -133,74 +136,62 @@
         <!-- Modal content -->
         <div class="modal-content">
             <span class="close">&times;</span>
-{#            <table id = "vendorTable" >#}
-{#                <tr>#}
-{#                    <th>Company name</th>#}
-{#                    <th>Supplier code</th>#}
-{#                    <th>Quantity</th>#}
-{#                    <th>Delivery Time</th>#}
-{#                    <th>Price</th>#}
-{#                </tr>#}
-{#                <tr>#}
-{#                    <td>sialbb</td>#}
-{#                    <td>SPC00007</td>#}
-{#                    <td><input value="0"> mg</td>#}
-{#                    <td>2 weeks</td>#}
-{#                    <td>10 $</td>#}
-{#                </tr>#}
-{#                <tr>#}
-{#                    <td>sialbb</td>#}
-{#                    <td>SPC23007</td>#}
-{#                    <td><input value="0"> mg</td>#}
-{#                    <td>4 weeks</td>#}
-{#                    <td>100 $</td>#}
-{#                </tr>#}
-{#                <tr>#}
-{#                    <td>sialdfgdsbb</td>#}
-{#                    <td>SPC00456007</td>#}
-{#                    <td><input value="0"> mg</td>#}
-{#                    <td>0.5 weeks</td>#}
-{#                    <td>300 $</td>#}
-{#                </tr>#}
-{#            </table>#}
-{#            <button>Choose</button>#}
+            <div id='tableDiv'></div>
+            <a href="{{url_for('main.cart')}}"><button>Choose</button></a>
         </div>
+
 
     </div>
     <script>
         var modal = document.getElementById("myModal");
-
-        // Get the button that opens the modal
-
-
-        // Get the <span> element that closes the modal
         var span = document.getElementsByClassName("close")[0];
-
-        // When the user clicks the button, open the modal 
-
-        // When the user clicks on <span> (x), close the modal
         span.onclick = function (e) {
             modal.style.display = "none";
-
         }
-
-        // When the user clicks anywhere outside of the modal, close it
         window.onclick = function (event) {
             if (event.target == modal) {
                 modal.style.display = "none";
             }
         }
-
-
-        function getVendors(id) {
-
-            modal.style.display = "block";
-
+        function openModal(b) {
+            $.getJSON('/vendorModal/' + b.id,
+                function (res) {
+                    let table_body = '<table><tr><th>No</th><th>Company name</th>';
+                    table_body += '<th>Supplier code</th><th>Delivery time</th>'
+                        + '<th>Quantity</th><th>Price</th></tr>'
+                    for (let i = 0; i < res.length; i++) {
+                        table_body += '<tr><td>' + (i + 1) + '</td>';
+                        table_body += '<td>' + res[i].cat_name + '</td>';
+                        table_body += '<td>' + res[i].supplier_code + '</td>';
+                        table_body += '<td>' + '2 weeks' + '</td>';
+                        table_body += "<td><input type=number id=" + b.id
+                            + " name= " + res[i].supplier_code + ',' + res[i].cat_name
+                            + "," + res[i].price
+                            + "," + res[i].cat_id_fk
+                            + " value=" + res[i].buyAmount
+                            + " onchange='vendorUpdate(this)'>"
+                            + '</td>';
+                        table_body += '<td>' + res[i].price + '</td>';
+                        table_body += '</tr>';
+                    }
+                    table_body += '</table>';
+                    $('#tableDiv').html(table_body);
+                    modal.style.display = "block";
+                });
+            return false;
+        }
+        function vendorUpdate(input) {
+            $.getJSON('/vendorUpdate', {
+                'item_id': input.id,
+                'value': input.value,
+                'data': input.name
+            },
+                function (res) {
+                    console.log(res)
+                });
+            return false;
         }
 
-        function findVendors(id) {
-            return [{ "supplier_code": "SPC00007", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 10, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "CDS022812|ALDRICH", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 2, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "SPC00007|ALDRICH", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 3, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "CDS022812", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 32, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "G-6295", "zinc_id": "ZINC000012384497", "cat_id_fk": 24, "price": "NA", "quantity": "NA", "cat_name": "achemblock" }, { "supplier_code": "4003585", "zinc_id": "ZINC000012384497", "cat_id_fk": 32, "price": "NA", "quantity": "NA", "cat_name": "chbre" }, { "supplier_code": "4003585", "zinc_id": "ZINC000012384497", "cat_id_fk": 36, "price": "NA", "quantity": "NA", "cat_name": "chbrbbe" }, { "supplier_code": "QB-9979", "zinc_id": "ZINC000012384497", "cat_id_fk": 58, "price": "NA", "quantity": "NA", "cat_name": "combiblocksbb" }, { "supplier_code": "SPC-a026", "zinc_id": "ZINC000012384497", "cat_id_fk": 60, "price": "110", "quantity": "0.25 g", "cat_name": "spiro" }, { "supplier_code": "32796", "zinc_id": "ZINC000012384497", "cat_id_fk": 61, "price": "NA", "quantity": "NA", "cat_name": "astateche" }, { "supplier_code": "4H56-1-789", "zinc_id": "ZINC000012384497", "cat_id_fk": 62, "price": "NA", "quantity": "NA", "cat_name": "synquestbb" }]
-        }
     </script>
 
 </body>

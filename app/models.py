@@ -55,10 +55,6 @@ class Carts(db.Model):
         pass
 
     def getCart(self):
-        # data = []
-        # for i in self.items:
-        #     data.append(i.getItem())
-        # return json.dumps(data)
         return self.items
 
 class Items(db.Model):
@@ -75,7 +71,7 @@ class Items(db.Model):
     def __repr__(self):
         data = {'item_id':self.item_id,'identifier':self.identifier, 'quantity':self.quantity, 
                 'unit':self.unit, 'compound_img':self.compound_img, 
-                'database':self.database, 'price':self.price
+                'database':self.database, 'price':self.price, 'vendors':self.vendors
                 }
         return json.dumps(data)
     
@@ -97,9 +93,15 @@ class Vendors(db.Model):
     company_name = db.Column(db.String(120), index=True)
     quantity = db.Column(db.Integer, default=0)
     unit = db.Column(db.String(10), default='mg')
-    supplier_code = db.Column(db.String(120),)
+    supplier_code = db.Column(db.String(120))
     price = db.Column(db.Integer)
     cat_id_fk = db.Column(db.String(120))
+    
+    def __repr__(self):
+        data = {'company_name':self.company_name,'quantity':self.quantity, 'supplier_code':self.supplier_code, 
+                'price':self.price
+                }
+        return json.dumps(data)
 
 
 def findVendors(id):
