@@ -66,6 +66,7 @@ def addToCart():
 
 @bp.route('/deleteItem/<item_id>', methods= ['POST'])
 def deleteItem(item_id):
+    Vendors.query.filter_by(item_fk=item_id).delete()
     Items.query.filter_by(item_id=item_id).delete()
     db.session.commit()
     print('item deleted')
@@ -94,7 +95,6 @@ def vendorUpdate():
     cat_id_fk = datas[3]
     print(f'{item_id}-{supplier_code}-{value}-{company_name}-{price}-{cat_id_fk}')
     vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=supplier_code).first()
-    print(vendor)
     if vendor is None and int(value) != 0:
         vendor = Vendors(item_fk=item_id, company_name=company_name, quantity=value,
                             supplier_code=supplier_code, price=price, cat_id_fk=cat_id_fk)
