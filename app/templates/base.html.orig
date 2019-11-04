@@ -8,21 +8,24 @@
     {% endif %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>SmallWorld Search</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css" />
-    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css" />
-    <link rel="stylesheet" type="text/css" href="../static/css/sw.css">
-    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
-    <script src="../static/js/datatables.min.js"></script>
-    <script src="../static/js/jquery-ui.min.js"></script>
-    <script src="../static/js/EventSource.js"></script>
-    <script src="../static/js/jsme/jsme.nocache.js"></script>
-    <!-- Marvin JS? -->
-    <!--<script src="js/marvinjs/gui/lib/promise-1.0.0.min.js"></script>-->
-    <!--<script src="js/marvinjs/marvinjslauncher.js"></script>-->
-    <script src="../static/js/swsearch.js"></script>
-    <script src="../static/js/sketcher.js"></script>
+    <script type="text/javascript" language="javascript"
+        src="{{ url_for('static', filename='jsme/jsme.nocache.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+
+
+    <script type="text/javascript" language="javascript"
+        src="{{ url_for('static', filename='dataTable.js') }}"></script>
+    <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='sketch.js') }}"></script>
+    <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='sw.js') }}"></script>
+    <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='click.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
+</head>
+
+<body>
+    <div id="root">
         <div>Molecule Shopping Cart:
             <a href="{{ url_for('main.index') }}">Home</a>
             {% if current_user.is_anonymous %}
@@ -31,10 +34,6 @@
             <a href="{{ url_for('main.logout') }}">Logout</a>
             {% endif %}
         </div>
-</head>
-
-<body>
-    <div id="root">
         <noscript>
             <div
                 style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">

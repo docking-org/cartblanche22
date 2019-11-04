@@ -1,30 +1,6 @@
-<!--
-  ~ ====================================
-  ~ Copyright (c) 2019 NextMove Software
-  ~ ====================================
-  -->
-<!DOCTYPE html>
-<html>
+{%  extends 'base.html' %}
 
-<head>
-    <title>SmallWorld Search</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css" />
-    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css" />
-    <link rel="stylesheet" type="text/css" href="../static/css/sw.css">
-    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
-    <script src="../static/js/datatables.min.js"></script>
-    <script src="../static/js/jquery-ui.min.js"></script>
-    <script src="../static/js/EventSource.js"></script>
-    <script src="../static/js/jsme/jsme.nocache.js"></script>
-    <!-- Marvin JS? -->
-    <!--<script src="js/marvinjs/gui/lib/promise-1.0.0.min.js"></script>-->
-    <!--<script src="js/marvinjs/marvinjslauncher.js"></script>-->
-    <script src="../static/js/swsearch.js"></script>
-    <script src="../static/js/sketcher.js"></script>
-</head>
-
-<body>
+{%  block content %}
     <div id="menu">
         <div style="padding-right: 2px"><img src="img/logo3_box.svg" height="30px"></div>
         <div style="padding-left: 2px; font-size: 12pt;">SmallWorld</div>
@@ -270,6 +246,7 @@
                 <button title="Download Results" id="export-button" onclick="export_results();">
                     <i class="fa fa-download fa-2x" aria-hidden="true"></i>
                 </button>
+                <a href="/cart"><button>Cart</button></a>
             </div>
 
             <table id="results">
@@ -292,17 +269,4 @@
     </div>
     <div id="imgpop" class="popbox">
     </div>
-    <footer>
-        <p>&copy;2015-2019 <a style="color: inherit;" href="">Irwin Lab</a>.
-            All
-            Rights Reserved.</p>
-        <p id="statusmesg">
-            <span id="statusspan"></span>
-            <button onclick="refresh()" title="Refresh Result Set">
-                <i class="fa fa-sync fa-spin-hover" aria-hidden="true"></i>
-            </button>
-        </p>
-    </footer>
-</body>
-
-</html>
+{%  endblock %}
