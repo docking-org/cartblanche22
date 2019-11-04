@@ -1,8 +1,8 @@
-"""db fields changed
+"""db dcreated again
 
-Revision ID: 89397b27f5be
+Revision ID: e8d8fadcabb3
 Revises: 
-Create Date: 2019-10-22 13:49:45.377287
+Create Date: 2019-10-29 09:44:22.468458
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '89397b27f5be'
+revision = 'e8d8fadcabb3'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -50,10 +50,12 @@ def upgrade():
     sa.Column('vendor_id', sa.Integer(), nullable=False),
     sa.Column('item_fk', sa.Integer(), nullable=True),
     sa.Column('company_name', sa.String(length=120), nullable=True),
-    sa.Column('quantity', sa.Integer(), nullable=True),
+    sa.Column('pack_quantity', sa.Float(), nullable=True),
+    sa.Column('purchase_quantity', sa.Integer(), nullable=True),
     sa.Column('unit', sa.String(length=10), nullable=True),
     sa.Column('supplier_code', sa.String(length=120), nullable=True),
     sa.Column('price', sa.Integer(), nullable=True),
+    sa.Column('currency', sa.String(length=10), nullable=True),
     sa.Column('cat_id_fk', sa.String(length=120), nullable=True),
     sa.ForeignKeyConstraint(['item_fk'], ['items.item_id'], ),
     sa.PrimaryKeyConstraint('vendor_id')

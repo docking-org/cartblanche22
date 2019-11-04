@@ -68,41 +68,33 @@ class Items(db.Model):
     price = db.Column(db.Integer)
     vendors = db.relationship('Vendors', backref='item', lazy='dynamic')
 
-    def __repr__(self):
-        data = {'item_id':self.item_id,'identifier':self.identifier, 'quantity':self.quantity, 
-                'unit':self.unit, 'compound_img':self.compound_img, 
-                'database':self.database, 'price':self.price, 'vendors':self.vendors
-                }
-        return json.dumps(data)
+    # def __repr__(self):
+    #     data = {'item_id':self.item_id,'identifier':self.identifier, 'quantity':self.quantity, 
+    #             'unit':self.unit, 'compound_img':self.compound_img, 
+    #             'database':self.database, 'price':self.price, 'vendors':self.vendors
+    #             }
+    #     return json.dumps(data)
     
     def deleteItem(item_id):
         Items.query.filter_by(item_id=item_id).delete()
         db.session.commit()
         print('item deleted')
 
-    def getItem(self):
-        data = {'item_id':self.item_id,'identifier':self.identifier, 'quantity':self.quantity,
-                'unit':self.unit, 'compound_img':self.compound_img,
-                'database':self.database, 'price':self.price
-                }
-        return json.dumps(data)
 
 class Vendors(db.Model):
     vendor_id = db.Column(db.Integer, primary_key=True)
     item_fk = db.Column(db.Integer, db.ForeignKey('items.item_id'))
     company_name = db.Column(db.String(120), index=True)
-    quantity = db.Column(db.Integer, default=0)
+    pack_quantity = db.Column(db.Float, default=0)
+    purchase_quantity = db.Column(db.Integer)
     unit = db.Column(db.String(10), default='mg')
     supplier_code = db.Column(db.String(120))
     price = db.Column(db.Integer)
+    currency = db.Column(db.String(10), default="usd")
     cat_id_fk = db.Column(db.String(120))
     
-    def __repr__(self):
-        data = {'company_name':self.company_name,'quantity':self.quantity, 'supplier_code':self.supplier_code, 
-                'price':self.price
-                }
-        return json.dumps(data)
-
-
-def findVendors(id):
-    return [{"supplier_code": "SPC00007", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 10, "quantity": "NA", "cat_name": "sialbb"}, {"supplier_code": "CDS022812|ALDRICH", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 2, "quantity": "NA", "cat_name": "sialbb"}, {"supplier_code": "SPC00007|ALDRICH", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 3, "quantity": "NA", "cat_name": "sialbb"}, {"supplier_code": "CDS022812", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 32, "quantity": "NA", "cat_name": "sialbb"}, {"supplier_code": "G-6295", "zinc_id": "ZINC000012384497", "cat_id_fk": 24, "price": "NA", "quantity": "NA", "cat_name": "achemblock"}, {"supplier_code": "4003585", "zinc_id": "ZINC000012384497", "cat_id_fk": 32, "price": "NA", "quantity": "NA", "cat_name": "chbre"}, {"supplier_code": "4003585", "zinc_id": "ZINC000012384497", "cat_id_fk": 36, "price": "NA", "quantity": "NA", "cat_name": "chbrbbe"}, {"supplier_code": "QB-9979", "zinc_id": "ZINC000012384497", "cat_id_fk": 58, "price": "NA", "quantity": "NA", "cat_name": "combiblocksbb"}, {"supplier_code": "SPC-a026", "zinc_id": "ZINC000012384497", "cat_id_fk": 60, "price": "110", "quantity": "0.25 g", "cat_name": "spiro"}, {"supplier_code": "32796", "zinc_id": "ZINC000012384497", "cat_id_fk": 61, "price": "NA", "quantity": "NA", "cat_name": "astateche"}, {"supplier_code": "4H56-1-789", "zinc_id": "ZINC000012384497", "cat_id_fk": 62, "price": "NA", "quantity": "NA", "cat_name": "synquestbb"}]
+    # def __repr__(self):
+    #     data = {'company_name':self.company_name, 'supplier_code':self.supplier_code,                   'purchase_quantity':self.purchase_quantity, 
+    #             'price':self.price, 'currency':self.currency, 'pack_quantity':self.pack_quantity, 'unit':self.unit
+    #             }
+    #     return json.dumps(data)

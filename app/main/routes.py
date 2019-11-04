@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, jsonify, request
+from flask import render_template, flash, redirect, url_for, jsonify, request, send_file
 from app.main import bp
 from app.forms import LoginForm
 from flask_login import current_user, login_user
@@ -8,7 +8,9 @@ from werkzeug.urls import url_parse
 from app.models import Users, Carts, Items, Vendors
 from app import db
 from app.forms import RegistrationForm
-import json
+import json, csv, os
+import pandas as pd
+import numpy as np
 
 @bp.route('/')
 @bp.route('/index', methods=['GET', 'POST'])
@@ -75,13 +77,105 @@ def deleteItem(item_id):
 @bp.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):
     item = Items.query.get(item_id)
-    priceAPI = [{ "supplier_code": "SPC00007", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 10, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "CDS022812|ALDRICH", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 2, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "SPC00007|ALDRICH", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 3, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "CDS022812", "zinc_id": "ZINC000012384497", "cat_id_fk": 6, "price": 32, "quantity": "NA", "cat_name": "sialbb" }, { "supplier_code": "G-6295", "zinc_id": "ZINC000012384497", "cat_id_fk": 24, "price": "NA", "quantity": "NA", "cat_name": "achemblock" }, { "supplier_code": "4003585", "zinc_id": "ZINC000012384497", "cat_id_fk": 32, "price": "NA", "quantity": "NA", "cat_name": "chbre" }, { "supplier_code": "4003585", "zinc_id": "ZINC000012384497", "cat_id_fk": 36, "price": "NA", "quantity": "NA", "cat_name": "chbrbbe" }, { "supplier_code": "QB-9979", "zinc_id": "ZINC000012384497", "cat_id_fk": 58, "price": "NA", "quantity": "NA", "cat_name": "combiblocksbb" }, { "supplier_code": "SPC-a026", "zinc_id": "ZINC000012384497", "cat_id_fk": 60, "price": "110", "quantity": "0.25", "cat_name": "spiro" }, { "supplier_code": "32796", "zinc_id": "ZINC000012384497", "cat_id_fk": 61, "price": "NA", "quantity": "NA", "cat_name": "astateche" }, { "supplier_code": "4H56-1-789", "zinc_id": "ZINC000012384497", "cat_id_fk": 62, "price": "NA", "quantity": "NA", "cat_name": "synquestbb" }]
+    priceAPI = [ 
+    { 
+        "supplier_code":"SPC-a026",
+        "zinc_id":"ZINC000012384497",
+        "cat_id_fk":60,
+        "packs":[ 
+            { 
+                "price":110,
+                "currency":"usd",
+                "pack_quantity":0.25,
+                "unit":"g"
+            },
+            { 
+                "price":248,
+                "currency":"usd",
+                "pack_quantity":1,
+                "unit":"g"
+            },
+            { 
+                "price":743,
+                "currency":"usd",
+                "pack_quantity":5,
+                "unit":"g"
+            },
+            { 
+                "price":1237,
+                "currency":"usd",
+                "pack_quantity":25,
+                "unit":"g"
+            }
+        ],
+        "cat_name":"spiro",
+        "shipping":"1-2 weeks"
+    },
+    { 
+        "supplier_code":"EN300-312890",
+        "zinc_id":"ZINC000012384497",
+        "cat_id_fk":331,
+        "packs":[ 
+            { 
+                "price":60,
+                "currency":"usd",
+                "pack_quantity":10,
+                "unit":"mg"
+            }
+        ],
+        "cat_name":"enaminebbe",
+        "shipping":"6 weeks"
+    },
+    { 
+        "supplier_code":"MolPort-002-679-030",
+        "zinc_id":"ZINC000012384497",
+        "cat_id_fk":383,
+        "packs":[ 
+            { 
+                "price":"10-50",
+                "currency":"usd",
+                "pack_quantity":1,
+                "unit":"mg"
+            },
+            { 
+                "price":"50-100",
+                "currency":"usd",
+                "pack_quantity":5,
+                "unit":"mg"
+            },
+            { 
+                "price":"POA",
+                "currency":"usd",
+                "pack_quantity":100,
+                "unit":"mg"
+            }
+        ],
+        "cat_name":"molporte",
+        "shipping":"within 6 weeks"
+    },
+    { 
+        "supplier_code":"WXVL_AN2715LJ0008",
+        "zinc_id":"ZINC000012384497",
+        "cat_id_fk":70,
+        "packs":[ 
+            { 
+                "price":"POA",
+                "currency":"NA",
+                "pack_quantity":"NA",
+                "unit":"NA"
+            }
+        ],
+        "cat_name":"wuxi-v",
+        "shipping":"Make on Demand"
+    }
+]
     for i in priceAPI:
-        vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=i['supplier_code']).first()
-        if vendor is None:
-            i['buyAmount'] = 0
-        else:
-            i['buyAmount'] = vendor.quantity
+        vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=i['supplier_code']).all()
+        if vendor:
+            for v in vendor:
+                for pack in i['packs']:
+                    if v.pack_quantity == pack['pack_quantity']:
+                        pack['purchase_quantity'] = v.purchase_quantity
     return jsonify(priceAPI)
 
 @bp.route('/vendorUpdate', methods= ['GET',  'POST'])
@@ -92,27 +186,84 @@ def vendorUpdate():
     supplier_code = datas[0]
     company_name = datas[1]
     price = datas[2]
-    cat_id_fk = datas[3]
-    print(f'{item_id}-{supplier_code}-{value}-{company_name}-{price}-{cat_id_fk}')
-    vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=supplier_code).first()
+    currency = datas[3]
+    pack_quantity = datas[4]
+    unit = datas[5]
+    cat_id_fk = datas[6]
+
+    print(f'{item_id}-{supplier_code}-{value}-{company_name}-{price}-{pack_quantity}-{cat_id_fk}')
+    vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=supplier_code, pack_quantity=pack_quantity, unit=unit).first()
     if vendor is None and int(value) != 0:
-        vendor = Vendors(item_fk=item_id, company_name=company_name, quantity=value,
-                            supplier_code=supplier_code, price=price, cat_id_fk=cat_id_fk)
+        vendor = Vendors(item_fk=item_id, company_name=company_name, purchase_quantity=value,
+                            supplier_code=supplier_code, price=price, pack_quantity=pack_quantity, unit=unit, cat_id_fk=cat_id_fk)
         db.session.add(vendor)
         db.session.commit()
         print(f'added as a vendor : {vendor}')
-    elif int(value) == 0:
-        Vendors.query.filter_by(item_fk=item_id, supplier_code=supplier_code).delete()
+    elif value =='' or int(value) == 0:
+        Vendors.query.filter_by(item_fk=item_id, supplier_code=supplier_code, pack_quantity=pack_quantity, unit=unit).delete()
         db.session.commit()
         print(f'vendor deleted')
     else:
-        vendor.quantity = int(value)
+        vendor.purchase_quantity = int(value)
         db.session.commit()
-    return jsonify('post called')  
+    return jsonify('vendor updated')  
 
 @bp.route('/cart', methods= ['GET',  'POST'])
 def cart():
-    data = current_user.cart_fk.getCart()
-    # print(type(data))
-    return render_template('table.html', data=data)
+    items = current_user.cart_fk.items
+    totalPrices=[]
+    totalQuantities=[]
+    return render_template('table.html', data=items, prices=totalPrices, quantities=totalQuantities)
+@bp.route('/tsv', methods= ['GET',  'POST'])
+def tsv():
+    items = current_user.cart_fk.items
+    totalPrices=[]
+    totalQuantities=[]
+    with open('cart.csv', 'w', newline='') as csvfile:
+        fieldnames = ['identifier', 'company name', 'pack quantity', 'unit', 'price','currency' ,'purchase quantity']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
+        writer.writeheader()
+        for i in items:
+            for v in i.vendors:
+                 writer.writerow({
+                    'identifier': i.identifier, 
+                    'company name': v.company_name,
+                    'pack quantity': v.pack_quantity,
+                    'unit' : v.unit,
+                    'price' : v.price,
+                    'currency' : v.currency,
+                    'purchase quantity' : v.purchase_quantity
+                    })
+    # d = {'identifier':[],'company name': [], 'pack quantity': [],'unit':[], 'price': [],'currency':[], 'purchase quantity':[]}
+    # for i in items:
+    #     for v in i.vendors:
+    #         d['identifier'].append(i.identifier)
+    #         d['company name'].append(v.company_name)
+    #         d['pack quantity'].append(v.pack_quantity)
+    #         d['unit'].append(v.unit)
+    #         d['price'].append(v.price)
+    #         d['currency'].append(v.currency)
+    #         d['purchase quantity'].append(v.purchase_quantity)
 
+    # df = pd.DataFrame(data=d)
+    # print("Original DataFrame")
+    # print(df)
+    # print('Data from new_file.csv file:')
+    # new_df = df.to_csv('new_file.csv', sep='\t', index=False)
+    # new_df = pd.read_csv('new_file.csv')
+    folder =  os.getcwd()
+    # file_dr = os.path.realpath(folder)
+    return send_file(folder+ '/cart.csv',
+                     mimetype='text/csv',
+                     attachment_filename='cart.csv',
+                     as_attachment=True)
+    # resp = make_response(new_df)
+    # resp.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    # resp.headers["Content-Type"] = "text/csv"
+    # return resp
+
+    # return send_file(new_df,
+    #                  mimetype='text/csv',
+    #                  attachment_filename='cart.csv',
+    #                  as_attachment=True)
+    return redirect(url_for('main.cart'))

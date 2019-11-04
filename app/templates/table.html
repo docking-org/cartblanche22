@@ -87,33 +87,40 @@
 <body>
 
     <h2>HTML Table</h2>
-
+    <a href="{{url_for('main.tsv')}}"><button>Export .tsv</button></a>
+    <button>Export2</button>
     <table>
         <tr>
             <th>No</th>
-            <th>Quantity</th>
             <th>Compound</th>
             <th>Identifier</th>
             <th>Database</th>
             <th>Suppliers</th>
-            <th>Price</th>
+            <th>Total Quantity</th>
+            <th>Total Price</th>
             <th>Utility</th>
         </tr>
         {% for i in data %}
         <tr>
             <td>{{ loop.index }}</td>
-            <td>{{ i.quantity }} {{i.unit}}</td>
             <td><img src={{ i.compound_img }}></td>
             <td>{{ i.identifier }}</td>
             <td> {{ i.database }}</td>
+
             <td>
                 {% for v in i.vendors %}
                 <ul>
-                    <li>{{v.company_name}} -- {{v.supplier_code}} -- {{v.quantity}} -- {{v.price}}</li>
+                    <li>{{v.company_name}}--each pack has {{v.pack_quantity}}{{v.unit}} for {{v.price}}{{v.currency}}
+                        added
+                        {{v.purchase_quantity}} pack
+                    </li>
                 </ul>
                 {% endfor %}
             </td>
-            <td>{{ i.price }}</td>
+            <!-- <td>{{quantities[loop.index-1]}}</td> -->
+            <!-- <td>{{prices[loop.index-1]}}</td> -->
+            <td></td>
+            <td></td>
             <td>
                 <!-- <button id={{i.id}} onclick='deleteItem(this)'> Delete </button> -->
                 <form action="{{ url_for('main.deleteItem', item_id=i.item_id) }}" method=post>
@@ -147,10 +154,12 @@
         var span = document.getElementsByClassName("close")[0];
         span.onclick = function (e) {
             modal.style.display = "none";
+            location.reload();
         }
         window.onclick = function (event) {
             if (event.target == modal) {
                 modal.style.display = "none";
+                location.reload();
             }
         }
         function openModal(b) {
@@ -158,21 +167,35 @@
                 function (res) {
                     let table_body = '<table><tr><th>No</th><th>Company name</th>';
                     table_body += '<th>Supplier code</th><th>Delivery time</th>'
-                        + '<th>Quantity</th><th>Price</th></tr>'
+                        + '<th>Price</th><th>Pack Size</th><th>Quantity</th></tr>'
+
                     for (let i = 0; i < res.length; i++) {
-                        table_body += '<tr><td>' + (i + 1) + '</td>';
-                        table_body += '<td>' + res[i].cat_name + '</td>';
-                        table_body += '<td>' + res[i].supplier_code + '</td>';
-                        table_body += '<td>' + '2 weeks' + '</td>';
-                        table_body += "<td><input type=number id=" + b.id
-                            + " name= " + res[i].supplier_code + ',' + res[i].cat_name
-                            + "," + res[i].price
-                            + "," + res[i].cat_id_fk
-                            + " value=" + res[i].buyAmount
-                            + " onchange='vendorUpdate(this)'>"
-                            + '</td>';
-                        table_body += '<td>' + res[i].price + '</td>';
-                        table_body += '</tr>';
+                        let len = res[i].packs.length
+                        for (let p = 0; p < len; p++) {
+                            table_body += '<tr>'
+                            if (p == 0) {
+                                table_body += '<td rowspan=' + len + '>' + (i + 1) + '</td>';
+                                table_body += '<td rowspan=' + len + '>' + res[i].cat_name + '</td>';
+                                table_body += '<td rowspan=' + len + '>' + res[i].supplier_code + '</td>';
+                                table_body += '<td rowspan=' + len + '>' + res[i].shipping + '</td>';
+                            }
+                            let pack = res[i].packs[p]
+                            table_body += '<td>' + pack.price + ' ' + pack.currency + '</td>';
+                            table_body += '<td>' + pack.pack_quantity + ' ' + pack.unit + '</td>';
+                            table_body += "<td><input type=number id=" + b.id
+                                + " name= " + res[i].supplier_code
+                                + ',' + res[i].cat_name
+                                + "," + pack.price
+                                + "," + pack.currency
+                                + "," + pack.pack_quantity
+                                + "," + pack.unit
+                                + "," + res[i].cat_id_fk
+                                + " value=" + pack.purchase_quantity
+                                + " onchange='vendorUpdate(this)' max=10>"
+                                + '</td>';
+                            table_body += '</tr>'
+                        }
+
                     }
                     table_body += '</table>';
                     $('#tableDiv').html(table_body);
