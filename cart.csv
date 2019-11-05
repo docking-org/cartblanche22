@@ -1,7 +1,6 @@
 identifier	company name	pack quantity	unit	price	currency	purchase quantity
-ZINC000000967532	spiro	0.25	g	110	usd	1
 ZINC000000967532	enaminebbe	10.0	mg	60	usd	1
-ZINC000000967532	molporte	1.0	mg	10-50	usd	1
-ZINC000005133329	molporte	1.0	mg	10-50	usd	1
-ZINC000005133329	molporte	5.0	mg	50-100	usd	2
-ZINC000001867127	molporte	100.0	mg	POA	usd	2
+ZINC000000967532	molporte	1.0	mg	10-50	usd	4
+ZINC000001691363	spiro	25.0	g	1237	usd	1
+ZINC000001691363	enaminebbe	10.0	mg	60	usd	1
+ZINC000001691363	molporte	100.0	mg	POA	usd	1

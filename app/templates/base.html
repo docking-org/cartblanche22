@@ -23,17 +23,31 @@
     <!--<script src="js/marvinjs/marvinjslauncher.js"></script>-->
     <script src="../static/js/swsearch.js"></script>
     <script src="../static/js/sketcher.js"></script>
-        <div>Molecule Shopping Cart:
-            <a href="{{ url_for('main.index') }}">Home</a>
-            {% if current_user.is_anonymous %}
-            <a href="{{ url_for('main.login') }}">Login</a>
-            {% else %}
-            <a href="{{ url_for('main.logout') }}">Logout</a>
-            {% endif %}
-        </div>
+    <div>Molecule Shopping Cart:
+        <a href="{{ url_for('main.index') }}">Home</a>
+        {% if current_user.is_anonymous %}
+        <a href="{{ url_for('main.login') }}">Login</a>
+        {% else %}
+        <a href="{{ url_for('main.logout') }}">Logout</a>
+        {% endif %}
+    </div>
 </head>
 
 <body>
+    <div id="menu">
+        <!-- <div style="padding-right: 2px"><img src="img/logo3_box.svg" height="30px"></div>
+        <div style="padding-left: 2px; font-size: 12pt;">SmallWorld</div> -->
+        &nbsp;
+        <div><a href="{{url_for('main.index')}}">Search</a></div>
+        <div><a href="{{url_for('main.cart')}}">Cart</a></div>
+        {% if current_user.is_anonymous %}
+        <div><a href="{{ url_for('main.login') }}">Login</a></div>
+        {% else %}
+        <div><a href="{{ url_for('main.logout') }}">Logout</a></div>
+        {% endif %}
+        <div style="width: 100%"></div>
+        <!-- <div>Version 4.0</div> -->
+    </div>
     <div id="root">
         <noscript>
             <div
@@ -49,7 +63,7 @@
         <hr>
         {% block content %}
         {% endblock %}
-    </div> <!-- end div root-->
+    </div>
 </body>
 
 </html>
