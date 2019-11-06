@@ -162,8 +162,8 @@
         $.getJSON('/vendorModal/' + b.id,
             function (res) {
                 let table_body = '<table><tr><th>No</th><th>Company name</th>';
-                table_body += '<th>Supplier code</th><th>Delivery time</th>'
-                    + '<th>Price</th><th>Pack Size</th><th>Quantity</th></tr>'
+                table_body += '<th>Supplier code</th>'
+                    + '<th>Delivery time</th><th>Price</th><th>Pack Size</th><th>Quantity</th></tr>'
 
                 for (let i = 0; i < res.length; i++) {
                     let len = res[i].packs.length
@@ -173,22 +173,24 @@
                             table_body += '<td rowspan=' + len + '>' + (i + 1) + '</td>';
                             table_body += '<td rowspan=' + len + '>' + res[i].cat_name + '</td>';
                             table_body += '<td rowspan=' + len + '>' + res[i].supplier_code + '</td>';
-                            table_body += '<td rowspan=' + len + '>' + res[i].shipping + '</td>';
                         }
                         let pack = res[i].packs[p]
+                        table_body += '<td>' + pack.shipping + '</td>';
                         table_body += '<td>' + pack.price + ' ' + pack.currency + '</td>';
-                        table_body += '<td>' + pack.pack_quantity + ' ' + pack.unit + '</td>';
-                        table_body += "<td><input type=number id=" + b.id
-                            + " name= " + res[i].supplier_code
-                            + ',' + res[i].cat_name
-                            + "," + pack.price
-                            + "," + pack.currency
-                            + "," + pack.pack_quantity
-                            + "," + pack.unit
-                            + "," + res[i].cat_id_fk
-                            + " value=" + pack.purchase_quantity
-                            + " onchange='vendorUpdate(this)' max=10>"
-                            + '</td>';
+                        table_body += '<td>' + pack.quantity + ' ' + pack.unit + '</td>';
+                        if (pack.price != 'POA' || pack.quantity != 'NA') {
+                            table_body += "<td><input type=number id=" + b.id
+                                + " name= " + res[i].supplier_code
+                                + ',' + res[i].cat_name
+                                + "," + pack.price
+                                + "," + pack.currency
+                                + "," + pack.quantity
+                                + "," + pack.unit
+                                + "," + res[i].cat_id_fk
+                                + " value=" + pack.purchase_quantity
+                                + " onchange='vendorUpdate(this)' max=10>"
+                                + '</td>';
+                        }
                         table_body += '</tr>'
                     }
 

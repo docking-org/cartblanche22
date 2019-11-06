@@ -11,6 +11,7 @@ from app.forms import RegistrationForm
 import json, csv, os
 import pandas as pd
 import numpy as np
+import urllib.request
 
 @bp.route('/')
 @bp.route('/index', methods=['GET', 'POST'])
@@ -77,6 +78,14 @@ def deleteItem(item_id):
 @bp.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):
     item = Items.query.get(item_id)
+    # uri = "http://gimel.compbio.ucsf.edu:5022/api/_get_data?molecule_id=" + item.identifier
+    # with urllib.request.urlopen(uri) as url:
+    #     data = json.loads(url.read().decode())
+    # priceAPI = []
+    # for d in data:
+    #     if len(d['packs'])>0:
+    #         priceAPI.append(d)
+    # print(priceAPI)
     priceAPI = [ 
     { 
         "supplier_code":"SPC-a026",
@@ -86,30 +95,33 @@ def vendorModal(item_id):
             { 
                 "price":110,
                 "currency":"usd",
-                "pack_quantity":0.25,
-                "unit":"g"
+                "quantity":0.25,
+                "unit":"g",
+                "shipping":40
             },
             { 
                 "price":248,
                 "currency":"usd",
-                "pack_quantity":1,
-                "unit":"g"
+                "quantity":1,
+                "unit":"g",
+                "shipping":40
             },
             { 
                 "price":743,
                 "currency":"usd",
-                "pack_quantity":5,
-                "unit":"g"
+                "quantity":5,
+                "unit":"g",
+                "shipping":40
             },
             { 
                 "price":1237,
                 "currency":"usd",
-                "pack_quantity":25,
-                "unit":"g"
+                "quantity":25,
+                "unit":"g",
+                "shipping":40
             }
         ],
-        "cat_name":"spiro",
-        "shipping":"1-2 weeks"
+        "cat_name":"spiro"
     },
     { 
         "supplier_code":"EN300-312890",
@@ -119,12 +131,12 @@ def vendorModal(item_id):
             { 
                 "price":60,
                 "currency":"usd",
-                "pack_quantity":10,
-                "unit":"mg"
+                "quantity":10,
+                "unit":"mg",
+                "shipping":40
             }
         ],
-        "cat_name":"enaminebbe",
-        "shipping":"6 weeks"
+        "cat_name":"enaminebbe"
     },
     { 
         "supplier_code":"MolPort-002-679-030",
@@ -134,24 +146,27 @@ def vendorModal(item_id):
             { 
                 "price":"10-50",
                 "currency":"usd",
-                "pack_quantity":1,
-                "unit":"mg"
+                "quantity":1,
+                "unit":"mg",
+                "shipping":40
             },
             { 
                 "price":"50-100",
                 "currency":"usd",
-                "pack_quantity":5,
-                "unit":"mg"
+                "quantity":5,
+                "unit":"mg",
+                "shipping":40
             },
             { 
                 "price":"POA",
                 "currency":"usd",
-                "pack_quantity":100,
-                "unit":"mg"
+                "quantity":100,
+                "unit":"mg",
+                "shipping":40
             }
         ],
         "cat_name":"molporte",
-        "shipping":"within 6 weeks"
+        
     },
     { 
         "supplier_code":"WXVL_AN2715LJ0008",
@@ -161,12 +176,12 @@ def vendorModal(item_id):
             { 
                 "price":"POA",
                 "currency":"NA",
-                "pack_quantity":"NA",
-                "unit":"NA"
+                "quantity":"NA",
+                "unit":"NA",
+                "shipping":40
             }
         ],
         "cat_name":"wuxi-v",
-        "shipping":"Make on Demand"
     }
 ]
     for i in priceAPI:
@@ -174,7 +189,7 @@ def vendorModal(item_id):
         if vendor:
             for v in vendor:
                 for pack in i['packs']:
-                    if v.pack_quantity == pack['pack_quantity']:
+                    if v.pack_quantity == pack['quantity']:
                         pack['purchase_quantity'] = v.purchase_quantity
     return jsonify(priceAPI)
 
@@ -183,6 +198,7 @@ def vendorUpdate():
     item_id = request.args.get('item_id')
     value = request.args.get('value')
     datas = request.args.get('data').split(',')
+    print(f" data :  {request.args.get('data')}")
     supplier_code = datas[0]
     company_name = datas[1]
     price = datas[2]
