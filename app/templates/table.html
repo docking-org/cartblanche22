@@ -83,8 +83,8 @@
 
 
 
-<a href="{{url_for('main.tsv')}}"><button>Export .tsv</button></a>
-<button>Export2</button>
+<!-- <a href="{{url_for('main.tsv')}}"><button>Export .tsv</button></a>
+<button>Export2</button> -->
 <table>
     <tr>
         <th>No</th>
@@ -178,18 +178,24 @@
                         table_body += '<td>' + pack.shipping + '</td>';
                         table_body += '<td>' + pack.price + ' ' + pack.currency + '</td>';
                         table_body += '<td>' + pack.quantity + ' ' + pack.unit + '</td>';
-                        if (pack.price != 'POA' || pack.quantity != 'NA') {
+                        console.log($.trim(pack.price))
+                        if (pack.price != 0 && pack.quantity != 0) {
+                            var qt = pack.quantity;
+
                             table_body += "<td><input type=number id=" + b.id
                                 + " name= " + res[i].supplier_code
                                 + ',' + res[i].cat_name
-                                + "," + pack.price
+                                + "," + $.trim(pack.price)
                                 + "," + pack.currency
-                                + "," + pack.quantity
+                                + "," + $.trim(pack.quantity)
                                 + "," + pack.unit
                                 + "," + res[i].cat_id_fk
                                 + " value=" + pack.purchase_quantity
                                 + " onchange='vendorUpdate(this)' max=10>"
                                 + '</td>';
+                        }
+                        else {
+                            table_body += "<td> Need to contact with vendor </td>"
                         }
                         table_body += '</tr>'
                     }

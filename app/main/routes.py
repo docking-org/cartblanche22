@@ -93,30 +93,30 @@ def vendorModal(item_id):
         "cat_id_fk":60,
         "packs":[ 
             { 
-                "price":110,
+                "price":"110 ",
                 "currency":"usd",
                 "quantity":0.25,
                 "unit":"g",
                 "shipping":40
             },
             { 
-                "price":248,
+                "price":"248 ",
                 "currency":"usd",
                 "quantity":1,
                 "unit":"g",
                 "shipping":40
             },
             { 
-                "price":743,
+                "price":"743 ",
                 "currency":"usd",
                 "quantity":5,
                 "unit":"g",
                 "shipping":40
             },
             { 
-                "price":1237,
+                "price":"1237 ",
                 "currency":"usd",
-                "quantity":25,
+                "quantity":"25 ",
                 "unit":"g",
                 "shipping":40
             }
@@ -129,7 +129,7 @@ def vendorModal(item_id):
         "cat_id_fk":331,
         "packs":[ 
             { 
-                "price":60,
+                "price":"60 ",
                 "currency":"usd",
                 "quantity":10,
                 "unit":"mg",
@@ -158,7 +158,7 @@ def vendorModal(item_id):
                 "shipping":40
             },
             { 
-                "price":"POA",
+                "price":0,
                 "currency":"usd",
                 "quantity":100,
                 "unit":"mg",
@@ -174,16 +174,19 @@ def vendorModal(item_id):
         "cat_id_fk":70,
         "packs":[ 
             { 
-                "price":"POA",
+                "price":0,
                 "currency":"NA",
-                "quantity":"NA",
+                "quantity":0,
                 "unit":"NA",
                 "shipping":40
             }
         ],
         "cat_name":"wuxi-v",
     }
+
 ]
+    # if len(priceAPI) == 0:
+    #     return redirect(url_for('main.cart'))
     for i in priceAPI:
         vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=i['supplier_code']).all()
         if vendor:
