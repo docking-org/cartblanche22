@@ -1,6 +1,8 @@
 {%  extends 'base.html' %}
 {%  block content %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="../static/js/datatables.min.js"></script>
+<script src="../static/js/datatables.rowsGroup.js"></script>
 <style>
     table,
     th,
@@ -92,8 +94,8 @@
         <th>Identifier</th>
         <th>Database</th>
         <th>Suppliers</th>
-        <th>Total Quantity</th>
-        <th>Total Price</th>
+        <!-- <th>Total Quantity</th>
+        <th>Total Price</th> -->
         <th>Utility</th>
     </tr>
     {% for i in data %}
@@ -106,7 +108,7 @@
         <td>
             {% for v in i.vendors %}
             <ul>
-                <li>{{v.company_name}}--each pack has {{v.pack_quantity}}{{v.unit}} for {{v.price}}{{v.currency}}
+                <li>{{v.cat_name}}--each pack has {{v.pack_quantity}}{{v.unit}} for {{v.price}}{{v.currency}}
                     added
                     {{v.purchase_quantity}} pack
                 </li>
@@ -115,8 +117,8 @@
         </td>
         <!-- <td>{{quantities[loop.index-1]}}</td> -->
         <!-- <td>{{prices[loop.index-1]}}</td> -->
-        <td></td>
-        <td></td>
+        <!-- <td></td>
+        <td></td> -->
         <td>
             <!-- <button id={{i.id}} onclick='deleteItem(this)'> Delete </button> -->
             <form action="{{ url_for('main.deleteItem', item_id=i.item_id) }}" method=post>
@@ -139,8 +141,8 @@
     <!-- Modal content -->
     <div class="modal-content">
         <span class="close">&times;</span>
-        <div id='tableDiv'></div>
-        <a href="{{url_for('main.cart')}}"><button>Choose</button></a>
+        <table id='chooseVendors'>
+        </table>
     </div>
 
 
@@ -158,65 +160,92 @@
             location.reload();
         }
     }
-    function openModal(b) {
-        $.getJSON('/vendorModal/' + b.id,
-            function (res) {
-                let table_body = '<table><tr><th>No</th><th>Company name</th>';
-                table_body += '<th>Supplier code</th>'
-                    + '<th>Delivery time</th><th>Price</th><th>Pack Size</th><th>Quantity</th></tr>'
+    function openModal(item) {
 
-                for (let i = 0; i < res.length; i++) {
-                    let len = res[i].packs.length
-                    for (let p = 0; p < len; p++) {
-                        table_body += '<tr>'
-                        if (p == 0) {
-                            table_body += '<td rowspan=' + len + '>' + (i + 1) + '</td>';
-                            table_body += '<td rowspan=' + len + '>' + res[i].cat_name + '</td>';
-                            table_body += '<td rowspan=' + len + '>' + res[i].supplier_code + '</td>';
-                        }
-                        let pack = res[i].packs[p]
-                        table_body += '<td>' + pack.shipping + '</td>';
-                        table_body += '<td>' + pack.price + ' ' + pack.currency + '</td>';
-                        table_body += '<td>' + pack.quantity + ' ' + pack.unit + '</td>';
-                        console.log($.trim(pack.price))
-                        if (pack.price != 0 && pack.quantity != 0) {
-                            var qt = pack.quantity;
+        $.getJSON('/vendorModal/' + item.id, (json_data) => {
+            if (json_data == 'null') {
+                alert('no vendors found')
+            }
+            else {
+                //CLEARING TABLE AND DRAWING AGAIN 
+                $('#chooseVendors').html('')
+                let $tr = $('<tr>')
+                $('<th>').html('No').appendTo($tr)
+                $('<th>').html('Catalog name').appendTo($tr)
+                $('<th>').html('Supplier code').appendTo($tr)
+                $('<th>').html('Shipping').appendTo($tr)
+                $('<th>').html('Price').appendTo($tr)
+                $('<th>').html('Currency').appendTo($tr)
+                $('<th>').html('Pack quantity').appendTo($tr)
+                $('<th>').html('Unit').appendTo($tr)
+                $('<th>').html('Purchase quantity').appendTo($tr)
+                $('#chooseVendors').append($tr)
 
-                            table_body += "<td><input type=number id=" + b.id
-                                + " name= " + res[i].supplier_code
-                                + ',' + res[i].cat_name
-                                + "," + $.trim(pack.price)
-                                + "," + pack.currency
-                                + "," + $.trim(pack.quantity)
-                                + "," + pack.unit
-                                + "," + res[i].cat_id_fk
-                                + " value=" + pack.purchase_quantity
-                                + " onchange='vendorUpdate(this)' max=10>"
-                                + '</td>';
-                        }
-                        else {
-                            table_body += "<td> Need to contact with vendor </td>"
-                        }
-                        table_body += '</tr>'
-                    }
+                //ADDING ROWS 
+                $.each(json_data, (v, vendor) => {
+                    let $tr = $("<tr>").attr('id', v);
+                    $('<td>').attr('rowspan', vendor.packs.length + 1).html(v + 1).appendTo($tr);
+                    $('<td>').attr('rowspan', vendor.packs.length + 1).html(vendor.cat_name).appendTo($tr);
+                    $('<td>').attr('rowspan', vendor.packs.length + 1).html(vendor.supplier_code).appendTo($tr);
+                    $('#chooseVendors').append($tr)
+                    $.each(vendor.packs, (p, pack) => {
+                        let $tr = $("<tr>").attr('id', v + '_' + p);
+                        $('<td>').html(pack.shipping).appendTo($tr);
+                        $('<td>').html(pack.price).appendTo($tr);
+                        $('<td>').html(pack.currency).appendTo($tr);
+                        $('<td>').html(pack.quantity).appendTo($tr);
+                        $('<td>').html(pack.unit).appendTo($tr);
+                        let $td = $('<td>')
+                        $('<input>').attr('type', 'number').attr('value', pack.purchase_quantity).appendTo($td)
+                        $td.appendTo($tr);
+                        $('#chooseVendors').append($tr)
+                    });
 
-                }
-                table_body += '</table>';
-                $('#tableDiv').html(table_body);
+                })
+                $('<button>').attr('onclick', 'vendorUpdate(' + item.id + ')')
+                    .html('Choose')
+                    .insertAfter('#chooseVendors')
+
                 modal.style.display = "block";
-            });
+
+            }
+
+        })
         return false;
     }
-    function vendorUpdate(input) {
-        $.getJSON('/vendorUpdate', {
-            'item_id': input.id,
-            'value': input.value,
-            'data': input.name
-        },
-            function (res) {
-                console.log(res)
-            });
-        return false;
+    function vendorUpdate(item_id) {
+        post_data = []
+        let inputs = $('#chooseVendors').find('input')
+        $.each(inputs, (i, input) => {
+            if ($(input)[0].value > 0) {
+                vendor_data = {}
+                vendor_data.purchase_quantity = parseInt($(input)[0].value)
+                let tr = $(input).parents()[1]
+                let children = $(tr).children()
+                vendor_data.shipping = $(children[0]).html()
+                vendor_data.price = $(children[1]).html()
+                vendor_data.currency = $(children[2]).html()
+                vendor_data.quantity = $(children[3]).html()
+                vendor_data.unit = $(children[4]).html()
+                let id = $(tr)[0].id.split("_")[0]
+                let tds = $($("#" + id)[0]).children()
+                vendor_data.cat_name = $(tds[1]).html()
+                vendor_data.supplier_code = $(tds[2]).html()
+                post_data.push(vendor_data)
+            }
+        })
+        $.ajax({
+            type: "POST",
+            url: '/vendorUpdate',
+            data: JSON.stringify({ 'post_data': post_data, 'item_id': item_id }),
+            contentType: "application/json",
+            dataType: 'json',
+            success: (res) => {
+                console.log(res);
+                modal.style.display = "none";
+                location.reload();
+            }
+        });
     }
 
 </script>

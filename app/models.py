@@ -61,11 +61,11 @@ class Items(db.Model):
     item_id = db.Column(db.Integer, primary_key=True)
     cart_fk = db.Column(db.Integer, db.ForeignKey('carts.cart_id'))
     identifier = db.Column(db.String(120), index=True)
-    quantity = db.Column(db.Integer, default=10)
+    quantity = db.Column(db.Float, default=10)
     unit = db.Column(db.String(10), default='mg')
     compound_img = db.Column(db.String(256))
     database = db.Column(db.String(120), nullable = False)
-    price = db.Column(db.Integer)
+    price = db.Column(db.Float)
     vendors = db.relationship('Vendors', backref='item', lazy='dynamic')
 
     # def __repr__(self):
@@ -84,18 +84,13 @@ class Items(db.Model):
 class Vendors(db.Model):
     vendor_id = db.Column(db.Integer, primary_key=True)
     item_fk = db.Column(db.Integer, db.ForeignKey('items.item_id'))
-    company_name = db.Column(db.String(120), index=True)
+    cat_name = db.Column(db.String(120), index=True)
     pack_quantity = db.Column(db.Float, default=0)
     purchase_quantity = db.Column(db.Integer)
     unit = db.Column(db.String(10), default='mg')
     supplier_code = db.Column(db.String(120))
-    price = db.Column(db.Integer)
+    price = db.Column(db.Float)
     shipping = db.Column(db.Integer)
     currency = db.Column(db.String(10), default="usd")
-    cat_id_fk = db.Column(db.String(120))
-    
-    # def __repr__(self):
-    #     data = {'company_name':self.company_name, 'supplier_code':self.supplier_code,                   'purchase_quantity':self.purchase_quantity, 
-    #             'price':self.price, 'currency':self.currency, 'pack_quantity':self.pack_quantity, 'unit':self.unit
-    #             }
-    #     return json.dumps(data)
+    cat_id_fk = db.Column(db.Integer)
+

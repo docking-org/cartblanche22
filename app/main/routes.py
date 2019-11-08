@@ -78,154 +78,38 @@ def deleteItem(item_id):
 @bp.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):
     item = Items.query.get(item_id)
-    # uri = "http://gimel.compbio.ucsf.edu:5022/api/_get_data?molecule_id=" + item.identifier
-    # with urllib.request.urlopen(uri) as url:
-    #     data = json.loads(url.read().decode())
-    # priceAPI = []
-    # for d in data:
-    #     if len(d['packs'])>0:
-    #         priceAPI.append(d)
-    # print(priceAPI)
-    priceAPI = [ 
-    { 
-        "supplier_code":"SPC-a026",
-        "zinc_id":"ZINC000012384497",
-        "cat_id_fk":60,
-        "packs":[ 
-            { 
-                "price":"110 ",
-                "currency":"usd",
-                "quantity":0.25,
-                "unit":"g",
-                "shipping":40
-            },
-            { 
-                "price":"248 ",
-                "currency":"usd",
-                "quantity":1,
-                "unit":"g",
-                "shipping":40
-            },
-            { 
-                "price":"743 ",
-                "currency":"usd",
-                "quantity":5,
-                "unit":"g",
-                "shipping":40
-            },
-            { 
-                "price":"1237 ",
-                "currency":"usd",
-                "quantity":"25 ",
-                "unit":"g",
-                "shipping":40
-            }
-        ],
-        "cat_name":"spiro"
-    },
-    { 
-        "supplier_code":"EN300-312890",
-        "zinc_id":"ZINC000012384497",
-        "cat_id_fk":331,
-        "packs":[ 
-            { 
-                "price":"60 ",
-                "currency":"usd",
-                "quantity":10,
-                "unit":"mg",
-                "shipping":40
-            }
-        ],
-        "cat_name":"enaminebbe"
-    },
-    { 
-        "supplier_code":"MolPort-002-679-030",
-        "zinc_id":"ZINC000012384497",
-        "cat_id_fk":383,
-        "packs":[ 
-            { 
-                "price":"10-50",
-                "currency":"usd",
-                "quantity":1,
-                "unit":"mg",
-                "shipping":40
-            },
-            { 
-                "price":"50-100",
-                "currency":"usd",
-                "quantity":5,
-                "unit":"mg",
-                "shipping":40
-            },
-            { 
-                "price":0,
-                "currency":"usd",
-                "quantity":100,
-                "unit":"mg",
-                "shipping":40
-            }
-        ],
-        "cat_name":"molporte",
-        
-    },
-    { 
-        "supplier_code":"WXVL_AN2715LJ0008",
-        "zinc_id":"ZINC000012384497",
-        "cat_id_fk":70,
-        "packs":[ 
-            { 
-                "price":0,
-                "currency":"NA",
-                "quantity":0,
-                "unit":"NA",
-                "shipping":40
-            }
-        ],
-        "cat_name":"wuxi-v",
-    }
+    uri = "http://gimel.compbio.ucsf.edu:5022/api/_get_data?molecule_id=" + item.identifier
+    with urllib.request.urlopen(uri) as url:
+        data = json.loads(url.read().decode())
+    if data:
+        priceAPI = []
+        for d in data:
+            priceAPI.append(d)
+        for i in priceAPI:
+            for pack in i['packs']:
+                vendor = Vendors.query.filter_by(item_fk=item_id, cat_name=i['cat_name'],
+                        pack_quantity=float(pack['quantity']), unit=pack['unit']).first()
+                if vendor:
+                        pack['purchase_quantity'] = vendor.purchase_quantity
+                else:
+                    pack['purchase_quantity'] = 0
+        return jsonify(priceAPI)
+    else:
+        return jsonify('null')
 
-]
-    # if len(priceAPI) == 0:
-    #     return redirect(url_for('main.cart'))
-    for i in priceAPI:
-        vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=i['supplier_code']).all()
-        if vendor:
-            for v in vendor:
-                for pack in i['packs']:
-                    if v.pack_quantity == pack['quantity']:
-                        pack['purchase_quantity'] = v.purchase_quantity
-    return jsonify(priceAPI)
-
-@bp.route('/vendorUpdate', methods= ['GET',  'POST'])
+@bp.route('/vendorUpdate', methods= ['POST'])
 def vendorUpdate():
-    item_id = request.args.get('item_id')
-    value = request.args.get('value')
-    datas = request.args.get('data').split(',')
-    print(f" data :  {request.args.get('data')}")
-    supplier_code = datas[0]
-    company_name = datas[1]
-    price = datas[2]
-    currency = datas[3]
-    pack_quantity = datas[4]
-    unit = datas[5]
-    cat_id_fk = datas[6]
-
-    print(f'{item_id}-{supplier_code}-{value}-{company_name}-{price}-{pack_quantity}-{cat_id_fk}')
-    vendor = Vendors.query.filter_by(item_fk=item_id, supplier_code=supplier_code, pack_quantity=pack_quantity, unit=unit).first()
-    if vendor is None and int(value) != 0:
-        vendor = Vendors(item_fk=item_id, company_name=company_name, purchase_quantity=value,
-                            supplier_code=supplier_code, price=price, pack_quantity=pack_quantity, unit=unit, cat_id_fk=cat_id_fk)
+    data = request.get_json()
+    # Since user chose new vendors we do not need to store old chosen vendors
+    Vendors.query.filter_by(item_fk = data['item_id']).delete()
+    for item in data['post_data']:
+        vendor = Vendors(item_fk=data['item_id'], cat_name=item['cat_name'], 
+                        purchase_quantity=item['purchase_quantity'],
+                        supplier_code=item['supplier_code'], price=float(item['price']), 
+                        pack_quantity=float(item['quantity']), unit=item['unit'])
         db.session.add(vendor)
         db.session.commit()
-        print(f'added as a vendor : {vendor}')
-    elif value =='' or int(value) == 0:
-        Vendors.query.filter_by(item_fk=item_id, supplier_code=supplier_code, pack_quantity=pack_quantity, unit=unit).delete()
-        db.session.commit()
-        print(f'vendor deleted')
-    else:
-        vendor.purchase_quantity = int(value)
-        db.session.commit()
-    return jsonify('vendor updated')  
+    return jsonify('success')
 
 @bp.route('/cart', methods= ['GET',  'POST'])
 def cart():
@@ -233,6 +117,7 @@ def cart():
     totalPrices=[]
     totalQuantities=[]
     return render_template('table.html', data=items, prices=totalPrices, quantities=totalQuantities)
+
 @bp.route('/tsv', methods= ['GET',  'POST'])
 def tsv():
     items = current_user.cart_fk.items
