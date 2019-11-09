@@ -32,7 +32,7 @@ class Carts(db.Model):
     items = db.relationship('Items', backref='cart', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Cart {self.cart_id}>'
+        return '<Cart {}>'.format(self.cart_id)
     
     def addToCart(self, data):
         data['cart_id'] = self.cart_id
@@ -49,7 +49,7 @@ class Carts(db.Model):
         cart = Carts(user_fk= user.user_id)
         db.session.add(cart)
         db.session.commit()
-        print(f'cart created for {user} with cart {cart}')
+        
     
     def order():
         pass
