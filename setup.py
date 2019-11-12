@@ -20,7 +20,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.20191108.8',
+    version='0.20191108.9',
 
     description='Shopping cart v1.0',
     long_description='',
@@ -71,7 +71,7 @@ setup(
     install_requires=dependencies,
 
     scripts=(
-        'molecule_shopping_cart_app.py',
+        'application.py',
         'config.py',
         'setup.py',
         'requirements.txt',
