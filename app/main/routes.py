@@ -13,11 +13,13 @@ import json, csv, os
 # import numpy as np
 import urllib.request
 
-@application.route('/')
+
+@application.route('/', methods=['GET', 'POST'])
 @application.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
     return render_template('index.html')
+
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -36,10 +38,12 @@ def login():
         #return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
+
 @application.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
 
 @application.route('/register', methods=['GET', 'POST'])
 def register():
@@ -56,6 +60,7 @@ def register():
         return redirect(url_for('main.login'))
     return render_template('register.html', title='Register', form=form)
 
+
 @application.route('/addToCart', methods= ['GET',  'POST'])
 def addToCart():
     item = Items.query.filter_by(cart_fk=current_user.cart_fk.cart_id, identifier=request.args.get('id')).first()
@@ -67,6 +72,7 @@ def addToCart():
         return jsonify('added to cart success')
     return jsonify('item exists in cart')
 
+
 @application.route('/deleteItem/<item_id>', methods= ['POST'])
 def deleteItem(item_id):
     Vendors.query.filter_by(item_fk=item_id).delete()
@@ -74,6 +80,7 @@ def deleteItem(item_id):
     db.session.commit()
     print('item deleted')
     return redirect(url_for('main.cart'))
+
 
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):
@@ -97,6 +104,7 @@ def vendorModal(item_id):
     else:
         return jsonify('null')
 
+
 @application.route('/vendorUpdate', methods= ['POST'])
 def vendorUpdate():
     data = request.get_json()
@@ -111,12 +119,14 @@ def vendorUpdate():
         db.session.commit()
     return jsonify('success')
 
+
 @application.route('/cart', methods= ['GET',  'POST'])
 def cart():
     items = current_user.cart_fk.items
     totalPrices=[]
     totalQuantities=[]
     return render_template('table.html', data=items, prices=totalPrices, quantities=totalQuantities)
+
 
 @application.route('/tsv', methods= ['GET',  'POST'])
 def tsv():
