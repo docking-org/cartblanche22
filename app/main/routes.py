@@ -1,13 +1,16 @@
 from flask import render_template, flash, redirect, url_for, jsonify, request, send_file
 from app.main import application
-from app.forms import LoginForm
+from app.data.forms.authForms import LoginForm, RegistrationForm
 from flask_login import current_user, login_user
 from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
-from app.models import Users, Carts, Items, Vendors
+from app.data.models.users import Users
+from app.data.models.carts import Carts
+from app.data.models.items import Items
+from app.data.models.vendors import Vendors
 from app import db
-from app.forms import RegistrationForm
+
 import json, csv, os
 # import pandas as pd
 # import numpy as np
