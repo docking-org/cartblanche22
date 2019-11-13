@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, jsonify, request, send_file
-from app.main import bp
+from app.main import application
 from app.forms import LoginForm
 from flask_login import current_user, login_user
 from flask_login import logout_user
@@ -9,17 +9,17 @@ from app.models import Users, Carts, Items, Vendors
 from app import db
 from app.forms import RegistrationForm
 import json, csv, os
-import pandas as pd
-import numpy as np
+# import pandas as pd
+# import numpy as np
 import urllib.request
 
-@bp.route('/')
-@bp.route('/index', methods=['GET', 'POST'])
+@application.route('/')
+@application.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
     return render_template('index.html')
 
-@bp.route('/login', methods=['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -36,12 +36,12 @@ def login():
         #return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
-@bp.route('/logout')
+@application.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
-@bp.route('/register', methods=['GET', 'POST'])
+@application.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -56,7 +56,7 @@ def register():
         return redirect(url_for('main.login'))
     return render_template('register.html', title='Register', form=form)
 
-@bp.route('/addToCart', methods= ['GET',  'POST'])
+@application.route('/addToCart', methods= ['GET',  'POST'])
 def addToCart():
     item = Items.query.filter_by(cart_fk=current_user.cart_fk.cart_id, identifier=request.args.get('id')).first()
     if item is None:
@@ -67,7 +67,7 @@ def addToCart():
         return jsonify('added to cart success')
     return jsonify('item exists in cart')
 
-@bp.route('/deleteItem/<item_id>', methods= ['POST'])
+@application.route('/deleteItem/<item_id>', methods= ['POST'])
 def deleteItem(item_id):
     Vendors.query.filter_by(item_fk=item_id).delete()
     Items.query.filter_by(item_id=item_id).delete()
@@ -75,7 +75,7 @@ def deleteItem(item_id):
     print('item deleted')
     return redirect(url_for('main.cart'))
 
-@bp.route('/vendorModal/<item_id>', methods= ['GET','POST'])
+@application.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):
     item = Items.query.get(item_id)
     uri = "http://gimel.compbio.ucsf.edu:5022/api/_get_data?molecule_id=" + item.identifier
@@ -97,7 +97,7 @@ def vendorModal(item_id):
     else:
         return jsonify('null')
 
-@bp.route('/vendorUpdate', methods= ['POST'])
+@application.route('/vendorUpdate', methods= ['POST'])
 def vendorUpdate():
     data = request.get_json()
     # Since user chose new vendors we do not need to store old chosen vendors
@@ -111,14 +111,14 @@ def vendorUpdate():
         db.session.commit()
     return jsonify('success')
 
-@bp.route('/cart', methods= ['GET',  'POST'])
+@application.route('/cart', methods= ['GET',  'POST'])
 def cart():
     items = current_user.cart_fk.items
     totalPrices=[]
     totalQuantities=[]
     return render_template('table.html', data=items, prices=totalPrices, quantities=totalQuantities)
 
-@bp.route('/tsv', methods= ['GET',  'POST'])
+@application.route('/tsv', methods= ['GET',  'POST'])
 def tsv():
     items = current_user.cart_fk.items
     totalPrices=[]
