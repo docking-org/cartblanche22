@@ -11,13 +11,6 @@ class Items(db.Model):
     price = db.Column(db.Float)
     vendors = db.relationship('Vendors', backref='item', lazy='dynamic')
 
-    # def __repr__(self):
-    #     data = {'item_id':self.item_id,'identifier':self.identifier, 'quantity':self.quantity, 
-    #             'unit':self.unit, 'compound_img':self.compound_img, 
-    #             'database':self.database, 'price':self.price, 'vendors':self.vendors
-    #             }
-    #     return json.dumps(data)
-    
     def deleteItem(item_id):
         Items.query.filter_by(item_id=item_id).delete()
         db.session.commit()

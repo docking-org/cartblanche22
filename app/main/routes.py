@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, url_for, jsonify, request, send_file
 from app.main import application
 from app.data.forms.authForms import LoginForm, RegistrationForm
+from app.data.forms.cartForms import CartForm
 from flask_login import current_user, login_user
 from flask_login import logout_user
 from flask_login import login_required
@@ -66,15 +67,10 @@ def register():
 
 @application.route('/addToCart', methods= ['GET',  'POST'])
 def addToCart():
-    item = Items.query.filter_by(cart_fk=current_user.cart_fk.cart_id, identifier=request.args.get('id')).first()
-    if item is None:
-        item = Items(cart_fk = current_user.cart_fk.cart_id, identifier=request.args.get('id'), 
-                compound_img=request.args.get('img_url'), database= request.args.get('database'))
-        db.session.add(item)
-        db.session.commit()
-        return jsonify('added to cart success')
-    return jsonify('item exists in cart')
-
+    activeCart = Carts.query.get(current_user.activeCart)
+    if activeCart.addToCart(current_user, request.args.get('id'),request.args.get('img_url'),request.args.get('database')):
+        return jsonify("added to cart")
+    return jsonify("item existed in cart")
 
 @application.route('/deleteItem/<item_id>', methods= ['POST'])
 def deleteItem(item_id):
@@ -111,6 +107,7 @@ def vendorModal(item_id):
 @application.route('/vendorUpdate', methods= ['POST'])
 def vendorUpdate():
     data = request.get_json()
+    print(data)
     # Since user chose new vendors we do not need to store old chosen vendors
     Vendors.query.filter_by(item_fk = data['item_id']).delete()
     for item in data['post_data']:
@@ -125,15 +122,43 @@ def vendorUpdate():
 
 @application.route('/cart', methods= ['GET',  'POST'])
 def cart():
-    items = current_user.cart_fk.items
+    items = Items.query.filter_by(cart_fk=current_user.activeCart).all()
     totalPrices=[]
     totalQuantities=[]
     return render_template('table.html', data=items, prices=totalPrices, quantities=totalQuantities)
 
+@application.route('/carts', methods= ['GET',  'POST'])
+def carts():
+    carts = Carts.query.filter_by(user_fk=current_user.user_id).all()
+    return render_template('carts.html', carts=carts)
+
+@application.route('/createCart', methods= ['GET'])
+def createCart():
+    Carts.createCart(current_user)
+    return redirect(url_for('main.carts'))
+
+@application.route('/renameCart', methods= ['POST'])
+def renameCart():
+    data = request.get_json()
+    Carts.query.get(data['cart_id']).setName(data['name'])
+    return jsonify('Cart name successfully updated')
+
+@application.route('/deleteCart/<cart_id>', methods= ['POST'])
+def deleteCart(cart_id):
+    # Carts.deleteCart(cart_id)
+    Carts.query.filter_by(cart_id=cart_id).delete()
+    db.session.commit()
+    print('cart deleted')
+    return redirect(url_for('main.carts'))
+
+@application.route('/activateCart/<cart_id>', methods= ['POST'])
+def activateCart(cart_id):
+    current_user.setCart(cart_id)
+    return redirect(url_for('main.carts'))
 
 @application.route('/tsv', methods= ['GET',  'POST'])
 def tsv():
-    items = current_user.cart_fk.items
+    items = Items.query.filter_by(cart_fk=current_user.activeCart).all()
     totalPrices=[]
     totalQuantities=[]
     with open('cart.csv', 'w', newline='') as csvfile:
