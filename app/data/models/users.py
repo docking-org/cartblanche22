@@ -4,7 +4,7 @@ from app import db,login
 from flask_login import UserMixin
 import json
 from app.data.models.carts import Carts
-
+from app.data.models.items import Items
 
 class Users(UserMixin, db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
@@ -23,6 +23,10 @@ class Users(UserMixin, db.Model):
     @property
     def cart_name(self):
         return Carts.query.get(self.activeCart).name
+
+    @property
+    def items_in_cart(self):
+        return Items.query.filter_by(cart_fk=self.activeCart).all()
 
     def validate_username(self, username):
         user = Users.query.filter_by(username=username.data).first()

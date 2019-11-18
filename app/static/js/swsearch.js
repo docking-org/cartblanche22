@@ -393,8 +393,9 @@ function resize() {
 }
 
 function redraw() {
-	if (!dtable)
+	if (!dtable) {
 		return;
+	}
 	if ($('#results').dataTable().fnSettings() && $('#results').dataTable().fnSettings().oScroller) {
 		var s = $('#results').dataTable().fnSettings().oScroller.s;
 		s.dt.oApi._fnDraw(s.dt);
@@ -408,6 +409,7 @@ function stopStreaming() {
 }
 
 function init_table(table, url) {
+	console.log("table initiated")
 	if (!dtable) {
 		$('#splash').css('display', 'none');
 		var columns = [{
@@ -466,11 +468,13 @@ function init_table(table, url) {
 				[0, 'asc']
 			]
 		});
+
 	} else {
 		dtable.ajax.url(url).load();
 	}
 	update_bounds();
 	update_visible_columns();
+	addButtonDisable()
 }
 /* Popup */
 function hide_imgpop() {
@@ -577,6 +581,10 @@ function hit_renderer(data, type, row) {
 	button.attr('db', search_state.db);
 	button.attr('img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
 	button.attr('onclick', 'addToCart(this)');
+	if (items.includes(id)) {
+		button.prop('disabled', true)
+		button.html('Already in cart')
+	}
 	if (href) {
 		div.append("<b><a target='_blank' href='" + href + "'>" + id + "</a></b>");
 	} else {
@@ -599,7 +607,14 @@ function hit_renderer(data, type, row) {
 	row.append($("<td style='width: 150px;'></td>").append(img));
 	row.append($("<td style='line-height: 100%;'></td>").append(div));
 	table.append(row);
+
 	return $('<div>').append(table).html();
+}
+
+function addButtonDisable(items) {
+	function isInCart(id) {
+		return items.includes(id)
+	}
 }
 
 function addToCart(btn) {
@@ -609,7 +624,8 @@ function addToCart(btn) {
 		'img_url': btn.getAttribute('img')
 	},
 		function (res) {
-			alert(res)
+			$(btn).prop('disabled', true)
+			$(btn).html('Already in cart')
 		});
 	return false;
 }

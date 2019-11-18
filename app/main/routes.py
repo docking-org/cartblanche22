@@ -22,7 +22,10 @@ import urllib.request
 @application.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    return render_template('index.html')
+    zinc_ids = []
+    for i in current_user.items_in_cart:
+        zinc_ids.append(i.identifier)
+    return render_template('index.html', items=zinc_ids)
 
 
 @application.route('/login', methods=['GET', 'POST'])

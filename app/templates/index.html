@@ -11,19 +11,23 @@
         <div>Version 4.0</div>
     </div> -->
 <script type="text/javascript">
+
     $(document).ready(function () {
+        items = JSON.parse('{{ items | tojson }}');
         $('#content').width($('#content').parent().width() - 450);
         $(window).resize(function () {
             $('#content').width($('#content').parent().width() - 450);
             if (dtable) {
                 resize();
-                redraw();
+                redraw(JSON.parse('{{ items | tojson }}'));
             }
         });
         db_maps($('#dbsel'));
         toggle_scoring();
     });
 </script>
+<script src="../static/js/swsearch.js"></script>
+
 <div id="content">
     <div id="nav">
 
