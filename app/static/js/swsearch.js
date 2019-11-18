@@ -474,7 +474,6 @@ function init_table(table, url) {
 	}
 	update_bounds();
 	update_visible_columns();
-	addButtonDisable()
 }
 /* Popup */
 function hide_imgpop() {
@@ -539,7 +538,7 @@ function flex_renderer(data, type, row) {
 function hit_renderer(data, type, row) {
 	var table = $("<table class='compound_cell'></table>");
 	var img = $('<img width="150px" height="90px" />');
-	let button = $('<button>Add To Cart</button>')
+	let button = $('<button class="add">Add to Cart</button>')
 	var color = $('input[name="optColEdits"]').prop('checked');
 	var align = $('input[name="optAlign"]').prop('checked');
 	var base_url = config.WebApp.DepictionUrl;
@@ -580,10 +579,10 @@ function hit_renderer(data, type, row) {
 	button.attr('id', id);
 	button.attr('db', search_state.db);
 	button.attr('img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
-	button.attr('onclick', 'addToCart(this)');
+	button.attr('onclick', 'toggleCart(this)');
 	if (items.includes(id)) {
-		button.prop('disabled', true)
-		button.html('Already in cart')
+		button.html('Remove')
+		button.attr('class', 'remove')
 	}
 	if (href) {
 		div.append("<b><a target='_blank' href='" + href + "'>" + id + "</a></b>");
@@ -611,21 +610,39 @@ function hit_renderer(data, type, row) {
 	return $('<div>').append(table).html();
 }
 
-function addButtonDisable(items) {
-	function isInCart(id) {
-		return items.includes(id)
-	}
-}
 
-function addToCart(btn) {
-	$.getJSON('/addToCart', {
-		'id': btn.id,
-		'database': btn.getAttribute('db'),
-		'img_url': btn.getAttribute('img')
-	},
-		function (res) {
-			$(btn).prop('disabled', true)
-			$(btn).html('Already in cart')
-		});
+function toggleCart(btn) {
+	console.log(btn.getAttribute('class'))
+	if (btn.getAttribute('class') == 'add') {
+		$.getJSON('/addToCart', {
+			'id': btn.id,
+			'database': btn.getAttribute('db'),
+			'img_url': btn.getAttribute('img')
+		},
+			function (res) {
+				$(btn).html('Remove')
+				$(btn).attr('class', 'remove')
+				items.push(btn.id)
+				$(btn).prop('disabled', true);
+				setTimeout(function () {
+					// enable click after 1 second
+					$(btn).prop('disabled', false);
+				}, 500); // 0.5 second delay
+			});
+	}
+	else {
+		$.getJSON('/deleteItem/' + btn.id,
+			function (res) {
+				$(btn).html('Add To Cart')
+				$(btn).attr('class', 'add')
+				items.pop(btn.id)
+				$(btn).prop('disabled', true);
+				setTimeout(function () {
+					// enable click after 1 second
+					$(btn).prop('disabled', false);
+				}, 500); // 0.5 second delay
+			});
+	}
+
 	return false;
 }

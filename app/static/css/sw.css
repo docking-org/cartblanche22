@@ -6,6 +6,32 @@ body {
 	font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'Sans-Serif';
 	font-size: 12pt;
 }
+.add {
+	width:100px;
+	background-color: #4CAF50;
+	border: none;
+	color: white;
+	padding: 10px 20px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 12px;
+	margin: 2px 2px;
+	cursor: pointer;
+}
+.remove {
+	width:100px;
+	background-color: #f4511e;
+	border: none;
+	color: white;
+	padding: 10px 20px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 12px;
+	margin: 2px 2px;
+	cursor: pointer;
+}
 #root{
 	margin : 20px;
 }

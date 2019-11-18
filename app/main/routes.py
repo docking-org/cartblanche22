@@ -75,13 +75,15 @@ def addToCart():
         return jsonify("added to cart")
     return jsonify("item existed in cart")
 
-@application.route('/deleteItem/<item_id>', methods= ['POST'])
-def deleteItem(item_id):
-    Vendors.query.filter_by(item_fk=item_id).delete()
-    Items.query.filter_by(item_id=item_id).delete()
+@application.route('/deleteItem/<identifier>', methods= ['GET', 'POST'])
+def deleteItem(identifier):
+    item = Items.query.filter_by(identifier=identifier).first()
+    Vendors.query.filter_by(item_fk=item.item_id).delete()
+    Items.query.filter_by(cart_fk=current_user.activeCart, identifier=identifier).delete()
     db.session.commit()
     print('item deleted')
-    return redirect(url_for('main.cart'))
+    return jsonify("deleted from cart")
+    # return redirect(url_for('main.cart'))
 
 
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])

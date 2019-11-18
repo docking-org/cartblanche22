@@ -119,9 +119,9 @@
         <td></td> -->
         <td>
             <!-- <button id={{i.id}} onclick='deleteItem(this)'> Delete </button> -->
-            <form action="{{ url_for('main.deleteItem', item_id=i.item_id) }}" method=post>
-                <input type=submit value=Delete class="button">
-            </form>
+
+
+            <button onclick="deleteItem('{{i.identifier}}')">Delete</button>
 
             <button id={{i.item_id}} identifier={{i.identifier}} onclick="openModal(this)">Update
                 Vendor</button>
@@ -244,6 +244,13 @@
                 location.reload();
             }
         });
+    }
+    function deleteItem(identifier) {
+        $.getJSON('/deleteItem/' + identifier,
+            function (res) {
+                console.log('deleted')
+                location.reload();
+            });
     }
 
 </script>
