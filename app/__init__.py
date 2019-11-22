@@ -3,7 +3,10 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_user import UserManager
 from flask_bootstrap import Bootstrap
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -23,12 +26,24 @@ def create_app(config_class=Config):
 
     bootstrap.init_app(app)
 
+    from app.data.models.users import Users
+    from app.data.models.roles import Roles
+    from app.data.models.carts import Carts
+    from app.data.models.items import Items
+    from app.data.models.vendors import Vendors
+
+    admin = Admin(app, name='shoppingcart', template_mode='bootstrap3')
+    admin.add_view(ModelView(Users, db.session))
+    admin.add_view(ModelView(Roles, db.session))
+    admin.add_view(ModelView(Carts, db.session))
+    admin.add_view(ModelView(Items, db.session))
+    admin.add_view(ModelView(Vendors, db.session))
+
     from app.errors import application as errors_bp
     app.register_blueprint(errors_bp)
 
     from app.main import application as main_bp
     app.register_blueprint(main_bp)
-
     return app
 
 # from app import models

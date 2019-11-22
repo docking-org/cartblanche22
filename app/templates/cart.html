@@ -13,6 +13,7 @@
 
     table {
         border-collapse: collapse;
+
     }
 
 
@@ -62,6 +63,8 @@
         padding: 20px;
         border: 1px solid #888;
         width: 80%;
+        max-height: 500px;
+        overflow: scroll;
     }
 
     /* The Close Button */
@@ -79,11 +82,6 @@
         cursor: pointer;
     }
 </style>
-
-
-
-<!-- <a href="{{url_for('main.tsv')}}"><button>Export .tsv</button></a>
-<button>Export2</button> -->
 <h2>Items in cart</h2>
 <table>
     <tr>
@@ -121,7 +119,8 @@
             <!-- <button id={{i.id}} onclick='deleteItem(this)'> Delete </button> -->
 
 
-            <button onclick="deleteItem('{{i.identifier}}')">Delete</button>
+            <button onclick="deleteItem('{{i.identifier}}')"><i class="fa fa-trash-o" style="font-size:18px"
+                    aria-hidden="true"></i></button>
 
             <button id={{i.item_id}} identifier={{i.identifier}} onclick="openModal(this)">Update
                 Vendor</button>
@@ -139,7 +138,16 @@
     <!-- Modal content -->
     <div class="modal-content">
         <span class="close">&times;</span>
-        <table id='chooseVendors'>
+        <div id="spinner">
+            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+            <span class="sr-only">Loading...</span>
+
+        </div>
+        <div id="vendorResult">
+            <p id="vendorResult1">We are connecting to vendors</p>
+            <p id="vendorResult2">Thank you for your patient!</p>
+        </div>
+        <table id='chooseVendors' style='overflow:hidden'>
         </table>
     </div>
 
@@ -159,12 +167,18 @@
         }
     }
     function openModal(item) {
-
+        modal.style.display = "block";
+        $('#spinner').show().css('text-align', 'center')
+        $('#vendorResult').show().css('text-align', 'center')
         $.getJSON('/vendorModal/' + item.id, (json_data) => {
             if (json_data == 'null') {
-                alert('no vendors found')
+                $('#spinner').hide()
+                $('#vendorResult1').html('No vendors found.')
+                $('#vendorResult2').html('Sorry for inconvenience!')
             }
             else {
+                $('#spinner').hide()
+                $('#vendorResult').hide()
                 //CLEARING TABLE AND DRAWING AGAIN 
                 $('#chooseVendors').html('')
                 let $tr = $('<tr>')
@@ -181,10 +195,10 @@
 
                 //ADDING ROWS 
                 $.each(json_data, (v, vendor) => {
-                    let $tr = $("<tr>").attr('id', v);
+                    let $tr = $("<tr>").attr('id', v)
                     $('<td>').attr('rowspan', vendor.packs.length + 1).html(v + 1).appendTo($tr);
-                    $('<td>').attr('rowspan', vendor.packs.length + 1).html(vendor.cat_name).appendTo($tr);
-                    $('<td>').attr('rowspan', vendor.packs.length + 1).html(vendor.supplier_code).appendTo($tr);
+                    $('<td>').attr('rowspan', vendor.packs.length + 1).attr('id', v + '_cat_name').attr('cat_id_fk', vendor.cat_id_fk).html(vendor.cat_name).appendTo($tr);
+                    $('<td>').attr('rowspan', vendor.packs.length + 1).attr('id', v + '_supplier_code').html(vendor.supplier_code).appendTo($tr);
                     $('#chooseVendors').append($tr)
                     $.each(vendor.packs, (p, pack) => {
                         let $tr = $("<tr>").attr('id', v + '_' + p);
@@ -204,7 +218,6 @@
                     .html('Choose')
                     .insertAfter('#chooseVendors')
 
-                modal.style.display = "block";
 
             }
 
@@ -212,6 +225,7 @@
         return false;
     }
     function vendorUpdate(item_id) {
+        console.log(item_id)
         post_data = []
         let inputs = $('#chooseVendors').find('input')
         $.each(inputs, (i, input) => {
@@ -219,6 +233,7 @@
                 vendor_data = {}
                 vendor_data.purchase_quantity = parseInt($(input)[0].value)
                 let tr = $(input).parents()[1]
+                console.log(tr)
                 let children = $(tr).children()
                 vendor_data.shipping = $(children[0]).html()
                 vendor_data.price = $(children[1]).html()
@@ -226,9 +241,11 @@
                 vendor_data.quantity = $(children[3]).html()
                 vendor_data.unit = $(children[4]).html()
                 let id = $(tr)[0].id.split("_")[0]
-                let tds = $($("#" + id)[0]).children()
-                vendor_data.cat_name = $(tds[1]).html()
-                vendor_data.supplier_code = $(tds[2]).html()
+                console.log(id)
+                vendor_data.cat_name = $('#' + id + '_cat_name').html()
+                vendor_data.cat_id_fk = $('#' + id + '_cat_name').attr('cat_id_fk')
+                vendor_data.supplier_code = $('#' + id + '_supplier_code').html()
+                console.log(vendor_data)
                 post_data.push(vendor_data)
             }
         })
@@ -246,11 +263,20 @@
         });
     }
     function deleteItem(identifier) {
-        $.getJSON('/deleteItem/' + identifier,
-            function (res) {
-                console.log('deleted')
-                location.reload();
+        let confirmed = window.confirm("Are you sure to delete this item from cart?")
+        if (confirmed) {
+            $.ajax({
+                url: '/deleteItem/' + identifier,
+                type: 'DELETE',
+                success: function (result) {
+                    console.log(result)
+                    location.reload();
+                    // Do something with the result
+                }
             });
+
+        }
+
     }
 
 </script>

@@ -14,6 +14,7 @@
     <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css" />
     <link rel="stylesheet" type="text/css" href="../static/css/sw.css">
     <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="../static/js/datatables.min.js"></script>
     <script src="../static/js/jquery-ui.min.js"></script>
     <script src="../static/js/EventSource.js"></script>
@@ -30,11 +31,16 @@
         <!-- <div style="padding-right: 2px"><img src="img/logo3_box.svg" height="30px"></div>
                 <div style="padding-left: 2px; font-size: 12pt;">SmallWorld</div> -->
         &nbsp;
-        <div><a href="{{url_for('main.index')}}">Small World Search</a></div>
+        <div><a href="{{url_for('main.sw')}}">Small World</a></div>
+
+
 
         {% if current_user.is_anonymous %}
         <div><a href="{{ url_for('main.login') }}">Login</a></div>
         {% else %}
+        {% if current_user.has_roles('admin') %}
+        <div><a href="{{url_for('main.swp')}}">SWP</a></div>
+        {% endif %}
         <div><a href="{{url_for('main.carts')}}">Manage Carts</a></div>
         <div><a href="{{url_for('main.cart')}}">Cart:{{current_user.cart_name}} </a></div>
         <div><a href="{{ url_for('main.logout') }}">Logout</a></div>

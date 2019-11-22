@@ -19,14 +19,21 @@ import urllib.request
 
 
 @application.route('/', methods=['GET', 'POST'])
-@application.route('/index', methods=['GET', 'POST'])
+@application.route('/sw', methods=['GET', 'POST'])
 @login_required
-def index():
-    zinc_ids = []
+def sw():
+    identifiers = []
     for i in current_user.items_in_cart:
-        zinc_ids.append(i.identifier)
-    return render_template('index.html', items=zinc_ids)
+        identifiers.append(i.identifier)
+    return render_template('sw.html', items=identifiers)
 
+@application.route('/swp', methods=['GET', 'POST'])
+# @login_required
+def swp():
+    identifiers = []
+    for i in current_user.items_in_cart:
+        identifiers.append(i.identifier)
+    return render_template('swp.html', items=identifiers)
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -39,7 +46,7 @@ def login():
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('main.index')
+            next_page = url_for('main.sw')
         return redirect(next_page)
         #flash('Login requested for user {}, remember_me={}'.format(form.username.data, form.remember_me.data))
         #return redirect(url_for('index'))
@@ -49,13 +56,13 @@ def login():
 @application.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('main.index'))
+    return redirect(url_for('main.sw'))
 
 
 @application.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.sw'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = Users(username=form.username.data, email=form.email.data)
@@ -68,22 +75,19 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-@application.route('/addToCart', methods= ['GET',  'POST'])
+@application.route('/addToCart', methods= ['POST'])
 def addToCart():
     activeCart = Carts.query.get(current_user.activeCart)
-    if activeCart.addToCart(current_user, request.args.get('id'),request.args.get('img_url'),request.args.get('database')):
+    data = request.get_json()
+    print(data)
+    if activeCart.addToCart(current_user, data['id'],data['img_url'],data['database']):
         return jsonify("added to cart")
     return jsonify("item existed in cart")
 
-@application.route('/deleteItem/<identifier>', methods= ['GET', 'POST'])
+@application.route('/deleteItem/<identifier>', methods= ['DELETE'])
 def deleteItem(identifier):
-    item = Items.query.filter_by(identifier=identifier).first()
-    Vendors.query.filter_by(item_fk=item.item_id).delete()
-    Items.query.filter_by(cart_fk=current_user.activeCart, identifier=identifier).delete()
-    db.session.commit()
-    print('item deleted')
-    return jsonify("deleted from cart")
-    # return redirect(url_for('main.cart'))
+    Items.query.filter_by(identifier=identifier).first().deleteItem()
+    return jsonify("success")
 
 
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])
@@ -130,12 +134,12 @@ def cart():
     items = Items.query.filter_by(cart_fk=current_user.activeCart).all()
     totalPrices=[]
     totalQuantities=[]
-    return render_template('table.html', data=items, prices=totalPrices, quantities=totalQuantities)
+    return render_template('cart.html', data=items, prices=totalPrices, quantities=totalQuantities)
 
 @application.route('/carts', methods= ['GET',  'POST'])
 def carts():
     carts = Carts.query.filter_by(user_fk=current_user.user_id).all()
-    return render_template('carts.html', carts=carts)
+    return render_template('cartlist.html', carts=carts)
 
 @application.route('/createCart', methods= ['GET'])
 def createCart():
@@ -148,13 +152,11 @@ def renameCart():
     Carts.query.get(data['cart_id']).setName(data['name'])
     return jsonify('Cart name successfully updated')
 
-@application.route('/deleteCart/<cart_id>', methods= ['POST'])
+@application.route('/deleteCart/<cart_id>', methods= ['DELETE'])
 def deleteCart(cart_id):
-    # Carts.deleteCart(cart_id)
-    Carts.query.filter_by(cart_id=cart_id).delete()
-    db.session.commit()
+    Carts.query.get(cart_id).deleteCart()
     print('cart deleted')
-    return redirect(url_for('main.carts'))
+    return jsonify('success')
 
 @application.route('/activateCart/<cart_id>', methods= ['POST'])
 def activateCart(cart_id):

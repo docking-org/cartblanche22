@@ -1,4 +1,5 @@
 from app import db
+from app.data.models.vendors import Vendors
 
 class Items(db.Model):
     item_id = db.Column(db.Integer, primary_key=True)
@@ -11,7 +12,8 @@ class Items(db.Model):
     price = db.Column(db.Float)
     vendors = db.relationship('Vendors', backref='item', lazy='dynamic')
 
-    def deleteItem(item_id):
-        Items.query.filter_by(item_id=item_id).delete()
+    def deleteItem(self):
+        for vendor in self.vendors:
+            vendor.deleteVendor()
+        db.session.delete(self)
         db.session.commit()
-        print('item deleted')

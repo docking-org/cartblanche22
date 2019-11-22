@@ -120,7 +120,8 @@
         <td>{{c.price}}</td>
         <td>{{c.status}}</td>
         <td>
-            <button id="{{c.cart_id}}" onclick="openModal(this)">Rename</button>
+            <button id="{{c.cart_id}}" onclick="openModal(this)"><i class="fa fa-pencil" style="font-size:18px"
+                    aria-hidden="true"></i></button>
         </td>
     </tr>
     {% else %}
@@ -133,13 +134,14 @@
         <td>{{c.total}}</td>
         <td>{{c.status}}</td>
         <td>
-            <form action="{{ url_for('main.deleteCart', cart_id=c.cart_id) }}" method=post>
-                <input type=submit value=Delete class="button">
-            </form>
+            <button onclick="deleteCart('{{c.cart_id}}', '{{c.count}}')"><i class="fa fa-trash-o" style="font-size:18px"
+                    aria-hidden="true"></i></button>
+
+            <button id="{{c.cart_id}}" onclick="openModal(this)"><i class="fa fa-pencil" style="font-size:18px"
+                    aria-hidden="true"></i></button>
             <form action="{{ url_for('main.activateCart', cart_id=c.cart_id) }}" method=post>
                 <input type=submit value=Activate class="button">
             </form>
-            <button id="{{c.cart_id}}" onclick="openModal(this)">Rename</button>
         </td>
         {% endif %}
 
@@ -198,6 +200,21 @@
         current_id = button.id;
         $('#cartName').val($("#cname_" + button.id).html())
         modal.style.display = "block";
+    }
+    function deleteCart(cart_id, count) {
+        let confirmed = window.confirm("Are you sure to delete? It has " + count + " items")
+        if (confirmed) {
+            $.ajax({
+                url: '/deleteCart/' + cart_id,
+                type: 'DELETE',
+                success: function (result) {
+                    console.log(result)
+                    location.reload();
+                    // Do something with the result
+                }
+            });
+
+        }
     }
 
 </script>

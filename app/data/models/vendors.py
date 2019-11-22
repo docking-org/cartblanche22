@@ -12,3 +12,15 @@ class Vendors(db.Model):
     shipping = db.Column(db.Integer)
     currency = db.Column(db.String(10), default="usd")
     cat_id_fk = db.Column(db.Integer)
+
+    def deleteVendor(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def createVendor(item, item_id):
+        vendor = Vendors(item_fk=item_id, cat_name=item['cat_name'], cat_id_fk=item['cat_id_fk'],
+                        purchase_quantity=item['purchase_quantity'],
+                        supplier_code=item['supplier_code'], price=float(item['price']), 
+                        pack_quantity=float(item['quantity']), unit=item['unit'])
+        db.session.add(vendor)
+        db.session.commit()

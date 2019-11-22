@@ -3,22 +3,22 @@ import enum
 import datetime
 from app.data.models.items import Items
 
-class CartStatusEnum(enum.Enum):
-    one = 'Prepare'
-    two = 'Query'
-    three = 'Back from vendor'
-    four = 'Placed'
-    five = 'Partial reciept'
-    six = 'Complete/archived'
-    seven = 'Cancelled'
+# class CartStatusEnum(enum.Enum):
+#     one = 'Prepare'
+#     two = 'Query'
+#     three = 'Back from vendor'
+#     four = 'Placed'
+#     five = 'Partial reciept'
+#     six = 'Complete/archived'
+#     seven = 'Cancelled'
 
 
 class Carts(db.Model):
     cart_id = db.Column(db.Integer, primary_key=True)
-    user_fk = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    user_fk = db.Column(db.Integer, db.ForeignKey('users.id'))
     items = db.relationship('Items', backref='cart', lazy='dynamic')
     name = db.Column(db.String(256), default='Cart')
-    status = db.Column(db.Enum(CartStatusEnum), default=CartStatusEnum.one)
+    status = db.Column(db.String(256))
 
     def __repr__(self):
         return '<Cart {}>'.format(self.cart_id)
@@ -32,14 +32,17 @@ class Carts(db.Model):
             return True
         return False
     
-    def deleteCart(cart_id):
-        pass
+    def deleteCart(self):
+        for item in self.items:
+            item.deleteItem()
+        db.session.delete(self)
+        db.session.commit()
     
     def updateCart(item):
         pass
 
     def createCart(user):
-        cart = Carts(user_fk=user.user_id)
+        cart = Carts(user_fk=user.id)
         db.session.add(cart)
         db.session.commit()
         cart.name += str(cart.cart_id)
