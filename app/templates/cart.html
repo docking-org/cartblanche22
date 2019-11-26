@@ -7,14 +7,42 @@
     table,
     th,
     td {
-        border: 1px solid black;
+        border: 1px solid #ddd;
         padding: 8px;
     }
 
     table {
         border-collapse: collapse;
+        text-align: center;
+        width: 95%;
+        margin: auto;
+    }
+
+    #cart tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    #cart tr:hover {
+        background-color: #ddd;
+    }
+
+    #cart p {
+        font-size: 12px;
+    }
+
+    #cart th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    #suppliers tr {
+        background-color: white;
 
     }
+
+
 
 
 
@@ -65,6 +93,7 @@
         width: 80%;
         max-height: 500px;
         overflow: scroll;
+        text-align: center;
     }
 
     /* The Close Button */
@@ -82,51 +111,42 @@
         cursor: pointer;
     }
 </style>
-<h2>Items in cart</h2>
-<table>
+<h2>Items in {{current_user.cart_name}}</h2>
+<table id="cart">
     <tr>
         <th>No</th>
         <th>Compound</th>
         <th>Identifier</th>
-        <th>Database</th>
-        <th>Suppliers</th>
-        <!-- <th>Total Quantity</th>
-        <th>Total Price</th> -->
-        <th>Utility</th>
+        <th>Assigned supplier</th>
     </tr>
     {% for i in data %}
     <tr>
-        <td>{{ loop.index }}</td>
-        <td><img src={{ i.compound_img }}></td>
-        <td>{{ i.identifier }}</td>
-        <td> {{ i.database }}</td>
-
-        <td>
-            {% for v in i.vendors %}
-            <ul>
-                <li>{{v.cat_name}}--each pack has {{v.pack_quantity}}{{v.unit}} for {{v.price}}{{v.currency}}
-                    added
-                    {{v.purchase_quantity}} pack
-                </li>
-            </ul>
-            {% endfor %}
-        </td>
-        <!-- <td>{{quantities[loop.index-1]}}</td> -->
-        <!-- <td>{{prices[loop.index-1]}}</td> -->
-        <!-- <td></td>
-        <td></td> -->
-        <td>
-            <!-- <button id={{i.id}} onclick='deleteItem(this)'> Delete </button> -->
-
-
+        <td> {{ loop.index }} <br>
             <button onclick="deleteItem('{{i.identifier}}')"><i class="fa fa-trash-o" style="font-size:18px"
                     aria-hidden="true"></i></button>
+        </td>
+        <td><img src={{ i.compound_img }}></td>
+        <td>
+            <h3>{{ i.identifier }}</h3>
+            <p>({{ i.database }})</p>
 
-            <button id={{i.item_id}} identifier={{i.identifier}} onclick="openModal(this)">Update
-                Vendor</button>
+        </td>
 
-            {#                <button identifier={{i.identifier}} onclick='getVendors(this)'> Update Vendor </button>#}
-            <!-- <button identifier={{i.identifier}} onclick='duplicate(this)'> Duplicate </button> -->
+        <td>
+            <table id="suppliers">
+                {% for v in i.vendors %}
+                <tr>
+                    <td>{{v.cat_name}}</td>
+                    <td>{{v.supplier_code}}</td>
+                    <td>{{v.pack_quantity}} {{v.unit}}</td>
+                    <td>{{v.price}} {{v.currency}}</td>
+                    <td>{{v.purchase_quantity}} pack</td>
+                </tr>
+
+                {% endfor %}
+            </table>
+            <button id={{i.item_id}} identifier={{i.identifier}} onclick="openModal(this)"
+                style="text-align: right">Assign Vendor</button>
         </td>
     </tr>
 
@@ -145,7 +165,7 @@
         </div>
         <div id="vendorResult">
             <p id="vendorResult1">We are connecting to vendors</p>
-            <p id="vendorResult2">Thank you for your patient!</p>
+            <p id="vendorResult2">Thank you for your patience!</p>
         </div>
         <table id='chooseVendors' style='overflow:hidden'>
         </table>
@@ -174,7 +194,7 @@
             if (json_data == 'null') {
                 $('#spinner').hide()
                 $('#vendorResult1').html('No vendors found.')
-                $('#vendorResult2').html('Sorry for inconvenience!')
+                $('#vendorResult2').html('Sorry for the inconvenience!')
             }
             else {
                 $('#spinner').hide()
@@ -215,8 +235,8 @@
 
                 })
                 $('<button>').attr('onclick', 'vendorUpdate(' + item.id + ')')
-                    .html('Choose')
-                    .insertAfter('#chooseVendors')
+                    .html('Assign').css({ 'margin': '5px' })
+                    .insertBefore('#chooseVendors')
 
 
             }

@@ -21,7 +21,6 @@ var fromSmiInput = false;
 $(document).ready(function () {
 	console.log("config working")
 	$.get(sw_server + '/search/config', function (res) {
-		console.log(res)
 		config = res;
 		if (!config.WebApp.SearchAsYouDraw)
 			$('.swopt').removeClass('searchasyoudraw');
@@ -310,6 +309,7 @@ function newSearch(smiles) {
 		search_state = {
 			smi: smiles,
 			db: $("select[name='db'] option:selected").val(),
+			db_name: $("select[name='db'] option:selected").html(),
 			dist: $("input[name='distub']").val(),
 			topodist: $("input[name='topodistub']").val(),
 			tdn: $("input[name='tdnub']").val(),
@@ -409,7 +409,6 @@ function stopStreaming() {
 }
 
 function init_table(table, url) {
-	console.log("table initiated")
 	if (!dtable) {
 		$('#splash').css('display', 'none');
 		var columns = [{
@@ -577,7 +576,7 @@ function hit_renderer(data, type, row) {
 	var id = datasets[search_state.db].prefix + data.id;
 	var href = datasets[search_state.db].url.replace("%s", data.id);
 	button.attr('id', id);
-	button.attr('db', search_state.db);
+	button.attr('db', search_state.db_name);
 	button.attr('img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
 	button.attr('onclick', 'toggleCart(this)');
 	if (items.includes(id)) {
