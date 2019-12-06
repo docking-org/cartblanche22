@@ -22,8 +22,7 @@ def vendorModal(item_id):
             priceAPI.append(d)
         for i in priceAPI:
             for pack in i['packs']:
-                vendor = Vendors.query.filter_by(item_fk=item_id, cat_id_fk=int(i['cat_id_fk']),
-                        pack_quantity=float(pack['quantity']), unit=pack['unit']).first()
+                vendor = Vendors.query.filter_by(item_fk=item_id, cat_id_fk=int(i['cat_id_fk']), supplier_code=i['supplier_code'], pack_quantity=float(pack['quantity']), unit=pack['unit']).first()
                 if vendor:
                         pack['purchase_quantity'] = vendor.purchase_quantity
                 else:

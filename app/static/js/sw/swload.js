@@ -1,6 +1,5 @@
 var show_disabled = false;
-var sw_server = 'http://nextmove/smallworld';
-var sw_server = './';
+var sw_server = 'http://sw.docking.org';
 
 function toggle_visibility() {
 	$button = $('#vis-button');
@@ -18,7 +17,7 @@ function toggle_visibility() {
 }
 
 function send_data(data) {
-	return function() {
+	return function () {
 		$.ajax({
 			url: sw_server + '/maps/modify/' + data.key,
 			dataType: 'json',
@@ -33,7 +32,7 @@ function send_data(data) {
 				prefix: data.prefix,
 				enabled: data.enabled
 			}),
-			success: function(res) {
+			success: function (res) {
 				refresh(false);
 			}
 		});
@@ -52,7 +51,7 @@ function make_add_box() {
 	var $addButton = $('<i class="fa fa-upload" aria-hidden="true"></i>');
 	var $nameInput = $('<input name="name" type="text" placeholder="New Dataset...">');
 	$addButton.css('cursor', 'pointer');
-	$addButton.click(function(box) {
+	$addButton.click(function (box) {
 		var $nameinput = $('input[name=name]', $box);
 		var $fileinput = $('input[type=file]', $box);
 		var name = $nameinput.val();
@@ -71,7 +70,7 @@ function make_add_box() {
 		if (okay) {
 			var formData = new FormData($('form', box)[0]);
 			var $add = $('#add-new');
-			var fade = setInterval((function($elem) {
+			var fade = setInterval((function ($elem) {
 				$elem.fadeTo(800, 0.5).fadeTo(800, 1);
 			}).bind(null, $add), 1600);
 			$.ajax({
@@ -82,7 +81,7 @@ function make_add_box() {
 				cache: false,
 				contentType: false,
 				processData: false,
-				success: function(returndata) {
+				success: function (returndata) {
 					refresh(false);
 					clearInterval(fade);
 				}
@@ -104,11 +103,11 @@ function make_add_box() {
 
 function update_mapfile_priority() {
 	var $boxes = $('#sw-mapfiles').children();
-	var priority = $.map($.grep($.map($boxes, function(e) {
+	var priority = $.map($.grep($.map($boxes, function (e) {
 		return $(e).data('cfg');
-	}), function(e) {
+	}), function (e) {
 		return e;
-	}), function(e) {
+	}), function (e) {
 		return e.key
 	});
 	$.ajax({
@@ -143,12 +142,12 @@ function make_swmapfile_box(data) {
 	if (data.memoryMapped) $mmapIndicator.addClass('disabled');
 	if (!data.bloomFiltered) $bloomIndicator.addClass('disabled');
 	if (!data.extended) $extIndicator.addClass('disabled');
-	$enabledIndicator.click(function(box) {
+	$enabledIndicator.click(function (box) {
 		box.toggleClass('disabled');
 		box.data('cfg').enabled = !box.data('cfg').enabled;
 		queue_change_on_box(box);
 	}.bind(null, $box));
-	$nameInput.keyup(function(box) {
+	$nameInput.keyup(function (box) {
 		box.data('cfg').name = this.val();
 		queue_change_on_box(box);
 	}.bind($nameInput, $box));
@@ -156,16 +155,16 @@ function make_swmapfile_box(data) {
 	$top.append($('<tr>').append($('<td>').append($enabledIndicator)).append($('<td>').append($nameInput)).append($('<td>').append($mmapIndicator)).append($('<td>').append($bloomIndicator)).append($('<td>').append($extIndicator)));
 	var $urlInput = $('<input type="text">').attr('value', data.url).attr('placeholder', '...');
 	var $prefixInput = $('<input type="text">').attr('value', data.prefix).attr('placeholder', '...');
-	$urlInput.keyup(function(box) {
+	$urlInput.keyup(function (box) {
 		box.data('cfg').url = this.val();
 		queue_change_on_box(box);
 	}.bind($urlInput, $box));
-	$prefixInput.keyup(function(box) {
+	$prefixInput.keyup(function (box) {
 		box.data('cfg').prefix = this.val();
 		queue_change_on_box(box);
 	}.bind($prefixInput, $box));
 	if (data.status == 'Mapping' || data.status == 'Premapping') {
-		setInterval((function($elem) {
+		setInterval((function ($elem) {
 			$elem.fadeTo(800, 0.5).fadeTo(800, 1);
 		}).bind(null, $box), 1600);
 	}
@@ -186,7 +185,7 @@ function make_swmapfile_box(data) {
 }
 
 function refresh(auto) {
-	$.get(sw_server + "/search/maps", function(d) {
+	$.get(sw_server + "/search/maps", function (d) {
 		var $mapfiles = $('#sw-mapfiles');
 		var makesortable = false;
 		// first update
@@ -194,7 +193,7 @@ function refresh(auto) {
 			var $add = make_add_box();
 			$mapfiles.empty();
 			var keys = Object.keys(d);
-			$.each(keys, function(i, e) {
+			$.each(keys, function (i, e) {
 				var val = d[e];
 				val.key = e;
 				if (val.status != 'Missing' && (show_disabled || val.enabled)) $mapfiles.append(make_swmapfile_box(val));
@@ -210,7 +209,7 @@ function refresh(auto) {
 		// fresh update
 		else {
 			var $boxes = $mapfiles.children();
-			$.each($boxes, function(i, e) {
+			$.each($boxes, function (i, e) {
 				$elem = $(e);
 				var curr = $elem.data('cfg');
 				if (curr) {
@@ -241,7 +240,7 @@ function refresh(auto) {
 			});
 			var $add = $('#add-new');
 			var keys = Object.keys(d);
-			$.each(keys, function(i, e) {
+			$.each(keys, function (i, e) {
 				var val = d[e];
 				val.key = e;
 				if (val.status != 'Missing' && (show_disabled || val.enabled)) $add.before(make_swmapfile_box(val));
@@ -250,7 +249,7 @@ function refresh(auto) {
 		// recall if
 		var $boxes = $mapfiles.children();
 		var setupdate = false;
-		$.each($boxes, function(i, e) {
+		$.each($boxes, function (i, e) {
 			$elem = $(e);
 			var curr = $elem.data('cfg');
 			if (curr && (curr.status == 'Premapping' || curr.status == 'Mapping' || curr.status == 'Loading')) {
@@ -258,15 +257,15 @@ function refresh(auto) {
 			}
 		});
 		if (auto) {
-			if (setupdate) setTimeout(function() {
+			if (setupdate) setTimeout(function () {
 				return refresh(true)
 			}, 500);
-			else setTimeout(function() {
+			else setTimeout(function () {
 				return refresh(true)
 			}, 6000);
 		}
 	});
 }
-$(function() {
+$(function () {
 	refresh(true);
 });

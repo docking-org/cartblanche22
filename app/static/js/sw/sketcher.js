@@ -60,6 +60,7 @@ function set_smiles(callback) {
 			return;
 		marvinjs.exportStructure("mol")
 			.then(function (molfile) {
+				console.log(sw_server)
 				$.get(sw_server + '/util/mol2smi',
 					{ molfile: molfile },
 					function (res) {
@@ -86,15 +87,22 @@ function load_smiles(input) {
 	if (fromSmiInput) return;
 	var smi = $(input).val();
 	var url = config.WebApp.ResolverUrl;
+	console.log(url)
+	url = 'http://sw.docking.org/' + url.substring(2)
+	console.log(url)
 	url = url.replace("%s", encodeURIComponent(smi));
+	console.log(url)
 	$.get(url,
 		function (res) {
+			console.log(url)
 			if (res) {
 				if (sketcher == 'jsme') {
+					console.log(res)
 					fromSmiInput = true;
 					jsmeApplet.readMolFile(res);
 					fromSmiInput = false;
-				} else if (sketcher == 'marvinjs') {
+				}
+				else if (sketcher == 'marvinjs') {
 					fromSmiInput = true;
 					marvinjs.importStructure("mol", res);
 					fromSmiInput = false;
