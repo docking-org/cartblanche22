@@ -7,11 +7,13 @@ from flask_user import UserManager
 from flask_bootstrap import Bootstrap
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_mail import Mail
 
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
 bootstrap = Bootstrap()
+mail = Mail()
 
 
 def create_app(config_class=Config):
@@ -23,6 +25,8 @@ def create_app(config_class=Config):
 
     login.init_app(app)
     login.login_view = 'main.login'
+
+    mail.init_app(app)
 
     bootstrap.init_app(app)
 

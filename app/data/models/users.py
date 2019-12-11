@@ -5,6 +5,8 @@ from flask_login import UserMixin
 from app.data.models.carts import Carts
 from app.data.models.items import Items
 from app.data.models.roles import Roles, UserRoles
+from time import time
+import jwt
 
 class Users(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -55,6 +57,20 @@ class Users(db.Model, UserMixin):
 
     def has_roles(self, *args):
         return set(args).issubset({role.name for role in self.roles})
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return Users.query.get(id)
 
 @login.user_loader
 def load_user(id):

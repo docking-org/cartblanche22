@@ -80,6 +80,7 @@ function fetchPage(request) {
     }
   })
     .done(function (response) {
+      console.log(arthor.url + '/dt/' + arthor.table + '/search')
       if (response.draw === draw) {
         arthor.queryResponse = response.query;
         if (!response.hasMore && arthor.time === null) {

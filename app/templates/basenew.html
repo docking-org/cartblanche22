@@ -1,0 +1,54 @@
+{% extends 'bootstrap/base.html' %}
+<meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css" />
+<link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="../static/css/base.css" />
+<link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="../static/js/datatables.min.js"></script>
+<script src="../static/js/jquery-ui.min.js"></script>
+<!-- <script src="../static/js/EventSource.js"></script> -->
+<script src="../static/js/jsme/jsme.nocache.js"></script>
+
+{% block title %}
+{% if title %}{{ title }} - Molecule Shopping Cart
+{% else %}Welcome to Molecule Shopping Cart
+{% endif %}
+{% endblock %}
+
+{% block navbar %}
+<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+    <ul class="nav navbar-nav">
+        <li><a href="{{ url_for('main.cartblanche') }}">Cartblanche</a></li>
+        {% if not current_user.is_anonymous %}
+        <li><a href="{{ url_for('main.sw') }}">SW</a></li>
+        <li><a href="{{ url_for('main.arthor') }}">Arthor</a></li>
+        <li><a href="{{ url_for('main.carts') }}">Manage Carts</a></li>
+        <li><a href="{{ url_for('main.cart') }}">Cart:{{current_user.cart_name}}</a></li>
+        {% endif %}
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        {% if current_user.is_anonymous %}
+        <li><a href="">Login</a></li>
+        {% else %}
+        <li><a href="">Profile</a></li>
+        <li><a href="">Logout</a></li>
+        {% endif %}
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-info" role="alert">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {# application content needs to be provided in the app_content block #}
+    {% block app_content %}{% endblock %}
+</div>
+{% endblock %}
