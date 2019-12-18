@@ -80,7 +80,6 @@ function fetchPage(request) {
     }
   })
     .done(function (response) {
-      console.log(arthor.url + '/dt/' + arthor.table + '/search')
       if (response.draw === draw) {
         arthor.queryResponse = response.query;
         if (!response.hasMore && arthor.time === null) {
@@ -92,7 +91,6 @@ function fetchPage(request) {
             $('#search_type').html("Matched");
           $('#search_time').html(arthor.time);
           $('#res-panel').removeClass("waiting");
-          $('#res-panel').removeClass("failed");
         } else if (response.hasMore) {
           setTimeout(function () {
             updateTotal(backup);
@@ -102,51 +100,44 @@ function fetchPage(request) {
       }
     })
     .fail(function (error) {
-      console.log("aldaa end garj bnu? table zurahad data oldohgui bol ene aldaag uguh bh")
       deferred.fail(error);
-      $('#res-panel').removeClass("waiting");
-      $('#res-panel').addClass("failed");
     });
   return deferred.promise();
 }
 
 function redraw() {
+
   if (!arthor.query || !arthor.table)
     return;
-  if (!arthor.time) {
-    $('#res-panel').addClass("waiting");
-    $('#res-panel').removeClass("failed");
 
-  }
+  if (!arthor.time)
+    $('#res-panel').addClass("waiting");
 
   var table = $('#results');
   if (!dtable) {
     $('#splash').css('display', 'none');
-    var columns = [
-      {
-        "title": "#",
-        "class": "editop",
-        "width": "1px",
-        "render": hitid_renderer,
-        "sortable": false,
-        "type": "html"
-      },
-      {
-        "title": "Compound",
-        "name": "alignment",
-        "class": "compound",
-        "width": "450px",
-        "sortable": false,
-        "type": "html",
-        "render": smiles_renderer
-      },
-      {
-        "title": "Score",
-        "name": "sim",
-        "render": flex_renderer,
-        "sortable": false
-      },
-    ];
+    var columns = [{
+      "title": "#",
+      "class": "editop",
+      "width": "75px",
+      "render": hitid_renderer,
+      "sortable": false
+    },
+    {
+      "title": "Compound",
+      "name": "alignment",
+      "class": "compound",
+      "width": "450px",
+      "sortable": false,
+      "type": "html",
+      "render": smiles_renderer
+    },
+    {
+      "title": "Score",
+      "name": "sim",
+      "render": flex_renderer,
+      "sortable": false
+    }];
     dtable = table.DataTable({
       "columns": columns,
       "destroy": true,
@@ -212,8 +203,8 @@ function drag_img(event, smiles) {
   });
 }
 
-
 function smiles_renderer(data, type, row) {
+
   var table = $("<table class='compound_cell'></table>");
   var img = $('<img width="200px" height="100px" />');
 
@@ -221,6 +212,7 @@ function smiles_renderer(data, type, row) {
   var popup_url = arthor.getHitImg(data, 350, 200);
 
   var parts = get_smiles_parts(data);
+
   img.attr('src', depict_url);
   img.attr('onmouseenter', 'show_popup(event, "' + popup_url + '");');
   img.attr('onmousemove', 'move_popup(event);');
@@ -256,7 +248,7 @@ function smiles_renderer(data, type, row) {
   } catch (err) {
     console.log(err);
   }
-  let button = $('<button class="add">Add to Cart</button>')
+  let button = $('<button type="button" class="btn btn-info">Add to Cart</button>')
   button.attr('id', id);
   button.attr('db', arthor.table);
   button.attr('img', depict_url);
@@ -264,8 +256,9 @@ function smiles_renderer(data, type, row) {
   let items = localStorage.getItem('items')
   if (items.includes(id)) {
     button.html('Remove')
-    button.attr('class', 'remove')
+    button.attr('class', 'btn btn-danger')
   }
+
   var row = $('<tr></tr>');
   row.append($("<td></td>").append(button))
   row.append($("<td class=\"compound_cell_img\" style='width: 220px;'></td>").append(img));
@@ -275,11 +268,9 @@ function smiles_renderer(data, type, row) {
   return $('<div>').append(table)
     .html();
 }
-
 function toggleCart(btn) {
   let items = localStorage.getItem('items').split(',')
-  console.log(items)
-  if (btn.getAttribute('class') == 'add') {
+  if (btn.getAttribute('class') == 'btn btn-info') {
     $.ajax({
       type: 'POST',
       url: '/addToCart',
@@ -292,10 +283,10 @@ function toggleCart(btn) {
       dataType: "json",
       success: function (result) {
         $(btn).html('Remove')
-        $(btn).attr('class', 'remove')
+        $(btn).attr('class', 'btn btn-danger')
         items.push(btn.id)
-        console.log(items)
         localStorage.setItem('items', items)
+        $('#cartCount').html(result['count'])
       },
       error: function (data) {
         alert("fail");
@@ -308,9 +299,9 @@ function toggleCart(btn) {
       type: 'DELETE',
       success: function (result) {
         $(btn).html('Add to Cart')
-        $(btn).attr('class', 'add')
+        $(btn).attr('class', 'btn btn-info')
         items.pop(btn.id)
-        console.log(items)
+        $('#cartCount').html(result['count'])
         localStorage.setItem('items', items)
       }
     });

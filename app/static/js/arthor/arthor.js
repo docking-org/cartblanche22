@@ -44,7 +44,7 @@ function Arthor(url) {
       .replace("%m", smarts);
     return 'http://arthor.docking.org/' + url.substring(2)
   };
-  //gathering databases
+
   this.getTables = function () {
     var larthor = this;
     return $.get(this.url + "/dt/data")

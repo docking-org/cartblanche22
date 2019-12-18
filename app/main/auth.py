@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request
 from app.main import application
-from app.data.forms.authForms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.data.forms.authForms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, ChangePasswordForm
 from app.data.forms.cartForms import CartForm
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
@@ -11,6 +11,8 @@ from app.email import send_password_reset_email
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.cartblanche'))
     form = LoginForm()
     if form.validate_on_submit():
         user = Users.query.filter_by(username=form.username.data).first()
@@ -24,7 +26,7 @@ def login():
         return redirect(next_page)
         #flash('Login requested for user {}, remember_me={}'.format(form.username.data, form.remember_me.data))
         #return redirect(url_for('index'))
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('auth/login.html', title='Sign In', form=form)
 
 
 @application.route('/logout')
@@ -46,7 +48,7 @@ def register():
         Carts.createCart(user)
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('main.login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('auth/register.html', title='Register', form=form)
 
 @application.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
@@ -59,7 +61,7 @@ def reset_password_request():
             send_password_reset_email(user)
         flash('Check your email for the instructions to reset your password')
         return redirect(url_for('main.login'))
-    return render_template('reset_password_request.html',
+    return render_template('auth/reset_password_request.html',
                            title='Reset Password', form=form)
 
 @application.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -75,4 +77,15 @@ def reset_password(token):
         db.session.commit()
         flash('Your password has been reset.')
         return redirect(url_for('main.login'))
-    return render_template('reset_password.html', form=form)
+    return render_template('auth/reset_password.html', form=form)
+
+@application.route('/change_password/', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit() and current_user.is_authenticated:
+        current_user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been changed.')
+        return redirect(url_for('main.profile'))
+    return render_template('auth/change_password.html', form=form)

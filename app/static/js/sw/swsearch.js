@@ -537,7 +537,7 @@ function flex_renderer(data, type, row) {
 function hit_renderer(data, type, row) {
 	var table = $("<table class='compound_cell'></table>");
 	var img = $('<img width="150px" height="90px" />');
-	let button = $('<button class="add">Add to Cart</button>')
+	let button = $('<button type="button" class="btn btn-info">Add to Cart</button>')
 	var color = $('input[name="optColEdits"]').prop('checked');
 	var align = $('input[name="optAlign"]').prop('checked');
 	var base_url = config.WebApp.DepictionUrl;
@@ -581,7 +581,7 @@ function hit_renderer(data, type, row) {
 	button.attr('onclick', 'toggleCart(this)');
 	if (items.includes(id)) {
 		button.html('Remove')
-		button.attr('class', 'remove')
+		button.attr('class', 'btn btn-danger')
 	}
 	if (href) {
 		div.append("<b><a target='_blank' href='" + href + "'>" + id + "</a></b>");
@@ -611,9 +611,7 @@ function hit_renderer(data, type, row) {
 
 
 function toggleCart(btn) {
-	console.log(btn.getAttribute('class'))
-	console.log(items)
-	if (btn.getAttribute('class') == 'add') {
+	if (btn.getAttribute('class') == 'btn btn-info') {
 		$.ajax({
 			type: 'POST',
 			url: '/addToCart',
@@ -626,11 +624,11 @@ function toggleCart(btn) {
 			dataType: "json",
 			success: function (result) {
 				$(btn).html('Remove')
-				$(btn).attr('class', 'remove')
+				$(btn).attr('class', 'btn btn-danger')
 				if (!items.includes(btn.id)) {
 					items.push(btn.id)
 				}
-
+				$('#cartCount').html(result['count'])
 			},
 			error: function (data) {
 				alert("fail");
@@ -643,8 +641,9 @@ function toggleCart(btn) {
 			type: 'DELETE',
 			success: function (result) {
 				$(btn).html('Add To Cart')
-				$(btn).attr('class', 'add')
+				$(btn).attr('class', 'btn btn-info')
 				items.pop(btn.id)
+				$('#cartCount').html(result['count'])
 			}
 		});
 

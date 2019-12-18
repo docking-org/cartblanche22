@@ -9,7 +9,7 @@ def sw():
     identifiers = []
     for i in current_user.items_in_cart:
         identifiers.append(i.identifier)
-    return render_template('sw.html', items=identifiers)
+    return render_template('search/sw.html', items=identifiers)
 
 @application.route('/swp', methods=['GET', 'POST'])
 def swp():
@@ -17,7 +17,7 @@ def swp():
         identifiers = []
         for i in current_user.items_in_cart:
             identifiers.append(i.identifier)
-        return render_template('swp.html', items=identifiers)
+        return render_template('search/swp.html', items=identifiers)
     else:
         return redirect(url_for('main.sw'))
 
@@ -27,4 +27,4 @@ def arthor():
     identifiers = []
     for i in current_user.items_in_cart:
         identifiers.append(i.identifier)
-    return render_template('arthor.html', items=identifiers)
+    return render_template('search/arthor.html', items=identifiers)

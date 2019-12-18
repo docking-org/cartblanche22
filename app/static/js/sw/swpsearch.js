@@ -580,9 +580,10 @@ function hit_renderer(data, type, row) {
 	button.attr('db', search_state.db);
 	button.attr('img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
 	button.attr('onclick', 'toggleCart(this)');
+	button.attr('class', 'btn btn-info');
 	if (items.includes(id)) {
 		button.html('Remove')
-		button.attr('class', 'remove')
+		button.attr('class', 'btn btn-danger')
 	}
 	if (href) {
 		div.append("<b><a target='_blank' href='" + href + "'>" + id + "</a></b>");
@@ -612,9 +613,7 @@ function hit_renderer(data, type, row) {
 
 
 function toggleCart(btn) {
-	console.log(btn.getAttribute('class'))
-	console.log(items)
-	if (btn.getAttribute('class') == 'add') {
+	if (btn.getAttribute('class') == 'btn btn-info') {
 		$.ajax({
 			type: 'POST',
 			url: '/addToCart',
@@ -627,11 +626,11 @@ function toggleCart(btn) {
 			dataType: "json",
 			success: function (result) {
 				$(btn).html('Remove')
-				$(btn).attr('class', 'remove')
+				$(btn).attr('class', 'btn btn-danger')
 				if (!items.includes(btn.id)) {
 					items.push(btn.id)
 				}
-
+				$('#cartCount').html(result['count'])
 			},
 			error: function (data) {
 				alert("fail");
@@ -644,8 +643,9 @@ function toggleCart(btn) {
 			type: 'DELETE',
 			success: function (result) {
 				$(btn).html('Add To Cart')
-				$(btn).attr('class', 'add')
+				$(btn).attr('class', 'btn btn-info')
 				items.pop(btn.id)
+				$('#cartCount').html(result['count'])
 			}
 		});
 

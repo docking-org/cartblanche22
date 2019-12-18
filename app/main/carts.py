@@ -4,17 +4,18 @@ from flask_login import current_user
 from app.data.models.carts import Carts
 from app.data.models.items import Items
 
+
 @application.route('/cart', methods= ['GET',  'POST'])
 def cart():
     items = Items.query.filter_by(cart_fk=current_user.activeCart).all()
     totalPrices=[]
     totalQuantities=[]
-    return render_template('cart.html', data=items, prices=totalPrices, quantities=totalQuantities)
+    return render_template('cart/cart.html', data=items, prices=totalPrices, quantities=totalQuantities)
 
 @application.route('/carts', methods= ['GET',  'POST'])
 def carts():
     carts = Carts.query.filter_by(user_fk=current_user.id).all()
-    return render_template('cartlist.html', carts=carts)
+    return render_template('cart/cartlist.html', carts=carts)
 
 @application.route('/createCart', methods= ['GET'])
 def createCart():
@@ -33,7 +34,7 @@ def deleteCart(cart_id):
     print('cart deleted')
     return jsonify('success')
 
-@application.route('/activateCart/<cart_id>', methods= ['POST'])
+@application.route('/activateCart/<cart_id>', methods= ['GET'])
 def activateCart(cart_id):
     current_user.setCart(cart_id)
     return redirect(url_for('main.carts'))

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% if title %}
+    <title>{{ title }} - Molecule Shopping Cart</title>
+    {% else %}
+    <title>Welcome to Molecule Shopping Cart</title>
+    {% endif %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>SmallWorld Search</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="../static/js/datatables.min.js"></script>
+    <script src="../static/js/jquery-ui.min.js"></script>
+    <!-- <script src="../static/js/EventSource.js"></script> -->
+    <script src="../static/js/jsme/jsme.nocache.js"></script>
+
+
+    <!-- Marvin JS? -->
+    <!--<script src="js/marvinjs/gui/lib/promise-1.0.0.min.js"></script>-->
+    <!--<script src="js/marvinjs/marvinjslauncher.js"></script>-->
+
+
+</head>
+
+<body>
+    <div id="menu">
+        <!-- <div style="padding-right: 2px"><img src="img/logo3_box.svg" height="30px"></div>
+                <div style="padding-left: 2px; font-size: 12pt;">SmallWorld</div> -->
+        &nbsp;
+        <div><a href="{{url_for('main.cartblanche')}}">Cartblanche</a></div>
+        {% if current_user.is_anonymous %}
+        <div><a href="{{ url_for('main.login') }}">Login</a></div>
+        {% else %}
+        <div><a href="{{url_for('main.sw')}}">Small World</a></div>
+        {% if current_user.has_roles('admin') %}
+        <div><a href="{{url_for('main.swp')}}">SWP</a></div>
+        {% endif %}
+        <div><a href="{{url_for('main.arthor')}}">Arthor</a></div>
+        <div><a href="{{url_for('main.carts')}}">Manage Carts</a></div>
+        <div><a href="{{url_for('main.cart')}}">Cart:{{current_user.cart_name}} </a></div>
+        <div><a href="{{ url_for('main.logout') }}">Logout</a></div>
+        {% endif %}
+        <div style="width: 100%"></div>
+        <!-- <div>Version 4.0</div> -->
+    </div>
+
+    <div id="root">
+        <noscript>
+            <div
+                style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+                Your web browser must have JavaScript enabled
+                in order for this application to display correctly.
+            </div>
+        </noscript>
+        <!-- <script src="{{ url_for('static', filename='jsme_and_smallworldAPI.js') }}"></script> -->
+        <!-- <script src="{{ url_for('static', filename='sketcher.js') }}"></script> -->
+
+
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}
+        {% endblock %}
+    </div>
+    <footer>
+        <p>Acknowledgements Roger Sayle. Nextmovesoftware.com Arthor. Smallworld. Jennifer. Khanh. Julia<a
+                href="https://www.nigms.nih.gov/">Supported by NIGMS via GM71896</a> Questions, Discussion, Bug reports,
+            Feature requests <a href="http://irwinlab.compbio.ucsf.edu/">Irwin</a> and Shoichet Labs and UC Regents.</p>
+        <!-- <p id="statusmesg">
+            <span id="statusspan"></span>
+            <img onclick="arthor.notify()" alt="Force Reload" src="img/reload.png">
+        </p> -->
+    </footer>
+
+</body>
+
+</html>

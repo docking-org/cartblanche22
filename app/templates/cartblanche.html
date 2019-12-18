@@ -1,5 +1,110 @@
 {% extends 'base.html' %}
-{% block content %}
-<h1>Welcome!</h1>
-<!-- <h4>Click here to <a href="{{ url_for('main.login') }}">Login</a></h4> -->
+{% block app_content %}
+<div class="jumbotron row less-jumbo">
+    <div class="col-md-6">
+        <h1>Cartblanche</h1>
+        <p>
+            Welcome to Cartblanche, a free shopping cart portal based on ZINC and using Arthor and Smallworld.
+            Cartblanche allows you to search for and find purchasing information for over 10^10 commercially available
+            compounds.
+        </p>
+    </div>
+    <div class="col-md-6">
+        <p>
+            Cartblanche is provided by the <a target="_blank" href="http://irwinlab.compbio.ucsf.edu">Irwin</a>
+            and <a target="_blank" href="http://bkslab.org">Shoichet</a> Laboratories in the
+            Department of Pharmaceutical Chemistry at the University of California, San Francisco (UCSF).
+            We thank <a target="_blank" href="http://www.nigms.nih.gov">NIGMS</a> for financial support (GM71896).
+        </p>
+        <p>
+            To cite Cartblanche, please reference: Sterling and Irwin, <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model, 2015
+                <a href="http://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559"
+                    target="_blank">http://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559</a></em>.
+            You may also wish to cite our previous papers: Irwin, Sterling, Mysinger, Bolstad and Coleman,
+            <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model, 2012</em>
+            <a target="_blank" href="http://pubs.acs.org/doi/abs/10.1021/ci3001277">
+                DOI: 10.1021/ci3001277</a> or Irwin and Shoichet, <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model.
+                2005;45(1):177-82</em>
+            <a target="_blank" href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1360656/pdf/nihms2574.pdf">PDF</a>,
+            <a target="_blank"
+                href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=pubmed&amp;dopt=Abstract&amp;list_uids=15667143">DOI</a>.
+        </p>
+
+    </div>
+</div><!-- /.jumbotron -->
+
+<div class="row">
+    <div class="col-md-4 col-lg-3">
+        <div class="row">
+            <div class="col-xs-6 col-md-12">
+                <h2>Getting Started</h2>
+                <ul>
+                    <li>
+                        <a href="http://wiki.docking.org/index.php/ZINC15:Getting_started" target="_blank">
+                            Getting Started
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://wiki.docking.org/index.php/ZINC15:What%27s_New" target="_blank">
+                            What's New
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://wiki.docking.org/index.php/ZINC15:Resources" target="_blank">
+                            About ZINC 15 Resources
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://wiki.docking.org/index.php/ZINC15:Pipeline" target="_blank">
+                            Current Status / In Progress
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://wiki.docking.org/index.php/ZINC15:Estimates" target="_blank">
+                            Why are ZINC results "estimates"?
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-xs-6 col-md-12">
+                <h2>Explore Resources</h2>
+                <dl class="dl-inline">
+                    <dt>Chemistry</dt>
+                    <dd><a href="/tranches/home/" title="Download Chemical Space Tranches">Tranches</a>,
+                    </dd>
+                    <dd><a href="/substances/home/" title="Browse and search for substances">Substances</a></dd>,
+                    <dd><a href="/protomers/" title="Browse and search for 3D representations">3D
+                            <abbr title="representations">Representations</a></dd>,
+                    <dd><a href="/rings/" title="Find and explore rings in ZINC">Rings</a></dd>,
+                    <dd><a href="/patterns/" title="Browse ZINC by molecular patterns">Patterns</a>
+                    </dd>
+                    <dt>And More</dt>
+                    <dd><a href="/catalogs/">Catalogs</a></dd>,
+                    <dd><a href="/genes/">Genes</a></dd>,
+                    <dd><a href="/atccodes/">ATC Codes</a></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-5">
+        <h2>Ask Questions</h2>
+
+    </div>
+    <div class="col-md-4">
+
+        <h2>News</h2>
+
+
+        <div class="well well-sm">
+            <strong>Caveat Emptor</strong>: We do not guarantee the quality of any molecule for any
+            purpose and take no responsibility for errors arising from the use of
+            this database. ZINC is provided in the hope that it will be useful,
+            but you must use it at your own risk.
+        </div>
+    </div>
+</div>
+<!-- /.row -->
+
+
+
 {% endblock %}

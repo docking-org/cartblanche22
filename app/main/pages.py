@@ -6,3 +6,7 @@ from flask_login import current_user, login_required
 @application.route('/cartblanche', methods=['GET'])
 def cartblanche():
     return render_template('cartblanche.html')
+
+@application.route('/profile', methods=['GET'])
+def profile():
+    return render_template('profile.html')

@@ -39,18 +39,15 @@ function jsmeOnLoad() {
     });
     jsmeApplet.setAfterStructureModifiedCallback(function (event) {
       var smiles = event.src.smiles();
-      if (localStorage) {
+      if (localStorage)
         localStorage.molfile = event.src.molFile();
-        $('#ar_text_input').val(smiles);
-      }
-
       if (smiles === "")
         return;
       if (sketchCallback)
         sketchCallback(smiles);
       if (!fromSmiInput) {
         prevTextInput = null;
-        $('#ar_text_input').val(smiles);
+        $('#smiles-in').val(smiles);
       }
     });
   }
@@ -72,7 +69,7 @@ function set_smiles(callback) {
               return;
             callback(smiles);
             if (!fromSmiInput) {
-              $('#ar_text_input').val(smiles);
+              $('#smiles-in').val(smiles);
             }
             fromSmiInput = false;
           });
@@ -109,7 +106,7 @@ function set_structure(molfile) {
 
 function resolve_structure(input) {
   if (fromSmiInput) return;
-  console.log('in resolve_structre function')
+
   var smi = $(input).val();
   if (smi === prevTextInput)
     return;
@@ -117,11 +114,8 @@ function resolve_structure(input) {
   if (!smi)
     return;
   var url = arthor.config.WebApp.RESOLVER;
-  console.log('url ' + url)
+  console.log('ftom resolve: ' + url)
   url = url.replace("%s", encodeURIComponent(smi));
-
-
-
   $.get(url).then(function (molfile) {
     if (molfile)
       set_structure(molfile);
@@ -131,6 +125,7 @@ function resolve_structure(input) {
         Mesg.Info);
     });
 }
+
 function load_smiles(input) {
   console.log('zurj chadahnuu haray l da')
   if (fromSmiInput) return;
@@ -156,6 +151,4 @@ function load_smiles(input) {
       }
     });
 }
-
-
 

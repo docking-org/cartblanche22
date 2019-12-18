@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block app_content %}
+<div class="row">
+    <h3>Hello, {{current_user.username}}</h3>
+    Do you want to change your password? <a href="{{url_for('main.change_password')}}">Click here!</a>
+</div>
+{% endblock %}

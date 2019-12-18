@@ -13,10 +13,11 @@ def addToCart():
     data = request.get_json()
     print(data)
     if activeCart.addToCart(current_user, data['id'],data['img_url'],data['database']):
-        return jsonify("added to cart")
-    return jsonify("item existed in cart")
+        count = current_user.cart_count
+        return jsonify({'count':current_user.cart_count})    
+    return jsonify({'count':current_user.cart_count})
 
 @application.route('/deleteItem/<identifier>', methods= ['DELETE'])
 def deleteItem(identifier):
     Items.query.filter_by(identifier=identifier).first().deleteItem()
-    return jsonify("success")
+    return jsonify({'count':current_user.cart_count})
