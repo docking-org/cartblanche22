@@ -17,3 +17,10 @@ class Items(db.Model):
             vendor.deleteVendor()
         db.session.delete(self)
         db.session.commit()
+        
+    @property
+    def totalPrice(self):
+        total = 0
+        for v in self.vendors:
+            total += v.price * v.purchase_quantity
+        return total

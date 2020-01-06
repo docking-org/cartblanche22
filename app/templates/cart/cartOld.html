@@ -1,43 +1,11 @@
 {%  extends 'base.html' %}
+
 {% block scripts %}
 {{ super() }}
-<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="../static/js/datatables.min.js"></script>
-<script src="../static/js/datatables.rowsGroup.js"></script> -->
+<script src="../static/js/datatables.rowsGroup.js"></script>
 <script>
-
-    $(document).ready(function () {
-        let fakeTable = $('#fake').DataTable({
-            searching: false, paging: false, info: false,
-            dom: 'Bfrtip',
-            buttons: [
-                {
-                    title: 'CartList',
-                    extend: 'csvHtml5',
-
-                },
-                {
-                    title: 'CartList',
-                    extend: 'excelHtml5',
-
-                },
-                {
-                    title: 'CartList',
-                    extend: 'pdfHtml5',
-
-                },
-                {
-                    title: 'CartList',
-                    text: 'TSV',
-                    extend: 'csvHtml5',
-                    fieldSeparator: '\t',
-                    extension: '.tsv',
-
-                },
-            ]
-        });
-        let table = $('#cart').DataTable();
-    })
     var modal = document.getElementById("myModal");
     var span = document.getElementsByClassName("close")[0];
     span.onclick = function (e) {
@@ -173,10 +141,6 @@
 {% block styles %}
 {{ super() }}
 <style>
-    #fake {
-        display: none;
-    }
-
     /* The Modal (background) */
     .modal {
         display: none;
@@ -233,88 +197,45 @@
 {%  block app_content %}
 <div class="table-responsive">
     <h3>{{current_user.cart_name}} <span class="badge">{{ data | length }}</span></h3>
-    <table id="fake" class="table table-striped table-hover table-bordered">
-        <thead>
-            <tr>
-                <th>Identifier</th>
-                <th>Cat_name</th>
-                <th>supplier_code</th>
-                <th>pack_quantity</th>
-                <th>purchase_quantity</th>
-                <th>price</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for d in data %}
-            {% for v in d.vendors %}
-            <tr>
-                <td>{{d.identifier}}</td>
-                <td>{{v.cat_name}}</td>
-                <td>{{v.supplier_code}}</td>
-                <td>{{v.pack_quantity}} {{v.unit}}</td>
-                <td>{{v.price}} {{v.currency}}</td>
-                <td>{{v.purchase_quantity}} pack</td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
     <table id="cart" class="table table-striped table-hover table-bordered">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Compound</th>
-                <th>Identifier</th>
-                <th>Assigned supplier</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in data %}
-            <tr>
-                <td>
-                    <button type="button" class="btn btn-info" onclick="deleteItem('{{i.identifier}}')"><span
-                            class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-                </td>
-                <td><img src={{ i.compound_img }}></td>
-                <td>
-                    <h4>{{ i.identifier }}</h4>
-                    <p>({{ i.database }})</p>
+        <tr class="info">
+            <th>No</th>
+            <th>Compound</th>
+            <th>Identifier</th>
+            <th>Assigned supplier</th>
+        </tr>
+        {% for i in data %}
+        <tr>
+            <td> {{ loop.index }} <br>
+                <button type="button" class="btn btn-info" onclick="deleteItem('{{i.identifier}}')"><span
+                        class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+            </td>
+            <td><img src={{ i.compound_img }}></td>
+            <td>
+                <h4>{{ i.identifier }}</h4>
+                <p>({{ i.database }})</p>
 
-                </td>
-                <!-- <td class="details-control" data={{i.vendors}}>
-                    Click to see assigned vendors
-                </td> -->
+            </td>
 
-                <td>
-                    <table class="table table-striped table-hover table-bordered">
-                        {% for v in i.vendors %}
-                        <tr>
-                            <td>{{v.cat_name}}</td>
-                            <td>{{v.supplier_code}}</td>
-                            <td>{{v.pack_quantity}} {{v.unit}}</td>
-                            <td>{{v.price}} {{v.currency}}</td>
-                            <td>{{v.purchase_quantity}} pack</td>
-                        </tr>
+            <td>
+                <table id="suppliers" class="table table-striped table-hover table-bordered">
+                    {% for v in i.vendors %}
+                    <tr>
+                        <td>{{v.cat_name}}</td>
+                        <td>{{v.supplier_code}}</td>
+                        <td>{{v.pack_quantity}} {{v.unit}}</td>
+                        <td>{{v.price}} {{v.currency}}</td>
+                        <td>{{v.purchase_quantity}} pack</td>
+                    </tr>
 
-                        {% endfor %}
-                    </table>
+                    {% endfor %}
+                </table>
+                <button type="button" class="btn btn-info" id={{i.item_id}} identifier={{i.identifier}}
+                    onclick="openModal(this)" style="text-align: right">Assign Vendor</button>
+            </td>
+        </tr>
 
-
-                    <button type="button" class="btn btn-info" id={{i.item_id}} identifier={{i.identifier}}
-                        onclick="openModal(this)" style="text-align: right">+</button>
-                </td>
-            </tr>
-
-            {% endfor %}
-        </tbody>
-        <!-- <tfoot>
-            <tr>
-                <th></th>
-                <th>Compound</th>
-                <th>Identifier</th>
-                <th>Assigned supplier</th>
-            </tr>
-        </tfoot> -->
+        {% endfor %}
 
     </table>
 </div>

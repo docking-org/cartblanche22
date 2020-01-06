@@ -1,6 +1,6 @@
 from flask import redirect, jsonify, request
 from app.main import application
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.data.models.items import Items
 from app.data.models.vendors import Vendors
 from app import db
@@ -9,7 +9,27 @@ import urllib.request
 from urllib.error import HTTPError
 from werkzeug.urls import url_parse
 import requests
+from collections import OrderedDict 
+from operator import getitem 
 
+@application.route('/autoChooseVendor/<identifier>', methods= ['POST'])
+def autoChooseVendor(identifier):
+    print("comes here")
+    item = Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first()
+    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" +identifier+'&source_database=' + item.database
+    req = urllib.request.Request(url=uri,headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
+    try:
+        with urllib.request.urlopen(req) as url:
+            res = json.loads(url.read().decode())
+            print(res)
+            for i in res:
+                i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
+            res = sorted(res, key = lambda x : x['packs'][0]['price'])
+            vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase_quantity': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit']}
+            Vendors.createVendor(vendor, item.item_id)
+    except HTTPError as e:
+        pass
+    return jsonify("chosen")
 
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):

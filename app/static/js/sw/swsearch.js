@@ -629,6 +629,12 @@ function toggleCart(btn) {
 					items.push(btn.id)
 				}
 				$('#cartCount').html(result['count'])
+				$.ajax({
+					type: 'POST',
+					url: '/autoChooseVendor/' + btn.id,
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+				})
 			},
 			error: function (data) {
 				alert("fail");

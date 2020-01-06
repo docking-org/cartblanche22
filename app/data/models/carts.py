@@ -69,3 +69,9 @@ class Carts(db.Model):
         for i in self.items:
             price += 0
         return price
+    @property
+    def totalPrice(self):
+        total = 0
+        for i in self.items:
+            total += i.totalPrice
+        return total
