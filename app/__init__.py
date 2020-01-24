@@ -35,6 +35,7 @@ def create_app(config_class=Config):
     from app.data.models.carts import Carts
     from app.data.models.items import Items
     from app.data.models.vendors import Vendors
+    from app.data.models.availableVendors import AvailableVendors
 
     admin = Admin(app, name='shoppingcart', template_mode='bootstrap3')
     admin.add_view(ModelView(Users, db.session))
@@ -42,6 +43,7 @@ def create_app(config_class=Config):
     admin.add_view(ModelView(Carts, db.session))
     admin.add_view(ModelView(Items, db.session))
     admin.add_view(ModelView(Vendors, db.session))
+    admin.add_view(ModelView(AvailableVendors, db.session))
 
     from app.errors import application as errors_bp
     app.register_blueprint(errors_bp)

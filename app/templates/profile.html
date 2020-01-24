@@ -1,7 +1,85 @@
 {% extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script>
+    /* Create an array with the values of all the select options in a column */
+    $.fn.dataTable.ext.order['dom-select'] = function (settings, col) {
+        return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+            return $('select', td).val();
+        });
+    }
+    $.fn.dataTable.ext.order['dom-text-numeric'] = function (settings, col) {
+        return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+            return $('input', td).val() * 1;
+        });
+    }
+
+    $(document).ready(function () {
+        let table = $('#availableVendors').DataTable({
+            "columns": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                { "orderDataType": "dom-text-numeric" },
+            ],
+            "order": [[5, "desc"]]
+        });
+
+    });
+    function priorityUpdate(selected) {
+        console.log(selected.value)
+        console.log(selected.id)
+        $.ajax({
+            type: "POST",
+            url: '/updateVendorPriority',
+            data: JSON.stringify({ 'id': selected.id, 'value': selected.value }),
+            contentType: "application/json",
+            dataType: 'json',
+            success: (res) => {
+                console.log(res);
+            },
+        });
+    }
+</script>
+{% endblock %}
 {% block app_content %}
 <div class="row">
     <h3>Hello, {{current_user.username}}</h3>
     Do you want to change your password? <a href="{{url_for('main.change_password')}}">Click here!</a>
+</div>
+<hr>
+<div class="row">
+    <h3>Vendor preference list</h3>
+
+    <table class="table table-striped table-hover table-bordered" id="availableVendors">
+        <thead>
+            <tr>
+                <!-- <th>Cat ID</td> -->
+                <th>BB</th>
+                <th>Short name</th>
+                <th>Name</th>
+                <th>Purchasable</th>
+                <th>Availability</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in data %}
+            <tr>
+                <!-- <td>{{i.vendor.cat_id_fk}}</td> -->
+                <td>{{i.vendor.bb}}</td>
+                <td>{{i.vendor.short_name}}</td>
+                <td>{{i.vendor.name}}</td>
+                <td>{{i.vendor.purchasable}}</td>
+                <td>{{i.vendor.availability}}</td>
+                <td><input type="number" id="{{i.id}}" value="{{i.priority}}" onchange="priorityUpdate(this)" min="0"
+                        max="100"></td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

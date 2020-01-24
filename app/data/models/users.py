@@ -5,6 +5,7 @@ from flask_login import UserMixin
 from app.data.models.carts import Carts
 from app.data.models.items import Items
 from app.data.models.roles import Roles, UserRoles
+from app.data.models.availableVendors import AvailableVendors, UserVendors
 from time import time
 import jwt
 
@@ -17,6 +18,7 @@ class Users(db.Model, UserMixin):
     carts = db.relationship('Carts', backref='user', lazy='dynamic')
     activeCart = db.Column(db.Integer)
     roles = db.relationship('Roles', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
+    
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

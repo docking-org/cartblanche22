@@ -3,6 +3,7 @@ from app.main import application
 from flask_login import login_required, current_user
 from app.data.models.items import Items
 from app.data.models.vendors import Vendors
+from app.data.models.availableVendors import AvailableVendors, UserVendors
 from app import db
 import json
 import urllib.request
@@ -10,7 +11,33 @@ from urllib.error import HTTPError
 from werkzeug.urls import url_parse
 import requests
 from collections import OrderedDict 
-from operator import getitem 
+from operator import getitem
+
+
+@application.route('/vendorsFromZinc', methods=['GET'])
+def vendorsFromZinc():
+    files = {
+    'purchasable-between': '10 50',
+    'count': 'all',
+    'output_fields': 'cat_id bb short_name purchasable name',
+    }
+    response = requests.get('http://zinc15.docking.org/catalogs.txt', params=files)
+    if response:
+        AvailableVendors.query.update({AvailableVendors.availability:False})
+        db.session.commit()
+        for line in response.text.split('\n'):
+            l = line.split('\t')
+            if len(l) == 5:
+                if l[1] == "True":
+                    l[1] = True
+                else:
+                    l[1] = False
+                if AvailableVendors.query.filter_by(cat_id_fk=l[0], short_name=l[2]).first():
+                    AvailableVendors.query.filter_by(cat_id_fk=l[0], short_name=l[2]).first().availability = True
+                    db.session.commit()
+                else:
+                    AvailableVendors.createAvailableVendors(l)
+    return
 
 @application.route('/autoChooseVendor/<identifier>', methods= ['POST'])
 def autoChooseVendor(identifier):
@@ -35,6 +62,7 @@ def autoChooseVendor(identifier):
 def vendorModal(item_id):
     item = Items.query.get(item_id)
     uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" + item.identifier+'&source_database=' + item.database
+    print(uri)
     req = urllib.request.Request(url=uri,headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
     try:
         with urllib.request.urlopen(req) as url:
