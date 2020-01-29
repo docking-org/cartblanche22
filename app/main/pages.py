@@ -23,8 +23,8 @@ def profile():
 def updateVendorPriority():
     data = request.get_json()
     vendor = UserVendors.query.get(data['id'])
-    if int(data['value']) > 10:
-        vendor.priority = 10
+    if int(data['value']) > 100:
+        vendor.priority = 100
     elif int(data['value']) < 0:
         vendor.priority = 0
     else:

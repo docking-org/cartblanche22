@@ -13,7 +13,7 @@ def sw():
 
 @application.route('/swp', methods=['GET', 'POST'])
 def swp():
-    if current_user.has_roles('admin'):
+    if current_user.has_roles('private'):
         identifiers = []
         for i in current_user.items_in_cart:
             identifiers.append(i.identifier)

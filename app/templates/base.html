@@ -52,7 +52,7 @@
             <ul class="nav navbar-nav">
                 {% if not current_user.is_anonymous %}
                 <li><a href="{{ url_for('main.sw') }}">SW</a></li>
-                {% if current_user.has_roles('admin') %}
+                {% if current_user.has_roles('private') %}
                 <li><a href="{{url_for('main.swp')}}">SWP</a></li>
                 {% endif %}
                 <li><a href="{{ url_for('main.arthor') }}">Arthor</a></li>
