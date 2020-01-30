@@ -30,4 +30,4 @@ def updateVendorPriority():
     else:
         vendor.priority = int(data['value'])
     db.session.commit()
-    return jsonify('success')
+    return jsonify({'priority' : vendor.priority})

@@ -38,7 +38,8 @@
             contentType: "application/json",
             dataType: 'json',
             success: (res) => {
-                console.log(res);
+                console.log(res.priority);
+                $(selected).val(res.priority)
             },
         });
     }
