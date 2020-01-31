@@ -35,7 +35,11 @@ function norm_score_name(x) {
 }
 
 function add_scoretype_selection(config) {
+	console.log(config)
 	$.each(config.ScoreFuncs, function (i, e) {
+		if (e.name == "ECFP4" || e.name == "Daylight") {
+			e.enabledByDefault = true
+		}
 		$('#swscore').append($('<tr>').append($('<th>').append(e.name)).append($('<td>').addClass('spacer')).append($('<td>').append($('<input>').attr('type', 'checkbox').addClass('scorefunc').attr('name', norm_score_name(e.name)).attr('checked', e.enabledByDefault).change(toggle_scoring))).append($('<td>').css('font-style', 'italic').append(e.description ? e.description : '')));
 	});
 }
