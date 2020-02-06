@@ -1,4 +1,7 @@
 {%  extends 'base.html' %}
+{% block metas %}
+<meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
+{% endblock %}
 {% block styles %}
 {{super()}}
 <link rel="stylesheet" type="text/css" href="../static/css/sw/sw.css">

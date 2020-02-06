@@ -33,6 +33,10 @@ class Users(db.Model, UserMixin):
     @property
     def items_in_cart(self):
         return Items.query.filter_by(cart_fk=self.activeCart).all()
+    
+    @property
+    def totalPrice(self):
+        return Carts.query.get(self.activeCart).totalPrice
 
     def validate_username(self, username):
         user = Users.query.filter_by(username=username.data).first()
