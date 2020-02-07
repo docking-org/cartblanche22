@@ -4,7 +4,7 @@ from app.main import application
 import xmltodict
 
 @application.route('/punchoutOrder', methods= ['GET'])
-def res():
+def punchoutOrder():
     data = '''<!DOCTYPE cXML SYSTEM 'http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd'>
 <cXML payloadID='958074737352&amp;www.workchairs.com'
 timestamp='2004-06-14T12:59:09-07:00'>
@@ -42,7 +42,7 @@ timestamp='2004-06-14T12:59:09-07:00'>
     return Response(data, mimetype='text/xml')
 
 @application.route('/punchoutSetup', methods= ['POST'])
-def test():
+def punchoutSetup():
     xml_data = request.get_data()
     content_dict = xmltodict.parse(xml_data)
     print(content_dict['cXML']['Header']['From']['Credential']['@domain'])
