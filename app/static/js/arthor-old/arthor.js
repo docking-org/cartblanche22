@@ -42,7 +42,7 @@ function Arthor(url) {
       .replace("%w", w)
       .replace("%h", h)
       .replace("%m", smarts);
-    return 'http://arthor.docking.org/' + url.substring(2)
+    return 'https://arthor.docking.org/' + url.substring(2)
   };
   //gathering databases
   this.getTables = function () {
