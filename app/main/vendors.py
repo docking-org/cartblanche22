@@ -43,7 +43,8 @@ def vendorsFromZinc():
 def autoChooseVendor(identifier):
     print("comes here")
     item = Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first()
-    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" +identifier+'&source_database=' + item.database
+    id = ''.join(identifier.split())
+    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" +id+'&source_database=' + item.database
     req = urllib.request.Request(url=uri,headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
     try:
         with urllib.request.urlopen(req) as url:
@@ -61,7 +62,8 @@ def autoChooseVendor(identifier):
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):
     item = Items.query.get(item_id)
-    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" + item.identifier+'&source_database=' + item.database
+    id = ''.join(item.identifier.split())
+    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" + id+'&source_database=' + item.database
     print(uri)
     req = urllib.request.Request(url=uri,headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
     try:

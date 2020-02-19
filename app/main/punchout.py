@@ -13,25 +13,25 @@ import random
 
 @application.route('/punchoutOrder', methods= ['GET'])
 def punchoutOrder():
-    data = '''<!DOCTYPE cXML SYSTEM 'http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd'>
-<cXML payloadID='958074737352&amp;www.workchairs.com'
-timestamp='2004-06-14T12:59:09-07:00'>
+    randStr = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
+    data = genProlog("1.0", randStr)
+    data += '''
 <Header>
-<From>
-<Credential domain='DUNS'>
-<Identity>12345678</Identity>
-</Credential>
-</From>
+    <From>
+        <Credential domain='DUNS'>
+            <Identity>-YOUR IDENTITY-</Identity>
+        </Credential>
+    </From>
 <To>
-<Credential domain='NetworkID'>
-<Identity>AN01000002792</Identity>
-</Credential>
+    <Credential domain='NetworkID'>
+        <Identity>-YOUR IDENTITY-</Identity>
+    </Credential>
 </To>
 <Sender>
-<Credential domain='www.workchairs.com'>
-<Identity>PunchoutResponse</Identity>
-</Credential>
-<UserAgent>Our PunchOut Site V4.2</UserAgent>
+    <Credential domain='NetworkId'>
+        <Identity>-YOUR IDENTITY-</Identity>
+    </Credential>
+    <UserAgent>Our PunchOut Site V4.2</UserAgent>
 </Sender>
 </Header>'''
     message = "<Message><PunchOutOrderMessage><BuyerCookie>1J3YVWU9QWMTB</BuyerCookie>"
@@ -40,14 +40,14 @@ timestamp='2004-06-14T12:59:09-07:00'>
     for item in current_user.items_in_cart:
         for vendor in item.vendors:
             itemIn = "<ItemIn quantity='{}'>".format(vendor.purchase_quantity)
-            itemId = "<ItemID><SupplierPartID>'{}'</SupplierPartID><SupplierPartAuxiliaryID>'{}'</SupplierPartAuxiliaryID></ItemID>".format(vendor.supplier_code, vendor.cat_name)
-            itemDetail = "<ItemDetail><UnitPrice><Money currency='USD'>'{}'</Money></UnitPrice><Description xml:lang='en'>blablabla</Description><UnitOfMeasure>EA</UnitOfMeasure><Classification domain='UNSPSC'>14111514</Classification></ItemDetail>".format(vendor.price)
+            itemId = "<ItemID><SupplierPartID>'{}'</SupplierPartID></ItemID>".format(vendor.supplier_code)
+            itemDetail = "<ItemDetail><ManufacturerName>'{}'</ManufacturerName><UnitPrice><Money currency='USD'>'{}'</Money></UnitPrice><Description xml:lang='en'>pack size of {}{} of {}</Description><UnitOfMeasure>EA</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor.cat_name,  vendor.price, vendor.pack_quantity, vendor.unit, item.identifier)
             message = message + itemIn + itemId + itemDetail + '</ItemIn>'
     message += '</PunchOutOrderMessage></Message>'
     data += message
-    data += "</cXML>"
-    print(data)
-    return Response(data, mimetype='text/xml')
+    data += '</cXML>'
+    # main = '<input type="hidden" name="cxml-urlencoded" value="' + data + '">'
+    return Response( data, mimetype='text/xml')
 
 @application.route('/punchoutSetup', methods= ['POST'])
 def punchoutSetup():
