@@ -80,11 +80,12 @@ def punchoutSetup():
     <Status code="200" text="OK"/>
     <PunchOutSetupResponse>
     <StartPage>
-    <URL>https://cartblanche.docking.org/punchoutStart/
+     '''
+    url = ''.join(['<URL>https://cartblanche.docking.org/punchoutStart/',token, '</URL>'])
+    # test = 'https://cartblanche.docking.org/punchoutStart/' + token
+    print(url)
+    data += url
     '''
-    data += token
-    data += '''
-    </URL>
     </StartPage>
     </PunchOutSetupResponse>
     </Response>
