@@ -85,7 +85,7 @@ def punchoutSetup():
     # test = 'https://cartblanche.docking.org/punchoutStart/' + token
     print(url)
     data += url
-    '''
+    data += '''
     </StartPage>
     </PunchOutSetupResponse>
     </Response>
