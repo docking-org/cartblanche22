@@ -4,7 +4,8 @@ from flask_login import current_user
 from app.data.models.carts import Carts
 from app.data.models.items import Items
 import csv, os
-
+import re, requests
+import urllib.parse
 
 @application.route('/cart', methods= ['GET',  'POST'])
 def cart():
@@ -43,6 +44,38 @@ def deleteCart(cart_id):
 def activateCart(cart_id):
     current_user.setCart(cart_id)
     return redirect(url_for('main.carts'))
+
+@application.route('/importData', methods=['GET', 'POST'])
+def importData():
+    if request.method=="POST":
+        data = request.form['dataInput']
+        file = request.files['myfile'].read().decode("utf-8")
+        textDataList = [x for x in re.split(' |, |,|\n', data) if x!='']
+        fileDataList = [x for x in re.split(' |, |,|\n', file) if x!='']
+        wholeData = textDataList + fileDataList
+        # print(wholeData)
+        zincDB =[]
+        for data in wholeData:
+            lower = data.lower()
+            if 'c' in lower or 'zinc' in lower or lower.isnumeric():
+                response = requests.get('http://zinc15.docking.org/substances/'+data+'.txt')
+                if response:
+                    zincDB.append((response.text.split()[0], response.text.split()[1]))
+                    print(zincDB)
+        if zincDB:
+            activeCart = Carts.createCart(current_user)
+            db = 'ZINC-All-19Q4-1.4B.anon'
+            for data in zincDB:
+                identifier = data[0]
+                smile = data[1]
+                img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
+                item_id = activeCart.addToCart(current_user, identifier ,img, db)
+                # requests.post(url = 'http://0.0.0.0:5067/autoChooseVendor/'+str(item_id))
+                # identifier = response.text.split()[0]
+        return redirect(url_for('main.cart'))       
+        return render_template('cart/importResult.html', textDataList = textDataList, fileDataList= fileDataList)
+    else:
+        return render_template('cart/import.html')
 
 # @application.route('/cart/excel', methods=["GET"])
 # def cartExcelExport():

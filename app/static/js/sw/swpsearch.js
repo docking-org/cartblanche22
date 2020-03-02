@@ -637,7 +637,7 @@ function toggleCart(btn) {
 				$('#cartCount').html(result['count'])
 				$.ajax({
 					type: 'POST',
-					url: '/autoChooseVendor/' + btn.id,
+					url: '/autoChooseVendor/' + result['item_id'],
 					contentType: "application/json; charset=utf-8",
 					dataType: "json",
 				})

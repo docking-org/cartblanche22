@@ -29,7 +29,7 @@ def punchoutOrder():
 </To>
 <Sender>
     <Credential domain='NetworkId'>
-        <Identity>-YOUR IDENTITY-</Identity>
+        <Identity>smartbuy</Identity>
     </Credential>
     <UserAgent>Our PunchOut Site V4.2</UserAgent>
 </Sender>

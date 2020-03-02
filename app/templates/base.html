@@ -59,6 +59,7 @@
                 <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
                 <li><a href="{{ url_for('main.cart') }}">{{current_user.cart_name}} <span class="badge"
                             id="cartCount">{{current_user.cart_count}}</span></a></li>
+                <li> <a href="{{url_for('main.importData')}}">Import</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">

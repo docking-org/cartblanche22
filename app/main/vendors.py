@@ -39,12 +39,12 @@ def vendorsFromZinc():
                     AvailableVendors.createAvailableVendors(l)
     return
 
-@application.route('/autoChooseVendor/<identifier>', methods= ['POST'])
-def autoChooseVendor(identifier):
+@application.route('/autoChooseVendor/<item_id>', methods= ['POST'])
+def autoChooseVendor(item_id):
     print("comes here")
-    item = Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first()
-    id = ''.join(identifier.split())
-    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" +id+'&source_database=' + item.database
+    print(item_id)
+    item = Items.query.get(item_id)
+    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" +item.identifier+'&source_database=' + item.database
     req = urllib.request.Request(url=uri,headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
     try:
         with urllib.request.urlopen(req) as url:
@@ -54,7 +54,7 @@ def autoChooseVendor(identifier):
                 i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
             res = sorted(res, key = lambda x : x['packs'][0]['price'])
             vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase_quantity': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit']}
-            Vendors.createVendor(vendor, item.item_id)
+            Vendors.createVendor(vendor, item_id)
     except HTTPError as e:
         pass
     return jsonify("chosen")

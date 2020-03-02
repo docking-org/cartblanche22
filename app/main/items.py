@@ -15,10 +15,11 @@ from werkzeug.urls import url_parse
 def addToCart():
     activeCart = Carts.query.get(current_user.activeCart)
     data = request.get_json()
-    if activeCart.addToCart(current_user, data['id'],data['img_url'],data['database']):
+    item_id = activeCart.addToCart(current_user, data['id'],data['img_url'],data['database'])
+    if item_id:
         count = current_user.cart_count
-        return jsonify({'count':current_user.cart_count})    
-    return jsonify({'count':current_user.cart_count})
+        return jsonify({'count':current_user.cart_count, 'item_id':item_id})    
+    return jsonify({'count':current_user.cart_count, 'item_id':item_id})
 
 @application.route('/deleteItem/<identifier>', methods= ['DELETE'])
 def deleteItem(identifier):

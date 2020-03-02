@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block app_content %}
+<div class="form-group">
+    <form action="{{url_for('main.importData')}}" id="dataInput" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for=" dataInput">Enter codes:</label><br>
+            <textarea class="form-control" rows="4" cols="50" name="dataInput" form="dataInput"></textarea>
+        </div>
+
+        <h1> OR </h1>
+        <div class="form-group">
+            <label for="myfile">Select a file:</label>
+            <input type="file" id="myfile" name="myfile" class="btn btn-info">
+        </div>
+
+        <input type="submit" class="btn btn-info">
+    </form>
+
+</div>
+
+
+{% endblock %}

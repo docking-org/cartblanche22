@@ -29,8 +29,8 @@ class Carts(db.Model):
             item = Items(cart_fk = current_user.activeCart, identifier=identifier, compound_img=img_url, database=database)
             db.session.add(item)
             db.session.commit() 
-            return True
-        return False
+            return item.item_id
+        return item.item_id
     
     def deleteCart(self):
         for item in self.items:
@@ -48,6 +48,7 @@ class Carts(db.Model):
         cart.name += str(cart.cart_id)
         db.session.commit()
         user.setCart(cart.cart_id)
+        return cart
     
     def order():
         pass

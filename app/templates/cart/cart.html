@@ -233,6 +233,11 @@
         text-decoration: none;
         cursor: pointer;
     }
+
+    img {
+        width: 80%;
+        height: 80%;
+    }
 </style>
 {% endblock %}
 
@@ -241,6 +246,7 @@
     <h3>{{current_user.cart_name}} <span class="badge">{{ data | length }}</span></h3>
 
     <a href="{{url_for('main.punchoutOrder')}}"><button id="order" class="btn btn-info">Order</button></a>
+
 
     <table id="fake" class="table table-striped table-hover table-bordered">
         <thead>
