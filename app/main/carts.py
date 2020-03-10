@@ -3,16 +3,22 @@ from app.main import application
 from flask_login import current_user
 from app.data.models.carts import Carts
 from app.data.models.items import Items
+from app.main.punchout import punchoutOrder
 import csv, os
 import re, requests
 import urllib.parse
+
 
 @application.route('/cart', methods= ['GET',  'POST'])
 def cart():
     items = Items.query.filter_by(cart_fk=current_user.activeCart).all()
     totalPrices=[]
     totalQuantities=[]
-    return render_template('cart/cart.html', data=items, prices=totalPrices, quantities=totalQuantities)
+    punchoutOrderMessage, url = punchoutOrder()
+    for i in items:
+        for v in i.vendors:
+            print('{} item has vendor {}'.format(i, v))
+    return render_template('cart/cart.html', data=items, prices=totalPrices, quantities=totalQuantities, punchoutOrderMessage=punchoutOrderMessage, url=url)
 
 @application.route('/carts', methods= ['GET',  'POST'])
 def carts():
@@ -54,23 +60,21 @@ def importData():
         fileDataList = [x for x in re.split(' |, |,|\n', file) if x!='']
         wholeData = textDataList + fileDataList
         # print(wholeData)
-        zincDB =[]
+        zincDB ={}
         for data in wholeData:
             lower = data.lower()
             if 'c' in lower or 'zinc' in lower or lower.isnumeric():
                 response = requests.get('http://zinc15.docking.org/substances/'+data+'.txt')
-                if response:
-                    zincDB.append((response.text.split()[0], response.text.split()[1]))
+                if response and response.text.split()[0] not in zincDB.keys():
+                    zincDB[response.text.split()[0]] = response.text.split()[1]
                     print(zincDB)
         if zincDB:
             activeCart = Carts.createCart(current_user)
             db = 'ZINC-All-19Q4-1.4B.anon'
-            for data in zincDB:
-                identifier = data[0]
-                smile = data[1]
+            for identifier, smile in zincDB.items():
                 img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
                 item_id = activeCart.addToCart(current_user, identifier ,img, db)
-                # requests.post(url = 'http://0.0.0.0:5067/autoChooseVendor/'+str(item_id))
+                requests.post(url = 'http://0.0.0.0:5067/autoChooseVendor/'+str(item_id))
                 # identifier = response.text.split()[0]
         return redirect(url_for('main.cart'))       
         return render_template('cart/importResult.html', textDataList = textDataList, fileDataList= fileDataList)

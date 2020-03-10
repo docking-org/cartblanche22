@@ -1,4 +1,4 @@
-from flask import Response, request, current_app, redirect, jsonify, url_for
+from flask import Response, request, current_app, redirect, jsonify, url_for, session, render_template
 from flask_login import current_user, login_user
 from app.main import application
 import xmltodict
@@ -11,7 +11,6 @@ import string
 import random
 
 
-@application.route('/punchoutOrder', methods= ['GET'])
 def punchoutOrder():
     randStr = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
     data = genProlog("1.0", randStr)
@@ -29,7 +28,7 @@ def punchoutOrder():
 </To>
 <Sender>
     <Credential domain='NetworkId'>
-        <Identity>smartbuy</Identity>
+        <Identity>-YOUR IDENTITY-</Identity>
     </Credential>
     <UserAgent>Our PunchOut Site V4.2</UserAgent>
 </Sender>
@@ -47,14 +46,17 @@ def punchoutOrder():
     data += message
     data += '</cXML>'
     # main = '<input type="hidden" name="cxml-urlencoded" value="' + data + '">'
-    return Response( data, mimetype='text/xml')
+    url = ""
+    if 'url' in session.keys():
+        url = session['url']
+    return(data, url)
 
 @application.route('/punchoutSetup', methods= ['POST'])
 def punchoutSetup():
     xml_data = request.get_data()
     content_dict = xmltodict.parse(xml_data)
     cookie = content_dict['cXML']['Request']['PunchOutSetupRequest']['BuyerCookie']
-    url = content_dict['cXML']['Request']['PunchOutSetupRequest']['SupplierSetup']['URL']
+    url = content_dict['cXML']['Request']['PunchOutSetupRequest']['BrowserFormPost']['URL']
     identity = content_dict['cXML']['Header']['Sender']['Credential']['Identity']
     password = content_dict['cXML']['Header']['Sender']['Credential']['SharedSecret']
     print(password)
@@ -72,7 +74,7 @@ def punchoutSetup():
         return Response(data, mimetype='text/xml')
     print(user)
     token = jwt.encode(
-            {'user_id': user.id, 'exp': time() + 1800},
+            {'user_id': user.id, 'exp': time() + 1800, 'url':url},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
     print(token)
     data += '''
@@ -99,9 +101,11 @@ def punchoutStart(token):
     print(token)
     try:
         user_id = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['user_id']
+        url = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['url']
         user = Users.query.get(user_id)
         login_user(user)
         print(current_user)
+        session['url'] = url
         return redirect(url_for('main.sw'))
     except:
         return jsonify('something wrong with starting the page, token expired or user not found')

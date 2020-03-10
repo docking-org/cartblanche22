@@ -5,7 +5,7 @@ from app.data.models.items import Items
 from app.data.models.vendors import Vendors
 from app.data.models.availableVendors import AvailableVendors, UserVendors
 from app import db
-import json
+import json, requests
 import urllib.request
 from urllib.error import HTTPError
 from werkzeug.urls import url_parse
@@ -41,50 +41,58 @@ def vendorsFromZinc():
 
 @application.route('/autoChooseVendor/<item_id>', methods= ['POST'])
 def autoChooseVendor(item_id):
-    print("comes here")
-    print(item_id)
+    '''used to automatically choose one vendor from vendors. Currently it's taking lowest pack with lowest price'''
+    print('autoChoosing Vendor for {}'.format(item_id))
     item = Items.query.get(item_id)
-    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" +item.identifier+'&source_database=' + item.database
-    req = urllib.request.Request(url=uri,headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
-    try:
-        with urllib.request.urlopen(req) as url:
-            res = json.loads(url.read().decode())
-            print(res)
-            for i in res:
-                i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
-            res = sorted(res, key = lambda x : x['packs'][0]['price'])
-            vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase_quantity': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit']}
-            Vendors.createVendor(vendor, item_id)
-    except HTTPError as e:
-        pass
-    return jsonify("chosen")
+    payload = {'molecule_id' : ''.join(item.identifier.split()), 'source_database' : item.database}
+    response = requests.get('http://gimel.compbio.ucsf.edu:5022/api/_new_get_data', params=payload)
+    if response and len(response.json()) > 0:
+        res = response.json()
+        print(res)
+        for i in res:
+            i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
+        res = sorted(res, key = lambda x : x['packs'][0]['price'])
+        vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase_quantity': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit']}
+        Vendors.createVendor(vendor, item_id)
+    else:
+        return jsonify(success=False, message="Problem causing with price api request or empty")
+    return jsonify(success=True)
+
+    # try:
+    #     with urllib.request.urlopen(req) as url:
+    #         res = json.loads(url.read().decode())
+    #         print(res)
+    #         for i in res:
+    #             i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
+    #         res = sorted(res, key = lambda x : x['packs'][0]['price'])
+    #         vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase_quantity': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit']}
+    #         Vendors.createVendor(vendor, item_id)
+    # except HTTPError as e:
+    #     pass
+    # return True
 
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])
 def vendorModal(item_id):
     item = Items.query.get(item_id)
-    id = ''.join(item.identifier.split())
-    uri = "http://gimel.compbio.ucsf.edu:5022/api/_new_get_data?molecule_id=" + id+'&source_database=' + item.database
-    print(uri)
-    req = urllib.request.Request(url=uri,headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'})
-    try:
-        with urllib.request.urlopen(req) as url:
-            data = json.loads(url.read().decode())
-            priceAPI = []
-            for d in data:
-                priceAPI.append(d)
-            for i in priceAPI:
-                for pack in i['packs']:
-                    vendor = Vendors.query.filter_by(item_fk=item_id, cat_id_fk=i['cat_id_fk'], supplier_code=i['supplier_code'], pack_quantity=pack['quantity'], unit=pack['unit']).first()
-                    if vendor:
+    payload = {'molecule_id' : ''.join(item.identifier.split()), 'source_database' : item.database}
+    response = requests.get('http://gimel.compbio.ucsf.edu:5022/api/_new_get_data', params=payload)
+    if response:
+        data = response.json()
+        priceAPI = []
+        for d in data:
+            priceAPI.append(d)
+        for i in priceAPI:
+            for pack in i['packs']:
+                vendor = Vendors.query.filter_by(item_fk=item_id, cat_id_fk=i['cat_id_fk'], supplier_code=i['supplier_code'], pack_quantity=pack['quantity'], unit=pack['unit']).first()
+                if vendor:
                             pack['purchase_quantity'] = vendor.purchase_quantity
                             pack['class']="success"
-                    else:
+                else:
                         pack['purchase_quantity'] = 0
                         pack['class']=""
-            return jsonify(priceAPI)
-    except HTTPError as e:
-        content = e.read()
-        return jsonify('null')
+        return jsonify(priceAPI)
+    else:
+        jsonify('null')
 
 @application.route('/vendorUpdate', methods= ['POST'])
 def vendorUpdate():

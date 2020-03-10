@@ -51,31 +51,16 @@
         $("#delete_" + localStorage.activeCart).prop('disabled', 'true')
     });
     function deleteCart(cart_id, count) {
-        if (count != 0) {
-            let confirmed = window.confirm("Are you sure to delete? It has " + count + " items")
-            if (confirmed) {
-                $.ajax({
-                    url: '/deleteCart/' + cart_id,
-                    type: 'DELETE',
-                    success: function (result) {
-                        console.log(result)
-                        location.reload();
-                        // Do something with the result
-                    }
-                });
+        $.ajax({
+            url: '/deleteCart/' + cart_id,
+            type: 'DELETE',
+            success: function (result) {
+                console.log(result)
+                location.reload();
+                // Do something with the result
             }
-        }
-        else {
-            $.ajax({
-                url: '/deleteCart/' + cart_id,
-                type: 'DELETE',
-                success: function (result) {
-                    console.log(result)
-                    location.reload();
-                    // Do something with the result
-                }
-            });
-        }
+        });
+
     }
     function save() {
         console.log(this.id)

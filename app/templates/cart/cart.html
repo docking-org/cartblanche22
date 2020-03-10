@@ -36,7 +36,11 @@
                 },
             ]
         });
-        let table = $('#cart').DataTable();
+        table = $('#cart').DataTable();
+        let currentPage = localStorage.getItem("currentPage");
+        table.page(currentPage ? parseInt(currentPage) : 0).draw('page')
+        localStorage.setItem("currentPage", '0')
+
     })
     var modal = document.getElementById("myModal");
     var span = document.getElementsByClassName("close")[0];
@@ -50,7 +54,10 @@
             location.reload();
         }
     }
+
     function openModal(item) {
+        let pageNumber = table.page.info().page;
+        localStorage.setItem('currentPage', pageNumber)
         modal.style.display = "block";
         $('#spinner').show().css('text-align', 'center')
         $('#vendorResult').show().css('text-align', 'center')
@@ -245,9 +252,10 @@
 <div class="table-responsive">
     <h3>{{current_user.cart_name}} <span class="badge">{{ data | length }}</span></h3>
 
-    <a href="{{url_for('main.punchoutOrder')}}"><button id="order" class="btn btn-info">Order</button></a>
-
-
+    <form method="post" action={{url}}>
+        <input type="hidden" name="cxml-urlencoded" value={{punchoutOrderMessage}}>
+        <input type="submit" value="Checkout" class="btn btn-info" id="order">
+    </form>
     <table id="fake" class="table table-striped table-hover table-bordered">
         <thead>
             <tr>
