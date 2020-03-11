@@ -11,6 +11,7 @@ import string
 import random
 
 
+
 def punchoutOrder():
     randStr = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
     data = genProlog("1.0", randStr)
@@ -33,7 +34,11 @@ def punchoutOrder():
     <UserAgent>Our PunchOut Site V4.2</UserAgent>
 </Sender>
 </Header>'''
-    message = "<Message><PunchOutOrderMessage><BuyerCookie>1J3YVWU9QWMTB</BuyerCookie>"
+    message = "<Message><PunchOutOrderMessage>"
+    buyerCookie = ""
+    if 'buyerCookie' in session.keys():
+        buyerCookie = session['buyerCookie']
+    message += "<BuyerCookie>{}</BuyerCookie>".format(buyerCookie)
     PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>'{}'</Money></Total></PunchOutOrderMessageHeader>".format(current_user.totalPrice)
     message += PunchOutOrderMessageHeader
     for item in current_user.items_in_cart:
@@ -55,28 +60,24 @@ def punchoutOrder():
 def punchoutSetup():
     xml_data = request.get_data()
     content_dict = xmltodict.parse(xml_data)
-    cookie = content_dict['cXML']['Request']['PunchOutSetupRequest']['BuyerCookie']
+    buyerCookie = content_dict['cXML']['Request']['PunchOutSetupRequest']['BuyerCookie']
     url = content_dict['cXML']['Request']['PunchOutSetupRequest']['BrowserFormPost']['URL']
     identity = content_dict['cXML']['Header']['Sender']['Credential']['Identity']
     password = content_dict['cXML']['Header']['Sender']['Credential']['SharedSecret']
-    print(password)
-    print(cookie, url)
+
     randStr = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
     data = genProlog("1.0", randStr)
     user = Users.query.filter_by(username=identity).first()
     if user is None or not user.check_password(password):
-        print('Invalid username or password')
         data += '''
         <Response>
         <Status code="400" Text="Bad Request">Invalid Document. Something wrong with finding associated user.</Status>
         </Response>
         </cXML>'''
         return Response(data, mimetype='text/xml')
-    print(user)
     token = jwt.encode(
-            {'user_id': user.id, 'exp': time() + 1800, 'url':url},
+            {'user_id': user.id, 'exp': time() + 1800, 'url':url, 'buyerCookie':buyerCookie},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-    print(token)
     data += '''
     <Response>
     <Status code="200" text="OK"/>
@@ -84,8 +85,6 @@ def punchoutSetup():
     <StartPage>
      '''
     url = ''.join(['<URL>https://cartblanche.docking.org/punchoutStart/',token, '</URL>'])
-    # test = 'https://cartblanche.docking.org/punchoutStart/' + token
-    print(url)
     data += url
     data += '''
     </StartPage>
@@ -102,10 +101,12 @@ def punchoutStart(token):
     try:
         user_id = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['user_id']
         url = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['url']
+        buyerCookie = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['buyerCookie']
         user = Users.query.get(user_id)
         login_user(user)
         print(current_user)
         session['url'] = url
+        session['buyerCookie'] = buyerCookie
         return redirect(url_for('main.sw'))
     except:
         return jsonify('something wrong with starting the page, token expired or user not found')
@@ -116,8 +117,8 @@ def genProlog(cXMLvers, randStr):
     dt = datetime.datetime.now()
     nowNum = int(round(time()*1000))
     timeStr = dt.strftime("%y-%m-%dT%H:%M:%S")
-    data = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    data += '<!DOCTYPE cXML SYSTEM "' + sysID + '">\n';
+    # data = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    data = '<!DOCTYPE cXML SYSTEM "' + sysID + '">';
     data += '<cXML payloadID="' + str(nowNum) + ".";
     data += randStr + '@' + 'www.cartblanche.docking.org';
     data += '" timestamp="' + timeStr + '">';

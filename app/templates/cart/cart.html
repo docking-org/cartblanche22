@@ -251,9 +251,8 @@
 {%  block app_content %}
 <div class="table-responsive">
     <h3>{{current_user.cart_name}} <span class="badge">{{ data | length }}</span></h3>
-
-    <form method="post" action={{url}}>
-        <input type="hidden" name="cxml-urlencoded" value={{punchoutOrderMessage}}>
+    <form method="post" action={{url}} enctype="application/x-www-form-urlencoded">
+        <input type="hidden" name="cxml-urlencoded" value="{{punchoutOrderMessage}}">
         <input type="submit" value="Checkout" class="btn btn-info" id="order">
     </form>
     <table id="fake" class="table table-striped table-hover table-bordered">

@@ -15,9 +15,6 @@ def cart():
     totalPrices=[]
     totalQuantities=[]
     punchoutOrderMessage, url = punchoutOrder()
-    for i in items:
-        for v in i.vendors:
-            print('{} item has vendor {}'.format(i, v))
     return render_template('cart/cart.html', data=items, prices=totalPrices, quantities=totalQuantities, punchoutOrderMessage=punchoutOrderMessage, url=url)
 
 @application.route('/carts', methods= ['GET',  'POST'])
