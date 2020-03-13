@@ -57,21 +57,45 @@ def importData():
         fileDataList = [x for x in re.split(' |, |,|\n', file) if x!='']
         wholeData = textDataList + fileDataList
         # print(wholeData)
-        zincDB ={}
+        oldCart = current_user.activeCart
+        newCart = Carts.createCart(current_user)
+        molecules = []
         for data in wholeData:
-            lower = data.lower()
+            lower = data.lower().strip()
             if 'c' in lower or 'zinc' in lower or lower.isnumeric():
                 response = requests.get('http://zinc15.docking.org/substances/'+data+'.txt')
-                if response and response.text.split()[0] not in zincDB.keys():
-                    zincDB[response.text.split()[0]] = response.text.split()[1]
-                    print(zincDB)
-        if zincDB:
-            activeCart = Carts.createCart(current_user)
-            db = 'ZINC-All-19Q4-1.4B.anon'
-            for identifier, smile in zincDB.items():
-                img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
-                item_id = activeCart.addToCart(current_user, identifier ,img, db)
-                requests.post(url = 'http://0.0.0.0:5067/autoChooseVendor/'+str(item_id))
+                if response and response.text.split()[0] not in molecules:
+                    identifier, smile = response.text.split()[0], response.text.split()[1]
+                    molecules.append(identifier)
+                    db = 'ZINC-All-19Q4-1.4B.anon'
+                    img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
+                    item_id = newCart.addToCart(current_user, identifier ,img, db)
+                    requests.post(url = 'http://0.0.0.0:5067/autoChooseVendor/'+str(item_id))
+                # if response and response.text.split()[0] not in zincDB.keys():
+                #     zincDB[response.text.split()[0]] = response.text.split()[1]
+            else:
+                response = requests.get('http://gimel.compbio.ucsf.edu:5022/api/_search_btz', params={'molecule_id':lower})
+                molecule = response.json()
+                if response and molecule['db_name']:
+                    identifier = molecule['mol_id']
+                    molecules.append(identifier)
+                    smile = molecule['smiles']
+                    db = molecule['db_name']
+                    img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
+                    item_id = newCart.addToCart(current_user, identifier ,img, db)
+                    requests.post(url = 'http://0.0.0.0:5067/autoChooseVendor/'+str(item_id))
+        if len(molecules) == 0:
+            current_user.activeCart = oldCart
+            newCart.deleteCart()
+
+
+        # if zincDB:
+        #     activeCart = Carts.createCart(current_user)
+        #     db = 'ZINC-All-19Q4-1.4B.anon'
+        #     for identifier, smile in zincDB.items():
+        #         img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
+        #         item_id = activeCart.addToCart(current_user, identifier ,img, db)
+        #         requests.post(url = 'http://0.0.0.0:5067/autoChooseVendor/'+str(item_id))
                 # identifier = response.text.split()[0]
         return redirect(url_for('main.cart'))       
         return render_template('cart/importResult.html', textDataList = textDataList, fileDataList= fileDataList)
