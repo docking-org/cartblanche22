@@ -19,17 +19,17 @@ def punchoutOrder():
 <Header>
     <From>
         <Credential domain='DUNS'>
-            <Identity>-YOUR IDENTITY-</Identity>
+            <Identity></Identity>
         </Credential>
     </From>
 <To>
     <Credential domain='NetworkID'>
-        <Identity>-YOUR IDENTITY-</Identity>
+        <Identity></Identity>
     </Credential>
 </To>
 <Sender>
     <Credential domain='NetworkId'>
-        <Identity>-YOUR IDENTITY-</Identity>
+        <Identity></Identity>
     </Credential>
     <UserAgent>Our PunchOut Site V4.2</UserAgent>
 </Sender>
@@ -39,13 +39,13 @@ def punchoutOrder():
     if 'buyerCookie' in session.keys():
         buyerCookie = session['buyerCookie']
     message += "<BuyerCookie>{}</BuyerCookie>".format(buyerCookie)
-    PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>'{}'</Money></Total></PunchOutOrderMessageHeader>".format(current_user.totalPrice)
+    PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>{}</Money></Total></PunchOutOrderMessageHeader>".format(current_user.totalPrice)
     message += PunchOutOrderMessageHeader
     for item in current_user.items_in_cart:
         for vendor in item.vendors:
-            itemIn = "<ItemIn quantity='{}'>".format(vendor.purchase_quantity)
-            itemId = "<ItemID><SupplierPartID>'{}'</SupplierPartID></ItemID>".format(vendor.supplier_code)
-            itemDetail = "<ItemDetail><ManufacturerName>'{}'</ManufacturerName><UnitPrice><Money currency='USD'>'{}'</Money></UnitPrice><Description xml:lang='en'>pack size of {}{} of {}</Description><UnitOfMeasure>EA</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor.cat_name,  vendor.price, vendor.pack_quantity, vendor.unit, item.identifier)
+            itemIn = "<ItemIn quantity={}>".format(vendor.purchase_quantity)
+            itemId = "<ItemID><SupplierPartID>{}</SupplierPartID></ItemID>".format(vendor.supplier_code)
+            itemDetail = "<ItemDetail><ManufacturerName>{}</ManufacturerName><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'>pack size of {}{} of {}</Description><UnitOfMeasure>EA</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor.cat_name,  vendor.price, vendor.pack_quantity, vendor.unit, item.identifier)
             message = message + itemIn + itemId + itemDetail + '</ItemIn>'
     message += '</PunchOutOrderMessage></Message>'
     data += message
