@@ -43,9 +43,9 @@ def punchoutOrder():
     message += PunchOutOrderMessageHeader
     for item in current_user.items_in_cart:
         for vendor in item.vendors:
-            itemIn = "<ItemIn quantity={}>".format(vendor.purchase_quantity)
-            itemId = "<ItemID><SupplierPartID>{}</SupplierPartID></ItemID>".format(vendor.supplier_code)
-            itemDetail = "<ItemDetail><ManufacturerName>{}</ManufacturerName><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'>pack size of {}{} of {}</Description><UnitOfMeasure>EA</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor.cat_name,  vendor.price, vendor.pack_quantity, vendor.unit, item.identifier)
+            itemIn = "<ItemIn quantity='{}'>".format(vendor.purchase_quantity)
+            itemId = "<ItemID><SupplierPartID>{}_{}{}</SupplierPartID></ItemID>".format(vendor.supplier_code, vendor.pack_quantity, vendor.unit)
+            itemDetail = "<ItemDetail><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'><ShortName>{}_{}{}</ShortName>Pack size: {}{};Cat No.: {}; Supplier: {}</Description><UnitOfMeasure>PK</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor.price, vendor.supplier_code, vendor.pack_quantity, vendor.unit, vendor.pack_quantity, vendor.unit, vendor.supplier_code, vendor.cat_name)
             message = message + itemIn + itemId + itemDetail + '</ItemIn>'
     message += '</PunchOutOrderMessage></Message>'
     data += message
