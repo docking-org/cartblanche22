@@ -2,18 +2,6 @@
 {% block scripts %}
 {{ super() }}
 <script>
-    $(document).ready(buttonToggle('empty'))
-    function readFileAsync(file) {
-        return new Promise((resolve, reject) => {
-            let reader = new FileReader();
-            reader.onload = () => {
-                resolve(reader.result.split(/[\s,.;\t\r\n]+/))
-            };
-            reader.onerror = reject;
-            reader.readAsText(file);
-        })
-    }
-
     async function importData() {
         let textData = $("#textInput")[0].value.split(/[\s,.;\t\r\n]+/)
         let file = $('#myfile').prop('files')[0]
@@ -35,6 +23,7 @@
                     type: "POST",
                     url: '/importIdentifier/' + value,
                     success: (res) => {
+                        $('#identifier').html(value)
                         switch (res) {
                             case 'exists':
                                 $('#exists').append('<li>' + value + '</li>')
@@ -44,12 +33,7 @@
                                 break;
                             default:
                                 $('#added').append('<li>' + value + '</li>')
-                                $.ajax({
-                                    type: 'POST',
-                                    url: '/autoChooseVendor/' + res,
-                                    contentType: "application/json; charset=utf-8",
-                                    dataType: "json",
-                                })
+                                addToLocalStorage(res)
                         }
                     },
                     error: (res) => {
@@ -59,6 +43,25 @@
             })
         }
     }
+    function addToLocalStorage(res) {
+        let arr = JSON.parse(localStorage['arr']);
+        arr.push(res)
+        localStorage['arr'] = JSON.stringify(arr);
+    }
+
+    $(document).ready(buttonToggle('empty'))
+    function readFileAsync(file) {
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            reader.onload = () => {
+                resolve(reader.result.split(/[\s,.;\t\r\n]+/))
+            };
+            reader.onerror = reject;
+            reader.readAsText(file);
+        })
+    }
+
+
     function buttonToggle(value) {
         $('#modal-footer').empty()
         switch (value) {
@@ -79,8 +82,23 @@
                 break;
         }
     }
-    $(document).ajaxStart(() => buttonToggle('loading'));
-    $(document).ajaxStop(() => buttonToggle('completed'));
+    $(document).ajaxStart(() => {
+        buttonToggle('loading');
+        localStorage['arr'] = JSON.stringify([]);
+    });
+    $(document).ajaxStop(() => {
+        buttonToggle('completed');
+        let arr = JSON.parse(localStorage['arr']);
+        arr.forEach((value) => {
+            $.ajax({
+                type: 'POST',
+                url: '/autoChooseVendor/' + value,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+            })
+        })
+
+    });
 
 </script>
 {% endblock %}
