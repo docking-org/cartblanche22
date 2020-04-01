@@ -30,7 +30,7 @@ class Carts(db.Model):
             db.session.add(item)
             db.session.commit() 
             return item.item_id
-        return item.item_id
+        return False
     
     def deleteCart(self):
         for item in self.items:
