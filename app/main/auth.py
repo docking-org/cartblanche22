@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, jsonify
 from app.main import application
 from app.data.forms.authForms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, ChangePasswordForm
 from app.data.forms.cartForms import CartForm
@@ -22,7 +22,7 @@ def login():
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('main.sw')
+            next_page = url_for('main.cartblanche')
         return redirect(next_page)
         #flash('Login requested for user {}, remember_me={}'.format(form.username.data, form.remember_me.data))
         #return redirect(url_for('index'))
@@ -32,7 +32,7 @@ def login():
 @application.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('main.sw'))
+    return jsonify(url_for('main.cartblanche'))
 
 
 @application.route('/register', methods=['GET', 'POST'])

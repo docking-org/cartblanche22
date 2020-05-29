@@ -1,13 +1,58 @@
-from flask import render_template, flash, redirect, url_for, jsonify, request, send_file
+from flask import render_template, flash, redirect, url_for, jsonify, request, send_file, Response
 from app.main import application
 from flask_login import current_user
 from app.data.models.carts import Carts
 from app.data.models.items import Items
 from app.main.punchout import punchoutOrder
-import csv, os
+from app.main.items import addToCartWithVendor
+import csv, os, json
 import re, requests
 import urllib.parse
 
+@application.route('/saveCartToDb', methods=["POST"])
+def saveCartToDb():
+    data = request.get_json()
+    activeCart = Carts.query.get(current_user.activeCart)
+    for d in data:
+        if len(d['supplier']) == 0:
+            activeCart.addToCartGetId(current_user, d['identifier'], d['img'], d['db'])
+        else:
+            for v in d['supplier']:
+                addToCartWithVendor(d['identifier'], d['img'], d['db'], v)
+    # response = Response(, 200, mimetype="application/json")
+    # print(response)
+    return jsonify('successfully integrated  localStorageData to db')
+
+@application.route('/newcart', methods= ['GET',  'POST'])
+def newcart():
+    response = []
+    identifiers = []
+    is_authenticated = False
+    cart_count=0
+    if current_user.is_authenticated:
+        cart = current_user.items_in_cart
+        for c in cart:
+            identifiers.append(c.identifier)
+            item = {}
+            item['identifier'] = c.identifier
+            item['db'] = c.database
+            item['img'] = c.compound_img
+            supplier = []
+            for v in c.vendors:
+                vendor = {}
+                vendor['cat_name'] = v.cat_name
+                vendor['supplier_code'] = v.supplier_code
+                vendor['quantity'] = v.pack_quantity
+                vendor['unit'] = v.unit
+                vendor['price'] = v.price
+                vendor['purchase'] = v.purchase_quantity
+                vendor['shipping'] = v.shipping
+                supplier.append(vendor)
+            item['supplier'] = supplier
+            response.append(item)
+        cart_count=len(cart)
+        is_authenticated = True
+    return render_template('cart/newcart.html', cart=json.dumps(response), items = json.dumps(identifiers), is_authenticated=is_authenticated, cart_count=cart_count)
 
 @application.route('/cart', methods= ['GET',  'POST'])
 def cart():
@@ -20,20 +65,34 @@ def cart():
 @application.route('/carts', methods= ['GET',  'POST'])
 def carts():
     carts = Carts.query.filter_by(user_fk=current_user.id).all()
-    for i in range(len(carts)):
-        if carts[i].cart_id == current_user.activeCart:
-            carts[i], carts[0] = carts[0], carts[i]
-            break
-    return render_template('cart/carts.html', carts=carts)
+    print(carts)
+    result = []
+    for c in carts:
+        print(c.name)
+        cart = {
+            'name' : c.name,
+            'qty' : c.count,
+            'total' : c.totalPrice,
+            'status' : c.status,
+            'DT_RowId' : c.cart_id
+        }
+        if c.cart_id == current_user.activeCart:
+            cart['active'] = True
+            result.insert(0, cart)
+        else:
+            cart['active'] = False
+            result.append(cart)
+    return render_template('cart/carts.html', carts=carts, result = result)
 
 @application.route('/createCart', methods= ['GET'])
 def createCart():
     Carts.createCart(current_user)
-    return redirect(url_for('main.carts'))
+    return jsonify(url_for('main.carts'))
 
 @application.route('/renameCart', methods= ['POST'])
 def renameCart():
     data = request.get_json()
+    print(data['name'])
     Carts.query.get(data['cart_id']).setName(data['name'])
     return jsonify('Cart name successfully updated')
 
@@ -45,9 +104,34 @@ def deleteCart(cart_id):
 
 @application.route('/activateCart/<cart_id>', methods= ['GET'])
 def activateCart(cart_id):
+    print(cart_id)
     current_user.setCart(cart_id)
-    return redirect(url_for('main.carts'))
+    response = populateCart()
+    return jsonify({'data':response})
 
+def populateCart():
+    response = []
+    if current_user.is_authenticated:
+        cart = current_user.items_in_cart
+        for c in cart:
+            item = {}
+            item['identifier'] = c.identifier
+            item['db'] = c.database
+            item['img'] = c.compound_img
+            supplier = []
+            for v in c.vendors:
+                vendor = {}
+                vendor['cat_name'] = v.cat_name
+                vendor['supplier_code'] = v.supplier_code
+                vendor['quantity'] = v.pack_quantity
+                vendor['unit'] = v.unit
+                vendor['price'] = v.price
+                vendor['purchase'] = v.purchase_quantity
+                vendor['shipping'] = v.shipping
+                supplier.append(vendor)
+            item['supplier'] = supplier
+            response.append(item)
+    return response
 # @application.route('/importData', methods=['GET', 'POST'])
 # def importData():
 #     if request.method=="POST":

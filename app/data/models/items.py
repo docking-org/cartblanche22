@@ -17,6 +17,7 @@ class Items(db.Model):
             vendor.deleteVendor()
         db.session.delete(self)
         db.session.commit()
+
         
     @property
     def totalPrice(self):

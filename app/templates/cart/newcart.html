@@ -1,0 +1,216 @@
+{%  extends 'base.html' %}
+{% block styles %}
+{{ super() }}
+<style>
+    .unassigned {
+        background-color: #c5e9f4 !important;
+        opacity: 80%;
+    }
+</style>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="../static/js/datatables.min.js"></script>
+<script src="../static/js/datatables.rowsGroup.js"></script> -->
+<script src="../static/js/custom/api.js"></script>
+<script src="../static/js/custom/cart.js"></script>
+<script src="../static/js/custom/cartblanche.js"></script>
+<script>
+    function deleteItem(btn) {
+        console.log(btn.id)
+        let cart = JSON.parse(localStorage.getItem('cart'))
+        for (i = 0; i < cart.length; i++) {
+            if (cart[i].identifier == btn.id) {
+                cart.splice(i, 1);
+            }
+        }
+        console.log(cart)
+        localStorage.setItem('cart', JSON.stringify(cart))
+        $("#div" + btn.id).remove();
+        $('#cartCount').html(getCartSize(cart))
+        if (localStorage.getItem('is_authenticated') === 'True') {
+            console.log('delete')
+            $.ajax({
+                url: '/deleteItem/' + btn.id,
+                type: 'DELETE',
+                success: function (result) {
+                    console.log('cart count: ' + result['count'])
+                    console.log('db deleted: ' + btn.id)
+                }
+            });
+        }
+    }
+
+
+    $(document).ready(() => {
+        //cartToArray() is in api.js
+        let cartData = cartToArray()
+        //cartCheck() is in cartblanche.js
+        $('#total').html(updateTotalAmount())
+        cartCheck('{{is_authenticated}}', '{{cart|safe}}');
+        let table = $('#table').DataTable({
+            "language": {
+                "emptyTable": "Cart is empty"
+            },
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            data: cartData,
+            columns: [
+                { "mData": null },
+                {
+                    "mData": (data) => {
+                        return '<img src="' + data.img + '"/>';
+                    }
+                },
+                {
+                    "mData": function (data) {
+                        return "<a><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
+                    }
+                },
+                {
+                    "mData": function (data) {
+                        return data.cat_name + "<br/>" + data.supplier_code;
+                    }
+                },
+                {
+                    "mData": function (data) {
+                        return data.quantity + data.unit;
+                    }
+                },
+                { data: "shipping" },
+                {
+                    "mData": function (data) {
+                        return '$' + data.price;
+                    }
+                },
+                { data: "purchase" },
+                {
+                    "mData": function (data) {
+                        return '$' + data.total;
+                    }
+                },
+                {
+                    data: null,
+                    defaultContent: '<a id="delete" >Delete</a>'
+                },
+            ],
+            "columnDefs": [
+                {
+                    "targets": 7,
+                    "data": "purchase",
+                    "render": function (data, type, full, meta) {
+                        var $select = $("<select></select>", {
+                        });
+                        for (let i = 1; i <= 10; i++) {
+                            var $option = $("<option></option>", {
+                                "text": i,
+                                "value": i
+                            });
+                            if (data == i) {
+                                $option.attr("selected", "selected")
+                            }
+                            $select.append($option);
+                        }
+                        return $select.prop("outerHTML");
+                    }
+                }
+            ],
+            rowCallback: function (row, data) {
+
+                if (data['cat_name'] == 'not assigned') {
+                    $(row).addClass("unassigned")
+                }
+            }
+
+        });
+        table.on('order.dt search.dt change click', function () {
+            table.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+                cell.innerHTML = i + 1;
+            });
+        }).draw();
+        $('#table').on("click", "#delete", function () {
+            let data = table.row($(this).parents('tr')).data()
+            deleteVendorFromCart(data.identifier, data.cat_name, data.supplier_code, data.quantity, data.unit, data.price);
+            table.row($(this).parents('tr')).remove().draw(false);
+            let count = parseInt($('#cartCount').html()) - 1
+            $("#cartCount").html(count)
+            $('#total').html(updateTotalAmount())
+
+
+
+        });
+        $('#table').on('change', 'select', function () {
+            let new_purchase = $(this).context.value
+            let data = table.row($(this).parents('tr')).data()
+            data = updatePurchaseAmount(data, new_purchase);
+            table.row($(this).parents('tr')).data(data);
+            $('#total').html(updateTotalAmount())
+        })
+        $('#table').on("click", '#item', function () {
+            let data = table.row($(this).parents('tr')).data()
+        })
+
+        $('#table').on("click", "#identifier", function () {
+            let data = table.row($(this).parents('tr')).data()
+            $.ajax({
+                type: "POST",
+                url: "/processItem",
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    var route = data.result;
+                    console.log(route);
+                    window.location.href = route;
+                }
+            });
+        });
+
+    });
+    $('#checkout').on('click', () => {
+        console.log('checkout button clicked')
+        let cart = JSON.parse(localStorage.getItem('cart'))
+        let total = $('#total').html()
+        console.log(cart)
+        $.ajax({
+            type: "POST",
+            url: "/processCheckout",
+            data: JSON.stringify({ 'cart': cart, 'total': total }),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (route) {
+                window.location.href = route;
+            }
+        });
+    })
+
+</script>
+{% endblock %}
+
+
+{%  block app_content %}
+<div class="row">
+    <div class="col-md-6">
+        <h1>Shopping Cart</h1>
+    </div>
+    <div class="col-md-6 float-right text-right">
+        <h5 class="card-title" id='checkoutTitle'>Total : $<span id='total'>-</span></h5>
+        <button type="button" class="btn btn-info" id="checkout">Checkout</button>
+    </div>
+</div>
+<hr>
+<div>
+
+</div>
+<!-- <table id="exportTable" class="row-border " style="display:none"></table> -->
+<table id="table" class="row-border "></table>
+
+
+
+
+<!-- <div id="cart">
+</div> -->
+
+{%  endblock %}

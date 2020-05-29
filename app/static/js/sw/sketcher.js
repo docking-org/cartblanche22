@@ -88,7 +88,7 @@ function load_smiles(input) {
 	var smi = $(input).val();
 	var url = config.WebApp.ResolverUrl;
 	console.log(config.WebApp)
-	url = 'http://sw.docking.org/' + url.substring(2)
+	url = 'https://sw.docking.org/' + url.substring(2)
 	console.log(url)
 	url = url.replace("%s", encodeURIComponent(smi));
 	console.log(url)

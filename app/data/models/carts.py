@@ -31,7 +31,15 @@ class Carts(db.Model):
             db.session.commit() 
             return item.item_id
         return False
-    
+
+    def addToCartGetId(self, current_user, identifier, img_url, database):
+        item = Items.query.filter_by(cart_fk=current_user.activeCart, identifier=identifier).first()
+        if item is None:
+            item = Items(cart_fk = current_user.activeCart, identifier=identifier, compound_img=img_url, database=database)
+            db.session.add(item)
+            db.session.commit() 
+        return item.item_id
+
     def deleteCart(self):
         for item in self.items:
             item.deleteItem()

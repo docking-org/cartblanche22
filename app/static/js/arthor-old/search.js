@@ -214,6 +214,7 @@ function drag_img(event, smiles) {
 
 
 function smiles_renderer(data, type, row) {
+  console.log(data + 'smile_rendere')
   var table = $("<table class='compound_cell'></table>");
   var img = $('<img width="200px" height="100px" />');
 
@@ -296,7 +297,7 @@ function toggleCart(btn) {
         items.push(btn.id)
         console.log(items)
         localStorage.setItem('items', items)
-        $('#cartCount').html(result['count'])
+        $('#cartCount').html(getCartSize())
       },
       error: function (data) {
         alert("fail");
@@ -313,7 +314,7 @@ function toggleCart(btn) {
         items.pop(btn.id)
         console.log(items)
         localStorage.setItem('items', items)
-        $('#cartCount').html(result['count'])
+        $('#cartCount').html(getCartSize())
       }
     });
 

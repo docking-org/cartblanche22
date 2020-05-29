@@ -16,11 +16,13 @@
 {% endblock %}
 
 {% block scripts %}
+{{super()}}
 <script type="text/javascript" src="../static/js/arthor/smi.min.js"></script>
 <script type="text/javascript" src="../static/js/arthor/datatables.min.js"></script>
 <script type="text/javascript" src="../static/js/arthor/jsme/jsme.nocache.js"></script>
 <script type="text/javascript" src="../static/js/arthor/odometer.min.js"></script>
 <script type="text/javascript" src="../static/js/arthor/at_mesg.js"></script>
+<script type="text/javascript" src="../static/js/custom/cart.js"></script>
 <script type="text/javascript" src="../static/js/arthor/arthor.js"></script>
 <script type="text/javascript" src="../static/js/arthor/sketcher.js"></script>
 <script type="text/javascript" src="../static/js/arthor/mouseover.js"></script>
@@ -47,6 +49,11 @@
   }
 
   $(document).ready(function () {
+    if (localStorage.getItem('cart') != null) {
+      console.log('arthor document.ready working')
+      let cart = JSON.parse(localStorage.getItem('cart'))
+      $('#cartCount').html(getCartSize(cart))
+    }
     arthor.getConfig()
       .done(function (response) {
 
@@ -108,9 +115,7 @@
         redraw();
       }, 500);
     });
-    if (localStorage) {
-      localStorage.setItem('items', JSON.parse('{{ items | tojson }}'))
-    }
+
   });
 
   function listSelect(item) {

@@ -19,6 +19,7 @@
 
 {% block scripts %}
 {{super()}}
+
 <script src="../static/js/datatables.min.js"></script>
 <script src="../static/js/jquery-ui.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
@@ -28,6 +29,37 @@
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 <!-- <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.colVis.min.js"></script> -->
 <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/custom/cart.js"></script>
+<script></script>
+<script>
+
+    $(document).ready(() => {
+        if (localStorage.getItem('cart') != null) {
+            console.log('base document.ready working')
+            let cart = JSON.parse(localStorage.getItem('cart'))
+            $('#cartCount').html(getCartSize(cart))
+        }
+    })
+    $('#logoutTab').on('click', () => {
+        console.log('cleaning localstrage')
+        let cart = []
+        localStorage.setItem('cart', JSON.stringify(cart))
+        localStorage.removeItem('items')
+        $.ajax({
+            type: "GET",
+            url: "/logout",
+            success: function (route) {
+                console.log(route);
+                window.location.href = route;
+            }
+        });
+
+    })
+    if (localStorage.getItem('punchout') == 'False' && localStorage.getItem('is_authenticated') == 'False') {
+        $('#loginTab').show()
+    }
+
+</script>
 {% endblock %}
 
 {% block title %}
@@ -49,35 +81,46 @@
         </div>
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav">
-                {% if not current_user.is_anonymous %}
                 <li><a href="{{ url_for('main.sw') }}">SW</a></li>
-                {% if current_user.has_roles('private') %}
+
+                <li><a href="{{ url_for('main.arthor') }}">Arthor</a></li>
+                <!-- <li><a href="{{ url_for('main.cart') }}"><span class="badge"></span></a></li> -->
+                <!-- <li> <a href="{{url_for('main.importData')}}">Import</a></li> -->
+                {% if not current_user.is_anonymous %}
+                {% if current_user.has_roles('private') %}ˇ
                 <li><a href="{{url_for('main.swp')}}">SWP</a></li>
                 {% endif %}
-                <li><a href="{{ url_for('main.arthor') }}">Arthor</a></li>
+                <!-- <li> <a href="{{url_for('main.importData')}}">Import</a></li> -->
                 <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
-                <li><a href="{{ url_for('main.cart') }}">{{current_user.cart_name}} <span class="badge"
-                            id="cartCount">{{current_user.cart_count}}</span></a></li>
-                <li> <a href="{{url_for('main.importData')}}">Import</a></li>
+                <!-- <li><a href="{{ url_for('main.cart') }}">Old Cart</a></li> -->
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
+
                 {% if current_user.is_anonymous %}
-                <li><a href="{{ url_for('main.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a>
+                <!-- <li><a href="{{ url_for('main.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a>
+                </li> -->
+                <li id="loginTab" style="display:none"><a href="{{ url_for('main.login') }}" id="username">
+                        <span class="glyphicon glyphicon-user"></span>
+                        Hello, Sign in!
+                    </a>
                 </li>
                 {% else %}
-                <li><a href="{{ url_for('main.profile') }}"><span class="glyphicon glyphicon-user"></span> Hello,
-                        {{current_user.username}}</a>
+                <li><a href="{{ url_for('main.profile') }}" id="username">
+                        <span class="glyphicon glyphicon-user"></span>
+                        Hello, {{current_user.username}}
+                    </a>
                 </li>
-                <li><a href="{{ url_for('main.logout') }}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
+                <li><a id="logoutTab"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
                 </li>
                 {% endif %}
+                <li><a href="{{ url_for('main.newcart') }}"><span class="glyphicon glyphicon-shopping-cart"
+                            style="font-size:18px"></span><span class="badge" id="cartCount">{{cart_count}}</span> </a>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
-
-
 {% endblock %}
 
 {% block content %}

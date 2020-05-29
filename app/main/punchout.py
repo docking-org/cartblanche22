@@ -3,6 +3,7 @@ from flask_login import current_user, login_user
 from app.main import application
 import xmltodict
 from app.data.models.users import Users
+from app.data.models.carts import Carts
 from time import time
 import jwt
 from app import db
@@ -11,6 +12,46 @@ import string
 import random
 
 
+def processPunchoutOrder():
+    randStr = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
+    data = genProlog("1.0", randStr)
+    data += '''
+<Header>
+    <From>
+        <Credential domain='DUNS'>
+            <Identity></Identity>
+        </Credential>
+    </From>
+<To>
+    <Credential domain='NetworkID'>
+        <Identity></Identity>
+    </Credential>
+</To>
+<Sender>
+    <Credential domain='NetworkId'>
+        <Identity></Identity>
+    </Credential>
+    <UserAgent>Our PunchOut Site V4.2</UserAgent>
+</Sender>
+</Header>'''
+    message = "<Message><PunchOutOrderMessage>"
+    buyerCookie = ""
+    if 'buyerCookie' in session.keys():
+        buyerCookie = session['buyerCookie']
+    message += "<BuyerCookie>{}</BuyerCookie>".format(buyerCookie)
+    PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>{}</Money></Total></PunchOutOrderMessageHeader>".format(session['total'])
+    message += PunchOutOrderMessageHeader
+    for item in session['cart']:
+        for vendor in item['supplier']:
+            itemIn = "<ItemIn quantity='{}'>".format(vendor['purchase'])
+            itemId = "<ItemID><SupplierPartID>{}_{}{}</SupplierPartID></ItemID>".format(vendor['supplier_code'], vendor['quantity'], vendor['unit'])
+            itemDetail = "<ItemDetail><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'><ShortName>{}_{}{}</ShortName>Pack size: {}{};Cat No.: {}; Supplier: {}</Description><UnitOfMeasure>PK</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor['price'], vendor['supplier_code'], vendor['quantity'], vendor['unit'], vendor['quantity'], vendor['unit'], vendor['supplier_code'], vendor['cat_name'])
+            message = message + itemIn + itemId + itemDetail + '</ItemIn>'
+    message += '</PunchOutOrderMessage></Message>'
+    data += message
+    data += '</cXML>'
+    # main = '<input type="hidden" name="cxml-urlencoded" value="' + data + '">'
+    return data
 
 def punchoutOrder():
     randStr = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
@@ -84,7 +125,7 @@ def punchoutSetup():
     <PunchOutSetupResponse>
     <StartPage>
      '''
-    url = ''.join(['<URL>https://cartblanche.docking.org/punchoutStart/',token, '</URL>'])
+    url = ''.join(['<URL>0.0.0.0:5067/punchoutStart/',token, '</URL>'])
     data += url
     data += '''
     </StartPage>
@@ -102,12 +143,13 @@ def punchoutStart(token):
         user_id = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['user_id']
         url = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['url']
         buyerCookie = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['buyerCookie']
-        user = Users.query.get(user_id)
-        login_user(user)
-        print(current_user)
+        # user = Users.query.get(user_id)
+        # Carts.createCart(user)
+        # login_user(user)
+        # print(current_user)
         session['url'] = url
         session['buyerCookie'] = buyerCookie
-        return redirect(url_for('main.sw'))
+        return redirect(url_for('main.cartblanche'))
     except:
         return jsonify('something wrong with starting the page, token expired or user not found')
 

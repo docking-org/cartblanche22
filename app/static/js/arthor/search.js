@@ -179,7 +179,8 @@ function flex_renderer(data, type, row) {
 }
 
 function hitid_renderer(data, type, row) {
-  return data.toLocaleString();
+  // console.log(data)
+  return (data + 1).toLocaleString();
 }
 
 function show_popup(e, url) {
@@ -253,7 +254,11 @@ function smiles_renderer(data, type, row) {
   button.attr('db', arthor.table);
   button.attr('img', depict_url);
   button.attr('onclick', 'toggleCart(this)');
-  let items = localStorage.getItem('items')
+  let cart = JSON.parse(localStorage.getItem('cart'))
+  let items = []
+  for (i = 0; i < cart.length; i++) {
+    items.push(cart[i].identifier)
+  }
   if (items.includes(id)) {
     button.html('Remove')
     button.attr('class', 'btn btn-danger')
@@ -268,52 +273,65 @@ function smiles_renderer(data, type, row) {
   return $('<div>').append(table)
     .html();
 }
-function toggleCart(btn) {
-  let items = localStorage.getItem('items').split(',')
-  if (btn.getAttribute('class') == 'btn btn-info') {
-    $.ajax({
-      type: 'POST',
-      url: '/addToCart',
-      data: JSON.stringify({
-        'id': btn.id,
-        'database': btn.getAttribute('db'),
-        'img_url': btn.getAttribute('img')
-      }),
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      success: function (result) {
-        $(btn).html('Remove')
-        $(btn).attr('class', 'btn btn-danger')
-        items.push(btn.id)
-        localStorage.setItem('items', items)
-        $('#cartCount').html(result['count'])
-        $.ajax({
-          type: 'POST',
-          url: '/autoChooseVendor/' + result['item_id'],
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-        })
-      },
-      error: function (data) {
-        alert("fail");
-      }
-    });
-  }
-  else {
-    $.ajax({
-      url: '/deleteItem/' + btn.id,
-      type: 'DELETE',
-      success: function (result) {
-        $(btn).html('Add to Cart')
-        $(btn).attr('class', 'btn btn-info')
-        items.pop(btn.id)
-        $('#cartCount').html(result['count'])
-        localStorage.setItem('items', items)
-      }
-    });
+// function toggleCart(btn) {
+//   let cart = JSON.parse(localStorage.getItem('cart'))
+//   if (btn.getAttribute('class') == 'btn btn-info') {
+//     let item = {
+//       'identifier': btn.id,
+//       'db': btn.getAttribute('db'),
+//       'img': btn.getAttribute('img'),
+//       'supplier': []
+//     }
+//     cart.push(item)
+//     localStorage.setItem('cart', JSON.stringify(cart))
+//     $(btn).html('Remove')
+//     $(btn).attr('class', 'btn btn-danger')
+//     $('#cartCount').html(cart.length)
+//     if (localStorage.getItem('is_authenticated') === 'True') {
+//       console.log('add')
+//       $.ajax({
+//         type: 'POST',
+//         url: '/addToCart',
+//         data: JSON.stringify({
+//           'id': btn.id,
+//           'database': btn.getAttribute('db'),
+//           'img_url': btn.getAttribute('img')
+//         }),
+//         contentType: "application/json; charset=utf-8",
+//         dataType: "json",
+//         success: function (result) {
+//           console.log('db saved: ' + btn.id)
+//         },
+//         error: function (data) {
+//           alert("fail when adding to server molecule:" + btn.id);
+//         }
+//       });
+//     }
 
-  }
 
-  return false;
+//   }
+//   else {
+//     for (i = 0; i < cart.length; i++) {
+//       if (cart[i].identifier == btn.id) {
+//         cart.pop(i)
+//       }
+//     }
+//     localStorage.setItem('cart', JSON.stringify(cart))
+//     $(btn).html('Add To Cart')
+//     $(btn).attr('class', 'btn btn-info')
+//     $('#cartCount').html(cart.length)
+//     if (localStorage.getItem('is_authenticated') === 'True') {
+//       console.log('delete')
+//       $.ajax({
+//         url: '/deleteItem/' + btn.id,
+//         type: 'DELETE',
+//         success: function (result) {
+//           console.log('db deleted: ' + btn.id)
+//         }
+//       });
+//     }
 
-}
+
+//   }
+//   return false;
+// }

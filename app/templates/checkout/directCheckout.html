@@ -1,0 +1,127 @@
+{%  extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script src="../static/js/custom/api.js"></script>
+<script>
+    let exportTable = $('#exportTable').DataTable({
+        "paging": false,
+        "ordering": false,
+        "info": false,
+        "searching": false,
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                title: 'CartList',
+                extend: 'csvHtml5',
+                footer: true,
+
+            },
+            {
+                title: 'CartList',
+                extend: 'excelHtml5',
+                footer: true,
+
+            },
+            {
+                title: 'CartList',
+                extend: 'pdfHtml5',
+                footer: true,
+
+            },
+            {
+                title: 'CartList',
+                text: 'TSV',
+                extend: 'csvHtml5',
+                fieldSeparator: '\t',
+                extension: '.tsv',
+                footer: true,
+
+            },
+        ],
+        data: cartToArray(),
+        columns: [
+            { data: "num" },
+            { data: "identifier" },
+            { data: "cat_name" },
+            { data: "supplier_code" },
+            {
+                "mData": function (data) {
+                    return data.quantity + data.unit;
+                }
+            },
+            {
+                "mData": function (data) {
+                    return '$' + data.price;
+                }
+            },
+            { data: "purchase" },
+            {
+                "mData": function (data) {
+                    return '$' + data.total;
+                }
+            },
+        ],
+        "footerCallback": function (row, data, start, end, display) {
+            console.log(row, data, start, end)
+            var api = this.api(), data;
+
+            // Remove the formatting to get integer data for summation
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+
+            // Total over this page
+            pageTotal = api
+                .column(7)
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+
+            // Update footer
+            $(api.column(7).footer()).html(
+                '$' + pageTotal
+            );
+        }
+    })
+</script>
+{% endblock %}
+{%  block app_content %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h3>Sorry</h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            This page is in under construction. But you can export your purchase into .csv, .xlxs, .pdf, .tsv files.
+            <table id="exportTable">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Identifier</th>
+                        <th>Catalog Name</th>
+                        <th>Supplier Code</th>
+                        <th>Pack size</th>
+                        <th>Pack price</th>
+                        <th>Purchase Qty</th>
+                        <th>Total price</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th colspan="7" style="text-align:right"></th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </p>
+    </div>
+    <div class="panel-footer text-right">
+        <a href="{{url_for('main.sw')}}"><button class="btn btn-info">Explore molecules</button></a>
+        <a href="{{url_for('main.newcart')}}"><button class="btn btn-info">Take me to my cart</button></a>
+    </div>
+</div>
+{% endblock %}

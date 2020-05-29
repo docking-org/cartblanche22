@@ -1,4 +1,19 @@
 {% extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script src="../static/js/custom/cartblanche.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        localStorage.setItem('punchout', '{{punchout}}')
+        localStorage.setItem('is_authenticated', '{{is_authenticated}}')
+        timeoutCheck('{{is_authenticated}}', '{{cart|safe}}');
+        cartCheck('{{is_authenticated}}', '{{cart|safe}}');
+        console.log("jquery: ready");
+    });
+</script>
+{% endblock %}
 {% block app_content %}
 <div class="jumbotron row less-jumbo">
     <div class="col-md-6">

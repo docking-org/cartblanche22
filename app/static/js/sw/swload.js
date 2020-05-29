@@ -1,5 +1,5 @@
 var show_disabled = false;
-var sw_server = 'http://sw.docking.org';
+var sw_server = 'https://sw.docking.org';
 
 function toggle_visibility() {
 	$button = $('#vis-button');

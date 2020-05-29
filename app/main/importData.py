@@ -25,11 +25,11 @@ def importIdentifier(identifier):
 def validator(identifier):
     identifier = identifier.lower()
     if 'c' in identifier or 'identifier' in identifier or identifier.isnumeric():
-        response = requests.get('http://zinc15.docking.org/substances/'+identifier+'.txt')
+        response = requests.get('https://zinc15.docking.org/substances/'+identifier+'.txt')
         if response:
             identifier, smile = response.text.split()[0], response.text.split()[1]
             db = 'ZINC-All-19Q4-1.4B.anon'
-            img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
+            img = 'https://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
             return identifier, img, db
     else:
         response = requests.get('http://gimel.compbio.ucsf.edu:5022/api/_search_btz', params={'molecule_id':identifier})
@@ -38,6 +38,6 @@ def validator(identifier):
             identifier = molecule['mol_id']
             smile = molecule['smiles']
             db = molecule['db_name']
-            img = 'http://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
+            img = 'https://sw.docking.org/depict/svg?w=50&h=30&smi={}%20{}8&qry=&cols=&cmap=&bgcolor=clear&hgstyle=outerglow'.format(urllib.parse.quote(smile),identifier)
             return identifier, img, db
     return False

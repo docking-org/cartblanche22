@@ -5,18 +5,17 @@
 {% block scripts %}
 {{super()}}
 <script src="../static/js/jsme/jsme.nocache.js"></script>
+<script src="../static/js/custom/cart.js"></script>
 <script src="../static/js/sw/swsearch.js"></script>
 <script src="../static/js/sw/sketcher.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function () {
-        items = JSON.parse('{{ items | tojson }}');
         $('#content').width($('#content').parent().width() - 450);
         $(window).resize(function () {
             $('#content').width($('#content').parent().width() - 450);
             if (dtable) {
                 resize();
-                redraw(JSON.parse('{{ items | tojson }}'));
             }
         });
         db_maps($('#dbsel'));

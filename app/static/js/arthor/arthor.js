@@ -26,9 +26,10 @@ function Arthor(url) {
   this.tables = {};
   this.listeners = [];
 
-  this.configPromise = $.get(this.url + "/config").then((function (arthor) {
+  this.configPromise = $.get(this.url + '/config').then((function (arthor) {
     return function (response) {
       arthor.config = response;
+      console.log(arthor.config)
       return response;
     };
   })(this));
@@ -38,7 +39,7 @@ function Arthor(url) {
 
   this.getHitImg = function (smiles, w, h) {
     const smarts = (this.type == 'Substructure' || this.type == 'SMARTS') ? encodeURIComponent(this.queryResponse) : '';
-    let url = this.config.WebApp.DEPICTION.replace("%s", encodeURIComponent(smiles))
+    let url = this.config.WebApp.Depiction.replace("%s", encodeURIComponent(smiles))
       .replace("%w", w)
       .replace("%h", h)
       .replace("%m", smarts);
