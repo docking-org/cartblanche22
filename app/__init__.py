@@ -40,6 +40,7 @@ def create_app(config_class=Config):
     admin = Admin(app, name='shoppingcart', template_mode='bootstrap3')
     admin.add_view(ModelView(Users, db.session))
     admin.add_view(ModelView(Roles, db.session))
+    admin.add_view(ModelView(Vendors, db.session))
     admin.add_view(ModelView(AvailableVendors, db.session))
 
     from app.errors import application as errors_bp

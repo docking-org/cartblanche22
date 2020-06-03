@@ -9,7 +9,7 @@ class Vendors(db.Model):
     unit = db.Column(db.String(10), default='mg')
     supplier_code = db.Column(db.String(120))
     price = db.Column(db.Float)
-    shipping = db.Column(db.Integer)
+    shipping = db.Column(db.String(120), default="undefined")
     currency = db.Column(db.String(10), default="usd")
     cat_id_fk = db.Column(db.Integer)
 

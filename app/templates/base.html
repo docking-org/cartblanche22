@@ -39,6 +39,7 @@
             let cart = JSON.parse(localStorage.getItem('cart'))
             $('#cartCount').html(getCartSize(cart))
         }
+
     })
     $('#logoutTab').on('click', () => {
         console.log('cleaning localstrage')
@@ -81,9 +82,10 @@
         </div>
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.sw') }}">SW</a></li>
+                <li><a href="{{ url_for('main.sw') }}">Smallworld</a></li>
 
                 <li><a href="{{ url_for('main.arthor') }}">Arthor</a></li>
+                <!-- <li><input type="text" id="search" placeholder="Search..."></li> -->
                 <!-- <li><a href="{{ url_for('main.cart') }}"><span class="badge"></span></a></li> -->
                 <!-- <li> <a href="{{url_for('main.importData')}}">Import</a></li> -->
                 {% if not current_user.is_anonymous %}
