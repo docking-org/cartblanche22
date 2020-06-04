@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 
 class Vendors(db.Model):
     vendor_id = db.Column(db.Integer, primary_key=True)
@@ -9,9 +10,11 @@ class Vendors(db.Model):
     unit = db.Column(db.String(10), default='mg')
     supplier_code = db.Column(db.String(120))
     price = db.Column(db.Float)
-    shipping = db.Column(db.String(120), default="undefined")
+    shipping = db.Column(db.Integer)
+    shipping_str = db.Column(db.String(120), default="undefined")
     currency = db.Column(db.String(10), default="usd")
     cat_id_fk = db.Column(db.Integer)
+    created_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
         return 'id: {}, cat_name:{}, supplier_code:{}, pack_quantity:{}, price:{}, purchase_quantity:{}'.format(self.vendor_id, self.cat_name, self.supplier_code, self.pack_quantity, self.price, self.purchase_quantity)
@@ -42,7 +45,7 @@ class Vendors(db.Model):
             vendor_ = Vendors(item_fk=item_id, cat_name=vendor['cat_name'], 
                         purchase_quantity=vendor['purchase'],
                         supplier_code=vendor['supplier_code'], price=float(vendor['price']), 
-                        pack_quantity=float(vendor['quantity']), unit=vendor['unit'], shipping=vendor['shipping'])
+                        pack_quantity=float(vendor['quantity']), unit=vendor['unit'], shipping_str=vendor['shipping'])
         db.session.add(vendor_)
         db.session.commit()
         return vendor_

@@ -69,5 +69,6 @@ target
 deployment/
 .flaskenv
 app/static/node_modules
-migrationsSqlite
+migrations
+migrationsPsql
 app.db

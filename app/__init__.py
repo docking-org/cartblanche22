@@ -10,7 +10,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_mail import Mail
 
 db = SQLAlchemy()
-migrate = Migrate()
+migrate = Migrate(compare_type=True)
 login = LoginManager()
 bootstrap = Bootstrap()
 mail = Mail()

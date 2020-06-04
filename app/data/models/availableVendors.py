@@ -1,4 +1,5 @@
 from app import db 
+from datetime import datetime
 
 class AvailableVendors(db.Model):
     __tablename__ = 'availableVendors'
@@ -10,7 +11,8 @@ class AvailableVendors(db.Model):
     name = db.Column(db.String(120))
     availability = db.Column(db.Boolean)
     priority = db.Column(db.Integer, default=50)
-    
+    created_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
     def createAvailableVendors(l):
         vendor = AvailableVendors(cat_id_fk=l[0], bb=l[1], short_name=l[2], purchasable=l[3], name=l[4], availability=True)
         db.session.add(vendor)

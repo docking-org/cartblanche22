@@ -2,6 +2,7 @@ from app import db
 import enum
 import datetime
 from app.data.models.items import Items
+from datetime import datetime
 
 # class CartStatusEnum(enum.Enum):
 #     one = 'Prepare'
@@ -19,6 +20,7 @@ class Carts(db.Model):
     items = db.relationship('Items', backref='cart', lazy='dynamic')
     name = db.Column(db.String(256), default='Cart')
     status = db.Column(db.String(256))
+    created_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
         return '<Cart {}>'.format(self.cart_id)

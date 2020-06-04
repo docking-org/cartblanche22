@@ -1,5 +1,6 @@
 from app import db
 from app.data.models.vendors import Vendors
+from datetime import datetime
 
 class Items(db.Model):
     item_id = db.Column(db.Integer, primary_key=True)
@@ -11,6 +12,7 @@ class Items(db.Model):
     database = db.Column(db.String(120), nullable = False)
     price = db.Column(db.Float)
     vendors = db.relationship('Vendors', backref='item', lazy='dynamic')
+    created_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def deleteItem(self):
         for vendor in self.vendors:

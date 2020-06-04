@@ -8,6 +8,7 @@ from app.data.models.roles import Roles, UserRoles
 from app.data.models.availableVendors import AvailableVendors, UserVendors
 from time import time
 import jwt
+from datetime import datetime
 
 class Users(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -18,7 +19,7 @@ class Users(db.Model, UserMixin):
     carts = db.relationship('Carts', backref='user', lazy='dynamic')
     activeCart = db.Column(db.Integer)
     roles = db.relationship('Roles', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
-    
+    created_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

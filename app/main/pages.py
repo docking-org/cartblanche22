@@ -37,7 +37,7 @@ def cartblanche():
                 vendor['unit'] = v.unit
                 vendor['price'] = v.price
                 vendor['purchase'] = v.purchase_quantity
-                vendor['shipping'] = v.shipping
+                vendor['shipping'] = v.shipping_str
                 supplier.append(vendor)
             item['supplier'] = supplier
             response.append(item)
