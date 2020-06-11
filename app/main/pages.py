@@ -7,6 +7,7 @@ import json
 from app.data.models.users import Users
 from app.data.models.carts import Carts
 
+
 @application.route('/', methods=['GET'])
 @application.route('/cartblanche', methods=['GET'])
 def cartblanche():
@@ -45,6 +46,7 @@ def cartblanche():
         is_authenticated = True
     return render_template('cartblanche.html', cart=json.dumps(response), items = json.dumps(identifiers), is_authenticated=is_authenticated, cart_count=cart_count, url = url, punchout = punchout)
 
+
 @application.route('/profile', methods=['GET'])
 def profile():
     for i in AvailableVendors.query.all():
@@ -53,6 +55,7 @@ def profile():
             db.session.add(vendor)
             db.session.commit()
     return render_template('profile.html', data=current_user.vendors)
+
 
 @application.route('/updateVendorPriority', methods=['POST'])
 def updateVendorPriority():

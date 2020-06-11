@@ -88,6 +88,20 @@
             );
         }
     })
+    $('#gsheet').on('click', () => {
+        console.log('gsheet')
+        $.ajax({
+            type: "POST",
+            url: '/gsheet',
+            data: JSON.stringify(cartToArray()),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                window.open(data, '_blank');
+            }
+        })
+    })
 </script>
 {% endblock %}
 {%  block app_content %}
@@ -120,6 +134,7 @@
                 </tfoot>
             </table>
         </p>
+        <p><button class="btn btn-info" id="gsheet">Export to google sheets</button></p>
     </div>
     <div class="panel-footer text-right">
         <a href="{{url_for('main.sw')}}"><button class="btn btn-info">Return to Smallworld</button></a>

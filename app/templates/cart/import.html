@@ -73,7 +73,7 @@
             case 'completed':
                 $('#table').show()
                 $('#title').html("It's done! You are good to go...")
-                $('#modal-footer').append("<a href='{{ url_for('main.cart') }}' class='btn btn-info'> Take me to the my cart</a>")
+                $('#modal-footer').append("<a href='{{ url_for('main.newcart') }}' class='btn btn-info'> Take me to the my cart</a>")
                 break;
             case 'empty':
                 $('#modal-footer').append('<button class="btn btn-info" data-dismiss="modal">Close</button>')

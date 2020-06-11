@@ -16,15 +16,19 @@ from operator import getitem
 import asyncio
 from app.main.items import addToCartWithVendor
 
+
 @application.route('/updateVendor', methods=['PUT'])
 def updateVendor():
     if current_user.is_authenticated:
         activeCart = Carts.query.get(current_user.activeCart)
         data = request.get_json()
         item = Items.query.filter_by(identifier=data['identifier'], cart_fk=current_user.activeCart).first()
-        vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],                   supplier_code=data['supplier_code'], price=float(data['price']),                   pack_quantity=float(data['quantity']), unit=data['unit']).first()
+        vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],
+                                         supplier_code=data['supplier_code'], price=float(data['price']),
+                                         pack_quantity=float(data['quantity']), unit=data['unit']).first()
         vendor.updatePurchaseQuantity(data['purchase'])
     return jsonify('successfully updated vendor purchase to db')
+
 
 @application.route('/addVendor', methods=['POST'])
 def addVendor():
@@ -37,6 +41,7 @@ def addVendor():
         print(vendor_)
     return jsonify('successfullt added vendor to db')
 
+
 @application.route('/deleteVendor', methods=['POST'])
 def deleteVendor():
     if current_user.is_authenticated:
@@ -46,9 +51,12 @@ def deleteVendor():
         if len(vendors) <= 1:
             item.deleteItem()
         else:            
-            vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],                   supplier_code=data['supplier_code'], price=float(data['price']),                   pack_quantity=float(data['quantity']), unit=data['unit']).first()
+            vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],
+                                             supplier_code=data['supplier_code'], price=float(data['price']),
+                                             pack_quantity=float(data['quantity']), unit=data['unit']).first()
             vendor.deleteVendor()
     return jsonify('successfully deleted vendor from db')
+
 
 @application.route('/vendorsFromZinc', methods=['GET'])
 def vendorsFromZinc():
@@ -75,24 +83,28 @@ def vendorsFromZinc():
                     AvailableVendors.createAvailableVendors(l)
     return
 
+
 @application.route('/autoChooseVendor/<item_id>', methods= ['POST'])
 def autoChooseVendor(item_id):
     '''used to automatically choose one vendor from vendors. Currently it's taking lowest pack with lowest price'''
     print('autoChoosing Vendor for {}'.format(item_id))
     item = Items.query.get(item_id)
-    payload = {'molecule_id' : ''.join(item.identifier.split()), 'source_database' : item.database}
-    response = requests.get('https://gimel.compbio.ucsf.edu:5022/api/_new_get_data', params=payload)
+    payload = {'molecule_id': ''.join(item.identifier.split()), 'source_database': item.database}
+    response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
     if response and len(response.json()) > 0:
         res = response.json()
         print(res)
         for i in res:
-            i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
-        res = sorted(res, key = lambda x : x['packs'][0]['price'])
-        vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase_quantity': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit']}
+            i['packs'].sort(key=lambda x : (x['price'], x['quantity']))
+        res = sorted(res, key=lambda x : x['packs'][0]['price'])
+        vendor = {'cat_name': res[0]['cat_name'], 'cat_id_fk': res[0]['cat_id_fk'], 'purchase_quantity': 1,
+                  'supplier_code': res[0]['supplier_code'], 'price': res[0]['packs'][0]['price'],
+                  'quantity': res[0]['packs'][0]['quantity'], 'unit': res[0]['packs'][0]['unit']}
         Vendors.createVendor(vendor, item_id)
     else:
         return jsonify(success=False, message="Problem causing with price api request or empty")
     return jsonify(success=True)
+
 
 @application.route('/getVendors/<identifier>/<db>', methods= ['GET'])
 def getVendors(identifier, db):
@@ -114,7 +126,8 @@ def getVendors(identifier, db):
                 temp['shipping'] = pack['shipping']
                 temp['DT_RowId'] = i
                 vendors.append(temp)
-    return jsonify({'vendors' : vendors})
+    return jsonify({'vendors': vendors})
+
 
 @application.route('/chooseVendor', methods= ['GET', 'POST'])
 def chooseVendor():
@@ -141,7 +154,7 @@ def chooseVendor():
 def vendorModal(item_id):
     item = Items.query.get(item_id)
     payload = {'molecule_id' : ''.join(item.identifier.split()), 'source_database' : item.database}
-    response = requests.get('http://gimel.compbio.ucsf.edu:5022/api/_new_get_data', params=payload)
+    response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
     if response:
         data = response.json()
         priceAPI = []
@@ -164,7 +177,7 @@ def vendorModal(item_id):
 def vendorUpdate():
     data = request.get_json()
     # Since user chose new vendors we do not need to store old chosen vendors
-    Vendors.query.filter_by(item_fk = data['item_id']).delete()
+    Vendors.query.filter_by(item_fk=data['item_id']).delete()
     for item in data['post_data']:
         Vendors.createVendor(item, data['item_id'])
     return jsonify('success')

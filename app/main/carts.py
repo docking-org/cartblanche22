@@ -9,6 +9,7 @@ import csv, os, json
 import re, requests
 import urllib.parse
 
+
 @application.route('/saveCartToDb', methods=["POST"])
 def saveCartToDb():
     data = request.get_json()
@@ -23,12 +24,13 @@ def saveCartToDb():
     # print(response)
     return jsonify('successfully integrated  localStorageData to db')
 
+
 @application.route('/newcart', methods= ['GET',  'POST'])
 def newcart():
     response = []
     identifiers = []
     is_authenticated = False
-    cart_count=0
+    cart_count = 0
     if current_user.is_authenticated:
         cart = current_user.items_in_cart
         for c in cart:
