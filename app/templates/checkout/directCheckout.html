@@ -1,146 +1,286 @@
-{%  extends 'base.html' %}
+{% extends 'base.html' %}
 {% block scripts %}
-{{ super() }}
-<script src="../static/js/custom/api.js"></script>
-<script>
-    let exportTable = $('#exportTable').DataTable({
-        "paging": false,
-        "ordering": false,
-        "info": false,
-        "searching": false,
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                title: 'CartList',
-                extend: 'csvHtml5',
-                footer: true,
-
+    {{ super() }}
+    <script src="../static/js/custom/api.js"></script>
+    <script>
+        let chemspaceTable = $('#chemspace_table').DataTable({
+            data: cartToArray(),
+            "language": {
+                "emptyTable": "Cart is empty"
             },
-            {
-                title: 'CartList',
-                extend: 'excelHtml5',
-                footer: true,
+            "scrollY": "450px",
+            "scrollX": true,
+            "paging": false,
+            "info": false,
+            "ordering": false,
+            columns: [
+                {
+                    data: "num",
+                    "width": "5%",
+                },
 
-            },
-            {
-                title: 'CartList',
-                extend: 'pdfHtml5',
-                footer: true,
+                {
+                    "width": "25%",
+                    "mData": function (data) {
+                        return '<input type="checkbox" name="stereochemistry"/>'
+                    },
+                },
+                {
+                    "width": "25%",
+                    "mData": function (data) {
+                        return '<input type="checkbox" name="analogs"/>'
+                    },
+                },
+                {data: "identifier"},
 
-            },
-            {
-                title: 'CartList',
-                text: 'TSV',
-                extend: 'csvHtml5',
-                fieldSeparator: '\t',
-                extension: '.tsv',
-                footer: true,
+            ],
+        })
+        $('input[name=stereochemistry]').change(function () {
+            let data = chemspaceTable.row($(this).parents('tr')).data()
+            if ($(this).is(':checked')) {
+                data.stereochemistry = true
+            } else {
+                // Checkbox is not checked..
+                data.stereochemistry = false
+            }
+        });
 
-            },
-        ],
-        data: cartToArray(),
-        columns: [
-            { data: "num" },
-            { data: "identifier" },
-            { data: "cat_name" },
-            { data: "supplier_code" },
-            { data: "shipping" },
-            {
-                "mData": function (data) {
-                    return data.quantity + data.unit;
-                }
-            },
-            {
-                "mData": function (data) {
-                    return '$' + data.price;
-                }
-            },
-            { data: "purchase" },
-            {
-                "mData": function (data) {
-                    return '$' + data.total;
-                }
-            },
-        ],
-        "footerCallback": function (row, data, start, end, display) {
-            console.log(row, data, start, end)
-            var api = this.api(), data;
+        $('input[name=analogs]').change(function () {
+            let data = chemspaceTable.row($(this).parents('tr')).data()
+            if ($(this).is(':checked')) {
+                data.analogs = true
+            } else {
+                // Checkbox is not checked..
+                data.analogs = false
+            }
+        });
+        $('#id_stereochemistry').change(function () {
+            let data = chemspaceTable.rows().data();
+            let val;
+            if ($(this).is(':checked')) {
+                $('input[name=stereochemistry]').prop('checked', true)
+                val = true;
+            } else {
+                // Checkbox is not checked..
+                $('input[name=stereochemistry]').prop('checked', false)
+                val = false;
+            }
+            data.map(d => d.stereochemistry = val)
+        });
+        $('#id_analogs').change(function () {
+            let data = chemspaceTable.rows().data();
+            let val;
+            if ($(this).is(':checked')) {
+                $('input[name=analogs]').prop('checked', true)
+                val = true
+            } else {
+                // Checkbox is not checked..
+                $('input[name=analogs]').prop('checked', false)
+                val = false
+            }
+            data.map(d => d.analogs = val)
+        });
 
-            // Remove the formatting to get integer data for summation
-            var intVal = function (i) {
-                return typeof i === 'string' ?
-                    i.replace(/[\$,]/g, '') * 1 :
-                    typeof i === 'number' ?
-                        i : 0;
-            };
+        let exportTable = $('#exportTable').DataTable({
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            "searching": false,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    title: 'CartList',
+                    extend: 'csvHtml5',
+                    footer: true,
 
-            // Total over this page
-            pageTotal = api
-                .column(8)
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);
+                },
+                {
+                    title: 'CartList',
+                    extend: 'excelHtml5',
+                    footer: true,
 
-            // Update footer
-            $(api.column(8).footer()).html(
-                '$' + pageTotal
-            );
-        }
-    })
-    $('#gsheet').on('click', () => {
-        console.log('gsheet')
-        $.ajax({
-            type: "POST",
-            url: '/gsheet',
-            data: JSON.stringify(cartToArray()),
-            contentType: "application/json",
-            dataType: 'json',
-            success: function (data) {
-                console.log(data);
-                window.open(data, '_blank');
+                },
+                {
+                    title: 'CartList',
+                    extend: 'pdfHtml5',
+                    footer: true,
+
+                },
+                {
+                    title: 'CartList',
+                    text: 'TSV',
+                    extend: 'csvHtml5',
+                    fieldSeparator: '\t',
+                    extension: '.tsv',
+                    footer: true,
+
+                },
+            ],
+            data: cartToArray(),
+            columns: [
+                {data: "num"},
+                {data: "identifier"},
+                {data: "cat_name"},
+                {data: "supplier_code"},
+                {data: "shipping"},
+                {
+                    "mData": function (data) {
+                        return data.quantity + data.unit;
+                    }
+                },
+                {
+                    "mData": function (data) {
+                        return '$' + data.price;
+                    }
+                },
+                {data: "purchase"},
+                {
+                    "mData": function (data) {
+                        return '$' + data.total;
+                    }
+                },
+            ],
+            "footerCallback": function (row, data, start, end, display) {
+                console.log(row, data, start, end)
+                var api = this.api(), data;
+
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '') * 1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+
+                // Total over this page
+                pageTotal = api
+                    .column(8)
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                // Update footer
+                $(api.column(8).footer()).html(
+                    '$' + pageTotal
+                );
             }
         })
-    })
-</script>
+        $('#gsheet').on('click', () => {
+            console.log('gsheet')
+            $.ajax({
+                type: "POST",
+                url: '/gsheet',
+                data: JSON.stringify(cartToArray()),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    window.open(data, '_blank');
+                }
+            })
+        })
+        $('#send_chemspace').on('click', () => {
+            let d = chemspaceTable.rows().data();
+            let data = []
+            for(let i = 0; i < d.length; i++){
+                data.push(d[i])
+            }
+            $.ajax({
+                type: "POST",
+                url: '/order_chemspace',
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    $('#exampleModal .close').click();
+                    alert(data);
+                }
+             })
+
+        })
+    </script>
 {% endblock %}
-{%  block app_content %}
-<div class="panel panel-info">
-    <div class="panel-heading">
-        <h3>Sorry</h3>
-    </div>
-    <div class="panel-body">
-        <p>
-            This page is in under construction. But you can export your purchase into .csv, .xlxs, .pdf, .tsv files.
+{% block app_content %}
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3>Sorry</h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                This page is in under construction. But you can export your purchase into .csv, .xlxs, .pdf, .tsv files.
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                    Send to ChemSpace
+                </button>
+
+                <!-- Modal -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Send to ChemSpace</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table id="chemspace_table" style="width: 100%">
+                                <thead style="width:100%">
+                                <tr>
+                                    <th>No</th>
+
+                                    <th>Require exact stereochemistry? <input type="checkbox" id="id_stereochemistry"/>
+                                    </th>
+                                    <th>Quote close analogs? <input type="checkbox" id="id_analogs"/></th>
+                                    <th>Identifier</th>
+
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-info" id="send_chemspace">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <table id="exportTable">
                 <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Identifier</th>
-                        <th>Catalog Name</th>
-                        <th>Supplier Code</th>
-                        <th>Delivery time</th>
-                        <th>Pack size</th>
-                        <th>Pack price</th>
-                        <th>Purchase Qty</th>
-                        <th>Total price</th>
-                    </tr>
+                <tr>
+                    <th>No</th>
+                    <th>Identifier</th>
+                    <th>Catalog Name</th>
+                    <th>Supplier Code</th>
+                    <th>Delivery time</th>
+                    <th>Pack size</th>
+                    <th>Pack price</th>
+                    <th>Purchase Qty</th>
+                    <th>Total price</th>
+                </tr>
                 </thead>
                 <tfoot>
-                    <tr>
-                        <th colspan="8" style="text-align:right"></th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th colspan="8" style="text-align:right"></th>
+                    <th></th>
+                </tr>
                 </tfoot>
             </table>
-        </p>
-        <p><button class="btn btn-info" id="gsheet">Export to google sheets</button></p>
+            </p>
+            {#        <p><button class="btn btn-info" id="gsheet">Export to google sheets</button></p>#}
+        </div>
+        <div class="panel-footer text-right">
+            <a href="{{ url_for('main.sw') }}">
+                <button class="btn btn-info">Return to Smallworld</button>
+            </a>
+            <a href="{{ url_for('main.arthor') }}">
+                <button class="btn btn-info">Return to Arthor</button>
+            </a>
+            <a href="{{ url_for('main.newcart') }}">
+                <button class="btn btn-info"><span
+                        class="glyphicon glyphicon-shopping-cart" style="font-size:18px"></span></button>
+            </a>
+        </div>
     </div>
-    <div class="panel-footer text-right">
-        <a href="{{url_for('main.sw')}}"><button class="btn btn-info">Return to Smallworld</button></a>
-        <a href="{{url_for('main.arthor')}}"><button class="btn btn-info">Return to Arthor</button></a>
-        <a href="{{url_for('main.newcart')}}"><button class="btn btn-info"><span
-                    class="glyphicon glyphicon-shopping-cart" style="font-size:18px"></span></button></a>
-    </div>
-</div>
 {% endblock %}

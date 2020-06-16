@@ -49,6 +49,8 @@ function cartToArray() {
             temp['purchase'] = 0
             temp['total'] = 0
             temp['num'] = num
+            temp['stereochemistry'] = false
+            temp['analogs'] = false
             num += 1
             data.push(temp)
         }
@@ -68,6 +70,8 @@ function cartToArray() {
             temp['purchase'] = vendor['purchase']
             temp['total'] = vendor['price'] * vendor['purchase']
             temp['num'] = num
+            temp['stereochemistry'] = false
+            temp['analogs'] = false
             num += 1
             // temp.push(item['img'])
             // temp.push(item['identifier'])

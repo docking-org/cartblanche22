@@ -72,3 +72,4 @@ app/static/node_modules
 migrations
 migrationsPsql
 app.db
+requirementsTest.txt

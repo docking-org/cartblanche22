@@ -58,7 +58,7 @@
             "language": {
                 "emptyTable": "Cart is empty"
             },
-
+        "scrollX": false,
             "scrollY": "550px",
             "paging": false,
             "ordering": false,
@@ -68,6 +68,7 @@
                 {
                     "mData": null,
                 },
+
                 {
                     "mData": (data) => {
                         return '<img src="' + data.img + '"/>';
@@ -100,6 +101,8 @@
                         return '$' + data.total;
                     }
                 },
+
+
                 {
                     data: null,
                     defaultContent: '<a id="delete" ><span class="glyphicon glyphicon-trash btn btn-info btn-sm" aria-hidden="true"></span></a>'
@@ -215,7 +218,7 @@
 
 </div>
 <!-- <table id="exportTable" class="row-border " style="display:none"></table> -->
-<table id="table" class="row-border ">
+<table id="table" class="row-border " cellspacing="0" style="width:100%;">
     <thead>
         <tr>
             <th>No</th>
@@ -231,6 +234,7 @@
             <th>Pack price</th>
             <th>Purchase qty</th>
             <th>Total price</th>
+
             <th></th>
         </tr>
     </thead>
