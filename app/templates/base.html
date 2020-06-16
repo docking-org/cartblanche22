@@ -1,6 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% block html_attribs %} lang="en"{% endblock %}
-{% import "bootstrap/google.html" as google %}
+{#{% import "bootstrap/google.html" as google %}#}
 
 {% block metas %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +20,7 @@
 
 {% block scripts %}
 {{super()}}
-{{google.uanalytics('UA-10800222-14')}}
+{#{{google.uanalytics('UA-10800222-14')}}#}
 <script src="../static/js/datatables.min.js"></script>
 <script src="../static/js/jquery-ui.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
