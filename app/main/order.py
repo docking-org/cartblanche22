@@ -3,7 +3,7 @@ from flask_login import current_user
 from app.main import application
 from app.data.models.users import Users
 from app import db
-from app.email import send_email_chemspace
+from app.email import prepare_email_chemspace
 import tablib
 
 
@@ -20,5 +20,5 @@ def order_chemspace():
         data_.append(row)
     file = data_.export('xls')
     body = 'Have a nice day!'
-    send_email_chemspace(current_user, body, file)
+    prepare_email_chemspace(current_user, body, file)
     return jsonify('success')
