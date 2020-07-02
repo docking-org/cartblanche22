@@ -129,9 +129,12 @@ def getVendors(identifier, db):
     return jsonify({'vendors': vendors})
 
 
+
 @application.route('/chooseVendor', methods= ['GET', 'POST'])
 def chooseVendor():
-    '''used to automatically choose one vendor from vendors. Currently it's taking lowest pack with lowest price'''
+    """USED"""
+    """chooseVendor called after adding molecule to the cart"""
+    """used to automatically choose one vendor from vendors. Currently it's taking lowest pack with lowest price"""
     data = request.get_json()
     print(data)
     assigned = True
@@ -146,8 +149,14 @@ def chooseVendor():
         vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit'],'shipping':res[0]['packs'][0]['shipping']}
     else:
         assigned = False
-        vendor={}
+        vendor = {}
     addToCartWithVendor(data['identifier'], data['img'], data['db'], vendor)
+    payload = {
+        'ecfp4_fp-tanimoto-40': "83",
+        'output_fields': data['identifier']
+    }
+    response = requests.get('http://hg.docking.org/substances.txt', params=payload)
+    print(response)
     return jsonify({'vendor':vendor, 'assigned' : assigned})
 
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])

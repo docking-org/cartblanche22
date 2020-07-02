@@ -39,6 +39,16 @@ def newcart():
             item['identifier'] = c.identifier
             item['db'] = c.database
             item['img'] = c.compound_img
+            item['hg'] = False
+            payload = {
+                'ecfp4_fp-tanimoto-40': c.identifier,
+            }
+            r = requests.post('http://hg.docking.org/substances.txt', params=payload)
+            if r:
+                for line in r.text.split('\n'):
+                    l = line.split('\t')
+                    if l[0] == c.identifier:
+                        item['hg'] = True
             supplier = []
             for v in c.vendors:
                 vendor = {}
@@ -54,6 +64,7 @@ def newcart():
             response.append(item)
         cart_count=len(cart)
         is_authenticated = True
+        print(response)
     return render_template('cart/newcart.html', cart=json.dumps(response), items = json.dumps(identifiers), is_authenticated=is_authenticated, cart_count=cart_count)
 
 @application.route('/cart', methods= ['GET',  'POST'])

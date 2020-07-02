@@ -51,6 +51,7 @@ function cartToArray() {
             temp['num'] = num
             temp['stereochemistry'] = false
             temp['analogs'] = false
+            temp['hg'] = item.hg
             num += 1
             data.push(temp)
         }
@@ -72,6 +73,7 @@ function cartToArray() {
             temp['num'] = num
             temp['stereochemistry'] = false
             temp['analogs'] = false
+            temp['hg'] = item['hg']
             num += 1
             // temp.push(item['img'])
             // temp.push(item['identifier'])
@@ -84,7 +86,7 @@ function cartToArray() {
             data.push(temp)
         }
     }
-    console.log(data)
+    // console.log(data)
     return data;
 }
 

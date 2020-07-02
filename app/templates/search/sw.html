@@ -7,7 +7,8 @@
 <script src="../static/js/jsme/jsme.nocache.js"></script>
 <script src="../static/js/custom/cart.js"></script>
 <script src="../static/js/sw/swsearch.js"></script>
-<script src="../static/js/sw/sketcher.js"></script>
+    <script src="../static/js/sw/sketcher.js"></script>
+
 <script type="text/javascript">
 
     $(document).ready(function () {
@@ -280,4 +281,33 @@
 </div>
 <div id="imgpop" class="popbox">
 </div>
+
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exampleModalLongTitle">Similar molecules in UCSF  <span class="pull-right">40</span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <table id="hgData">
+               <thead>
+            <tr>
+                <th>Identifier</th>
+                <th>Smile</th>
+            </tr>
+        </thead>
+          </table>
+{#        <p id="hgData"></p>#}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {%  endblock %}

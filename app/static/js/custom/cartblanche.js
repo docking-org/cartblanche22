@@ -16,13 +16,13 @@ function update() {
     localStorage.setItem('timeout', oneday)
 }
 function cartCheck(is_authenticated, cart_) {
-    // if user is authenticated, localStorage cart data shoukd match with user's database cart data
+
+    // if user is authenticated, localStorage cart data should match with user's database cart data
     if (localStorage.getItem('cart') == null) {
         let cart = JSON.parse(cart_)
         localStorage.setItem('cart', JSON.stringify(cart))
     }
     if (is_authenticated == 'True') {
-        console.log('user is authenticated')
         let dbcart = JSON.parse(cart_)
         let totalCart = JSON.parse(localStorage.getItem('cart'))
         for (let i = 0; i < dbcart.length; i++) {
@@ -31,6 +31,7 @@ function cartCheck(is_authenticated, cart_) {
                 totalCart.push(dbcart[i])
             }
             else {
+                totalCart[index]['hg'] = dbcart[i].hg
                 let supplier_db = dbcart[i].supplier
                 let supplier_total = totalCart[index].supplier
                 for (let j = 0; j < supplier_db.length; j++) {

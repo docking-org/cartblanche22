@@ -8,7 +8,8 @@ function toggleCart(btn) {
             'identifier': identifier,
             'db': db,
             'img': img,
-            'supplier': []
+            'supplier': [],
+            'hg' : false,
         }
         cart.push(item)
         localStorage.setItem('cart', JSON.stringify(cart))

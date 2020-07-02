@@ -176,7 +176,7 @@
                 dataType: 'json',
                 success: function (data) {
                     console.log(data);
-                    window.open(data, '_blank');
+                    {#window.open(data, '_blank');#}
                 }
             })
         })
@@ -209,9 +209,11 @@
         <div class="panel-body">
             <p>
                 This page is in under construction. But you can export your purchase into .csv, .xlxs, .pdf, .tsv files.
+                {% if not current_user.is_anonymous %}
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                     Send to ChemSpace
                 </button>
+                {%  endif %}
 
                 <!-- Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -268,7 +270,7 @@
                 </tfoot>
             </table>
             </p>
-            {#        <p><button class="btn btn-info" id="gsheet">Export to google sheets</button></p>#}
+{#                    <p><button class="btn btn-info" id="gsheet">Export to google sheets</button></p>#}
         </div>
         <div class="panel-footer text-right">
             <a href="{{ url_for('main.sw') }}">
