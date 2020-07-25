@@ -23,7 +23,8 @@ def Create_Service(client_secret_file, api_name, api_version, scopes):
     print(SCOPES)
     cred = None
     socket.setdefaulttimeout(60)
-    pickle_file = f'token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
+    # pickle_file = f'token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
+    pickle_file = ''
     # print(pickle_file)
 
     # if os.path.exists('token.pickle'):
