@@ -146,17 +146,14 @@ def chooseVendor():
         for i in res:
             i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
         res = sorted(res, key = lambda x : x['packs'][0]['price'])
-        vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase': 1, 'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'], 'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit'],'shipping':res[0]['packs'][0]['shipping']}
+        vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase': 1,
+                  'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'],
+                  'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit'],
+                  'shipping':res[0]['packs'][0]['shipping']}
     else:
         assigned = False
         vendor = {}
     addToCartWithVendor(data['identifier'], data['img'], data['db'], vendor)
-    payload = {
-        'ecfp4_fp-tanimoto-40': "83",
-        'output_fields': data['identifier']
-    }
-    response = requests.get('http://hg.docking.org/substances.txt', params=payload)
-    print(response)
     return jsonify({'vendor':vendor, 'assigned' : assigned})
 
 @application.route('/vendorModal/<item_id>', methods= ['GET','POST'])

@@ -300,50 +300,12 @@ function refresh() {
 
 function molChanged(smiles) {
     if (config.WebApp.SearchAsYouDraw) {
+                newSearch(smiles);
         //adding hg database check
-        checkHg(smiles)
-        newSearch(smiles);
+        checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)
     }
 }
 
-function checkHg(smiles) {
-    $.ajax({
-        url: "http://hg.docking.org/substances.txt",
-        dataType: 'text',
-        data: {"ecfp4_fp-tanimoto-40": smiles},
-        success: function (data) {
-            if (data.length > 0) {
-                let res = data.split('\n')
-                let data_ = []
-                for (let i = 0; i < res.length; i++) {
-                    if (res[i].length > 0) {
-                        let temp = res[i].split("\t")
-                        data_.push(temp)
-                    }
-                }
-                showHg(data_)
-            }
-
-        },
-    })
-}
-
-function showHg(data) {
-    $('#exampleModalLong').modal('show');
-    $('#hgData').DataTable({
-        destroy: true,
-        "language": {
-            "emptyTable": "No similar molecule in HG database"
-        },
-        "scrollX": false,
-        "scrollY": "350px",
-        "paging": false,
-        "ordering": false,
-        "info": false,
-        data: data,
-    });
-
-}
 
 function newSearch(smiles) {
     if (!smiles)
@@ -615,7 +577,7 @@ function hit_renderer(data, type, row) {
         .replace("%c", encodeURIComponent(cols))
         .replace("%m", encodeURIComponent(cmap))
         .replace("%w", 50).replace("%h", 30);
-    // console.log(depict_url)
+
     img.attr('src', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     img.attr('onmouseenter', 'show_imgpop(this);');
     img.attr('onmouseleave', 'hide_imgpop();');
@@ -624,8 +586,10 @@ function hit_renderer(data, type, row) {
     var id = datasets[search_state.db].prefix + data.id;
     var href = datasets[search_state.db].url.replace("%s", data.id);
     button.attr('id', id);
-    button.attr('db', search_state.db_name);
-    button.attr('img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
+    button.attr('data-identifier', id);
+    button.attr('data-hg', false);
+    button.attr('data-db', search_state.db_name);
+    button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     button.attr('onclick', 'toggleCart(this)');
     let cart = JSON.parse(localStorage.getItem('cart'))
     let items = []

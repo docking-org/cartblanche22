@@ -16,6 +16,7 @@ def cartblanche():
     is_authenticated = False
     cart_count=0
     punchout = False
+    checkCart = False
     print(session)
     url = ''
     if 'url' in session.keys():
@@ -44,7 +45,12 @@ def cartblanche():
             response.append(item)
         cart_count=len(cart)
         is_authenticated = True
-    return render_template('cartblanche.html', cart=json.dumps(response), items = json.dumps(identifiers), is_authenticated=is_authenticated, cart_count=cart_count, url = url, punchout = punchout)
+        if 'checkCart' in session.keys():
+            checkCart = session['checkCart']
+            session['checkCart'] = False
+    return render_template('cartblanche.html', cart=json.dumps(response), items = json.dumps(identifiers),
+                           is_authenticated=is_authenticated, cart_count=cart_count, url=url, punchout=punchout,
+                           checkCart=checkCart)
 
 
 @application.route('/profile', methods=['GET'])
@@ -55,6 +61,11 @@ def profile():
             db.session.add(vendor)
             db.session.commit()
     return render_template('profile.html', data=current_user.vendors)
+
+
+@application.route('/about', methods=['GET'])
+def about():
+    return render_template('about.html')
 
 
 @application.route('/updateVendorPriority', methods=['POST'])

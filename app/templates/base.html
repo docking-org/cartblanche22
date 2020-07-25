@@ -87,14 +87,14 @@
                 <li><a href="{{ url_for('main.arthor') }}">Arthor</a></li>
                 <!-- <li><input type="text" id="search" placeholder="Search..."></li> -->
                 <!-- <li><a href="{{ url_for('main.cart') }}"><span class="badge"></span></a></li> -->
-                <li><a href="{{url_for('main.importData')}}">Import</a></li>
                 {% if not current_user.is_anonymous %}
                 {% if current_user.has_roles('private') %}ˇ
                 <li><a href="{{url_for('main.swp')}}">SWP</a></li>
                 {% endif %}
-                <!-- <li> <a href="{{url_for('main.importData')}}">Import</a></li> -->
+                    <li><a href="{{url_for('main.importData')}}">Import</a></li>
+
                 <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
-                <!-- <li><a href="{{ url_for('main.cart') }}">Old Cart</a></li> -->
+{#                <li><a href="{{ url_for('main.cart') }}">Old Cart</a></li>#}
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -139,7 +139,7 @@
 </div>
 
 <footer>
-    <p>Acknowledgements Roger Sayle. Nextmovesoftware.com Arthor. Smallworld. Jennifer. Khanh. Julia<a
+    <p><a href="{{ url_for("main.about") }}">Acknowledgements</a> Roger Sayle. Nextmovesoftware.com Arthor. Smallworld.<a
             href="https://www.nigms.nih.gov/">Supported by NIGMS via GM71896</a> Questions, Discussion, Bug reports,
         Feature requests <a href="http://irwinlab.compbio.ucsf.edu/">Irwin</a> and Shoichet Labs and UC Regents.</p>
 

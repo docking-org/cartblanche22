@@ -18,6 +18,8 @@
         }
         else {
             data = [...new Set(data)]
+            console.log('printing import data after separated by line and space and comma')
+            console.log(data)
             data.forEach((value) => {
                 $.ajax({
                     type: "POST",
@@ -104,13 +106,16 @@
 {% endblock %}
 {% block app_content %}
 <div>
+<div>
+    <h3>We support Zinc identifiers, s enamine, m enamine, wuxi codes. For the files: .txt only</h3>
+</div>
     <div class="form-group">
         <label for="dataInput">Enter codes:</label><br>
         <textarea classå="form-control" rows="4" cols="50" name="dataInput" form="dataInput" id="textInput"></textarea>
     </div>
     <h1> OR </h1>
     <div class="form-group">
-        <label for="myfile">Select a file:</label>
+        <label for="myfile">Select a file(.txt only) :</label>
         <input type="file" id="myfile" name="myfile" class="btn btn-info">
     </div>
     <button type="button" class="btn btn-info" onclick="importData()" data-toggle="modal"

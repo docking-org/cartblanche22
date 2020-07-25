@@ -1,24 +1,5 @@
-function toggleCart(btn) {
-    let cart = JSON.parse(localStorage.getItem('cart'))
-    if (btn.getAttribute('class') == 'btn btn-info') {
-        let identifier = btn.id
-        let db = btn.getAttribute('db')
-        let img = btn.getAttribute('img')
-        let item = {
-            'identifier': identifier,
-            'db': db,
-            'img': img,
-            'supplier': [],
-            'hg' : false,
-        }
-        cart.push(item)
-        localStorage.setItem('cart', JSON.stringify(cart))
-        let count = parseInt($('#cartCount').html()) + 1
-        $('#cartCount').html(count)
-        $(btn).html('Remove')
-        $(btn).attr('class', 'btn btn-danger')
-        $(btn).prop('disabled', true)
-        $.ajax({
+function vendorRequest(identifier, db, img, btn) {
+    $.ajax({
             type: 'POST',
             url: '/chooseVendor',
             data: JSON.stringify({
@@ -57,7 +38,6 @@ function toggleCart(btn) {
                     }
                     cart.push(item)
                     localStorage.setItem('cart', JSON.stringify(cart))
-
                 }
 
                 $(btn).prop('disabled', false)
@@ -66,11 +46,51 @@ function toggleCart(btn) {
                 alert(data);
             }
         });
+}
+function toggleCart(btn) {
+    localStorage.setItem('cartCheck', true)
+    let cart = JSON.parse(localStorage.getItem('cart'))
+    if (btn.getAttribute('class') == 'btn btn-info') {
+        $(btn).prop('disabled', true)
+        $(btn).html('Remove')
+        $(btn).attr('class', 'btn btn-danger')
+        let identifier = $(btn).data('identifier')
+        let db = $(btn).data('db')
+        let img = $(btn).data('img')
+        let item = {}
+        item.identifier = identifier
+        item.db = db
+        item.img = img
+        if($(btn).data('hg') == false){
+            item.supplier = []
+            vendorRequest(identifier, db, img, btn)
+        }
+        else{
+            item.supplier = [
+                {
+                    'cat_name': 'HG',
+                        'price':0,
+                        'purchase': 1,
+                        'quantity': 10,
+                        'shipping': 1,
+                        'supplier_code': 'HG',
+                        'unit':'mg',
+                }
+            ]
+            $(btn).prop('disabled', false)
+        }
+        cart.push(item)
+        localStorage.setItem('cart', JSON.stringify(cart))
+        let count = parseInt($('#cartCount').html()) + 1
+        $('#cartCount').html(count)
+
+
+
     }
     else {
         $(btn).prop('disabled', true)
         for (i = 0; i < cart.length; i++) {
-            if (cart[i].identifier == btn.id) {
+            if (cart[i].identifier == $(btn).data('identifier')) {
                 cart.splice(i, 1)
             }
         }
@@ -80,7 +100,7 @@ function toggleCart(btn) {
         $('#cartCount').html(getCartSize(cart))
         if (localStorage.getItem('is_authenticated') === 'True') {
             $.ajax({
-                url: '/deleteItem/' + btn.id,
+                url: '/deleteItem/' + $(btn).data('identifier'),
                 type: 'DELETE',
                 success: function (result) {
                 }

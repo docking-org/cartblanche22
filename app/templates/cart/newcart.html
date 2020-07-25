@@ -63,10 +63,11 @@
 
     $(document).ready(() => {
         //cartToArray() is in api.js
-
         //cartCheck() is in cartblanche.js
         $('#total').html(updateTotalAmount())
-        cartCheck('{{is_authenticated}}', '{{cart|safe}}');
+        if (localStorage.getItem('checkCart') == "True"){
+            cartCheck('{{is_authenticated}}', '{{cart|safe}}');
+        }
         let cartData = cartToArray()
         console.log('printing cart data before rendering to the table')
         console.log(cartData)
@@ -84,7 +85,6 @@
                 {
                     "mData": null,
                 },
-
                 {
                     "mData": (data) => {
                         return '<img src="' + data.img + '"/>';
@@ -117,8 +117,6 @@
                         return '$' + data.total;
                     }
                 },
-
-
                 {
                     data: null,
                     defaultContent: '<a id="delete" ><span class="glyphicon glyphicon-trash btn btn-info btn-sm" aria-hidden="true"></span></a>'
@@ -151,10 +149,7 @@
                 if (data['cat_name'] == 'not assigned') {
                     $(row).addClass("unassigned")
             }
-                if(data['hg'] == true){
-                    console.log('dfsa')
-                $(row).addClass("inshelf")
-                }
+
             }
 
         });
@@ -170,9 +165,6 @@
             let count = parseInt($('#cartCount').html()) - 1
             $("#cartCount").html(count)
             $('#total').html(updateTotalAmount())
-
-
-
         });
         $('#table').on('change', 'select', function () {
             let new_purchase = $(this).context.value
@@ -226,8 +218,8 @@
 <div class="row">
     <div class="col-md-6">
         <h1>Shopping Cart</h1>
-        <p><span class="dot inshelf" ></span>Molecule in UCSF</p>
-        <p><span class="dot unassigned"></span> Vendor unassigned</p>
+{#        <p><span class="dot inshelf" ></span>Molecule in UCSF</p>#}
+{#        <p><span class="dot unassigned"></span> Vendor unassigned</p>#}
     </div>
 
     <div class="col-md-6 float-right text-right">

@@ -16,6 +16,8 @@ function update() {
     localStorage.setItem('timeout', oneday)
 }
 function cartCheck(is_authenticated, cart_) {
+    console.log('printing from cartCheck function')
+                        localStorage.setItem('checkCart', 'False')
 
     // if user is authenticated, localStorage cart data should match with user's database cart data
     if (localStorage.getItem('cart') == null) {
@@ -31,11 +33,13 @@ function cartCheck(is_authenticated, cart_) {
                 totalCart.push(dbcart[i])
             }
             else {
-                totalCart[index]['hg'] = dbcart[i].hg
                 let supplier_db = dbcart[i].supplier
                 let supplier_total = totalCart[index].supplier
                 for (let j = 0; j < supplier_db.length; j++) {
-                    let sup_index = supplier_total.findIndex(supplier => supplier.cat_name == supplier_db[j].cat_name && supplier.supplier_code == supplier_db[j].supplier_code && supplier.quantity == supplier_db[j].quantity && supplier.unit == supplier_db[j].unit)
+                    let sup_index = supplier_total.findIndex(supplier =>
+                        supplier.cat_name == supplier_db[j].cat_name &&
+                        supplier.supplier_code == supplier_db[j].supplier_code &&
+                        supplier.quantity == supplier_db[j].quantity && supplier.unit == supplier_db[j].unit)
                     if (sup_index == -1) {
                         supplier_total.push(supplier_db[j])
                     }

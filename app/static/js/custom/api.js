@@ -25,7 +25,8 @@ function updateTotalAmount() {
             total += item.supplier[j].purchase * item.supplier[j].price
         }
     }
-    return total;
+    console.log(total)
+    return total.toFixed(2);
 }
 
 function cartToArray() {
@@ -51,7 +52,7 @@ function cartToArray() {
             temp['num'] = num
             temp['stereochemistry'] = false
             temp['analogs'] = false
-            temp['hg'] = item.hg
+            temp['salt'] = false
             num += 1
             data.push(temp)
         }
@@ -73,7 +74,7 @@ function cartToArray() {
             temp['num'] = num
             temp['stereochemistry'] = false
             temp['analogs'] = false
-            temp['hg'] = item['hg']
+            temp['salt'] = false
             num += 1
             // temp.push(item['img'])
             // temp.push(item['identifier'])
@@ -98,7 +99,9 @@ function updatePurchaseAmount(data, new_purchase) {
             for (let j = 0; j < cart[i]['supplier'].length; j++) {
                 let vendor = cart[i]['supplier'][j]
                 // console.log(vendor)
-                if (data['cat_name'] == vendor['cat_name'] && data['supplier_code'] == vendor['supplier_code'] && data['quantity'] == vendor['quantity'] && data['unit'] == vendor['unit'] && data['price'] == vendor['price']) {
+                if (data['cat_name'] == vendor['cat_name'] && data['supplier_code'] == vendor['supplier_code'] &&
+                    data['quantity'] == vendor['quantity'] && data['unit'] == vendor['unit'] &&
+                    data['price'] == vendor['price']) {
                     // console.log('olson')
                     vendor['purchase'] = new_purchase
                     data['total'] = (data['price'] * new_purchase).toFixed(2)
@@ -157,7 +160,8 @@ function deleteVendorFromCart(identifier, cat_name, supplier_code, quantity, uni
         cart.splice(i, 1)
     }
     else {
-        let s = supplier.findIndex(obj => obj.cat_name == cat_name && obj.supplier_code == supplier_code && obj.unit == unit && obj.quantity == quantity && obj.price == price)
+        let s = supplier.findIndex(obj => obj.cat_name == cat_name && obj.supplier_code == supplier_code &&
+            obj.unit == unit && obj.quantity == quantity && obj.price == price)
         cart[i]['supplier'].splice(s, 1)
     }
     localStorage.setItem('cart', JSON.stringify(cart))

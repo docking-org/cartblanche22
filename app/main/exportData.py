@@ -14,15 +14,20 @@ import asyncio
 
 
 def main(data):
+    print(data)
+
+
+@application.route('/gsheet', methods=["POST"])
+def gsheet():
+    data = request.get_json()
     FOLDER_PATH = os.path.realpath(os.path.dirname(__file__))
     CLIENT_SECRET_FILE = os.path.join(FOLDER_PATH, 'credentials.json')
     API_SERVICE_NAME = 'sheets'
     API_VERSION = 'v4'
-    SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
     service = Create_Service(CLIENT_SECRET_FILE, API_SERVICE_NAME, API_VERSION, SCOPES)
-
     if service is None:
-        return jsonify(url_for('main.directCheckout'))
+        return jsonify(url_for('main.directCheckout')), 400
         # return "authentication failed"
     header = {'properties': {'title': 'Cart data [%s]' % time.ctime()}}
     res = service.spreadsheets().create(body=header).execute()
@@ -43,14 +48,7 @@ def main(data):
     }
     service.spreadsheets().values().update(
         spreadsheetId=SHEET_ID, range='A1', valueInputOption='RAW', body=body).execute()
-
-
-@application.route('/gsheet', methods=["POST"])
-def gsheet():
-    data = request.get_json()
-    main(data)
-    # return jsonify(res['spreadsheetUrl'])
-    return 's'
+    return jsonify(res['spreadsheetUrl']), 200
 
 
 @application.route('/gsheetOld', methods=["POST"])

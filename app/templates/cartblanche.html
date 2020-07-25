@@ -8,8 +8,11 @@
 
         localStorage.setItem('punchout', '{{punchout}}')
         localStorage.setItem('is_authenticated', '{{is_authenticated}}')
+        localStorage.setItem('checkCart', '{{checkCart}}')
         timeoutCheck('{{is_authenticated}}', '{{cart|safe}}');
-        cartCheck('{{is_authenticated}}', '{{cart|safe}}');
+        if(localStorage.getItem('checkCart') == 'True'){
+                    cartCheck('{{is_authenticated}}', '{{cart|safe}}');
+        }
         console.log("jquery: ready");
     });
 </script>
@@ -54,56 +57,80 @@
             <div class="col-xs-6 col-md-12">
                 <h2>Getting Started</h2>
                 <ul>
+
+
                     <li>
-                        <a href="http://wiki.docking.org/index.php/ZINC15:Getting_started" target="_blank">
-                            Getting Started
+                        <a href="{{ url_for('main.sw') }}" >
+                            Search molecule using Smallworld
                         </a>
                     </li>
                     <li>
-                        <a href="http://wiki.docking.org/index.php/ZINC15:What%27s_New" target="_blank">
-                            What's New
+                        <a href="{{ url_for('main.arthor') }}">
+                            Search molecule using Arthor
+                        </a>
+                    </li>
+
+                 {% if current_user.is_anonymous %}
+                    <li>
+                        <a href="{{ url_for('main.login') }}">
+                            Sign in
+                        </a>
+                    </li>
+                     {%  else  %}
+                     <li>
+                        <a href="{{ url_for('main.change_password') }}" target="_blank">
+                            Do you want to change your password?
                         </a>
                     </li>
                     <li>
-                        <a href="http://wiki.docking.org/index.php/ZINC15:Resources" target="_blank">
-                            About ZINC 15 Resources
+                        <a href="{{ url_for('main.profile') }}" target="_blank">
+                            My profile
                         </a>
                     </li>
-                    <li>
-                        <a href="http://wiki.docking.org/index.php/ZINC15:Pipeline" target="_blank">
-                            Current Status / In Progress
+                     <li>
+                        <a href="{{ url_for('main.profile') }}" target="_blank">
+                            Prioritize your vendor preferences
                         </a>
                     </li>
-                    <li>
-                        <a href="http://wiki.docking.org/index.php/ZINC15:Estimates" target="_blank">
-                            Why are ZINC results "estimates"?
+                     <li>
+                        <a href="{{ url_for('main.importData') }}" target="_blank">
+                            Import molecules from .txt file or identifiers...
                         </a>
                     </li>
+                    {%  endif %}
+                <li>
+                                       <a href="{{ url_for("main.about") }}" target="_blank">Acknowledgements</a>
+
+                    </li>
+
+
                 </ul>
             </div>
-            <div class="col-xs-6 col-md-12">
-                <h2>Explore Resources</h2>
-                <dl class="dl-inline">
-                    <dt>Chemistry</dt>
-                    <dd><a href="/tranches/home/" title="Download Chemical Space Tranches">Tranches</a>,
-                    </dd>
-                    <dd><a href="/substances/home/" title="Browse and search for substances">Substances</a></dd>,
-                    <dd><a href="/protomers/" title="Browse and search for 3D representations">3D
-                            <abbr title="representations">Representations</a></dd>,
-                    <dd><a href="/rings/" title="Find and explore rings in ZINC">Rings</a></dd>,
-                    <dd><a href="/patterns/" title="Browse ZINC by molecular patterns">Patterns</a>
-                    </dd>
-                    <dt>And More</dt>
-                    <dd><a href="/catalogs/">Catalogs</a></dd>,
-                    <dd><a href="/genes/">Genes</a></dd>,
-                    <dd><a href="/atccodes/">ATC Codes</a></dd>
-                </dl>
-            </div>
+{#            <div class="col-xs-6 col-md-12">#}
+{#                <h2>Explore Resources</h2>#}
+{#                <dl class="dl-inline">#}
+{#                    <dt>Chemistry</dt>#}
+{#                    <dd><a href="/tranches/home/" title="Download Chemical Space Tranches">Tranches</a>,#}
+{#                    </dd>#}
+{#                    <dd><a href="/substances/home/" title="Browse and search for substances">Substances</a></dd>,#}
+{#                    <dd><a href="/protomers/" title="Browse and search for 3D representations">3D#}
+{#                            <abbr title="representations">Representations</a></dd>,#}
+{#                    <dd><a href="/rings/" title="Find and explore rings in ZINC">Rings</a></dd>,#}
+{#                    <dd><a href="/patterns/" title="Browse ZINC by molecular patterns">Patterns</a>#}
+{#                    </dd>#}
+{#                    <dt>And More</dt>#}
+{#                    <dd><a href="/catalogs/">Catalogs</a></dd>,#}
+{#                    <dd><a href="/genes/">Genes</a></dd>,#}
+{#                    <dd><a href="/atccodes/">ATC Codes</a></dd>#}
+{#                </dl>#}
+{#            </div>#}
         </div>
     </div>
     <div class="col-md-4 col-lg-5">
         <h2>Ask Questions</h2>
-
+        <li>
+            Email us : cartblache20@gmail.com
+        </li>
     </div>
     <div class="col-md-4">
 
@@ -113,7 +140,7 @@
         <div class="well well-sm">
             <strong>Caveat Emptor</strong>: We do not guarantee the quality of any molecule for any
             purpose and take no responsibility for errors arising from the use of
-            this database. ZINC is provided in the hope that it will be useful,
+            this application. Cartblanche is provided in the hope that it will be useful,
             but you must use it at your own risk.
         </div>
     </div>

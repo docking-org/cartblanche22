@@ -251,8 +251,9 @@ function smiles_renderer(data, type, row) {
   }
   let button = $('<button type="button" class="btn btn-info">Add to Cart</button>')
   button.attr('id', id);
-  button.attr('db', arthor.table);
-  button.attr('img', depict_url);
+  button.attr('data-identifier', id);
+  button.attr('data-db', arthor.table);
+  button.attr('data-img', depict_url);
   button.attr('onclick', 'toggleCart(this)');
   let cart = JSON.parse(localStorage.getItem('cart'))
   let items = []

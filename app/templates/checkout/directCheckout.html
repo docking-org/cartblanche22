@@ -22,7 +22,12 @@
                     data: "num",
                     "width": "5%",
                 },
-
+{
+                    "width": "25%",
+                    "mData": function (data) {
+                        return '<input type="checkbox" name="salt"/>'
+                    },
+                },
                 {
                     "width": "25%",
                     "mData": function (data) {
@@ -39,6 +44,15 @@
 
             ],
         })
+         $('input[name=salt]').change(function () {
+            let data = chemspaceTable.row($(this).parents('tr')).data()
+            if ($(this).is(':checked')) {
+                data.salt = true
+            } else {
+                // Checkbox is not checked..
+                data.salt = false
+            }
+        });
         $('input[name=stereochemistry]').change(function () {
             let data = chemspaceTable.row($(this).parents('tr')).data()
             if ($(this).is(':checked')) {
@@ -57,6 +71,19 @@
                 // Checkbox is not checked..
                 data.analogs = false
             }
+        });
+        $('#id_salt').change(function () {
+            let data = chemspaceTable.rows().data();
+            let val;
+            if ($(this).is(':checked')) {
+                $('input[name=salt]').prop('checked', true)
+                val = true;
+            } else {
+                // Checkbox is not checked..
+                $('input[name=salt]').prop('checked', false)
+                val = false;
+            }
+            data.map(d => d.salt = val)
         });
         $('#id_stereochemistry').change(function () {
             let data = chemspaceTable.rows().data();
@@ -166,7 +193,7 @@
 
                 // Update footer
                 $(api.column(8).footer()).html(
-                    '$' + pageTotal
+                    '$' + pageTotal.toFixed(2)
                 );
             }
         })
@@ -180,8 +207,23 @@
                 dataType: 'json',
                 success: function (data) {
                     console.log(data);
+                    $('#spinner').hide()
+                    let result =  $('#googleExportResult')
+                   result.html("Successfully exported your data. Here is your link: ")
+var newLink = $("<a />", {
+    name : "sheet",
+    href : data,
+    text : "click me",
+    target : "_blank"
+}).appendTo(result)
                     {#window.open(data, '_blank');#}
+                },
+                error: function (data) {
+                    console.log(data)
+                    $('#spinner').hide()
+                    $('#googleExportResult').html("Export failed.")
                 }
+
             })
         })
         $('#send_chemspace').on('click', () => {
@@ -218,6 +260,8 @@
  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                     Send to ChemSpace
                 </button></p>
+                                        <p><button class="btn btn-info" id="gsheet" data-toggle="modal" data-target="#googleExportModal">Export to google sheets</button></p>
+
                 {%  endif %}
 
                 <!-- Modal -->
@@ -236,7 +280,8 @@
                                 <thead style="width:100%">
                                 <tr>
                                     <th>No</th>
-
+<th>Request salt if possible? <input type="checkbox" id="id_salt"/>
+                                    </th>
                                     <th>Require exact stereochemistry? <input type="checkbox" id="id_stereochemistry"/>
                                     </th>
                                     <th>Quote close analogs? <input type="checkbox" id="id_analogs"/></th>
@@ -253,6 +298,7 @@
                     </div>
                 </div>
             </div>
+
             <table id="exportTable">
                 <thead>
                 <tr>
@@ -275,7 +321,7 @@
                 </tfoot>
             </table>
             </p>
-{#                    <p><button class="btn btn-info" id="gsheet">Export to google sheets</button></p>#}
+{#         <p><button class="btn btn-info">Import from google sheets</button></p>#}
         </div>
         <div class="panel-footer text-right">
             <a href="{{ url_for('main.sw') }}">
@@ -290,4 +336,30 @@
             </a>
         </div>
     </div>
+     <div class="modal fade" id="googleExportModal" tabindex="-1" role="dialog" aria-labelledby="googleExportModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Export to google sheets</h3>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <div id="spinner">
+            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+            <span class="sr-only">Loading...</span>
+        </div>
+                            <div id="googleExportResult">
+            <p id="googleExportResult">Loading...</p>
+        </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 {% endblock %}

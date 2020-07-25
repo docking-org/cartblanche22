@@ -581,8 +581,9 @@ function hit_renderer(data, type, row) {
 	var id = datasets[search_state.db].prefix + data.id;
 	var href = datasets[search_state.db].url.replace("%s", data.id);
 	button.attr('id', id);
-	button.attr('db', search_state.db);
-	button.attr('img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
+	button.attr('data-identifier', id);
+	button.attr('data-db', search_state.db);
+	button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
 	button.attr('onclick', 'toggleCart(this)');
 	button.attr('class', 'btn btn-info');
 	if (items.includes(id)) {

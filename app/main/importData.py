@@ -1,19 +1,21 @@
 from flask import abort, jsonify, render_template
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.main import application
 from app import db
 from app.data.models.carts import Carts
 import requests
 import urllib.parse
 
-
 @application.route('/importData', methods=["GET"])
+@login_required
 def importData():
      return render_template('cart/import.html')
 
 
 @application.route('/importIdentifier/<identifier>', methods=['POST'])
 def importIdentifier(identifier):
+
+    print(identifier)
     try:
         identifier, img, db = validator(identifier)
     except TypeError as err:
@@ -26,6 +28,7 @@ def importIdentifier(identifier):
 
 
 def validator(identifier):
+    print('validating ', identifier)
     identifier = identifier.lower()
     if 'c' in identifier or 'identifier' in identifier or identifier.isnumeric():
         response = requests.get('https://zinc15.docking.org/substances/'+identifier+'.txt')

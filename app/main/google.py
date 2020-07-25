@@ -2,9 +2,12 @@ import pickle
 import os
 from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from googleapiclient.discovery import build
+import oauthlib
+
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from google.auth.transport.requests import Request
 import datetime
+import socket
 from threading import Timer
 import time
 
@@ -19,21 +22,32 @@ def Create_Service(client_secret_file, api_name, api_version, scopes):
     SCOPES = scopes
     print(SCOPES)
     cred = None
+    socket.setdefaulttimeout(60)
     pickle_file = f'token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
     # print(pickle_file)
 
     # if os.path.exists('token.pickle'):
     #     with open('token.pickle', 'rb') as token:
     #         cred = pickle.load(token)
-
+    import webbrowser
     if not cred or not cred.valid:
         if cred and cred.expired and cred.refresh_token:
             cred.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
-            print(flow)
-            cred = flow.run_local_server(port=5077)
-            print(cred)
+            try:
+                flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
+                cred = flow.run_local_server(port=0)
+            except oauthlib.oauth2.rfc6749.errors.AccessDeniedError as e:
+                print(e)
+                print("access denied: ", e)
+                return None
+            except webbrowser.Error as wbe:
+                print("wbe: ", wbe)
+            except Exception as e:
+                print("General EX: ", e)
+                return None
+            # cred = flow.run_local_server(port=5077)
+            # print(cred)
 
         with open(pickle_file, 'wb') as token:
             pickle.dump(cred, token)
