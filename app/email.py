@@ -37,5 +37,5 @@ def prepare_email_chemspace(user, data, file):
                                                    data=data),
                          html_body=render_template('email/order_chemspace.html',
                                                    data=data),
-                         cc=['munkhzulk1@gmail.com'],
+                         cc=[''],
                          file=file)

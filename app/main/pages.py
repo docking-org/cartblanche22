@@ -1,11 +1,9 @@
 from flask import render_template, request, jsonify, session
 from app.main import application
-from flask_login import current_user, login_required
+from flask_login import current_user
 from app.data.models.availableVendors import AvailableVendors, UserVendors
 from app import db
 import json
-from app.data.models.users import Users
-from app.data.models.carts import Carts
 
 
 @application.route('/', methods=['GET'])

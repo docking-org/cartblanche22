@@ -8,6 +8,7 @@ function timeoutCheck(is_authenticated, cart_) {
     }
     update()
 }
+
 function update() {
     console.log('updating timeout')
     var oneday = new Date();
@@ -15,10 +16,12 @@ function update() {
     // oneday.setMinutes(oneday.getMinutes() + 1); //one day from now
     localStorage.setItem('timeout', oneday)
 }
-function cartCheck(is_authenticated, cart_) {
-    console.log('printing from cartCheck function')
-                        localStorage.setItem('checkCart', 'False')
 
+
+//used
+//sync authenticated users cart data in database with localStorage cart data
+function cartCheck(is_authenticated, cart_) {
+    localStorage.setItem('checkCart', 'False')
     // if user is authenticated, localStorage cart data should match with user's database cart data
     if (localStorage.getItem('cart') == null) {
         let cart = JSON.parse(cart_)
@@ -31,8 +34,7 @@ function cartCheck(is_authenticated, cart_) {
             let index = totalCart.findIndex(item => item.identifier == dbcart[i].identifier)
             if (index == -1) {
                 totalCart.push(dbcart[i])
-            }
-            else {
+            } else {
                 let supplier_db = dbcart[i].supplier
                 let supplier_total = totalCart[index].supplier
                 for (let j = 0; j < supplier_db.length; j++) {
@@ -42,32 +44,13 @@ function cartCheck(is_authenticated, cart_) {
                         supplier.quantity == supplier_db[j].quantity && supplier.unit == supplier_db[j].unit)
                     if (sup_index == -1) {
                         supplier_total.push(supplier_db[j])
-                    }
-                    else {
+                    } else {
 
                         supplier_total[sup_index].purchase = Math.max(supplier_db[j].purchase, supplier_total[sup_index].purchase)
                     }
                 }
             }
         }
-        // let items = []
-        // for (i = 0; i < localStorageCart.length; i++) {
-        //     items.push(localStorageCart[i].identifier)
-        // }
-        // let cart = JSON.parse(cart_)
-        // for (let i = 0; i < cart.length; i++) {
-        //     if (!items.includes(cart[i].identifier)) {
-        //         let item = {
-        //             'identifier': cart[i].identifier,
-        //             'db': cart[i].db,
-        //             'img': cart[i].img,
-        //             'supplier': cart[i].supplier
-        //         }
-        //         console.log(cart[i].supplier)
-        //         localStorageCart.push(item)
-        //         items.push(cart[i].identifier)
-        //     }
-        // }
         localStorage.setItem('cart', JSON.stringify(totalCart))
         $.ajax({
             type: 'POST',

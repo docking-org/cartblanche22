@@ -43,7 +43,7 @@ function Arthor(url) {
       .replace("%w", w)
       .replace("%h", h)
       .replace("%m", smarts);
-    return 'https://arthor.docking.org/' + url.substring(2)
+    return 'http://arthor.docking.org/' + url.substring(2)
   };
 
   this.getTables = function () {
@@ -125,4 +125,4 @@ function Arthor(url) {
 
 /* Site specific */
 
-var arthor = new Arthor('https://arthor.docking.org/');
+var arthor = new Arthor('http://arthor.docking.org/');

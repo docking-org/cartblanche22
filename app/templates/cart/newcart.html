@@ -7,19 +7,6 @@
         background-color: #c5e9f4 !important;
         opacity: 80%;
     }
-    .inshelf {
-        background-color: #91cf91 !important;
-        opacity: 80%;
-        color:black;
-    }
-    .dot {
-        margin-right: 5px;
-        padding: 5px;
-  height: 15px;
-  width: 15px;
-  border-radius: 50%;
-  display: inline-block;
-}
 
     table head {
         padding: 50px;
@@ -36,14 +23,12 @@
 <script src="../static/js/custom/cartblanche.js"></script>
 <script>
     function deleteItem(btn) {
-        console.log(btn.id)
         let cart = JSON.parse(localStorage.getItem('cart'))
         for (i = 0; i < cart.length; i++) {
             if (cart[i].identifier == btn.id) {
                 cart.splice(i, 1);
             }
         }
-        console.log(cart)
         localStorage.setItem('cart', JSON.stringify(cart))
         $("#div" + btn.id).remove();
         $('#cartCount').html(getCartSize(cart))
@@ -218,8 +203,7 @@
 <div class="row">
     <div class="col-md-6">
         <h1>Shopping Cart</h1>
-{#        <p><span class="dot inshelf" ></span>Molecule in UCSF</p>#}
-{#        <p><span class="dot unassigned"></span> Vendor unassigned</p>#}
+        <p>(Click on the identifier to assign vendor)</p>
     </div>
 
     <div class="col-md-6 float-right text-right">
@@ -231,7 +215,6 @@
 <div>
 
 </div>
-<!-- <table id="exportTable" class="row-border " style="display:none"></table> -->
 <table id="table" class="row-border " cellspacing="0" style="width:100%;">
     <thead>
         <tr>
@@ -253,11 +236,4 @@
         </tr>
     </thead>
 </table>
-
-
-
-
-<!-- <div id="cart">
-</div> -->
-
 {%  endblock %}

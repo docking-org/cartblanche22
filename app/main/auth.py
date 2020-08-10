@@ -1,7 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, jsonify, session
 from app.main import application
 from app.data.forms.authForms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, ChangePasswordForm
-from app.data.forms.cartForms import CartForm
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app.data.models.users import Users

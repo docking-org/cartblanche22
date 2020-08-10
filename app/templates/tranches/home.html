@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{%  block scripts %}
+     {{ super() }}
+    <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.1/js/dataTables.fixedColumns.min.js"></script>
+    <script>
+    $(document).ready(function () {
+$('#dtHorizontalExample').DataTable({
+      scrollY:        "500px",
+        scrollX:        "500px",
+        scrollCollapse: true,
+        paging:         false,
+    "info": false,
+            "ordering": false,
+    footer: true,
+        fixedColumns:   {
+            leftColumns: 1,
+            rightColumns: 1,
+        },
+     select: {
+            style: 'os',
+            items: 'cell'
+        }
+
+});
+$('.dataTables_length').addClass('bs-select');
+});
+    </script>
+{% endblock %}
+{% block app_content %}
+    <table id="dtHorizontalExample" class="table table-striped table-bordered table-sm" cellspacing="0"
+  width="100%">
+  <thead>
+    <tr>
+        {% for i in range(60) %}
+        <th>{{ i }}</th>
+        {% endfor %}
+
+    </tr>
+  </thead>
+  <tbody>
+  {% for j in range(60) %}
+    <tr>
+        {% for i in range(60) %}
+        <td>{{ i }}</td>
+        {% endfor %}
+    </tr>
+  {%  endfor %}
+  </tbody>
+    <tfoot>
+       <tr>
+        {% for i in range(60) %}
+        <th>{{ i }}</th>
+        {% endfor %}
+
+    </tr>
+    </tfoot>
+</table>
+{%  endblock %}

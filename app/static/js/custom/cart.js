@@ -113,44 +113,44 @@ function toggleCart(btn) {
     return false;
 }
 
-function chooseVendor(identifier, db, cart) {
-    console.log('autochoosing vendor')
-    $.ajax({
-        type: 'POST',
-        url: '/chooseVendor',
-        data: JSON.stringify({
-            'identifier': identifier,
-            'db': db
-        }),
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (result) {
-            console.log("printing chosen vendor")
-            console.log(result)
-            let vendor = {
-                'cat_name': result['cat_name'],
-                'price': result['price'],
-                'purchase': result['purchase'],
-                'quantity': result['quantity'],
-                'shipping': result['shipping'],
-                'supplier_code': result['supplier_code'],
-                'unit': result['unit']
-            }
-            let item = {
-                'identifier': identifier,
-                'db': db,
-                'img': img,
-                'supplier': [vendor]
-            }
-            let cart = JSON.parse(localStorage.getItem('cart'))
-            cart.push(item)
-            localStorage.setItem(JSON.stringify(cart))
-        },
-        error: function (data) {
-            alert(data);
-        }
-    });
-}
+// function chooseVendor(identifier, db, cart) {
+//     console.log('autochoosing vendor')
+//     $.ajax({
+//         type: 'POST',
+//         url: '/chooseVendor',
+//         data: JSON.stringify({
+//             'identifier': identifier,
+//             'db': db
+//         }),
+//         contentType: "application/json; charset=utf-8",
+//         dataType: "json",
+//         success: function (result) {
+//             console.log("printing chosen vendor")
+//             console.log(result)
+//             let vendor = {
+//                 'cat_name': result['cat_name'],
+//                 'price': result['price'],
+//                 'purchase': result['purchase'],
+//                 'quantity': result['quantity'],
+//                 'shipping': result['shipping'],
+//                 'supplier_code': result['supplier_code'],
+//                 'unit': result['unit']
+//             }
+//             let item = {
+//                 'identifier': identifier,
+//                 'db': db,
+//                 'img': img,
+//                 'supplier': [vendor]
+//             }
+//             let cart = JSON.parse(localStorage.getItem('cart'))
+//             cart.push(item)
+//             localStorage.setItem(JSON.stringify(cart))
+//         },
+//         error: function (data) {
+//             alert(data);
+//         }
+//     });
+// }
 function getCartSize(cart_) {
     // let cart = JSON.parse(localStorage.getItem('cart'))
     let count = 0
