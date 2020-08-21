@@ -1,58 +1,149 @@
 {% extends 'base.html' %}
-{%  block scripts %}
-     {{ super() }}
-    <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.1/js/dataTables.fixedColumns.min.js"></script>
-    <script>
-    $(document).ready(function () {
-$('#dtHorizontalExample').DataTable({
-      scrollY:        "500px",
-        scrollX:        "500px",
-        scrollCollapse: true,
-        paging:         false,
-    "info": false,
-            "ordering": false,
-    footer: true,
-        fixedColumns:   {
-            leftColumns: 1,
-            rightColumns: 1,
-        },
-     select: {
-            style: 'os',
-            items: 'cell'
+{% block styles %}
+    {{ super() }}
+    <style>
+        th, td {
+            white-space: nowrap;
+            vertical-align: top;
+            background-color: white;
+                        {#width: 50px !important;#}
+
         }
 
-});
-$('.dataTables_length').addClass('bs-select');
-});
+        .chosen {
+            background-color: rgb(200, 200, 200);
+        }
+
+    </style>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/fixedcolumns/3.2.1/js/dataTables.fixedColumns.min.js"></script>
+    <script>
+       let intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+       let findSum = function (array) {
+           return  array.reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+       }
+       function rowClicked(){
+           console.log('rowClicked')
+       }
+       function colClicked(){
+           console.log('colClicked')
+       }
+        $(document).ready(function () {
+            let table = $('#dtHorizontalExample').DataTable({
+                search : false,
+                scrollY: '500px',
+                scrollX: '500px',
+                scrollCollapse: true,
+                paging: false,
+                "info": false,
+                "ordering": false,
+                footer: true,
+                fixedColumns: {
+                    leftColumns: 1,
+                    rightColumns: 2,
+                },
+                "rowCallback": function( row, data ) {
+    {#console.log(data)#}
+                    var sum = findSum(data.slice(1, 61))
+                    $('td:last', row).html(sum);
+    console.log(sum)
+  },
+                "footerCallback": function (row, data, start, end, display) {
+
+                    var api = this.api();
+                    for (let i = 1; i <= 60; i++) {
+                        total = findSum(api
+                            .column(i)
+                            .data())
+                        {#console.log(total)#}
+
+                        $('tr:eq(1) th:eq(' + i + ')', api.table().footer())
+                            .html(total);
+                    }
+                }
+
+
+            });
+
+        });
     </script>
 {% endblock %}
 {% block app_content %}
     <table id="dtHorizontalExample" class="table table-striped table-bordered table-sm" cellspacing="0"
-  width="100%">
-  <thead>
-    <tr>
-        {% for i in range(60) %}
-        <th>{{ i }}</th>
-        {% endfor %}
+           width="100%">
+        <thead>
+        {#        <tr>#}
+        {#            <th></th>#}
+        {#            <th colspan="60">Molecular Weight (up to, Daltons)</th>#}
+        {#            <th></th>#}
+        {#            <th></th>#}
+        {#        </tr>#}
+        <tr>
+            <th>
+                MWt
+                <br>
+                LogP
 
-    </tr>
-  </thead>
-  <tbody>
-  {% for j in range(60) %}
-    <tr>
-        {% for i in range(60) %}
-        <td>{{ i }}</td>
-        {% endfor %}
-    </tr>
-  {%  endfor %}
-  </tbody>
-    <tfoot>
-       <tr>
-        {% for i in range(60) %}
-        <th>{{ i }}</th>
-        {% endfor %}
+            </th>
+            {% for i in range(60) %}
+                <th onclick ="colClicked()">{{ i }}</th>
+            {% endfor %}
+            <th>
+                MWt
+                <br>
+                LogP
+            </th>
+            <th>sum</th>
+        </tr>
+        </thead>
+        <tbody>
 
-    </tr>
-    </tfoot>
-</table>
-{%  endblock %}
+        {% for j in range(60) %}
+            <tr>
+                <td onclick="rowClicked()">{{ j }}</td>
+                {% for i in range(60) %}
+                    <td class="tranches chosen" id="tranche_{{ j }}_{{ i }}" data-column={{ j }} data-row={{ i }}>{{ i }}</td>
+                {% endfor %}
+                <td>{{ j }}</td>
+                <td>sum</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr>
+            <th>
+                LogP
+                <br>
+                MWt
+            </th>
+            {% for i in range(60) %}
+                <th>{{ i }}</th>
+            {% endfor %}
+            <th> LogP
+                <br>
+                MWt
+            </th>
+            <th>sum</th>
+        </tr>
+        <tr>
+            <th>sum</th>
+            {% for i in range(60) %}
+                <th class="sum" id="tranches_sum_{{ i }}" data-sum-column={{ i }} >gfgvs</th>
+            {% endfor %}
+            <th>s</th>
+            <th>sum</th>
+        </tr>
+
+        </tfoot>
+    </table>
+{% endblock %}
