@@ -1,6 +1,6 @@
 var sw_server;
 // sw_server = '10.20.0.1:5010'; // nm debug deployment
-sw_server = 'http://swp.docking.org'; // nm debug deployment
+sw_server = 'https://swp.docking.org'; // nm debug deployment
 var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
