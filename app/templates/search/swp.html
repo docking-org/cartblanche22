@@ -8,24 +8,27 @@
 {% endblock %}
 {% block scripts %}
 {{super()}}
+    <script src="../static/js/jsme/jsme.nocache.js"></script>
+<script src="../static/js/custom/cart.js"></script>
+<script src="../static/js/custom/hg.js"></script>
+<script src="../static/js/sw/swpsearch.js"></script>
+    <script src="../static/js/sw/sketcher.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function () {
-        items = JSON.parse('{{ items | tojson }}');
+        {#items = JSON.parse('{{ items | tojson }}');#}
         $('#content').width($('#content').parent().width() - 450);
         $(window).resize(function () {
             $('#content').width($('#content').parent().width() - 450);
             if (dtable) {
                 resize();
-                redraw(JSON.parse('{{ items | tojson }}'));
+                {#redraw(JSON.parse('{{ items | tojson }}'));#}
             }
         });
         db_maps($('#dbsel'));
         toggle_scoring();
     });
 </script>
-<script src="../static/js/sw/swpsearch.js"></script>
-<script src="../static/js/sw/sketcher.js"></script>
 <script type="text/javascript">
     install_range_slider('dist', 25);
     install_range_slider('topodist', 25);
@@ -288,5 +291,34 @@
     </div>
 </div>
 <div id="imgpop" class="popbox">
+</div>
+
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exampleModalLongTitle">Similar molecules in UCSF  <span class="pull-right">40</span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <table id="hgData" style="width:100%;">
+              <thead style="width:100%;">
+            <tr style="width:100%;">
+               <th>Incart</th>
+                 <th>Image</th>
+                <th>Identifier</th>
+                <th>Smile</th>
+            </tr>
+        </thead>
+          </table>
+{#        <p id="hgData"></p>#}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 {%  endblock %}

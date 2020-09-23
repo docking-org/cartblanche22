@@ -253,6 +253,7 @@ function smiles_renderer(data, type, row) {
   button.attr('id', id);
   button.attr('data-identifier', id);
   button.attr('data-db', arthor.table);
+  button.attr('data-hg', false);
   button.attr('data-img', depict_url);
   button.attr('onclick', 'toggleCart(this)');
   let cart = JSON.parse(localStorage.getItem('cart'))

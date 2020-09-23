@@ -109,10 +109,12 @@ def autoChooseVendor(item_id):
 
 @application.route('/getVendors/<identifier>/<db>', methods= ['GET'])
 def getVendors(identifier, db):
+    print('geTVEndors')
     payload = {'molecule_id' : identifier , 'source_database' : db}
-    response = requests.get('http://ec2-52-53-226-228.us-west-1.compute.amazonaws.com/api/_new_get_data', params=payload)
+    response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data', params=payload)
     # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
     vendors = []
+    print(response)
     if response and len(response.json()) > 0:
         res = response.json()
         i = 0
@@ -128,6 +130,7 @@ def getVendors(identifier, db):
                 temp['shipping'] = pack['shipping']
                 temp['DT_RowId'] = i
                 vendors.append(temp)
+    print(vendors)
     return jsonify({'vendors': vendors})
 
 
@@ -140,23 +143,30 @@ def chooseVendor():
     data = request.get_json()
     print(data)
     assigned = True
-    payload = {'molecule_id' : data['identifier'], 'source_database' : data['db']}
-    # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
-    response = requests.get('http://ec2-52-53-226-228.us-west-1.compute.amazonaws.com/api/_new_get_data', params=payload)
-
-    if response and len(response.json()) > 0:
-        res = response.json()
-        print(res)
-        for i in res:
-            i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
-        res = sorted(res, key = lambda x : x['packs'][0]['price'])
-        vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase': 1,
-                  'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'],
-                  'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit'],
-                  'shipping':res[0]['packs'][0]['shipping']}
+    if data['hg'] == True:
+        vendor = {'cat_name': 'HG', 'cat_id_fk': 0, 'purchase': 1,
+                  'supplier_code': 'HG', 'price': 0,
+                  'quantity': 10, 'unit': 'mg',
+                  'shipping': 0}
     else:
-        assigned = False
-        vendor = {}
+        payload = {'molecule_id' : data['identifier'], 'source_database' : data['db']}
+        # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
+        response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data', params=payload)
+
+        if response and len(response.json()) > 0:
+            res = response.json()
+            print(res)
+            for i in res:
+                i['packs'].sort(key = lambda x : (x['price'], x['quantity']))
+            res = sorted(res, key = lambda x : x['packs'][0]['price'])
+            vendor = {'cat_name' : res[0]['cat_name'], 'cat_id_fk':res[0]['cat_id_fk'], 'purchase': 1,
+                      'supplier_code':res[0]['supplier_code'], 'price':res[0]['packs'][0]['price'],
+                      'quantity':res[0]['packs'][0]['quantity'], 'unit':res[0]['packs'][0]['unit'],
+                      'shipping':res[0]['packs'][0]['shipping']}
+        else:
+            print('vendor not found')
+            assigned = False
+            vendor = {}
     addToCartWithVendor(data['identifier'], data['img'], data['db'], vendor)
     return jsonify({'vendor':vendor, 'assigned' : assigned})
 
@@ -165,7 +175,7 @@ def vendorModal(item_id):
     item = Items.query.get(item_id)
     payload = {'molecule_id' : ''.join(item.identifier.split()), 'source_database' : item.database}
     # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
-    response = requests.get('http://ec2-52-53-226-228.us-west-1.compute.amazonaws.com/api/_new_get_data', params=payload)
+    response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data', params=payload)
 
     if response:
         data = response.json()

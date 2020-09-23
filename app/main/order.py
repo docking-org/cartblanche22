@@ -11,14 +11,16 @@ import tablib
 def order_chemspace():
     try:
         data = request.get_json()
-        headers = ('No', 'identifier', 'db', 'catalog name', 'supplier_code', 'pack size', 'unit', 'price', 'shipping',
-                   'purchase qty ', 'total', 'Request salt if possible?', 'Require exact stereochemistry?', 'Quote close analogs?')
+        headers = ('No', 'identifier', 'db', 'catalog name', 'supplier_code',  'shipping', 'Request salt if possible?',
+                   'Require exact stereochemistry?', 'Quote close analogs?','pack size', 'unit', 'price',
+                   'purchase qty ', 'total')
         data_ = tablib.Dataset(headers=headers)
         total = 0
         for i in data:
             print(i)
-            row = (i['num'], i['identifier'], i['db'], i['cat_name'], i['supplier_code'], i['quantity'], i['unit'],
-                   i['price'], i['shipping'], i['purchase'], i['total'], i['salt'], i['stereochemistry'], i['analogs'])
+            row = (i['num'], i['identifier'], i['db'], i['cat_name'], i['supplier_code'], i['shipping'], i['salt'],
+                   i['stereochemistry'], i['analogs'], i['quantity'], i['unit'],
+                   i['price'], i['purchase'], i['total'])
             total += float(i['price']) * int(i['purchase'])
             data_.append(row)
         row = ('', '', '', '', '', '', '', '', '', '', '', '', 'total', round(total, 2))
@@ -28,4 +30,5 @@ def order_chemspace():
         prepare_email_chemspace(current_user, body, file)
         return jsonify('success')
     except Exception as e:
+        print(e)
         return jsonify("failed")

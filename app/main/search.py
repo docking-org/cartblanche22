@@ -13,6 +13,7 @@ def sw():
 
 @application.route('/swp', methods=['GET', 'POST'])
 def swp():
+    return render_template('search/swp.html')
     if current_user.has_roles('private'):
         # identifiers = []
         # for i in current_user.items_in_cart:

@@ -48,6 +48,7 @@ function jsmeOnLoad() {
       if (!fromSmiInput) {
         prevTextInput = null;
         $('#smiles-in').val(smiles);
+        console.log('jsmeOnLoad')
       }
     });
   }
@@ -70,6 +71,8 @@ function set_smiles(callback) {
             callback(smiles);
             if (!fromSmiInput) {
               $('#smiles-in').val(smiles);
+                      console.log('set_smiles')
+
             }
             fromSmiInput = false;
           });

@@ -1,11 +1,12 @@
-function vendorRequest(identifier, db, img, btn) {
+function vendorRequest(identifier, db, img, btn, hg) {
     $.ajax({
             type: 'POST',
             url: '/chooseVendor',
             data: JSON.stringify({
                 'identifier': identifier,
                 'db': db,
-                'img': img
+                'img': img,
+                'hg':hg
             }),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -61,30 +62,12 @@ function toggleCart(btn) {
         item.identifier = identifier
         item.db = db
         item.img = img
-        if($(btn).data('hg') == false){
-            item.supplier = []
-            vendorRequest(identifier, db, img, btn)
-        }
-        else{
-            item.supplier = [
-                {
-                    'cat_name': 'HG',
-                        'price':0,
-                        'purchase': 1,
-                        'quantity': 10,
-                        'shipping': 1,
-                        'supplier_code': 'HG',
-                        'unit':'mg',
-                }
-            ]
-            $(btn).prop('disabled', false)
-        }
+        item.supplier = []
+        vendorRequest(identifier, db, img, btn, $(btn).data('hg'))
         cart.push(item)
         localStorage.setItem('cart', JSON.stringify(cart))
         let count = parseInt($('#cartCount').html()) + 1
         $('#cartCount').html(count)
-
-
 
     }
     else {

@@ -85,12 +85,13 @@
                 <li><a href="{{ url_for('main.sw') }}">Smallworld</a></li>
 
                 <li><a href="{{ url_for('main.arthor') }}">Arthor</a></li>
+            {#                {% if current_user.has_roles('private') %}#}
+                <li><a href="{{url_for('main.swp')}}">SWP</a></li>
+{#                {% endif %}#}
                 <!-- <li><input type="text" id="search" placeholder="Search..."></li> -->
                 <!-- <li><a href="{{ url_for('main.cart') }}"><span class="badge"></span></a></li> -->
                 {% if not current_user.is_anonymous %}
-                {% if current_user.has_roles('private') %}ˇ
-                <li><a href="{{url_for('main.swp')}}">SWP</a></li>
-                {% endif %}
+
                     <li><a href="{{url_for('main.importData')}}">Import</a></li>
 
                 <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>

@@ -7,11 +7,6 @@ from app.data.models.items import Items
 from app.data.models.items import Vendors
 # from app.main.vendors import getVendors
 import json
-import urllib.request
-from urllib.error import HTTPError
-from werkzeug.urls import url_parse
-import asyncio
-import requests
 
 @application.route('/addToCart', methods= ['POST'])
 # adding Item to Cart
@@ -25,9 +20,8 @@ def addToCart():
         return jsonify({'count':current_user.cart_count, 'item_id':item_id})    
     return jsonify({'count':current_user.cart_count, 'item_id':item_id})
 
-# @application.route('/addToCartWithVendor', methods= ['POST'])
+@application.route('/addToCartWithVendor', methods= ['POST'])
 # adding Item to Cart
-
 def addToCartWithVendor(identifier,img, db, vendor) -> None:
     print("calling addToCartWithVendor")
     if current_user.is_authenticated:
@@ -36,7 +30,7 @@ def addToCartWithVendor(identifier,img, db, vendor) -> None:
         if vendor:
             vendor_ =Vendors.addVendor(item_id, vendor)
         print('added succeesfully')
-
+    return 'success'
     # return 'sucess'
     # data = request.get_json()
     # item_id = activeCart.addToCart(current_user, data['id'],data['img_url'],data['database'])

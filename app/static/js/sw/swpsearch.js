@@ -1,6 +1,7 @@
 var sw_server;
-sw_server = '10.20.0.1:5010'; // nm debug deployment
-var config = {}
+// sw_server = '10.20.0.1:5010'; // nm debug deployment
+sw_server = 'http://swp.docking.org'; // nm debug deployment
+var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
 	return {
@@ -20,6 +21,7 @@ var fromSmiInput = false;
 
 $(document).ready(function () {
 	console.log("config working")
+	console.log(sw_server + '/search/config')
 	$.get(sw_server + '/search/config', function (res) {
 		console.log(res)
 		config = res;
@@ -303,6 +305,8 @@ function refresh() {
 function molChanged(smiles) {
 	if (config.WebApp.SearchAsYouDraw)
 		newSearch(smiles);
+	//adding hg database check
+        checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db)
 }
 
 function newSearch(smiles) {
@@ -583,9 +587,15 @@ function hit_renderer(data, type, row) {
 	button.attr('id', id);
 	button.attr('data-identifier', id);
 	button.attr('data-db', search_state.db);
+	button.attr('data-hg', false);
 	button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
 	button.attr('onclick', 'toggleCart(this)');
 	button.attr('class', 'btn btn-info');
+	let cart = JSON.parse(localStorage.getItem('cart'))
+    let items = []
+    for (i = 0; i < cart.length; i++) {
+        items.push(cart[i].identifier)
+    }
 	if (items.includes(id)) {
 		button.html('Remove')
 		button.attr('class', 'btn btn-danger')
@@ -617,52 +627,52 @@ function hit_renderer(data, type, row) {
 }
 
 
-function toggleCart(btn) {
-	if (btn.getAttribute('class') == 'btn btn-info') {
-		$.ajax({
-			type: 'POST',
-			url: '/addToCart',
-			data: JSON.stringify({
-				'id': btn.id,
-				'database': btn.getAttribute('db'),
-				'img_url': btn.getAttribute('img')
-			}),
-			contentType: "application/json; charset=utf-8",
-			dataType: "json",
-			success: function (result) {
-				$(btn).html('Remove')
-				$(btn).attr('class', 'btn btn-danger')
-				if (!items.includes(btn.id)) {
-					items.push(btn.id)
-				}
-				$('#cartCount').html(result['count'])
-				$.ajax({
-					type: 'POST',
-					url: '/autoChooseVendor/' + result['item_id'],
-					contentType: "application/json; charset=utf-8",
-					dataType: "json",
-				})
-			},
-			error: function (data) {
-				alert("fail");
-			}
-		});
-	}
-	else {
-		$.ajax({
-			url: '/deleteItem/' + btn.id,
-			type: 'DELETE',
-			success: function (result) {
-				$(btn).html('Add To Cart')
-				$(btn).attr('class', 'btn btn-info')
-				items.pop(btn.id)
-				$('#cartCount').html(result['count'])
-			}
-		});
-
-	}
-
-
-
-	return false;
-}
+// function toggleCart(btn) {
+// 	if (btn.getAttribute('class') == 'btn btn-info') {
+// 		$.ajax({
+// 			type: 'POST',
+// 			url: '/addToCart',
+// 			data: JSON.stringify({
+// 				'id': btn.id,
+// 				'database': btn.getAttribute('db'),
+// 				'img_url': btn.getAttribute('img')
+// 			}),
+// 			contentType: "application/json; charset=utf-8",
+// 			dataType: "json",
+// 			success: function (result) {
+// 				$(btn).html('Remove')
+// 				$(btn).attr('class', 'btn btn-danger')
+// 				if (!items.includes(btn.id)) {
+// 					items.push(btn.id)
+// 				}
+// 				$('#cartCount').html(result['count'])
+// 				$.ajax({
+// 					type: 'POST',
+// 					url: '/autoChooseVendor/' + result['item_id'],
+// 					contentType: "application/json; charset=utf-8",
+// 					dataType: "json",
+// 				})
+// 			},
+// 			error: function (data) {
+// 				alert("fail");
+// 			}
+// 		});
+// 	}
+// 	else {
+// 		$.ajax({
+// 			url: '/deleteItem/' + btn.id,
+// 			type: 'DELETE',
+// 			success: function (result) {
+// 				$(btn).html('Add To Cart')
+// 				$(btn).attr('class', 'btn btn-info')
+// 				items.pop(btn.id)
+// 				$('#cartCount').html(result['count'])
+// 			}
+// 		});
+//
+// 	}
+//
+//
+//
+// 	return false;
+// }

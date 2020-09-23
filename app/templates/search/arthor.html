@@ -12,6 +12,8 @@
 <!-- <link rel="stylesheet" href="../static/css/arthor/jquery-ui.min.css" type="text/css" /> -->
 <link rel="stylesheet" type="text/css" href="../static/css/arthor/odometer.css">
 <link rel="stylesheet" type="text/css" href="../static/css/arthor/arthor.css">
+{#<link rel="stylesheet" type="text/css" href="../static/css/arthor/index.css">#}
+{#<link rel="stylesheet" type="text/css" href="../static/css/arthor/load.css">#}
 <!-- <link rel="stylesheet" type="text/css" href="../static/css/arthor/font-awesome.min.css"> -->
 {% endblock %}
 
@@ -219,7 +221,7 @@
       <input id="smiles-in" onkeyup="load_smiles(this)" style="width: 100%; text-align: left; font-family: Monospace;"
         placeholder="Smiles-in">
       <ul id="arthor_search_list">
-        <li value="SIM" onclick="setSearchType(this)" class="first">Similarity</li>
+{#        <li value="SIM" onclick="setSearchType(this)" class="first">Similarity</li>#}
         <li value="SUB" onclick="setSearchType(this)">Substructure</li>
         <li value="SMA" onclick="setSearchType(this)" class="last">SMARTS</li>
       </ul>
@@ -290,5 +292,34 @@
   <div id="cleared">
   </div>
 </div>
+      <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exampleModalLongTitle">Similar molecules in UCSF  <span class="pull-right">40</span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <table id="hgData" style="width:100%;">
+              <thead style="width:100%;">
+            <tr style="width:100%;">
+               <th>Incart</th>
+                 <th>Image</th>
+                <th>Identifier</th>
+                <th>Smile</th>
+            </tr>
+        </thead>
+          </table>
+{#        <p id="hgData"></p>#}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
