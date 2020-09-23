@@ -124,4 +124,4 @@ function Arthor(url) {
 
 /* Site specific */
 
-var arthor = new Arthor('http://arthor.docking.org/');
+var arthor = new Arthor('https://arthor.docking.org/');

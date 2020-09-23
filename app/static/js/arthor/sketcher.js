@@ -133,7 +133,7 @@ function load_smiles(input) {
   console.log('zurj chadahnuu haray l da')
   if (fromSmiInput) return;
   var smi = $(input).val();
-  var url = 'http://sw.docking.org/util/smi2mol?smi=%s'
+  var url = 'https://sw.docking.org/util/smi2mol?smi=%s'
 
 
   url = url.replace("%s", encodeURIComponent(smi));

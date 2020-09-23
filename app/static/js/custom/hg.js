@@ -14,7 +14,7 @@ function checkHg(smiles, modal, table, db) {
                         t['identifier'] = temp[0]
                         t['smiles'] = temp[1]
                         t['db'] = db
-                        let base_url = 'http://sw.docking.org/depict/svg?w=%w&h=%h&smi=%s&qry=%q&cols=%c&cmap=%m'
+                        let base_url = 'https://sw.docking.org/depict/svg?w=%w&h=%h&smi=%s&qry=%q&cols=%c&cmap=%m'
                         let depict_url = base_url.replace("%s", encodeURIComponent(temp[1] + ' ' + temp[0]))
                             .replace("%w", 50).replace("%h", 30);
                         let bg = 'bgcolor=clear&hgstyle=outerglow'

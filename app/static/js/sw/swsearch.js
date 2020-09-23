@@ -1,5 +1,5 @@
 var sw_server;
-sw_server = 'http://sw.docking.org'; // nm debug deployment
+sw_server = 'https://sw.docking.org'; // nm debug deployment
 var config = {}
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
