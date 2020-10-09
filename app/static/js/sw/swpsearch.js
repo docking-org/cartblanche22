@@ -1,6 +1,6 @@
 var sw_server;
 // sw_server = '10.20.0.1:5010'; // nm debug deployment
-sw_server = 'https://swp.docking.org'; // nm debug deployment
+sw_server = 'https://gpcr:xtal@swp.docking.org'; // nm debug deployment
 var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
@@ -21,15 +21,34 @@ var fromSmiInput = false;
 
 $(document).ready(function () {
 	console.log("config working")
-	console.log(sw_server + '/search/config')
-	$.get(sw_server + '/search/config', function (res) {
-		console.log(res)
+	// console.log(sw_server + '/search/config')
+	$.ajax({
+    type: 'GET',
+    url: sw_server + '/search/config',
+    crossDomain: true,
+    dataType: 'json',
+    success: function(res) {
+        console.log('res', res)
 		config = res;
 		if (!config.WebApp.SearchAsYouDraw)
 			$('.swopt').removeClass('searchasyoudraw');
 		add_scoretype_selection(config);
 		toggle_scoring();
-	});
+    },
+    error: function (responseData, textStatus, errorThrown) {
+        alert('GET failed.');
+    }
+});
+
+
+	// $.get(sw_server + '/search/config', function (res) {
+	// 	console.log('res', res)
+	// 	config = res;
+	// 	if (!config.WebApp.SearchAsYouDraw)
+	// 		$('.swopt').removeClass('searchasyoudraw');
+	// 	add_scoretype_selection(config);
+	// 	toggle_scoring();
+	// });
 });
 
 function norm_score_name(x) {

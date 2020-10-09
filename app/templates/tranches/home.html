@@ -2,148 +2,146 @@
 {% block styles %}
     {{ super() }}
     <style>
-        th, td {
-            white-space: nowrap;
-            vertical-align: top;
-            background-color: white;
+        {#th, td {#}
+        {#    white-space: nowrap;#}
+        {#    vertical-align: top;#}
+        {#    background-color: white;#}
                         {#width: 50px !important;#}
+        {##}
+        {##}
+        {#.chosen {#}
+        {#    background-color: rgb(200, 200, 200);#}
+     div {
+            max-width:80em;
+            max-height: 50em;
+            overflow: scroll;
+            position: relative;
+        }
+
+        table {
+            position: relative;
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            padding: 0.5em;
+        }
+
+        thead th {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            top: 0;
+            background: grey;
+            color: #FFF;
+        }
+
+        tfoot th {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            bottom: 0;
+            background: grey;
+            color: #FFF;
+        }
+
+        tfoot th:first-child {
+            left: 0;
+            z-index: 1;
+        }
+
+        tfoot th:last-child {
+            right: 0;
+            z-index: 1;
+        }
+
+        thead th:first-child {
+            left: 0;
+            z-index: 1;
+        }
+
+        thead th:last-child {
+            right: 0;
+            z-index: 1;
+        }
+
+        tbody th {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            left: 0;
+            background: #FFF;
+            border-right: 1px solid #CCC;
 
         }
 
-        .chosen {
-            background-color: rgb(200, 200, 200);
+        tbody td:last-child {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            right: 0;
+            background: blue;
+            border-right: 1px solid #CCC;
         }
-
     </style>
+
 {% endblock %}
 {% block scripts %}
     {{ super() }}
-    <script type="text/javascript"
-            src="https://cdn.datatables.net/fixedcolumns/3.2.1/js/dataTables.fixedColumns.min.js"></script>
     <script>
-       let intVal = function (i) {
-                        return typeof i === 'string' ?
-                            i.replace(/[\$,]/g, '') * 1 :
-                            typeof i === 'number' ?
-                                i : 0;
-                    };
-       let findSum = function (array) {
-           return  array.reduce(function (a, b) {
-                                return intVal(a) + intVal(b);
-                            }, 0);
-       }
-       function rowClicked(){
-           console.log('rowClicked')
-       }
-       function colClicked(){
-           console.log('colClicked')
-       }
-        $(document).ready(function () {
-            let table = $('#dtHorizontalExample').DataTable({
-                search : false,
-                scrollY: '500px',
-                scrollX: '500px',
-                scrollCollapse: true,
-                paging: false,
-                "info": false,
-                "ordering": false,
-                footer: true,
-                fixedColumns: {
-                    leftColumns: 1,
-                    rightColumns: 2,
-                },
-                "rowCallback": function( row, data ) {
-    {#console.log(data)#}
-                    var sum = findSum(data.slice(1, 61))
-                    $('td:last', row).html(sum);
-    console.log(sum)
-  },
-                "footerCallback": function (row, data, start, end, display) {
-
-                    var api = this.api();
-                    for (let i = 1; i <= 60; i++) {
-                        total = findSum(api
-                            .column(i)
-                            .data())
-                        {#console.log(total)#}
-
-                        $('tr:eq(1) th:eq(' + i + ')', api.table().footer())
-                            .html(total);
-                    }
-                }
-
-
-            });
-
-        });
+     $(document).ready(function (){
+         console.log('hi')
+       let arr = {{ cell2D | safe }}
+         console.log(typeof(arr))
+        let log_total = Math.log({{ unfilteredSize }})
+         for(let i=0; i < 62; i++){
+             for (let j = 0; j < 62; j++){
+                 $('#' + i +'-' +j).html(arr[i][j])
+                  let color = (Math.floor(255-255 * (log_total-1.1*Math.log(arr[i][j]))/log_total));
+                    $('#' + i +'-' +j).css('background-color', '#' + color.toString(16).repeat(3));
+                    $('#' + i +'-' +j).css('color', color > 105 ? '#333' : '#ccc');
+                    {#$('#' + i +'-' +j).style['opacity'] = cell.enabled ? 1.0 : 0.1;#}
+             }
+         }
+     });
     </script>
 {% endblock %}
 {% block app_content %}
-    <table id="dtHorizontalExample" class="table table-striped table-bordered table-sm" cellspacing="0"
-           width="100%">
+    <div>
+    <table>
         <thead>
-        {#        <tr>#}
-        {#            <th></th>#}
-        {#            <th colspan="60">Molecular Weight (up to, Daltons)</th>#}
-        {#            <th></th>#}
-        {#            <th></th>#}
-        {#        </tr>#}
         <tr>
-            <th>
-                MWt
-                <br>
-                LogP
-
-            </th>
-            {% for i in range(60) %}
-                <th onclick ="colClicked()">{{ i }}</th>
+            <th></th>
+            {% for cell in ticks[0] %}
+            <th>{{ axes[0][cell] }}</th>
             {% endfor %}
-            <th>
-                MWt
-                <br>
-                LogP
-            </th>
-            <th>sum</th>
+          <th>Totals, by logp</th>
         </tr>
         </thead>
         <tbody>
-
-        {% for j in range(60) %}
-            <tr>
-                <td onclick="rowClicked()">{{ j }}</td>
-                {% for i in range(60) %}
-                    <td class="tranches chosen" id="tranche_{{ j }}_{{ i }}" data-column={{ j }} data-row={{ i }}>{{ i }}</td>
+        {% for row in ticks[0] %}
+        <tr>
+            <th>{{ axes[1][row] }}</th>
+            {% for col in ticks[0] %}
+                <td id ='{{ row }}-{{ col }}'>{{ row, col }}</td>
                 {% endfor %}
-                <td>{{ j }}</td>
-                <td>sum</td>
-            </tr>
+            <td id="sum-{{ row }}">Sum {{ row }}</td>
+        </tr>
         {% endfor %}
-        </tbody>
-        <tfoot>
-        <tr>
-            <th>
-                LogP
-                <br>
-                MWt
-            </th>
-            {% for i in range(60) %}
-                <th>{{ i }}</th>
-            {% endfor %}
-            <th> LogP
-                <br>
-                MWt
-            </th>
-            <th>sum</th>
-        </tr>
-        <tr>
-            <th>sum</th>
-            {% for i in range(60) %}
-                <th class="sum" id="tranches_sum_{{ i }}" data-sum-column={{ i }} >gfgvs</th>
-            {% endfor %}
-            <th>s</th>
-            <th>sum</th>
-        </tr>
 
-        </tfoot>
+        </tbody>
+     <tfoot>
+                <tr>
+                    <th>Totals, by Weight</th>
+                 {% for col in ticks[0] %}
+            <th id="sum-{{ col }}">sum {{ axes[0][col] }}</th>
+            {% endfor %}
+                     <th>all sum</th>
+
+                </tr>
+            </tfoot>
     </table>
+    </div>
+
 {% endblock %}
