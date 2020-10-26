@@ -6,14 +6,14 @@
         {#    white-space: nowrap;#}
         {#    vertical-align: top;#}
         {#    background-color: white;#}
-                        {#width: 50px !important;#}
+        {#width: 50px !important;#}
         {##}
         {##}
         {#.chosen {#}
         {#    background-color: rgb(200, 200, 200);#}
-     div {
-            max-width:80em;
-            max-height: 50em;
+        div {
+            max-width: 80em;
+            max-height: 40em;
             overflow: scroll;
             position: relative;
         }
@@ -21,11 +21,14 @@
         table {
             position: relative;
             border-collapse: collapse;
+            border: 1px solid #ddd;
         }
 
         td,
         th {
             padding: 0.5em;
+                        border: 1px solid #ddd;
+
         }
 
         thead th {
@@ -35,6 +38,8 @@
             top: 0;
             background: grey;
             color: #FFF;
+                        border: 1px solid #ddd;
+
         }
 
         tfoot th {
@@ -44,26 +49,36 @@
             bottom: 0;
             background: grey;
             color: #FFF;
+                        border: 1px solid #ddd;
+
         }
 
         tfoot th:first-child {
             left: 0;
             z-index: 1;
+                  border-right: 1px solid #ddd;
+
         }
 
         tfoot th:last-child {
             right: 0;
             z-index: 1;
+                  border-right: 1px solid #ddd;
+
         }
 
         thead th:first-child {
             left: 0;
             z-index: 1;
+                  border-right: 1px solid #ddd;
+
         }
 
         thead th:last-child {
             right: 0;
             z-index: 1;
+                  border-right: 1px solid #ddd;
+
         }
 
         tbody th {
@@ -72,7 +87,7 @@
             position: sticky;
             left: 0;
             background: #FFF;
-            border-right: 1px solid #CCC;
+            border-right: 1px solid #ddd;
 
         }
 
@@ -81,8 +96,10 @@
             /* for Safari */
             position: sticky;
             right: 0;
-            background: blue;
-            border-right: 1px solid #CCC;
+            background-color: white;;
+            text-align: center;
+                        border: 1px solid #ddd;
+
         }
     </style>
 
@@ -90,58 +107,155 @@
 {% block scripts %}
     {{ super() }}
     <script>
-     $(document).ready(function (){
-         console.log('hi')
-       let arr = {{ cell2D | safe }}
-         console.log(typeof(arr))
-        let log_total = Math.log({{ unfilteredSize }})
-         for(let i=0; i < 62; i++){
-             for (let j = 0; j < 62; j++){
-                 $('#' + i +'-' +j).html(arr[i][j])
-                  let color = (Math.floor(255-255 * (log_total-1.1*Math.log(arr[i][j]))/log_total));
-                    $('#' + i +'-' +j).css('background-color', '#' + color.toString(16).repeat(3));
-                    $('#' + i +'-' +j).css('color', color > 105 ? '#333' : '#ccc');
-                    {#$('#' + i +'-' +j).style['opacity'] = cell.enabled ? 1.0 : 0.1;#}
-             }
-         }
-     });
+        let scope = new Object();
+        scope.cells = new Array(62).fill(new Array(62).fill(0));
+        $(document).ready(function () {
+            let arr = {{ cell2D | safe }};
+            let log_total = Math.log({{ unfilteredSize }})
+            let rowSize = new Array(62).fill(0);
+            let colSize = new Array(62).fill(0);
+            let totalSize = 0
+            for (let i = 0; i < 62; i++) {
+                for (let j = 0; j < 62; j++) {
+                    scope.cells[i][j] = arr[i][j]
+                    rowSize[i] += arr[i][j];
+                    colSize[j] += arr[i][j];
+                    totalSize += arr[i][j];
+                    let cell = $('#' + i + '-' + j)
+                    cell.html(arr[i][j])
+                    let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(arr[i][j])) / log_total));
+
+                    cell.css('background-color', '#' + color.toString(16).repeat(3));
+                    cell.css('color', color > 105 ? '#333' : '#ccc');
+                    if (cell.hasClass("enabled")) {
+                        cell.css('opacity', 1.0)
+                    } else {
+                        cell.css('opacity', 0.1)
+                    }
+                }
+            }
+            for (let i = 0; i < 62; i++) {
+                $('#row-' + i).html(rowSize[i])
+                $('#col-' + i).html(colSize[i])
+            }
+            $('#tranche-total').html(totalSize)
+            scope.rowSize = rowSize
+            scope.colSize = colSize
+
+
+        });
+         function colToggle(o) {
+            let col = $('#' + o.id)
+            let id = col.data('id')
+            if (col.hasClass('enabled')) {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + i + '-' + id)
+                    cell.removeClass('enabled')
+                }
+                col.removeClass('enabled')
+            } else {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + i + '-' + id)
+                    cell.addClass('enabled')
+                }
+                col.addClass('enabled')
+            }
+            calculate()
+        }
+
+        function rowToggle(o) {
+            let row = $('#' + o.id)
+            let id = row.data('id')
+            if (row.hasClass('enabled')) {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + id + '-' + i)
+                    cell.removeClass('enabled')
+                }
+                row.removeClass('enabled')
+            } else {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + id + '-' + i)
+                    cell.addClass('enabled')
+                }
+                row.addClass('enabled')
+            }
+            calculate()
+        }
+
+        function cellToggle(o) {
+            let cell = $('#' + o.id)
+            if (cell.hasClass("enabled")) {
+                cell.removeClass("enabled")
+            } else {
+                cell.addClass('enabled')
+            }
+            calculate()
+        }
+
+        function calculate() {
+            let arr = {{ cell2D | safe }};
+            let rowSize = new Array(62).fill(0);
+            let colSize = new Array(62).fill(0);
+            let totalSize = 0
+            for (let i = 0; i < 62; i++) {
+                for (let j = 0; j < 62; j++) {
+                    let cell = $('#' + i + '-' + j)
+                    if (cell.hasClass('enabled')) {
+                         rowSize[i] += arr[i][j];
+                    colSize[j] += arr[i][j];
+                    totalSize += arr[i][j];
+                        cell.css('opacity', 1.0)
+                    } else {
+                        cell.css('opacity', 0.1)
+                    }
+                }
+            }
+            for (let i = 0; i < 62; i++) {
+                $('#row-' + i).html(rowSize[i])
+                $('#col-' + i).html(colSize[i])
+            }
+            $('#tranche-total').html(totalSize)
+            console.log(rowSize, colSize, totalSize)
+        }
+
     </script>
 {% endblock %}
 {% block app_content %}
     <div>
-    <table>
-        <thead>
-        <tr>
-            <th></th>
-            {% for cell in ticks[0] %}
-            <th>{{ axes[0][cell] }}</th>
-            {% endfor %}
-          <th>Totals, by logp</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for row in ticks[0] %}
-        <tr>
-            <th>{{ axes[1][row] }}</th>
-            {% for col in ticks[0] %}
-                <td id ='{{ row }}-{{ col }}'>{{ row, col }}</td>
+        <table>
+            <thead>
+            <tr>
+                <th></th>
+                {% for cell in ticks[0] %}
+                    <th class="enabled" onclick="colToggle(this)" id="th-col-{{ cell }}" data-id={{ cell }}>{{ axes[0][cell] }}</th>
                 {% endfor %}
-            <td id="sum-{{ row }}">Sum {{ row }}</td>
-        </tr>
-        {% endfor %}
-
-        </tbody>
-     <tfoot>
+                <th>Totals, by logp</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in ticks[0] %}
                 <tr>
-                    <th>Totals, by Weight</th>
-                 {% for col in ticks[0] %}
-            <th id="sum-{{ col }}">sum {{ axes[0][col] }}</th>
-            {% endfor %}
-                     <th>all sum</th>
-
+                    <th class="enabled" id="th-row-{{ row }}" onclick="rowToggle(this)" data-id={{ row }}>{{ axes[1][row] }}</th>
+                    {% for col in ticks[0] %}
+                        <td id='{{ row }}-{{ col }}' class="enabled row-{{ row }} col-{{ col }}"
+                            onclick="cellToggle(this)">{{ row, col }}</td>
+                    {% endfor %}
+                    <td id="row-{{ row }}">Sum {{ row }}</td>
                 </tr>
+            {% endfor %}
+
+            </tbody>
+            <tfoot>
+            <tr>
+                <th>Totals, by HAC</th>
+                {% for col in ticks[0] %}
+                    <th id="col-{{ col }}">sum {{ axes[0][col] }}</th>
+                {% endfor %}
+                <th id="tranche-total">all sum</th>
+
+            </tr>
             </tfoot>
-    </table>
+        </table>
     </div>
 
 {% endblock %}
