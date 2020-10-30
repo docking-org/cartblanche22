@@ -2,16 +2,8 @@
 {% block styles %}
     {{ super() }}
     <style>
-        {#th, td {#}
-        {#    white-space: nowrap;#}
-        {#    vertical-align: top;#}
-        {#    background-color: white;#}
-        {#width: 50px !important;#}
-        {##}
-        {##}
-        {#.chosen {#}
-        {#    background-color: rgb(200, 200, 200);#}
-        div {
+
+        .div-tranche {
             max-width: 80em;
             max-height: 40em;
             overflow: scroll;
@@ -20,15 +12,24 @@
 
         table {
             position: relative;
-            border-collapse: collapse;
-            border: 1px solid #ddd;
+            borderborder-collapse: collapse;
+        {#: 1px solid black;#}
         }
 
-        td,
         th {
             padding: 0.5em;
-                        border: 1px solid #ddd;
 
+        }
+
+        td {
+            border: 1px solid #ccc;
+            padding: 0.5em;
+        }
+
+        thead th:first-child {
+            left: 0;
+            z-index: 1;
+            border: none;
         }
 
         thead th {
@@ -38,7 +39,48 @@
             top: 0;
             background: grey;
             color: #FFF;
-                        border: 1px solid #ddd;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            opacity: 0.8;
+            margin-top: 0;
+        }
+
+        thead th.enabled {
+            opacity: 1;
+        }
+
+        thead th:last-child {
+            right: 0;
+            z-index: 1;
+        }
+
+        tbody th {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            left: 0;
+            background: grey;
+            color: white;
+            opacity: 0.8;
+            border-bottom: 1px solid #ccc;
+            border-top: 1px solid #ccc;
+
+            border-right: 1px solid #ccc;
+
+        }
+
+        tbody th.enabled {
+            opacity: 1;
+        }
+
+        tbody td:last-child {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            right: 0;
+            background-color: grey;
+            color: white;
+            text-align: center;
 
         }
 
@@ -49,58 +91,84 @@
             bottom: 0;
             background: grey;
             color: #FFF;
-                        border: 1px solid #ddd;
+            border-right: 1px solid #ccc;
+            border-left: 1px solid #ccc;
 
         }
 
         tfoot th:first-child {
             left: 0;
             z-index: 1;
-                  border-right: 1px solid #ddd;
-
+            border: none;
         }
 
         tfoot th:last-child {
             right: 0;
             z-index: 1;
-                  border-right: 1px solid #ddd;
 
         }
 
-        thead th:first-child {
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
             left: 0;
-            z-index: 1;
-                  border-right: 1px solid #ddd;
-
-        }
-
-        thead th:last-child {
             right: 0;
-            z-index: 1;
-                  border-right: 1px solid #ddd;
-
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
         }
 
-        tbody th {
-            position: -webkit-sticky;
-            /* for Safari */
-            position: sticky;
-            left: 0;
-            background: #FFF;
-            border-right: 1px solid #ddd;
-
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
         }
 
-        tbody td:last-child {
-            position: -webkit-sticky;
-            /* for Safari */
-            position: sticky;
-            right: 0;
-            background-color: white;;
-            text-align: center;
-                        border: 1px solid #ddd;
-
+        input:checked + .slider {
+            background-color: grey;
         }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #ccc;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+
     </style>
 
 {% endblock %}
@@ -109,9 +177,11 @@
     <script>
         let scope = new Object();
         scope.cells = new Array(62).fill(new Array(62).fill(0));
+
         $(document).ready(function () {
             let arr = {{ cell2D | safe }};
             let log_total = Math.log({{ unfilteredSize }})
+            scope.log_total = Math.log({{ unfilteredSize }})
             let rowSize = new Array(62).fill(0);
             let colSize = new Array(62).fill(0);
             let totalSize = 0
@@ -141,10 +211,37 @@
             $('#tranche-total').html(totalSize)
             scope.rowSize = rowSize
             scope.colSize = colSize
-
-
+            scope.totalSize = totalSize
+            scope.cells = arr;
         });
-         function colToggle(o) {
+
+        function renderTable(){
+             let rowSize = new Array(62).fill(0);
+            let colSize = new Array(62).fill(0);
+            let totalSize = 0
+        for (let i = 0; i < 62; i++) {
+                for (let j = 0; j < 62; j++) {
+                    let cell = $('#' + i + '-' + j)
+                     if (cell.hasClass('enabled')) {
+                        rowSize[i] += scope.cells[i][j];
+                        colSize[j] += scope.cells[i][j];
+                        totalSize += scope.cells[i][j];
+                        cell.css('opacity', 1.0)
+                    } else {
+                        cell.css('opacity', 0.1)
+                    }
+                    cell.html(scope.numberToggle ? bigNumber(scope.cells[i][j]) : scope.cells[i][j])
+                }
+            }
+
+         for (let i = 0; i < 62; i++) {
+                $('#row-' + i).html(scope.numberToggle ? bigNumber(rowSize[i]) :rowSize[i])
+                $('#col-' + i).html(scope.numberToggle ? bigNumber(colSize[i]) : colSize[i])
+            }
+         $('#tranche-total').html(scope.numberToggle ? bigNumber(totalSize) :totalSize)
+        }
+
+        function colToggle(o) {
             let col = $('#' + o.id)
             let id = col.data('id')
             if (col.hasClass('enabled')) {
@@ -160,7 +257,7 @@
                 }
                 col.addClass('enabled')
             }
-            calculate()
+            renderTable()
         }
 
         function rowToggle(o) {
@@ -179,7 +276,8 @@
                 }
                 row.addClass('enabled')
             }
-            calculate()
+            renderTable()
+            {#o.stopPropagation();#}
         }
 
         function cellToggle(o) {
@@ -189,7 +287,7 @@
             } else {
                 cell.addClass('enabled')
             }
-            calculate()
+            renderTable()
         }
 
         function calculate() {
@@ -201,9 +299,9 @@
                 for (let j = 0; j < 62; j++) {
                     let cell = $('#' + i + '-' + j)
                     if (cell.hasClass('enabled')) {
-                         rowSize[i] += arr[i][j];
-                    colSize[j] += arr[i][j];
-                    totalSize += arr[i][j];
+                        rowSize[i] += arr[i][j];
+                        colSize[j] += arr[i][j];
+                        totalSize += arr[i][j];
                         cell.css('opacity', 1.0)
                     } else {
                         cell.css('opacity', 0.1)
@@ -215,27 +313,51 @@
                 $('#col-' + i).html(colSize[i])
             }
             $('#tranche-total').html(totalSize)
-            console.log(rowSize, colSize, totalSize)
+        }
+        function numberToggles(btn) {
+            scope.numberToggle = $(btn).prop('checked');
+            renderTable();
+        }
+        function bigNumber(input){
+             if(input >= 10000000) {
+               return '' + Math.round(input / 1000000) + 'M';
+           } else if(input >= 1000000) {
+               return '' + Math.round(input / 100000) / 10 + 'M';
+           } else if (input >= 10000) {
+               return '' + Math.round(input / 1000)  + 'K';
+           } else if (input >= 1000) {
+               return '' + Math.round(input / 100) / 10 + 'K';
+           } else {
+               return input;
+           }
         }
 
     </script>
 {% endblock %}
 {% block app_content %}
     <div>
+        <label class="switch">
+            <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
+            <span class="slider round"></span>
+        </label>
+    </div>
+    <div class="div-tranche">
         <table>
             <thead>
             <tr>
-                <th></th>
+                <th class="enabled"></th>
                 {% for cell in ticks[0] %}
-                    <th class="enabled" onclick="colToggle(this)" id="th-col-{{ cell }}" data-id={{ cell }}>{{ axes[0][cell] }}</th>
+                    <th class="enabled" onclick="colToggle(this)" id="th-col-{{ cell }}"
+                        data-id={{ cell }}>{{ axes[2][cell] }}.{{ axes[0][cell] }}</th>
                 {% endfor %}
-                <th>Totals, by logp</th>
+                <th class="enabled">Totals, by logp</th>
             </tr>
             </thead>
             <tbody>
             {% for row in ticks[0] %}
                 <tr>
-                    <th class="enabled" id="th-row-{{ row }}" onclick="rowToggle(this)" data-id={{ row }}>{{ axes[1][row] }}</th>
+                    <th class="enabled" id="th-row-{{ row }}" onclick="rowToggle(this)"
+                        data-id={{ row }}>{{ axes[2][row] }}.{{ axes[1][row] }}</th>
                     {% for col in ticks[0] %}
                         <td id='{{ row }}-{{ col }}' class="enabled row-{{ row }} col-{{ col }}"
                             onclick="cellToggle(this)">{{ row, col }}</td>
