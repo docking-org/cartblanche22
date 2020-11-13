@@ -105,7 +105,6 @@
         tfoot th:last-child {
             right: 0;
             z-index: 1;
-
         }
 
         .switch {
@@ -176,7 +175,6 @@
     <script>
         let scope = new Object();
         scope.cells = new Array(62).fill(new Array(62).fill(0));
-
         $(document).ready(function () {
             let arr = {{ cell2D | safe }};
             let log_total = Math.log({{ unfilteredSize }})
@@ -193,13 +191,12 @@
                     let cell = $('#' + i + '-' + j)
                     cell.html(arr[i][j])
                     let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(arr[i][j])) / log_total));
-
-                    cell.css('background-color', '#' + color.toString(16).repeat(3));
+                    cell.parent().css('background-color', '#' + color.toString(16).repeat(3));
                     cell.css('color', color > 105 ? '#333' : '#ccc');
-                    if (cell.hasClass("enabled")) {
-                        cell.css('opacity', 1.0)
+                    if (cell.parent().hasClass("enabled")) {
+                        cell.parent().css('opacity', 1.0)
                     } else {
-                        cell.css('opacity', 0.1)
+                        cell.parent().css('opacity', 0.1)
                     }
                 }
             }
@@ -212,22 +209,28 @@
             scope.colSize = colSize
             scope.totalSize = totalSize
             scope.cells = arr;
+            scope.enabled = new Array(62).fill(new Array(62).fill(true));
+            console.log(scope.enabled)
         });
 
         function renderTable() {
+            console.log(scope.enabled)
             let rowSize = new Array(62).fill(0);
             let colSize = new Array(62).fill(0);
             let totalSize = 0
             for (let i = 0; i < 62; i++) {
                 for (let j = 0; j < 62; j++) {
                     let cell = $('#' + i + '-' + j)
-                    if (cell.hasClass('enabled')) {
+                    let parent = cell.parent()
+                    if (parent.hasClass('enabled')) {
+                        scope.enabled[i][j] = true
                         rowSize[i] += scope.cells[i][j];
                         colSize[j] += scope.cells[i][j];
                         totalSize += scope.cells[i][j];
-                        cell.css('opacity', 1.0)
+                        parent.css('opacity', 1.0)
                     } else {
-                        cell.css('opacity', 0.1)
+                        scope.enabled[i][j] = false
+                        parent.css('opacity', 0.1)
                     }
                     cell.html(scope.numberToggle ? bigNumber(scope.cells[i][j]) : scope.cells[i][j])
                 }
@@ -246,13 +249,13 @@
             if (col.hasClass('enabled')) {
                 for (let i = 0; i < 62; i++) {
                     let cell = $('#' + i + '-' + id)
-                    cell.removeClass('enabled')
+                    cell.parent().removeClass('enabled')
                 }
                 col.removeClass('enabled')
             } else {
                 for (let i = 0; i < 62; i++) {
                     let cell = $('#' + i + '-' + id)
-                    cell.addClass('enabled')
+                    cell.parent().addClass('enabled')
                 }
                 col.addClass('enabled')
             }
@@ -265,54 +268,30 @@
             if (row.hasClass('enabled')) {
                 for (let i = 0; i < 62; i++) {
                     let cell = $('#' + id + '-' + i)
-                    cell.removeClass('enabled')
+                    cell.parent().removeClass('enabled')
                 }
                 row.removeClass('enabled')
             } else {
                 for (let i = 0; i < 62; i++) {
                     let cell = $('#' + id + '-' + i)
-                    cell.addClass('enabled')
+                    cell.parent().addClass('enabled')
                 }
                 row.addClass('enabled')
             }
             renderTable()
-            {#o.stopPropagation();#}
         }
 
-        function cellToggle(o) {
-            let cell = $('#' + o.id)
-            if (cell.hasClass("enabled")) {
-                cell.removeClass("enabled")
+        function cellToggle(cell) {
+            let i = cell.getAttribute('data-row')
+            let j = cell.getAttribute('data-col')
+            if ($(cell).hasClass("enabled")) {
+                $(cell).removeClass("enabled")
             } else {
-                cell.addClass('enabled')
+                $(cell).addClass('enabled')
             }
             renderTable()
         }
 
-        function calculate() {
-            let arr = {{ cell2D | safe }};
-            let rowSize = new Array(62).fill(0);
-            let colSize = new Array(62).fill(0);
-            let totalSize = 0
-            for (let i = 0; i < 62; i++) {
-                for (let j = 0; j < 62; j++) {
-                    let cell = $('#' + i + '-' + j)
-                    if (cell.hasClass('enabled')) {
-                        rowSize[i] += arr[i][j];
-                        colSize[j] += arr[i][j];
-                        totalSize += arr[i][j];
-                        cell.css('opacity', 1.0)
-                    } else {
-                        cell.css('opacity', 0.1)
-                    }
-                }
-            }
-            for (let i = 0; i < 62; i++) {
-                $('#row-' + i).html(rowSize[i])
-                $('#col-' + i).html(colSize[i])
-            }
-            $('#tranche-total').html(totalSize)
-        }
 
         function numberToggles(btn) {
             scope.numberToggle = $(btn).prop('checked');
@@ -362,7 +341,7 @@
             <thead>
             <tr>
                 <th class="enabled"><div class ="table-div"></div></th>
-                {% for cell in ticks[0] %}
+                {% for cell in ticks[0][4:] %}
                     <th class="enabled" onclick="colToggle(this)" id="th-col-{{ cell }}"
                         data-id={{ cell }}><div class ="table-div">{{ axes[2][cell] }}.{{ axes[0][cell] }}</div></th>
                 {% endfor %}
@@ -374,9 +353,10 @@
                 <tr>
                     <th class="enabled" id="th-row-{{ row }}" onclick="rowToggle(this)"
                         data-id={{ row }}><div class ="table-div">{{ axes[2][row] }}.{{ axes[1][row] }}</div></th>
-                    {% for col in ticks[0] %}
+                    {% for col in ticks[0][4:] %}
                         <td class="enabled row-{{ row }} col-{{ col }}"
-                            onclick="cellToggle(this)" data-row="{{ row }}" data-col="{{ col }}" id='{{ row }}-{{ col }}'>
+                            onclick="cellToggle(this)" data-row="{{ row }}" data-col="{{ col }}" >
+                        <p id='{{ row }}-{{ col }}'></p>
                         </td>
                     {% endfor %}
                     <td>
@@ -399,7 +379,7 @@
             <tfoot>
             <tr>
                 <th><div class ="table-div">Totals, by HAC</div></th>
-                {% for col in ticks[0] %}
+                {% for col in ticks[0][4:] %}
                     <th >
                     <div class ="table-div"></div>
                         <span>

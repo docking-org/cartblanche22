@@ -2,8 +2,9 @@ from flask import render_template
 from app.main import application
 from app.data.models.tranche import Tranche
 import json
+from sqlalchemy import distinct
 
-@application.route('/tranches', methods=['GET'])
+@application.route('/tranchesNew', methods=['GET'])
 def tranches():
     tranches = Tranche.query.all()
     axes = [('H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
@@ -22,13 +23,20 @@ def tranches():
             ]
     ticks = [ (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
          30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+         58, 59, 60, 61),
+              (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+         30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
          58, 59, 60),]
     cell2D = [[0 for x in range(62)] for y in range(62)]
+    cell2DNew = [[{} for x in range(62)] for y in range(61)]
     unfilteredSize = 0
     for i in tranches:
         row_idx = axes[0].index(str(i.h_num))
         col_idx = axes[1].index(str(i.p_num))
+        cell2DNew[col_idx][row_idx] = {'size': i.sum, 'chosen' : True}
         cell2D[col_idx][row_idx] = i.sum
         unfilteredSize += i.sum
-    return render_template('tranches/home.html', tranches = tranches, axes = axes, cell2D=json.dumps(cell2D),
+    # print(cell2DNew)
+    return render_template('tranches/homeNew.html', tranches = tranches, axes = axes, cell2D=json.dumps(cell2D),
+                           cell2DNew=json.dumps(cell2DNew),
                            ticks=ticks, unfilteredSize=unfilteredSize)
