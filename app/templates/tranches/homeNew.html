@@ -4,8 +4,7 @@
     <style>
 
         .div-tranche {
-            {#max-width: 80em;#}
-            max-height: 35em;
+        {#max-width: 80em;#} max-height: 35em;
             overflow: scroll;
             position: relative;
             border-right: 1px solid #ccc;
@@ -15,12 +14,15 @@
             position: relative;
             border-collapse: collapse;
         }
-        table div{
-            width:60px;
+
+        table div {
+            width: 60px;
         }
-        .div-last{
+
+        .div-last {
             width: 80px;
         }
+
         th {
             padding: 0.5em;
         }
@@ -33,12 +35,14 @@
         thead th:first-child {
             left: 0;
             z-index: 2;
-            border:none;
+            border: none;
         }
-         thead th:last-child {
+
+        thead th:last-child {
             right: 0;
             z-index: 2;
         }
+
         thead th {
             position: -webkit-sticky;
             /* for Safari */
@@ -51,7 +55,8 @@
             margin-top: 0;
             z-index: 1;
         }
-         tbody th {
+
+        tbody th {
             position: -webkit-sticky;
             /* for Safari */
             position: sticky;
@@ -61,10 +66,11 @@
             border-bottom: 1px solid #ccc;
             border-top: 1px solid #ccc;
             border-right: 1px solid #ccc;
-             z-index: 1;
+            z-index: 1;
 
         }
-         tbody td:last-child {
+
+        tbody td:last-child {
             position: -webkit-sticky;
             /* for Safari */
             position: sticky;
@@ -72,16 +78,17 @@
             background-color: white;
             color: black;
             text-align: center;
-            border-right:none;
+            border-right: none;
 
         }
-                 tfoot th {
+
+        tfoot th {
             position: -webkit-sticky;
             /* for Safari */
             position: sticky;
             bottom: 0;
             background: white;
-            color:black;
+            color: black;
             border-right: 1px solid #ccc;
             border-left: 1px solid #ccc;
 
@@ -98,7 +105,7 @@
             z-index: 2;
         }
 
-        .cell-th:hover{
+        .cell-th:hover {
             background-color: grey;
         }
 
@@ -169,6 +176,17 @@
     {{ super() }}
     <script>
         let numberToggle = false;
+        let predefined = {
+            'all': [[0, 61], [0, 62]],
+            'none': [[0, 0], [0, 0]],
+            'fragments': [[0, 32], [9, 17]],
+            'flagments': [[0, 42], [15, 21]],
+            'goldilocks': [[16, 27], [18, 22]],
+            'lead-like': [[0, 42], [17, 25]],
+            'lugs': [[0, 42], [23, 31]],
+            'drug-like': [[0, 57], [9, 31]],
+            'big-n-greasy': [[0, 3], [25, 31]]
+        };
         $(document).ready(function () {
             let data = {{ cell2DNew | safe }};
             let cols = new Array(62).fill(true);
@@ -179,14 +197,14 @@
             renderTrancheTable();
         });
 
-        function renderTrancheTable(){
+        function renderTrancheTable() {
             arr = JSON.parse(localStorage.getItem('twoD'))
             let rowSize = new Array(61).fill(0);
             let colSize = new Array(62).fill(0);
             let totalSize = 0
             let log_total = Math.log({{ unfilteredSize }})
             let trancheCount = 0
-             for (let i = 0; i < 61; i++) {
+            for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
                     tranche = arr[i][j]
                     let cell = $('#' + i + '-' + j)
@@ -195,15 +213,14 @@
                     let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(tranche.size)) / log_total));
                     td.css('background-color', '#' + color.toString(16).repeat(3));
                     cell.css('color', color > 105 ? '#333' : '#ccc');
-                    if(tranche.chosen === true){
+                    if (tranche.chosen === true) {
                         let val = parseInt(tranche.size)
                         rowSize[i] += val
                         colSize[j] += val
                         totalSize += val
                         td.css('opacity', 1)
                         trancheCount += 1
-                    }
-                    else{
+                    } else {
                         td.css('opacity', 0.1)
                     }
                 }
@@ -215,33 +232,35 @@
             $('#tranche-total').html(numberToggle ? bigNumber(totalSize) : totalSize)
             $('#tranche-count').html(numberToggle ? bigNumber(trancheCount) : trancheCount)
         }
-        function colToggle(obj){
-            console.log(obj)
+
+        function colToggle(obj) {
             let id = obj.getAttribute('data-id')
             let arr = JSON.parse(localStorage.getItem('twoD'))
             let cols = JSON.parse(localStorage.getItem('cols'))
             cols[id] = !cols[id]
             $(obj.target).css('opacity', 1 ? cols[id] : 0.1)
-            for (let i=0; i < 61; i++){
-                 arr[i][id].chosen = cols[id]
+            for (let i = 0; i < 61; i++) {
+                arr[i][id].chosen = cols[id]
             }
             localStorage.setItem('twoD', JSON.stringify(arr));
             localStorage.setItem('cols', JSON.stringify(cols));
             renderTrancheTable();
         }
-        function rowToggle(obj){
+
+        function rowToggle(obj) {
             let id = obj.getAttribute('data-id')
             let arr = JSON.parse(localStorage.getItem('twoD'))
             let rows = JSON.parse(localStorage.getItem('rows'))
             rows[id] = !rows[id]
-            for (let i=0; i < 62; i++){
-                 arr[id][i].chosen = rows[id]
+            for (let i = 0; i < 62; i++) {
+                arr[id][i].chosen = rows[id]
             }
             localStorage.setItem('twoD', JSON.stringify(arr));
             localStorage.setItem('rows', JSON.stringify(rows));
             renderTrancheTable();
         }
-        function cellToggle(obj){
+
+        function cellToggle(obj) {
             let row = obj.getAttribute('data-row')
             let col = obj.getAttribute('data-col')
             let arr = JSON.parse(localStorage.getItem('twoD'))
@@ -269,14 +288,50 @@
             }
         }
 
+        function setPredefined(s) {
+            let arr = JSON.parse(localStorage.getItem('twoD'))
+            let p = predefined[s]
+            for (let i = 0; i < 61; i++) {
+                for (let j = 0; j < 62; j++) {
+                    if (p[0][0] <= i && i < p[0][1] && p[1][0] <= j && j < p[1][1]) {
+                        arr[i][j].chosen = true
+                    } else {
+                        arr[i][j].chosen = false
+                    }
+                }
+            }
+            localStorage.setItem('twoD', JSON.stringify(arr));
+            renderTrancheTable();
+        }
     </script>
 {% endblock %}
 {% block app_content %}
-    <div>
+    <div class="row">
+        <div class="pull-right">
+            <div class="dropdown">
+                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
+                    <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="setPredefined('all')">All</a></li>
+                    <li><a href="#" onclick="setPredefined('none')">None</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
+                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
+                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
+                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>
+                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
+                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
+                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
+                </ul>
+            </div>
+        </div>
+    <div class="pull-right">
         <label class="switch">
-            <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
-            <span class="slider round"></span>
+                <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
+                <span class="slider round"></span>
         </label>
+    </div>
+
     </div>
     <div class="container">
         <div class="row">
@@ -288,81 +343,92 @@
         </div>
 
         <div class="row">
-  <div class="col-sm-1 col-xs-1"
-       style="background-color: white; height:35em;  color:black; border-left: 1px solid #ccc; border-right:1px solid #ccc;width: 2em">
+            <div class="col-sm-1 col-xs-1"
+                 style="background-color: white; height:35em;  color:black; border-left: 1px solid #ccc; border-right:1px solid #ccc;width: 2em">
                 <p style="transform: rotate(-90deg); top: 25em; position: sticky;">LogP</p>
             </div>
-            <div style="background-color: grey; border-bottom: 1px solid #ccc" >
-                 <div class="div-tranche">
-        <table>
-            <thead>
-            <tr>
-                <th><div></div></th>
-                {% for cell in ticks[0][4:] %}
-                    <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)">
-                        <div>
-                            {{ axes[2][cell] }}.{{ axes[0][cell] }}
-                        </div>
-                    </th>
-                {% endfor %}
-                <th><div class="div-last">Totals, by logp</div></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for row in ticks[1] %}
-                <tr>
-                    <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)"><div>{{ axes[2][row] }}.{{ axes[1][row] }}</div></th>
-                    {% for col in ticks[0][4:] %}
-                        <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}" onclick="cellToggle(this)">
-                        <div>
-                            <p id='{{ row }}-{{ col }}'></p>
-                        </div>
-                        </td>
-                    {% endfor %}
-                    <td>
-                        <div class="div-last">
-                              <span >
+            <div style="background-color: grey; border-bottom: 1px solid #ccc">
+                <div class="div-tranche">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>
+                                <div></div>
+                            </th>
+                            {% for cell in ticks[0][4:] %}
+                                <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)">
+                                    <div>
+                                        {{ axes[2][cell] }}.{{ axes[0][cell] }}
+                                    </div>
+                                </th>
+                            {% endfor %}
+                            <th>
+                                <div class="div-last">Totals, by logp</div>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in ticks[1] %}
+                            <tr>
+                                <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)">
+                                    <div>{{ axes[2][row] }}.{{ axes[1][row] }}</div>
+                                </th>
+                                {% for col in ticks[0][4:] %}
+                                    <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
+                                        onclick="cellToggle(this)">
+                                        <div>
+                                            <p id='{{ row }}-{{ col }}'></p>
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                                <td>
+                                    <div class="div-last">
+                              <span>
                             {{ axes[2][row] }}.{{ axes[1][row] }}
                         </span>
-                            <br />
-                        <span id="row-sum-{{ row }}">
+                                        <br/>
+                                        <span id="row-sum-{{ row }}">
                             Sum {{ row }}
                         </span>
-                        </div>
-                    </td>
+                                    </div>
+                                </td>
 
 
-                </tr>
-            {% endfor %}
+                            </tr>
+                        {% endfor %}
 
-            </tbody>
-            <tfoot>
-            <tr>
-                <th><div >Totals, by HAC</div></th>
-                {% for col in ticks[0][4:] %}
-                    <th>
-                    <div>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th>
+                                <div>Totals, by HAC</div>
+                            </th>
+                            {% for col in ticks[0][4:] %}
+                                <th>
+                                    <div>
                         <span>
                             {{ axes[2][col] }}.{{ axes[0][col] }}
                         </span>
-                        <br />
-                        <span id="col-sum-{{ col }}">
+                                        <br/>
+                                        <span id="col-sum-{{ col }}">
                             sum {{ axes[0][col] }}
                         </span>
-                    </div>
-                    </th>
-                {% endfor %}
-                <th>
-                    <div class="div-last">
-                    <span id="tranche-count"></span>
-                    <span id="tranche-total"></span>
-                </div>
-                </th>
+                                    </div>
+                                </th>
+                            {% endfor %}
+                            <th>
+                                <div class="div-last">
 
-            </tr>
-            </tfoot>
-        </table>
-    </div>
+                                    Tranches: <span id="tranche-count"></span>
+                                    <br/>
+                                    Total: <span id="tranche-total"></span>
+                                </div>
+                            </th>
+
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
