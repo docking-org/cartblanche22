@@ -196,9 +196,49 @@
       flags: arthor.flags
     });
     var base_url = arthor.url + '/dt/' + arthor.table + '/search';
-    $('#arthor_sdf_link').attr('href', base_url + '.sdf?' + params);
-    $('#arthor_tsv_link').attr('href', base_url + '.tsv?' + params);
-    $('#arthor_csv_link').attr('href', base_url + '.csv?' + params);
+    $('#arthor_sdf_link_500').attr('href', base_url + '.sdf?' + params);
+    $('#arthor_tsv_link_500').attr('href', base_url + '.tsv?' + params);
+    $('#arthor_csv_link_500').attr('href', base_url + '.csv?' + params);
+    var limit = 5000;
+    var params = $.param({
+      query: arthor.query,
+      type: arthor.type,
+      draw: 0,
+      start: 0,
+      length: limit,
+      flags: arthor.flags
+    });
+    var base_url = arthor.url + '/dt/' + arthor.table + '/search';
+    $('#arthor_sdf_link_5000').attr('href', base_url + '.sdf?' + params);
+    $('#arthor_tsv_link_5000').attr('href', base_url + '.tsv?' + params);
+    $('#arthor_csv_link_5000').attr('href', base_url + '.csv?' + params);
+    var limit = 10000;
+    var params = $.param({
+      query: arthor.query,
+      type: arthor.type,
+      draw: 0,
+      start: 0,
+      length: limit,
+      flags: arthor.flags
+    });
+    var base_url = arthor.url + '/dt/' + arthor.table + '/search';
+    $('#arthor_sdf_link_10000').attr('href', base_url + '.sdf?' + params);
+    $('#arthor_tsv_link_10000').attr('href', base_url + '.tsv?' + params);
+    $('#arthor_csv_link_10000').attr('href', base_url + '.csv?' + params);
+       var limit = 50000;
+    var params = $.param({
+      query: arthor.query,
+      type: arthor.type,
+      draw: 0,
+      start: 0,
+      length: limit,
+      flags: arthor.flags
+    });
+    var base_url = arthor.url + '/dt/' + arthor.table + '/search';
+        $('#arthor_tsv_link_50000').attr('href', base_url + '.tsv?' + params);
+        $('#arthor_csv_link_50000').attr('href', base_url + '.tsv?' + params);
+        $('#arthor_sdf_link_50000').attr('href', base_url + '.tsv?' + params);
+
   }
 </script>
 {% endblock %}
@@ -276,12 +316,94 @@
         <div class="dropdown">
           <button class="dropbtn"><i class="fa fa-download"></i></button>
           <div class="dropdown-content">
-            <a id="arthor_tsv_link" href="#"><i class="fa fa-download"></i> TSV</a>
-            <a id="arthor_csv_link" href="#"><i class="fa fa-download"></i> CSV</a>
-            <a id="arthor_sdf_link" href="#"><i class="fa fa-download"></i> SDF</a>
+            <a data-toggle="modal" data-target="#tsvDownload"><i class="fa fa-download"></i> TSV</a>
+            <a data-toggle="modal" data-target="#csvDownload"><i class="fa fa-download"></i> CSV</a>
+            <a data-toggle="modal" data-target="#sdfDownload"><i class="fa fa-download"></i> SDF</a>
+{#            <a id="arthor_tsv_link" href="#"><i class="fa fa-download"></i> TSV</a>#}
+{#            <a id="arthor_csv_link" href="#"><i class="fa fa-download"></i> CSV</a>#}
+{#            <a id="arthor_sdf_link" href="#"><i class="fa fa-download"></i> SDF</a>#}
           </div>
         </div>
       </div>
+
+        <!-- Modal TSV-->
+<div class="modal fade" id="tsvDownload" tabindex="-1" role="dialog" aria-labelledby="tsvDownloadLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Download as a TSV format</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+         <ul class="list-group">
+     <li  class="list-group-item"><a id="arthor_tsv_link_500" href="#"><i class="fa fa-download"></i> Download 500 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_tsv_link_5000" href="#"><i class="fa fa-download"></i> Download 5000 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_tsv_link_10000" href="#"><i class="fa fa-download"></i> Download 10000 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_tsv_link_50000" href="#"><i class="fa fa-download"></i> Download 50000 molecules </a></li>
+      </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+{#        <button type="button" class="btn btn-primary">Save changes</button>#}
+      </div>
+    </div>
+  </div>
+</div>
+        <!-- Modal CSV -->
+<div class="modal fade" id="csvDownload" tabindex="-1" role="dialog" aria-labelledby="csvDownloadLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Download as a CSV format</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+         <ul class="list-group">
+     <li  class="list-group-item"><a id="arthor_csv_link_500" href="#"><i class="fa fa-download"></i> Download 500 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_csv_link_5000" href="#"><i class="fa fa-download"></i> Download 5000 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_csv_link_10000" href="#"><i class="fa fa-download"></i> Download 10000 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_csv_link_50000" href="#"><i class="fa fa-download"></i> Download 50000 molecules </a></li>
+      </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+{#        <button type="button" class="btn btn-primary">Save changes</button>#}
+      </div>
+    </div>
+  </div>
+</div>
+        <!-- Modal SDF -->
+<div class="modal fade" id="sdfDownload" tabindex="-1" role="dialog" aria-labelledby="sdfDownloadLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Download as a SDF format</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+         <ul class="list-group">
+     <li  class="list-group-item"><a id="arthor_sdf_link_500" href="#"><i class="fa fa-download"></i> Download 500 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_sdf_link_5000" href="#"><i class="fa fa-download"></i> Download 5000 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_sdf_link_10000" href="#"><i class="fa fa-download"></i> Download 10000 molecules</a></li>
+     <li class="list-group-item"><a id="arthor_sdf_link_50000" href="#"><i class="fa fa-download"></i> Download 50000 molecules </a></li>
+      </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+{#        <button type="button" class="btn btn-primary">Save changes</button>#}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
     </div>
     <div id="splash" style="margin: auto; width: 40%; color: #fff; margin-top: 20%; text-align: center;">
       <i><span id="splash-mesg">To start a search draw a query structure in the sketcher</span></i>

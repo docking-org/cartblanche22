@@ -303,6 +303,22 @@
             localStorage.setItem('twoD', JSON.stringify(arr));
             renderTrancheTable();
         }
+        function trancheDownloadModalClicked() {
+            let arr = JSON.parse(localStorage.getItem('twoD'))
+            let temp = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+             'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
+             'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+            let st = ''
+              for (let i = 0; i < 61; i++) {
+                for (let j = 0; j < 62; j++) {
+                    if (arr[i][j].chosen) {
+                        st = st + temp[j] + temp[i] +' '
+                    }
+                }
+            }
+              $('#selected-tranches').html(st)
+
+        }
     </script>
 {% endblock %}
 {% block app_content %}
@@ -331,6 +347,37 @@
                 <span class="slider round"></span>
         </label>
     </div>
+    <div class="pull-right">
+        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal" onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download</button>
+    </div>
+
+            <!-- Modal -->
+<div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog" aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Download</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+                                            <textarea id="selected-tranches"
+                                                      class="tranche-list form-control"
+                                                      name="tranches"
+                                                      rows="6"
+                                                      cols="20"
+                                                     ></textarea>
+                                        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
     </div>
     <div class="container">
@@ -378,6 +425,11 @@
                                         onclick="cellToggle(this)">
                                         <div>
                                             <p id='{{ row }}-{{ col }}'></p>
+                                               <a  style="color: darkgrey;" href=""
+                                   title="View substances in the {{ row }} -{{ col }} tranche"
+                                   class="hover-link hover-link-se hover-link-slow">
+                                    <i class="glyphicon glyphicon-info-sign"><span class="sr-only">View</span></i>
+                                </a>
                                         </div>
                                     </td>
                                 {% endfor %}
