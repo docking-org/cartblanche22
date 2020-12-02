@@ -211,6 +211,9 @@
                     cell.html(numberToggle ? bigNumber(tranche.size) : tranche.size)
                     let td = $('#cell-' + i + '-' + j)
                     let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(tranche.size)) / log_total));
+                    if (color < 0){
+                        color = 0
+                    }
                     td.css('background-color', '#' + color.toString(16).repeat(3));
                     cell.css('color', color > 105 ? '#333' : '#ccc');
                     if (tranche.chosen === true) {
@@ -218,10 +221,12 @@
                         rowSize[i] += val
                         colSize[j] += val
                         totalSize += val
-                        td.css('opacity', 1)
+                        cell.css('opacity', 1)
+
                         trancheCount += 1
                     } else {
-                        td.css('opacity', 0.1)
+                        cell.css('opacity', 0.1)
+                        td.css('background-color', 'white');
                     }
                 }
             }
@@ -308,11 +313,21 @@
             let temp = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
              'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
              'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+            let col = ['H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
+     'H16', 'H17',
+          'H18','H19', 'H20', 'H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28', 'H29', 'H30', 'H31', 'H32', 'H33',
+          'H34','H35',  'H36', 'H37', 'H38', 'H39', 'H40', 'H41', "H42", 'H43', 'H44', 'H45', 'H46', 'H47', 'H48', 'H49',
+          'H50', 'H51', 'H52', 'H53', 'H54', 'H55', 'H56', 'H57', 'H58', 'H59', 'H60', 'H61']
+            let row = ['M500','M400','M300', 'M200','M100','M000','P000', 'P010', 'P020', 'P030', 'P040', 'P050', 'P060', 'P070',
+          'P080','P090', 'P100', 'P110', 'P120', 'P130','P140','P150','P160','P170','P180','P190','P200', 'P210', 'P220',
+          'P230', 'P240', 'P250', 'P260', 'P270', 'P280', 'P290', 'P300', 'P310', 'P320', 'P330', 'P340', 'P350', 'P360',
+          'P370','P380','P390','P400','P410','P420', 'P430','P440', 'P450','P460', 'P470','P480','P490','P500','P600',
+          'P700', 'P800', 'P900']
             let st = ''
               for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
                     if (arr[i][j].chosen) {
-                        st = st + temp[j] + temp[i] +' '
+                        st = st + col[j] + row[i] +' '
                     }
                 }
             }
@@ -405,7 +420,7 @@
                             {% for cell in ticks[0][4:] %}
                                 <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)">
                                     <div>
-                                        {{ axes[2][cell] }}.{{ axes[0][cell] }}
+                                        {{ axes[2][cell] }}<br>{{ axes[0][cell] }}
                                     </div>
                                 </th>
                             {% endfor %}
@@ -418,18 +433,18 @@
                         {% for row in ticks[1] %}
                             <tr>
                                 <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)">
-                                    <div>{{ axes[2][row] }}.{{ axes[1][row] }}</div>
+                                    <div>{{ axes[2][row] }}<br>{{ axes[1][row] }}</div>
                                 </th>
                                 {% for col in ticks[0][4:] %}
                                     <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
                                         onclick="cellToggle(this)">
                                         <div>
                                             <p id='{{ row }}-{{ col }}'></p>
-                                               <a  style="color: darkgrey;" href=""
-                                   title="View substances in the {{ row }} -{{ col }} tranche"
-                                   class="hover-link hover-link-se hover-link-slow">
-                                    <i class="glyphicon glyphicon-info-sign"><span class="sr-only">View</span></i>
-                                </a>
+{#                                               <a  style="color: darkgrey;" href=""#}
+{#                                   title="View substances in the {{ row }} -{{ col }} tranche"#}
+{#                                   class="hover-link hover-link-se hover-link-slow">#}
+{#                                    <i class="glyphicon glyphicon-info-sign"><span class="sr-only">View</span></i>#}
+{#                                </a>#}
                                         </div>
                                     </td>
                                 {% endfor %}

@@ -236,8 +236,34 @@
     });
     var base_url = arthor.url + '/dt/' + arthor.table + '/search';
         $('#arthor_tsv_link_50000').attr('href', base_url + '.tsv?' + params);
-        $('#arthor_csv_link_50000').attr('href', base_url + '.tsv?' + params);
-        $('#arthor_sdf_link_50000').attr('href', base_url + '.tsv?' + params);
+        $('#arthor_csv_link_50000').attr('href', base_url + '.csv?' + params);
+        $('#arthor_sdf_link_50000').attr('href', base_url + '.sdf?' + params);
+        var limit = 100000;
+    var params = $.param({
+      query: arthor.query,
+      type: arthor.type,
+      draw: 0,
+      start: 0,
+      length: limit,
+      flags: arthor.flags
+    });
+    var base_url = arthor.url + '/dt/' + arthor.table + '/search';
+        $('#arthor_tsv_link_100000').attr('href', base_url + '.tsv?' + params);
+        $('#arthor_csv_link_100000').attr('href', base_url + '.csv?' + params);
+        $('#arthor_sdf_link_100000').attr('href', base_url + '.sdf?' + params);
+        var limit = 500000;
+    {#var params = $.param({#}
+    {#  query: arthor.query,#}
+    {#  type: arthor.type,#}
+    {#  draw: 0,#}
+    {#  start: 0,#}
+    {#  length: limit,#}
+    {#  flags: arthor.flags#}
+    {#});#}
+    {#var base_url = arthor.url + '/dt/' + arthor.table + '/search';#}
+    {#    $('#arthor_tsv_link_500000').attr('href', base_url + '.tsv?' + params);#}
+    {#    $('#arthor_csv_link_500000').attr('href', base_url + '.csv?' + params);#}
+    {#    $('#arthor_sdf_link_500000').attr('href', base_url + '.sdf?' + params);#}
 
   }
 </script>
@@ -342,6 +368,8 @@
      <li class="list-group-item"><a id="arthor_tsv_link_5000" href="#"><i class="fa fa-download"></i> Download 5000 molecules</a></li>
      <li class="list-group-item"><a id="arthor_tsv_link_10000" href="#"><i class="fa fa-download"></i> Download 10000 molecules</a></li>
      <li class="list-group-item"><a id="arthor_tsv_link_50000" href="#"><i class="fa fa-download"></i> Download 50000 molecules </a></li>
+     <li class="list-group-item"><a id="arthor_tsv_link_100000" href="#"><i class="fa fa-download"></i> Download 100000 molecules </a></li>
+{#     <li class="list-group-item"><a id="arthor_tsv_link_500000" href="#"><i class="fa fa-download"></i> Download 500000 molecules </a></li>#}
       </ul>
       </div>
       <div class="modal-footer">
@@ -367,6 +395,8 @@
      <li class="list-group-item"><a id="arthor_csv_link_5000" href="#"><i class="fa fa-download"></i> Download 5000 molecules</a></li>
      <li class="list-group-item"><a id="arthor_csv_link_10000" href="#"><i class="fa fa-download"></i> Download 10000 molecules</a></li>
      <li class="list-group-item"><a id="arthor_csv_link_50000" href="#"><i class="fa fa-download"></i> Download 50000 molecules </a></li>
+             <li class="list-group-item"><a id="arthor_csv_link_100000" href="#"><i class="fa fa-download"></i> Download 100000 molecules </a></li>
+{#     <li class="list-group-item"><a id="arthor_csv_link_500000" href="#"><i class="fa fa-download"></i> Download 500000 molecules </a></li>#}
       </ul>
       </div>
       <div class="modal-footer">
@@ -392,6 +422,8 @@
      <li class="list-group-item"><a id="arthor_sdf_link_5000" href="#"><i class="fa fa-download"></i> Download 5000 molecules</a></li>
      <li class="list-group-item"><a id="arthor_sdf_link_10000" href="#"><i class="fa fa-download"></i> Download 10000 molecules</a></li>
      <li class="list-group-item"><a id="arthor_sdf_link_50000" href="#"><i class="fa fa-download"></i> Download 50000 molecules </a></li>
+             <li class="list-group-item"><a id="arthor_sdf_link_100000" href="#"><i class="fa fa-download"></i> Download 100000 molecules </a></li>
+{#     <li class="list-group-item"><a id="arthor_sdf_link_500000" href="#"><i class="fa fa-download"></i> Download 500000 molecules </a></li>#}
       </ul>
       </div>
       <div class="modal-footer">
