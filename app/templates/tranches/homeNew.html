@@ -25,11 +25,13 @@
 
         th {
             padding: 0.5em;
+            text-align: center;
         }
 
         td {
             border: 1px solid #ccc;
             padding: 0.5em;
+            text-align: center;
         }
 
         thead th:first-child {
@@ -79,6 +81,7 @@
             color: black;
             text-align: center;
             border-right: none;
+            font-weight: bold;
 
         }
 
@@ -222,10 +225,10 @@
                         colSize[j] += val
                         totalSize += val
                         cell.css('opacity', 1)
-
                         trancheCount += 1
                     } else {
                         cell.css('opacity', 0.1)
+                        cell.css('color', 'black')
                         td.css('background-color', 'white');
                     }
                 }
@@ -245,7 +248,12 @@
             cols[id] = !cols[id]
             $(obj.target).css('opacity', 1 ? cols[id] : 0.1)
             for (let i = 0; i < 61; i++) {
-                arr[i][id].chosen = cols[id]
+                if (arr[i][id].size === 0){
+                    arr[i][id].chosen = false
+                }
+                else{
+                    arr[i][id].chosen = cols[id]
+                }
             }
             localStorage.setItem('twoD', JSON.stringify(arr));
             localStorage.setItem('cols', JSON.stringify(cols));
@@ -258,7 +266,13 @@
             let rows = JSON.parse(localStorage.getItem('rows'))
             rows[id] = !rows[id]
             for (let i = 0; i < 62; i++) {
-                arr[id][i].chosen = rows[id]
+                if(arr[id][i].size === 0){
+                    arr[id][i].chosen = false
+                }
+                else{
+                   arr[id][i].chosen = rows[id]
+
+                }
             }
             localStorage.setItem('twoD', JSON.stringify(arr));
             localStorage.setItem('rows', JSON.stringify(rows));
@@ -269,7 +283,12 @@
             let row = obj.getAttribute('data-row')
             let col = obj.getAttribute('data-col')
             let arr = JSON.parse(localStorage.getItem('twoD'))
-            arr[row][col].chosen = !arr[row][col].chosen
+            if(arr[row][col].size === 0){
+                arr[row][col].chosen = false
+            }
+            else{
+                arr[row][col].chosen = !arr[row][col].chosen
+            }
             localStorage.setItem('twoD', JSON.stringify(arr));
             renderTrancheTable();
         }
@@ -298,7 +317,7 @@
             let p = predefined[s]
             for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
-                    if (p[0][0] <= i && i < p[0][1] && p[1][0] <= j && j < p[1][1]) {
+                    if (p[0][0] <= i && i < p[0][1] && p[1][0] <= j && j < p[1][1] && arr[i][j].size != 0) {
                         arr[i][j].chosen = true
                     } else {
                         arr[i][j].chosen = false
@@ -385,11 +404,27 @@
                                                       cols="20"
                                                      ></textarea>
                                         </div>
+            <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label for="download-since">Only If Modified Since</label>
+                                                <input id="download-since"
+                                                       class="form-control"
+                                                       type="date"
+                                                       name="since">
+                                            </div>
+                                        </div>
+
+                                    </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+           <div class="modal-footer">
+                   <div class="btn-group pull-right">
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="glyphicon glyphicon-download-alt"></i>
+                                                Download
+                                            </button>
+                                        </div>
+
     </div>
   </div>
 </div>
@@ -398,7 +433,8 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12"
-                 style="background-color: white; border: 1px solid #ccc; text-align: center; text-justify: auto; color: black;
+                 style="background-color: white; border: 1px solid #ccc; text-align: center;
+                 text-justify: auto; color: black;font-weight: bold;
                 ">
                 Heavy Atom Count
             </div>
@@ -406,7 +442,8 @@
 
         <div class="row">
             <div class="col-sm-1 col-xs-1"
-                 style="background-color: white; height:35em;  color:black; border-left: 1px solid #ccc; border-right:1px solid #ccc;width: 2em">
+                 style="background-color: white; height:35em;  color:black; border-left: 1px solid #ccc;
+                 border-right:1px solid #ccc;width: 2em; font-weight: bold;">
                 <p style="transform: rotate(-90deg); top: 25em; position: sticky;">LogP</p>
             </div>
             <div style="background-color: grey; border-bottom: 1px solid #ccc">
@@ -451,7 +488,7 @@
                                 <td>
                                     <div class="div-last">
                               <span>
-                            {{ axes[2][row] }}.{{ axes[1][row] }}
+                            {{ axes[2][row] }}<br>{{ axes[1][row] }}
                         </span>
                                         <br/>
                                         <span id="row-sum-{{ row }}">
@@ -474,7 +511,7 @@
                                 <th>
                                     <div>
                         <span>
-                            {{ axes[2][col] }}.{{ axes[0][col] }}
+                            {{ axes[2][col] }}<br>{{ axes[0][col] }}
                         </span>
                                         <br/>
                                         <span id="col-sum-{{ col }}">
@@ -487,7 +524,8 @@
                                 <div class="div-last">
 
                                     Tranches: <span id="tranche-count"></span>
-                                    <br/>
+{#                                    <br/>#}
+                                    <hr>
                                     Total: <span id="tranche-total"></span>
                                 </div>
                             </th>

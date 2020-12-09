@@ -33,7 +33,10 @@ def tranches():
     for i in tranches:
         row_idx = axes[0].index(str(i.h_num))
         col_idx = axes[1].index(str(i.p_num))
-        cell2DNew[col_idx][row_idx] = {'size': i.sum, 'chosen' : True}
+        if i.sum == 0:
+            cell2DNew[col_idx][row_idx] = {'size': i.sum, 'chosen': False}
+        else:
+            cell2DNew[col_idx][row_idx] = {'size': i.sum, 'chosen': True}
         cell2D[col_idx][row_idx] = i.sum
         unfilteredSize += i.sum
     # print(cell2DNew)

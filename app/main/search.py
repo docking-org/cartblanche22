@@ -1,7 +1,46 @@
-from flask import render_template,  url_for, redirect
+from flask import render_template,  url_for, redirect, request
 from app.main import application
 from flask_login import current_user, login_required
 from flask_user import roles_required
+from app.data.forms.searchForms import searchZincForm, searchFileForm, searchZincListForm
+import requests
+@application.route('/search/<var>', methods=["GET"])
+def search(var):
+    print(var)
+    if var == 'zinc':
+        form = searchZincForm()
+    elif var == 'file':
+        form = searchFileForm()
+    elif var == 'zinclist':
+        form = searchZincListForm()
+    return render_template('search/searchby.html', var=var, form=form)
+
+@application.route('/searchZinc', methods=["POST"])
+def searchZinc():
+    print(request.form.getlist('id'))
+    zinc_id = request.form.getlist('id')[0]
+    files = {
+        'zinc_id': zinc_id
+    }
+    response = requests.get('http://zinc22.docking.org/search.json', params=files)
+    if response:
+        data = response.json()
+        return render_template('search/search_result.html', data=data)
+    else:
+        return render_template('errors/404.html'), 404
+
+
+@application.route('/searchZincList', methods=["POST"])
+def searchZincList():
+    print(request.form.getlist('listData'))
+    # zinc_id = request.form.getlist('id')[0]
+    # files = {
+    #     'zinc_id': zinc_id
+    # }
+    # response = requests.get('http://zinc22.docking.org/search.json', params=files)
+    # data = response.json()
+    # print(data)
+    return render_template('search/search_result.html')
 
 @application.route('/sw', methods=['GET', 'POST'])
 def sw():
@@ -31,3 +70,4 @@ def arthor():
     #     identifiers.append(i.identifier)
     # return render_template('search/arthor.html', items=identifiers)
     return render_template('search/arthor.html')
+

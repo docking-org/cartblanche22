@@ -41,3 +41,5 @@ class ChangePasswordForm(FlaskForm):
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Change')
+
+
