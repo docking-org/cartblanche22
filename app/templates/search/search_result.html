@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script>
+
+    function searchZinc() {
+        let val = $('#searchValue').val()
+        $.ajax({
+             url: "http://zinc22.docking.org/search.json",
+            dataType: 'json',
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            data: {'zinc_id': val},
+            crossDomain:true,
+            success: function (result) {
+                console.log(result)
+                let smile = result.smiles;
+                let zinc_id = result.zinc_id;
+                let supplier_code = result.supplier_code
+                $('p').append('Smiles : ' + smile).appendTo($('#resultZinc'))
+                $('p').append('Zinc ID : ' + zinc_id).appendTo($('#resultZinc'))
+                $('p').append('Supplier Code : ' + supplier_code).appendTo($('#resultZinc'))
+            }
+        });
+    }
+
+</script>
+{% endblock %}
+{% block app_content %}
+<div>
+
+<div class="card" style="">
+  <img class="card-img-top" src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}"&qry=%q&cols=%c&cmap=%m" alt="">
+  <div class="card-body">
+    <h5 class="card-title">Zinc Id : {{ data.zinc_id }}</h5>
+      <ul class="list-group list-group-flush">
+    <li class="list-group-item">Catalog Name : {{ data.catalogs[0].catalog_name }}</li>
+    <li class="list-group-item">Supplier code : {{ data.supplier_code[0] }}</li>
+    <li class="list-group-item">Tranche : {{ data.tranche }}</li>
+  </ul>
+
+  </div>
+</div>
+
+</div>
+
+{% endblock %}

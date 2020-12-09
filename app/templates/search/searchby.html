@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script>
+
+    function searchZinc() {
+        let val = $('#searchValue').val()
+        $.ajax({
+             url: "http://zinc22.docking.org/search.json",
+            dataType: 'json',
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            data: {'zinc_id': val},
+            crossDomain:true,
+            success: function (result) {
+                console.log(result)
+                let smile = result.smiles;
+                let zinc_id = result.zinc_id;
+                let supplier_code = result.supplier_code
+                $('p').append('Smiles : ' + smile).appendTo($('#resultZinc'))
+                $('p').append('Zinc ID : ' + zinc_id).appendTo($('#resultZinc'))
+                $('p').append('Supplier Code : ' + supplier_code).appendTo($('#resultZinc'))
+            }
+        });
+    }
+
+</script>
+{% endblock %}
+{% block app_content %}
+<div>
+<div>
+    <h3>Search by {{ var }}</h3>
+</div>
+    {% if var == 'zinc' %}
+        <h5>Example : ZINCms000002NiP3</h5>
+        <form action="/searchZinc" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.id.label }}<br>
+            {{ form.id }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    {% endif %}
+    {% if var == 'file' %}
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.file.label }}<br>
+            {{ form.file }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    {% endif %}
+    {% if var == 'zinclist' %}
+        <p>Example:</p>
+        <p>ZINCgs0000000OA0
+ZINCgs0000000OA1
+ZINCgs0000000OA2
+ZINCgs0000000OA3
+ZINCgs0000000OA4
+ZINCgs0000000OA5
+ZINCgs0000000OA6
+ZINCgs0000000OA7
+ZINCgs0000000OA8
+ZINCgs0000000OA9
+ZINCgs0000000OAA
+ZINCgs0000000OAB
+ZINCgs0000000OAC
+ZINCgs0000000OAD
+ZINCgs0000000OAE
+ZINCgs0000000OAF
+ZINCgs0000000OAL
+ZINCgs0000000OAM
+ZINCgs0000000OAN
+ZINCgs0000000OAO
+ZINCgs0000000OAQ
+ZINCgs0000000OAR
+ZINCgs0000000OAS
+ZINCgs0000000OAT
+ZINCgs0000000OAU
+ZINCgs0000000OAV
+ZINCgs0000000OAW
+ZINCgs0000000OAX
+ZINCgs0000000OAY
+ZINCgs0000000OAZ
+ZINCgs0000000OAa
+ZINCgs0000000OAb
+ZINCgs0000000OAc
+ZINCgs0000000OAf
+ZINCgs0000000OAg
+ZINCgs0000000OAh</p>
+    <form action="/searchZincList" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.listData.label }}<br>
+            {{ form.listData }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    {% endif %}
+
+</div>
+
+{% endblock %}

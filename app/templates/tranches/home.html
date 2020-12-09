@@ -1,0 +1,582 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <style>
+
+        .div-tranche {
+            {#max-width: 80em;#}
+            max-height: 35em;
+            overflow: scroll;
+            position: relative;
+            border-right: 1px solid #ccc;
+        }
+
+        table {
+            position: relative;
+            borderborder-collapse: collapse;
+        {#: 1px solid black;#}
+        }
+
+        th {
+            padding: 0.5em;
+        }
+
+        td {
+            border: 1px solid #ccc;
+            padding: 0.5em;
+        }
+
+        thead th:first-child {
+            left: 0;
+            z-index: 1;
+            border:none;
+        }
+
+        thead th {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            top: 0;
+            background: #ccc;
+            opacity: 1 !important;
+            color: black;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            margin-top: 0;
+        }
+
+        thead th.enabled {
+             background: white;
+        }
+
+        thead th:last-child {
+            right: 0;
+            z-index: 1;
+        }
+
+        tbody th {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            left: 0;
+            background: #ccc;
+            color: black;
+            {#opacity: 1 !important;#}
+            border-bottom: 1px solid #ccc;
+            border-top: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+
+        }
+
+        tbody th.enabled {
+    background-color: white
+        }
+
+        tbody td:last-child {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            right: 0;
+            background-color: white;
+            color: black;
+            text-align: center;
+            border-right:none;
+
+        }
+
+        tfoot th {
+            position: -webkit-sticky;
+            /* for Safari */
+            position: sticky;
+            bottom: 0;
+            background: white;
+            color:black;
+            border-right: 1px solid #ccc;
+            border-left: 1px solid #ccc;
+
+        }
+
+        tfoot th:first-child {
+            left: 0;
+            z-index: 1;
+            border: none;
+        }
+
+        tfoot th:last-child {
+            right: 0;
+            z-index: 1;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: grey;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #ccc;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+    </style>
+
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        let scope = new Object();
+        scope.cells = new Array(62).fill(new Array(62).fill(0));
+        $(document).ready(function () {
+            let arr = {{ cell2D | safe }};
+            let log_total = Math.log({{ unfilteredSize }})
+            scope.log_total = Math.log({{ unfilteredSize }})
+            let rowSize = new Array(62).fill(0);
+            let colSize = new Array(62).fill(0);
+            let totalSize = 0
+            for (let i = 0; i < 62; i++) {
+                for (let j = 0; j < 62; j++) {
+                    scope.cells[i][j] = arr[i][j]
+                    rowSize[i] += arr[i][j];
+                    colSize[j] += arr[i][j];
+                    totalSize += arr[i][j];
+                    let cell = $('#' + i + '-' + j)
+                    cell.html(arr[i][j])
+                    let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(arr[i][j])) / log_total));
+                    cell.parent().css('background-color', '#' + color.toString(16).repeat(3));
+                    cell.css('color', color > 105 ? '#333' : '#ccc');
+                    if (cell.parent().hasClass("enabled")) {
+                        cell.parent().css('opacity', 1.0)
+                    } else {
+                        cell.parent().css('opacity', 0.1)
+                    }
+                }
+            }
+            for (let i = 0; i < 62; i++) {
+                $('#row-' + i).html(rowSize[i])
+                $('#col-' + i).html(colSize[i])
+            }
+            $('#tranche-total').html(totalSize)
+            scope.rowSize = rowSize
+            scope.colSize = colSize
+            scope.totalSize = totalSize
+            scope.cells = arr;
+            scope.enabled = new Array(62).fill(new Array(62).fill(true));
+            console.log(scope.enabled)
+        });
+
+        function renderTable() {
+            console.log(scope.enabled)
+            let rowSize = new Array(62).fill(0);
+            let colSize = new Array(62).fill(0);
+            let totalSize = 0
+            for (let i = 0; i < 62; i++) {
+                for (let j = 0; j < 62; j++) {
+                    let cell = $('#' + i + '-' + j)
+                    let parent = cell.parent()
+                    if (parent.hasClass('enabled')) {
+                        scope.enabled[i][j] = true
+                        rowSize[i] += scope.cells[i][j];
+                        colSize[j] += scope.cells[i][j];
+                        totalSize += scope.cells[i][j];
+                        parent.css('opacity', 1.0)
+                    } else {
+                        scope.enabled[i][j] = false
+                        parent.css('opacity', 0.1)
+                    }
+                    cell.html(scope.numberToggle ? bigNumber(scope.cells[i][j]) : scope.cells[i][j])
+                }
+            }
+
+            for (let i = 0; i < 62; i++) {
+                $('#row-' + i).html(scope.numberToggle ? bigNumber(rowSize[i]) : rowSize[i])
+                $('#col-' + i).html(scope.numberToggle ? bigNumber(colSize[i]) : colSize[i])
+            }
+            $('#tranche-total').html(scope.numberToggle ? bigNumber(totalSize) : totalSize)
+        }
+
+        function colToggle(o) {
+            let col = $('#' + o.id)
+            let id = col.data('id')
+            if (col.hasClass('enabled')) {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + i + '-' + id)
+                    cell.parent().removeClass('enabled')
+                }
+                col.removeClass('enabled')
+            } else {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + i + '-' + id)
+                    cell.parent().addClass('enabled')
+                }
+                col.addClass('enabled')
+            }
+            renderTable()
+        }
+
+        function rowToggle(o) {
+            let row = $('#' + o.id)
+            let id = row.data('id')
+            if (row.hasClass('enabled')) {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + id + '-' + i)
+                    cell.parent().removeClass('enabled')
+                }
+                row.removeClass('enabled')
+            } else {
+                for (let i = 0; i < 62; i++) {
+                    let cell = $('#' + id + '-' + i)
+                    cell.parent().addClass('enabled')
+                }
+                row.addClass('enabled')
+            }
+            renderTable()
+        }
+
+        function cellToggle(cell) {
+            let i = cell.getAttribute('data-row')
+            let j = cell.getAttribute('data-col')
+            if ($(cell).hasClass("enabled")) {
+                $(cell).removeClass("enabled")
+            } else {
+                $(cell).addClass('enabled')
+            }
+            renderTable()
+        }
+
+
+        function numberToggles(btn) {
+            scope.numberToggle = $(btn).prop('checked');
+            renderTable();
+        }
+
+        function bigNumber(input) {
+            if (input >= 10000000) {
+                return '' + Math.round(input / 1000000) + 'M';
+            } else if (input >= 1000000) {
+                return '' + Math.round(input / 100000) / 10 + 'M';
+            } else if (input >= 10000) {
+                return '' + Math.round(input / 1000) + 'K';
+            } else if (input >= 1000) {
+                return '' + Math.round(input / 100) / 10 + 'K';
+            } else {
+                return input;
+            }
+        }
+
+    </script>
+{% endblock %}
+{% block app_content %}
+    <div>
+        <label class="switch">
+            <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
+            <span class="slider round"></span>
+        </label>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12"
+                 style="background-color: white; border: 1px solid #ccc; text-align: center; color: black;
+                ">
+                <p>Molecular Weight</p>
+            </div>
+        </div>
+
+        <div class="row">
+  <div class="col-sm-1 col-xs-1"
+       style="background-color: white; height:35em;  color:black; border-left: 1px solid #ccc; border-right:1px solid #ccc;width: 2em">
+                <p style="transform: rotate(-90deg); top: 25em; position: sticky;">LogP</p>
+            </div>
+            <div style="background-color: grey; border-bottom: 1px solid #ccc" >
+                 <div class="div-tranche">
+        <table>
+            <thead>
+            <tr>
+                <th class="enabled"><div class ="table-div"></div></th>
+                {% for cell in ticks[0][4:] %}
+                    <th class="enabled" onclick="colToggle(this)" id="th-col-{{ cell }}"
+                        data-id={{ cell }}><div class ="table-div">{{ axes[2][cell] }}.{{ axes[0][cell] }}</div></th>
+                {% endfor %}
+                <th class="enabled"><div class ="table-div">Totals, by logp</div></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in ticks[0] %}
+                <tr>
+                    <th class="enabled" id="th-row-{{ row }}" onclick="rowToggle(this)"
+                        data-id={{ row }}><div class ="table-div">{{ axes[2][row] }}.{{ axes[1][row] }}</div></th>
+                    {% for col in ticks[0][4:] %}
+                        <td class="enabled row-{{ row }} col-{{ col }}"
+                            onclick="cellToggle(this)" data-row="{{ row }}" data-col="{{ col }}" >
+                        <p id='{{ row }}-{{ col }}'></p>
+                        </td>
+                    {% endfor %}
+                    <td>
+                        <div class ="table-div">
+
+                              <span >
+                            {{ axes[2][row] }}.{{ axes[1][row] }}
+                        </span>
+                        <span id="row-{{ row }}">
+                            Sum {{ row }}
+                        </span>
+                        </div>
+                    </td>
+
+
+                </tr>
+            {% endfor %}
+
+            </tbody>
+            <tfoot>
+            <tr>
+                <th><div class ="table-div">Totals, by HAC</div></th>
+                {% for col in ticks[0][4:] %}
+                    <th >
+                    <div class ="table-div"></div>
+                        <span>
+                            {{ axes[2][col] }}.{{ axes[0][col] }}
+                        </span>
+                        <span id="col-{{ col }}">
+                            sum {{ axes[0][col] }}
+                        </span>
+
+                    </th>
+                {% endfor %}
+                <th id="tranche-total">
+
+                    all sum</th>
+
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+            </div>
+        </div>
+    </div>
+    <div class="div-tranche">
+
+{#<table cellspacing="0" cellpadding="0">#}
+{#      <tr>#}
+{#          <td rowspan="65" id="ver-header" class="enabled"><div style="transform: rotate(-90deg);">LogP</div></td>#}
+{#          <td colspan="65" id="hor-header" class="enabled"><div style="height: 2em;  position:fixed;">Molecular Weight (up to, Daltons)</div></td>#}
+{#      </tr>#}
+{#      <tr>#}
+{#                <td class="enabled cell-ver-left" style=" top:2.5em; z-index:4; background-color: grey">#}
+{#                    <div class="cell-width cell-thead "></div>#}
+{#                </td>#}
+{#                {% for cell in ticks[0] %}#}
+{#                    <td class="enabled cell-header" onclick="colToggle(this)" id="th-col-{{ cell }}"#}
+{#                        data-id={{ cell }}>#}
+{#                        <div class="cell-width cell-thead">#}
+{#                            {{ axes[2][cell] }}.{{ axes[0][cell] }}#}
+{#                        </div>#}
+{#                    </td>#}
+{#                {% endfor %}#}
+{#                <td class="enabled right-header cell-header">#}
+{#                    <div class="cell-width cell-thead"></div>#}
+{#                </td>#}
+{#                <td class="enabled right-sum-header">#}
+{#                    <div class="cell-width cell-thead">Totals, by logp</div>#}
+{#                </td>#}
+{##}
+{#            </tr>#}
+{#{% for row in ticks[0] %}#}
+{#                <tr>#}
+{#                    <td class="enabled cell-ver-left" id="th-row-{{ row }}" onclick="rowToggle(this)"#}
+{#                         data-id={{ row }}>#}
+{#                        <div class="cell-width">#}
+{#                            {{ axes[2][row] }}.{{ axes[1][row] }}#}
+{#                        </div>#}
+{#                    </td>#}
+{#                    {% for col in ticks[0] %}#}
+{#                        <td class="enabled row-{{ row }} col-{{ col }}"#}
+{#                            onclick="cellToggle(this)">#}
+{#                            <div class="cell-width enabled row-{{ row }} col-{{ col }}" id='{{ row }}-{{ col }}'#}
+{#                                 onclick="cellToggle(this)">#}
+{#                                {{ row, col }}#}
+{#                            </div>#}
+{#                        </td>#}
+{#                    {% endfor %}#}
+{##}
+{#                    <td class="enabled right-2">#}
+{#                        <div class="cell-width ">{{ axes[2][row] }}.{{ axes[1][row] }}#}
+{#                        </div>#}
+{#                    </td>#}
+{#                    <td class="right-1">#}
+{#                        <div class="cell-width-sum" id="row-{{ row }}">#}
+{#                            Sum {{ row }}#}
+{#                        </div>#}
+{#                    </td>#}
+{##}
+{##}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#        <tr class="bottom">#}
+                {#            <th></th>#}
+{#                <td class="bottom enabled cell-footer-left">#}
+{#                    <div class="cell-width">Totals, by HAC</div>#}
+{#                </td>#}
+{#                {% for col in ticks[0] %}#}
+{#                    <td class="bottom enabled">#}
+{#                        <div class="cell-width cell-footer">#}
+{#                            <p>{{ axes[2][col] }}.{{ axes[0][col] }}</p>#}
+{##}
+{#                            <p id="col-{{ col }}">sum {{ axes[0][col] }}</p>#}
+{#                        </div>#}
+{#                    </td>#}
+{#                {% endfor %}#}
+{#                <td class="enabled right-2 bottom enabled">#}
+{#                    <div class="cell-width cell-footer"></div>#}
+{#                </td>#}
+{#                <td id="tranche-total" class="right-1 bottom enabled">#}
+{#                    <div class="cell-width cell-footer"></div>#}
+{#                </td>#}
+{##}
+{#            </tr>#}
+{##}
+{#</table>#}
+{##}
+{#        <table>#}
+{##}
+{#            <thead>#}
+{##}
+{#            <tr>#}
+{#                <th rowspan="65">LogP (up to)</th>#}
+{#                <th colspan="65">Molecular Weight (up to, Daltons)</th>#}
+{#            </tr>#}
+{##}
+{#            <tr>#}
+                {#            <th></th>#}
+{#                <th class="enabled right-2">#}
+{#                    <div class="cell-width cell-thead"></div>#}
+{#                </th>#}
+{##}
+{##}
+{#                {% for cell in ticks[0] %}#}
+{#                    <th class="enabled" onclick="colToggle(this)" id="th-col-{{ cell }}"#}
+{#                        data-id={{ cell }}>#}
+{#                        <div class="cell-width cell-thead">#}
+{#                            {{ axes[2][cell] }}.{{ axes[0][cell] }}#}
+{#                        </div>#}
+{#                    </th>#}
+{#                {% endfor %}#}
+{#                <th class="enabled right-2">#}
+{#                    <div class="cell-width cell-thead"></div>#}
+{#                </th>#}
+{#                <th class="enabled right-1">#}
+{#                    <div class="cell-width cell-thead">Totals, by logp</div>#}
+{#                </th>#}
+{##}
+{#            </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            {% for row in ticks[0] %}#}
+{#                <tr>#}
+{#                    <th class="enabled" id="th-row-{{ row }}" onclick="rowToggle(this)"#}
+{#                        data-id={{ row }}>#}
+{#                        <div class="cell-width">#}
+{#                            {{ axes[2][row] }}.{{ axes[1][row] }}#}
+{#                        </div>#}
+{#                    </th>#}
+{#                    {% for col in ticks[0] %}#}
+{#                        <td class="enabled row-{{ row }} col-{{ col }}"#}
+{#                            onclick="cellToggle(this)">#}
+{#                            <div class="cell-width enabled row-{{ row }} col-{{ col }}" id='{{ row }}-{{ col }}'#}
+{#                                 onclick="cellToggle(this)">#}
+{#                                {{ row, col }}#}
+{#                            </div>#}
+{#                        </td>#}
+{#                    {% endfor %}#}
+{##}
+{#                    <td class="enabled right-2">#}
+{#                        <div class="cell-width ">{{ axes[2][row] }}.{{ axes[1][row] }}#}
+{#                        </div>#}
+{#                    </td>#}
+{#                    <td class="right-1">#}
+{#                        <div class="cell-width-sum" id="row-{{ row }}">#}
+{#                            Sum {{ row }}#}
+{#                        </div>#}
+{#                    </td>#}
+{##}
+{##}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#            <tfoot>#}
+{#            <tr class="bottom-2">#}
+                {#            <th></th>#}
+{#                <th>#}
+{#                    <div class="cell-width cell-footer">Totals, by HAC</div>#}
+{#                </th>#}
+{#                {% for col in ticks[0] %}#}
+{#                    <th>#}
+{#                        <div class="cell-width cell-footer">#}
+{#                            <p>{{ axes[2][col] }}.{{ axes[0][col] }}</p>#}
+{##}
+{#                            <p id="col-{{ col }}">sum {{ axes[0][col] }}</p>#}
+{#                        </div>#}
+{#                    </th>#}
+{#                {% endfor %}#}
+{#                <th class="enabled right-2 ">#}
+{#                    <div class="cell-width cell-footer"></div>#}
+{#                </th>#}
+{#                <th id="tranche-total" class="right-1 ">#}
+{#                    <div class="cell-width cell-footer"></div>#}
+{#                </th>#}
+{##}
+{#            </tr>#}
+{##}
+{#            </tfoot>#}
+{#        </table>#}
+    </div>
+
+{% endblock %}

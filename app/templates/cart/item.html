@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super() }}
+<style>
+    table.dataTable tbody tr.chosen {
+        background-color: #5bc0de;
+    }
+
+    table.dataTable tbody tr.selected {
+        background-color: #c5e9f4 !important;
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: #c5e9f4 !important;
+    }
+
+    table.dataTable tbody tr:hover.selected {
+        background-color: #c5e9f4 !important;
+    }
+
+    div.sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 45px;
+    }
+
+    .vendor {
+        border: 1px solid #ccc;
+        color: black;
+    }
+
+    .vendor:hover {
+        background-color: #c5e9f4;
+        border-color: #46b8da;
+        color: white;
+    }
+
+    .card {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+    }
+
+    .panel-heading {
+        background-color: white !important;
+    }
+</style>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script src="../static/js/custom/api.js"></script>
+<script>
+    function deleteVendor(btn) {
+        console.log($('#' + btn.getAttribute('data-id')).data())
+        let identifier = $("#identifier").attr('data-identifier')
+        cat_name = btn.getAttribute('data-catname')
+        supplier_code = btn.getAttribute('data-suppliercode')
+        price = btn.getAttribute('data-price')
+        unit = btn.getAttribute('data-unit')
+        quantity = btn.getAttribute('data-quantity')
+        deleteVendorFromCart(identifier, cat_name, supplier_code, quantity, unit, price);
+        let count = parseInt($('#cartCount').html()) - 1
+        $("#cartCount").html(count)
+        $('#' + btn.getAttribute('data-id')).removeClass("chosen")
+        $('#add').show()
+        $('#delete').hide()
+    }
+    function add(btn) {
+        let identifier = $("#identifier").attr('data-identifier')
+        let db = $("#identifier").attr('data-db')
+        let img = $("#identifier").attr('data-img')
+        let vendor = {}
+        vendor['shipping'] = btn.getAttribute('data-shipping')
+        vendor['cat_name'] = btn.getAttribute('data-catname')
+        vendor['supplier_code'] = btn.getAttribute('data-suppliercode')
+        vendor['price'] = btn.getAttribute('data-price')
+        vendor['unit'] = btn.getAttribute('data-unit')
+        vendor['quantity'] = btn.getAttribute('data-quantity')
+        vendor['purchase'] = 1
+        addVendorToCart(identifier, db, img, vendor)
+        let cart = JSON.parse(localStorage.getItem('cart'))
+        let i = cart.findIndex(obj => obj.identifier == identifier)
+        if (i == -1) {
+            let item = {
+                'identifier': identifier,
+                'db': db,
+                'img': img,
+                'supplier': [vendor]
+            }
+            cart.push(item)
+        }
+        else {
+            cart[i]['supplier'].push(vendor)
+        }
+        localStorage.setItem('cart', JSON.stringify(cart))
+        $("#cartCount").html(getCartSize(cart))
+        $('#' + btn.getAttribute('data-id')).addClass("chosen")
+        $('#delete').show()
+        $('#add').hide()
+
+    }
+    $(document).ready(() => {
+        $('#delete').hide()
+        let identifier = $("#identifier").attr('data-identifier')
+        let cart = JSON.parse(localStorage.getItem('cart'))
+        let table = $('#vendorTable').DataTable({
+            "language": {
+                "emptyTable": "Sorry, we couldn't find any vendors related to this molecule."
+            },
+            "paging": false,
+            "info": false,
+            data: getVendors(false, identifier, '{{db}}'),
+            columns: [
+                { "mData": null },
+                { data: "cat_name" },
+                { data: "supplier_code" },
+                {
+                    "mData": function (data) {
+                        return data.quantity + data.unit;
+                    }
+                },
+                { data: "shipping" },
+                {
+                    "mData": function (data) {
+                        return '$' + data.price;
+                    }
+                },
+
+            ],
+            "columnDefs": [{
+                "searchable": false,
+                "orderable": false,
+                "targets": 0
+            }],
+            rowCallback: function (row, data) {
+                for (let i = 0; i < cart.length; i++) {
+                    if (cart[i]['identifier'] == identifier) {
+                        for (let j = 0; j < cart[i]['supplier'].length; j++) {
+                            let vendor = cart[i]['supplier'][j]
+                            if (data['cat_name'] == vendor['cat_name'] && data['supplier_code'] == vendor['supplier_code'] && data['quantity'] == vendor['quantity'] && data['unit'] == vendor['unit'] && data['price'] == vendor['price']) {
+                                $(row).addClass("chosen")
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        });
+        table.on('order.dt search.dt', function () {
+            table.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+                cell.innerHTML = i + 1;
+            });
+        }).draw();
+        $('#vendorTable').on("click", "tr", function () {
+            $('#add').prop('disabled', false)
+            table.$('tr.selected').removeClass('selected');
+            $(this).toggleClass('selected');
+            let data = table.row(this).data();
+            $('#price').html(data['quantity'] + data['unit'] + ' - $' + data['price'])
+            $('#deliveryTime').html(data['shipping'])
+
+            if ($(this).hasClass("chosen")) {
+                $('#add').hide()
+                $('#delete').show()
+
+            }
+            else {
+                $('#add').show()
+                $('#delete').hide()
+
+            }
+            $('#delete').attr('data-catname', data['cat_name']).attr('data-suppliercode', data['supplier_code']).attr('data-price', data['price']).attr('data-quantity', data['quantity']).attr('data-unit', data['unit']).attr('data-shipping', data['shipping'])
+            $('#delete').attr('data-id', data.DT_RowId)
+            $('#add').attr('data-catname', data['cat_name']).attr('data-suppliercode', data['supplier_code']).attr('data-price', data['price']).attr('data-quantity', data['quantity']).attr('data-unit', data['unit']).attr('data-shipping', data['shipping'])
+            $('#add').attr('data-id', data.DT_RowId)
+
+
+        });
+    });
+</script>
+{% endblock %}
+{% block app_content %}
+<div class="container-fluid">
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-4">
+                <img src="{{img}}" class="img-rounded img-thumbnail" alt="Cinque Terre">
+            </div>
+            <div class="col-md-4">
+                <h3 id="identifier" data-identifier="{{identifier}}" data-db="{{db}}" data-img="{{img}}">Identifier :
+                    {{identifier}}</h3>
+                <h5>DB : {{db}}</h5>
+            </div>
+        </div>
+        <table id="vendorTable" class="hover">
+            <!-- {% for v in vendors %}
+            <tr>
+                <td></td>
+                <td>{{v.cat_name}}</td>
+                <td>{{v.supplier_code}}</td>
+                <td>{{v.quantity}} {{v.unit}}</td>
+                <td>{{v.shipping}}</td>
+                <td>$ {{v.price}}</td>
+            </tr>
+            {% endfor %} -->
+        </table>
+    </div>
+    <div class="col-md-4 sticky">
+        <div class="panel panel-default text-center">
+            <div class="panel-heading">
+                <h3>Price</h3>
+                <h5 id="price">-</h5>
+            </div>
+            <div class="panel-body">
+                <h5>Delivery information</h5>
+                <p id="deliveryTime">-</p>
+                <!-- <p>Quantity:</p>
+                <select>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                </select> -->
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-info" id="add" onclick="add(this)" disabled>Add to Cart</button>
+                <button class="btn btn-warning" id="delete" onclick="deleteVendor(this)" style="display: none">Delete
+                    from cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

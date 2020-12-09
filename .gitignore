@@ -27,7 +27,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-
+migrations1026
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -69,3 +69,7 @@ target
 deployment/
 .flaskenv
 app/static/node_modules
+migrations
+migrationsPsql
+app.db
+requirementsTest.txt

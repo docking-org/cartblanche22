@@ -1,0 +1,36 @@
+{%  extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script>
+    $('form').on('submit', () => {
+        localStorage.setItem('cart', JSON.stringify([]))
+        $.ajax({
+            type: "GET",
+            url: '/deleteSession',
+            success: (res) => {
+                console.log(res)
+            }
+        });
+        console.log('submit clicked')
+    })
+</script>
+{% endblock %}
+{%  block app_content %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h3>Confirmation</h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            Please click on 'Transfer to Procurement System' to send your Cart contents to your Procurement System.
+        </p>
+    </div>
+    <div class="panel-footer text-right">
+        <a href="{{url_for('main.sw')}}"><button class="btn btn-info">Continue shopping</button></a>
+        <form style='display:inline' method="post" action={{url}} enctype="application/x-www-form-urlencoded">
+            <input type="hidden" name="cxml-urlencoded" value="{{punchoutOrderMessage}}">
+            <input type="submit" value="Transfer to Procurement System" class="btn btn-info ">
+        </form>
+    </div>
+</div>
+{% endblock %}

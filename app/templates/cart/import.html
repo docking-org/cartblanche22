@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script>
+    async function importData() {
+        let textData = $("#textInput")[0].value.split(/[\s,.;\t\r\n]+/)
+        let file = $('#myfile').prop('files')[0]
+        let fileData = []
+        try {
+            fileData = await readFileAsync(file);
+        }
+        catch (err) {
+            console.log(err)
+        }
+        let data = fileData.concat(textData).filter(line => line != "")
+        if (data.length == 0) {
+            buttonToggle('empty')
+        }
+        else {
+            data = [...new Set(data)]
+            console.log('printing import data after separated by line and space and comma')
+            console.log(data)
+            data.forEach((value) => {
+                $.ajax({
+                    type: "POST",
+                    url: '/importIdentifier/' + value,
+                    success: (res) => {
+                        $('#identifier').html(value)
+                        switch (res) {
+                            case 'exists':
+                                $('#exists').append('<li>' + value + '</li>')
+                                break;
+                            case 'fail':
+                                $('#discarded').append('<li>' + value + '</li>')
+                                break;
+                            default:
+                                $('#added').append('<li>' + value + '</li>')
+                                addToLocalStorage(res)
+                        }
+                    },
+                    error: (res) => {
+                        console.log(res)
+                    }
+                });
+            })
+        }
+    }
+    function addToLocalStorage(res) {
+        let arr = JSON.parse(localStorage['arr']);
+        arr.push(res)
+        localStorage['arr'] = JSON.stringify(arr);
+    }
+
+    $(document).ready(buttonToggle('empty'))
+    function readFileAsync(file) {
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            reader.onload = () => {
+                resolve(reader.result.split(/[\s,.;\t\r\n]+/))
+            };
+            reader.onerror = reject;
+            reader.readAsText(file);
+        })
+    }
+
+
+    function buttonToggle(value) {
+        $('#modal-footer').empty()
+        switch (value) {
+            case 'loading':
+                $('#table').show()
+                $('#title').html("We are working on your data...")
+                $('#modal-footer').append('<button class="btn btn-info" disabled><i class="fa fa-spinner fa-pulse fa-x fa-fw"></i> Loading...</button>')
+                break;
+            case 'completed':
+                $('#table').show()
+                $('#title').html("It's done! You are good to go...")
+                $('#modal-footer').append("<a href='{{ url_for('main.newcart') }}' class='btn btn-info'> Take me to the my cart</a>")
+                break;
+            case 'empty':
+                $('#modal-footer').append('<button class="btn btn-info" data-dismiss="modal">Close</button>')
+                $('#title').html("Nothing to import!")
+                $('#table').hide()
+                break;
+        }
+    }
+    $(document).ajaxStart(() => {
+        buttonToggle('loading');
+        localStorage['arr'] = JSON.stringify([]);
+    });
+    $(document).ajaxStop(() => {
+        buttonToggle('completed');
+        let arr = JSON.parse(localStorage['arr']);
+        arr.forEach((value) => {
+            $.ajax({
+                type: 'POST',
+                url: '/autoChooseVendor/' + value,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+            })
+        })
+
+    });
+
+</script>
+{% endblock %}
+{% block app_content %}
+<div>
+<div>
+    <h3>We support Zinc identifiers, s enamine, m enamine, wuxi codes. For the files: .txt only</h3>
+</div>
+    <div class="form-group">
+        <label for="dataInput">Enter codes:</label><br>
+        <textarea classå="form-control" rows="4" cols="50" name="dataInput" form="dataInput" id="textInput"></textarea>
+    </div>
+    <h1> OR </h1>
+    <div class="form-group">
+        <label for="myfile">Select a file(.txt only) :</label>
+        <input type="file" id="myfile" name="myfile" class="btn btn-info">
+    </div>
+    <button type="button" class="btn btn-info" onclick="importData()" data-toggle="modal"
+        data-target="#modal">Import</button>
+</div>
+<!-- <div class="form-group">
+    <form action="{{url_for('main.importData')}}" id="dataInput" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for=" dataInput">Enter codes:</label><br>
+            <textarea class="form-control" rows="4" cols="50" name="dataInput" form="dataInput"></textarea>
+        </div>
+        <h1> OR </h1>
+        <div class="form-group">
+            <label for="myfile">Select a file:</label>
+            <input type="file" id="myfile" name="myfile" class="btn btn-info">
+        </div>
+        <input type="submit" class="btn btn-info" onsubmit="spinner()">
+    </form>
+</div> -->
+
+<div class="modal" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div>
+                    <p id="identifier"></p>
+                </div>
+
+            </div>
+            <div class="modal-body">
+                <table id="table" class="table table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Already in cart</th>
+                            <th>Added to cart</th>
+                            <th>Discarded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="exists"></td>
+                            <td id="added"></td>
+                            <td id="discarded"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer" id='modal-footer'>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
