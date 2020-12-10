@@ -2,7 +2,9 @@ from app import db
 from datetime import datetime
 
 class AvailableVendors(db.Model):
+    __bind_key__ = 'zinc22'
     __tablename__ = 'availableVendors'
+    
     vendor_id = db.Column(db.Integer, primary_key=True)
     cat_id_fk = db.Column(db.Integer)
     short_name = db.Column(db.String(120))

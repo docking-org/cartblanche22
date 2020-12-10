@@ -1,12 +1,11 @@
 from flask import render_template
 from app.main import application
-from app.data.models.tranche import Tranche
 import json
 from sqlalchemy import distinct
 
 @application.route('/tranches', methods=['GET'])
 def tranches():
-    tranches = Tranche.query.all()
+    tranches = TrancheModel.query.all()
     axes = [('H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
      'H16', 'H17',
           'H18','H19', 'H20', 'H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28', 'H29', 'H30', 'H31', 'H32', 'H33',

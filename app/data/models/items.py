@@ -3,6 +3,9 @@ from app.data.models.vendors import Vendors
 from datetime import datetime
 
 class Items(db.Model):
+    __bind_key__ = 'zinc22'
+    __tablename__ = 'items'
+
     item_id = db.Column(db.Integer, primary_key=True)
     cart_fk = db.Column(db.Integer, db.ForeignKey('carts.cart_id'))
     identifier = db.Column(db.String(120), index=True)

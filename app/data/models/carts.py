@@ -15,6 +15,9 @@ from datetime import datetime
 
 
 class Carts(db.Model):
+    __bind_key__ = 'zinc22'
+    __tablename__ = 'carts'
+
     cart_id = db.Column(db.Integer, primary_key=True)
     user_fk = db.Column(db.Integer, db.ForeignKey('users.id'))
     items = db.relationship('Items', backref='cart', lazy='dynamic')
