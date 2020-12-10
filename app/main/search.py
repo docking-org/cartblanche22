@@ -25,21 +25,32 @@ def searchZinc():
     response = requests.get('http://zinc22.docking.org/search.json', params=files)
     if response:
         data = response.json()
-        return render_template('search/search_result.html', data=data)
+        print(data)
+        return render_template('search/search_result.html', data_=[data])
     else:
         return render_template('errors/404.html'), 404
 
 
 @application.route('/searchZincList', methods=["POST"])
 def searchZincList():
-    print(request.form.getlist('listData'))
-    # zinc_id = request.form.getlist('id')[0]
-    # files = {
-    #     'zinc_id': zinc_id
-    # }
-    # response = requests.get('http://zinc22.docking.org/search.json', params=files)
-    # data = response.json()
-    # print(data)
+    data_ = request.form.getlist('listData')[0].split('\r\n')
+    data = []
+    for i in data_:
+        if i != '':
+            data.append(i)
+    d = ','.join(data)
+    print(d)
+    files = {
+        'zinc_id-in': d
+    }
+    response = requests.post('http://zinc22.docking.org/sublist', params=files)
+    print(response)
+    if response:
+        data = response.json()
+        print(data)
+        return render_template('search/search_result.html', data_=data['items'])
+    else:
+        return render_template('errors/404.html'), 404
     return render_template('search/search_result.html')
 
 @application.route('/sw', methods=['GET', 'POST'])
