@@ -37,7 +37,7 @@ def searchZinc():
 
 @application.route('/searchZincList', methods=["POST"])
 def searchZincList():
-    data_ = request.form.getlist('listData')[0].split('\r\n')
+    data_ = request.form.getlist('listData')[0].split('\r\n').strip()
     data = []
     for i in data_:
         if i != '':

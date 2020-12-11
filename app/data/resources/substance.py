@@ -49,7 +49,7 @@ class SubstanceList(Resource):
             return {'message': 'Not found'}, 404
 
         data['items'] = data['items'][0]
-        return jsonify(data['items'])
+        return jsonify(data)
 
 
 class Substance(Resource):

@@ -23,7 +23,7 @@ cors = CORS()
 def create_app(config_class=Config):
     application = app = Flask(__name__)
     app.config.from_object(Config)
-
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_BINDS'] = {
         'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
         # 'zinc22': 'postgresql+psycopg2://test:@localhost:6533/zinc22',
