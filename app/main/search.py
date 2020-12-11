@@ -4,6 +4,8 @@ from flask_login import current_user, login_required
 from flask_user import roles_required
 from app.data.forms.searchForms import searchZincForm, searchFileForm, searchZincListForm
 import requests
+
+
 @application.route('/search/<var>', methods=["GET"])
 def search(var):
     print(var)
@@ -15,6 +17,7 @@ def search(var):
         form = searchZincListForm()
     return render_template('search/searchby.html', var=var, form=form)
 
+
 @application.route('/searchZinc', methods=["POST"])
 def searchZinc():
     print(request.form.getlist('id'))
@@ -22,7 +25,8 @@ def searchZinc():
     files = {
         'zinc_id': zinc_id
     }
-    response = requests.get('http://zinc22.docking.org/search.json', params=files)
+    response = requests.get('http://{}/search.json'.format(request.host), params=files)
+    # response = requests.get('http://zinc22.docking.org/search.json', params=files)
     if response:
         data = response.json()
         print(data)
@@ -43,7 +47,8 @@ def searchZincList():
     files = {
         'zinc_id-in': d
     }
-    response = requests.post('http://zinc22.docking.org/sublist', params=files)
+    response = requests.post('http://{}/sublist'.format(request.host), params=files)
+    # response = requests.post('http://zinc22.docking.org/sublist', params=files)
     print(response)
     if response:
         data = response.json()
@@ -53,6 +58,7 @@ def searchZincList():
         return render_template('errors/404.html'), 404
     return render_template('search/search_result.html')
 
+
 @application.route('/sw', methods=['GET', 'POST'])
 def sw():
     # identifiers = []
@@ -60,6 +66,7 @@ def sw():
     #     identifiers.append(i.identifier)
     # return render_template('search/sw.html', items=identifiers)
     return render_template('search/sw.html')
+
 
 @application.route('/swp', methods=['GET', 'POST'])
 def swp():

@@ -26,7 +26,7 @@ def create_app(config_class=Config):
 
     app.config['SQLALCHEMY_BINDS'] = {
         'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
-        # 'zinc22': 'postgresql+psycopg2://test:@localhost:6543/zinc22',
+        # 'zinc22': 'postgresql+psycopg2://test:@localhost:6533/zinc22',
         'tin': 'postgresql+psycopg2://tinuser:usertin@' + app.config['TIN_URL'] + '/tin'
     }
 

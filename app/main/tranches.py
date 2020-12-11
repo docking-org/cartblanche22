@@ -2,6 +2,7 @@ from flask import render_template
 from app.main import application
 import json
 from sqlalchemy import distinct
+from app.data.models.tranche import TrancheModel
 
 @application.route('/tranches', methods=['GET'])
 def tranches():
