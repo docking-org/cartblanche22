@@ -89,12 +89,10 @@ class SmileList(Resource):
 
     def getList(self, args, file_type=None):
         smiles = args.get('smiles-in')
-        print('test')
-        print(args)
         dist = 0
         if 'dist' in args:
             dist = args.get('dist')
-            print(dist)
+
 
         uri = "{}/search/submit".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
         params = {
@@ -126,7 +124,6 @@ class SmileList(Resource):
             data = json.loads(resp.text.split('\n\n')[0][5:])
             hlids.append(data['hlid'])
 
-        print(hlids)
         result = self.get_result_from_smallworld("type", hlids)
 
         return jsonify(result)
@@ -252,8 +249,6 @@ class SmileList(Resource):
         result_data = {}
 
         ret_data = cls.request_uri(uri, hlids, params)
-
-        print(ret_data)
         
         return ret_data
 
