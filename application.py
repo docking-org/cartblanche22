@@ -18,6 +18,7 @@ def before_request_callback():
 if __name__ == '__main__':
     from gevent import monkey
     from psycogreen.gevent import patch_psycopg
+
     monkey.patch_all(subprocess=True)
     patch_psycopg()
     application.debug = True
