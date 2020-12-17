@@ -15,6 +15,8 @@ class Config(object):
         SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI_LOCAL_ZINC22")
         TIN_URL = "10.20.1.17:5437"
         # TIN_URL = "localhost:6537"
+        ZINC_SMALL_WORLD_SERVER = "http://10.20.0.5:8080"
+        # ZINC_SMALL_WORLD_SERVER = "http://swp.docking.org"
 
         SQLALCHEMY_TRACK_MODIFICATIONS = False
         MAIL_SERVER = os.getenv('MAIL_SERVER')
