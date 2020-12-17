@@ -78,21 +78,29 @@ class SmileList(Resource):
 
     def post(self, file_type=None):
         parser.add_argument('smiles-in', type=str)
+        parser.add_argument('dist', type=int)
         args = parser.parse_args()
-        smiles = args.get('smiles-in').split(',')  
-        args['smiles-in'] = smiles
+        new_args = {key: val for key, val in args.items() if val is not None}
+        smiles = new_args.get('smiles-in').split(',')  
+        new_args['smiles-in'] = smiles
         
-        return self.getList(args, file_type)
+        return self.getList(new_args, file_type)
 
 
     def getList(self, args, file_type=None):
         smiles = args.get('smiles-in')
+        print('test')
+        print(args)
+        dist = 0
+        if 'dist' in args:
+            dist = args.get('dist')
+            print(dist)
 
         uri = "{}/search/submit".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
         params = {
             'smi': 'C1=CC=CC=C1',
             'db': 'zinc22_2d_All.smi.anon',
-            'dist': 0,
+            'dist': dist,
             'tdn': 4,
             'tup': 4,
             'rdn': 4,
@@ -290,11 +298,13 @@ class SmileList(Resource):
 class Smiles(Resource): 
     def post(self, file_type=None):
         parser.add_argument('smiles-in', location='files', type=FileStorage, required=True)
+        parser.add_argument('dist', type=int)
         args = parser.parse_args()
+        new_args = {key: val for key, val in args.items() if val is not None}
 
-        uploaded_file = args.get('smiles-in').stream.read().decode("latin-1")
+        uploaded_file = new_args.get('smiles-in').stream.read().decode("latin-1")
 
         lines = uploaded_file.split('\n')
-        args['smiles-in'] = lines
+        new_args['smiles-in'] = lines
 
-        return SmileList.getList(args, file_type)
+        return SmileList.getList(new_args, file_type)
