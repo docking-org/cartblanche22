@@ -97,8 +97,14 @@
                 <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
 {#                <li><a href="{{ url_for('main.cart') }}">Old Cart</a></li>#}
                 {% endif %}
-                            <li><a href="{{ url_for('main.tranches') }}">Tranches</a></li>
-<li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Search <span class="caret"></span></a>
+<li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Tranches <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="{{ url_for('main.tranches2d') }}">2D</a></li>
+{#          <li><a href="{{ url_for('main.tranches3d') }}">3D</a></li>#}
+
+      </ul>
+    </li>
+                <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Search <span class="caret"></span></a>
       <ul class="dropdown-menu">
         <li><a href="{{ url_for('main.search', var = 'zinc') }}">By ZincID</a></li>
           <li><a href="{{ url_for('main.search', var = 'zinclist') }}">By list of ZincIDs</a></li>
