@@ -25,11 +25,9 @@ def create_app(config_class=Config):
     app.config.from_object(Config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_BINDS'] = {
-        # for servers
         'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
-        'tin': 'postgresql+psycopg2://tinuser:usertin@' + app.config['TIN_URL'] + '/tin',
         # 'zinc22': 'postgresql+psycopg2://test:@localhost:6533/zinc22',
-        # 'tin': 'postgresql+psycopg2://tinuser:usertin@localhost:6543/tin'
+        'tin': 'postgresql+psycopg2://tinuser:usertin@' + app.config['TIN_URL'] + '/tin'
     }
 
 
