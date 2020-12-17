@@ -4,8 +4,8 @@ import json
 from sqlalchemy import distinct
 from app.data.models.tranche import TrancheModel
 
-@application.route('/tranches', methods=['GET'])
-def tranches():
+@application.route('/tranches/2d', methods=['GET'])
+def tranches2d():
     tranches = TrancheModel.query.all()
     axes = [('H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
      'H16', 'H17',
@@ -43,3 +43,8 @@ def tranches():
     return render_template('tranches/homeNew.html', tranches = tranches, axes = axes, cell2D=json.dumps(cell2D),
                            cell2DNew=json.dumps(cell2DNew),
                            ticks=ticks, unfilteredSize=unfilteredSize)
+
+
+@application.route('/tranches/3d', methods=['GET'])
+def tranches3d():
+    pass

@@ -25,8 +25,8 @@ def searchZinc():
     files = {
         'zinc_id': zinc_id
     }
-    response = requests.get('http://{}/search.json'.format(request.host), params=files)
-    # response = requests.get('http://zinc22.docking.org/search.json', params=files)
+    # response = requests.get('http://{}/search.json'.format(request.host), params=files)
+    response = requests.get('http://zinc22.docking.org/search.json', params=files)
     if response:
         data = response.json()
         print(data)
@@ -37,18 +37,18 @@ def searchZinc():
 
 @application.route('/searchZincList', methods=["POST"])
 def searchZincList():
-    data_ = request.form.getlist('listData')[0].split('\r\n').strip()
+    data_ = request.form.getlist('listData')[0].split('\r\n')
     data = []
     for i in data_:
         if i != '':
-            data.append(i)
+            data.append(i.strip())
     d = ','.join(data)
     print(d)
     files = {
         'zinc_id-in': d
     }
-    response = requests.post('http://{}/sublist'.format(request.host), params=files)
-    # response = requests.post('http://zinc22.docking.org/sublist', params=files)
+    # response = requests.post('http://{}/sublist'.format(request.host), params=files)
+    response = requests.post('http://zinc22.docking.org/sublist', params=files)
     print(response)
     if response:
         data = response.json()
