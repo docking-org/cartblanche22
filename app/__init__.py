@@ -52,7 +52,7 @@ def create_app(config_class=Config):
     from app.data.models.tin.substance import SubstanceModel
     from app.data.models.tin.catalog import CatalogModel, CatalogContentModel, CatalogSubstanceModel, CatalogModel
     
-    from app.data.resources.main import Search
+    from app.data.resources.main import Search, Smiles, SmileList
     from app.data.resources.substance import Substance, Substances, SubstanceList
     from app.data.resources.catalog_content import CatalogContents, CatalogContent
     from app.data.resources.tranche import Tranches
@@ -71,6 +71,8 @@ def create_app(config_class=Config):
     api.add_resource(CatalogContent, '/catalog')
     api.add_resource(CatalogContents, '/catalogs.<file_type>')
     api.add_resource(Tranches, '/tranches.<file_type>')
+    api.add_resource(Smiles, '/smiles.<file_type>')
+    api.add_resource(SmileList, '/smilelist')
 
     from app.errors import application as errors_bp
     app.register_blueprint(errors_bp)
