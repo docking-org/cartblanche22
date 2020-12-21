@@ -191,17 +191,17 @@
             'big-n-greasy': [[0, 3], [25, 31]]
         };
         $(document).ready(function () {
-            let data = {{ cell2DNew | safe }};
+            let data = {{ cell3D| safe }};
             let cols = new Array(62).fill(true);
             let rows = new Array(61).fill(true);
-            localStorage.setItem('twoD', JSON.stringify(data));
-            localStorage.setItem('cols', JSON.stringify(cols));
-            localStorage.setItem('rows', JSON.stringify(rows));
+            localStorage.setItem('3d', JSON.stringify(data));
+            localStorage.setItem('cols3d', JSON.stringify(cols));
+            localStorage.setItem('rows3d', JSON.stringify(rows));
             renderTrancheTable();
         });
 
         function renderTrancheTable() {
-            arr = JSON.parse(localStorage.getItem('twoD'))
+            arr = JSON.parse(localStorage.getItem('3d'))
             let rowSize = new Array(61).fill(0);
             let colSize = new Array(62).fill(0);
             let totalSize = 0
@@ -209,27 +209,32 @@
             let trancheCount = 0
             for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
-                    tranche = arr[i][j]
+                    tranches = arr[i][j]
                     let cell = $('#' + i + '-' + j)
-                    cell.html(numberToggle ? bigNumber(tranche.size) : tranche.size)
+                    cell.html(numberToggle ? bigNumber(tranches.size) : tranches.size)
                     let td = $('#cell-' + i + '-' + j)
-                    let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(tranche.size)) / log_total));
+                    let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(tranches.size)) / log_total));
+
                     if (color < 0){
                         color = 0
                     }
                     td.css('background-color', '#' + color.toString(16).repeat(3));
                     cell.css('color', color > 105 ? '#333' : '#ccc');
-                    if (tranche.chosen === true) {
-                        let val = parseInt(tranche.size)
+                        if (tranches.chosen === true) {
+                        let val = parseInt(tranches.size)
                         rowSize[i] += val
                         colSize[j] += val
                         totalSize += val
                         cell.css('opacity', 1)
-                        trancheCount += 1
+                        tranches.tranches.forEach(x=>{
+                            if(x.size != 0){
+                                trancheCount += 1
+                            }
+                        })
                     } else {
                         cell.css('opacity', 0.1)
                         cell.css('color', 'black')
-                        td.css('background-color', 'white');
+                        $('#cell-' + i + '-' + j).css('background-color', 'white');
                     }
                 }
             }
@@ -243,8 +248,8 @@
 
         function colToggle(obj) {
             let id = obj.getAttribute('data-id')
-            let arr = JSON.parse(localStorage.getItem('twoD'))
-            let cols = JSON.parse(localStorage.getItem('cols'))
+            let arr = JSON.parse(localStorage.getItem('3d'))
+            let cols = JSON.parse(localStorage.getItem('cols3d'))
             cols[id] = !cols[id]
             $(obj.target).css('opacity', 1 ? cols[id] : 0.1)
             for (let i = 0; i < 61; i++) {
@@ -253,17 +258,19 @@
                 }
                 else{
                     arr[i][id].chosen = cols[id]
+                    arr[i][id].tranches.forEach((x) => x.chosen = arr[i][id].chosen)
+
                 }
             }
-            localStorage.setItem('twoD', JSON.stringify(arr));
-            localStorage.setItem('cols', JSON.stringify(cols));
+            localStorage.setItem('3d', JSON.stringify(arr));
+            localStorage.setItem('cols3d', JSON.stringify(cols));
             renderTrancheTable();
         }
 
         function rowToggle(obj) {
             let id = obj.getAttribute('data-id')
-            let arr = JSON.parse(localStorage.getItem('twoD'))
-            let rows = JSON.parse(localStorage.getItem('rows'))
+            let arr = JSON.parse(localStorage.getItem('3d'))
+            let rows = JSON.parse(localStorage.getItem('rows3d'))
             rows[id] = !rows[id]
             for (let i = 0; i < 62; i++) {
                 if(arr[id][i].size === 0){
@@ -271,24 +278,27 @@
                 }
                 else{
                    arr[id][i].chosen = rows[id]
+                    arr[id][i].tranches.forEach((x) => x.chosen = arr[id][i].chosen)
                 }
             }
-            localStorage.setItem('twoD', JSON.stringify(arr));
-            localStorage.setItem('rows', JSON.stringify(rows));
+            localStorage.setItem('3d', JSON.stringify(arr));
+            localStorage.setItem('rows3d', JSON.stringify(rows));
             renderTrancheTable();
         }
 
         function cellToggle(obj) {
             let row = obj.getAttribute('data-row')
             let col = obj.getAttribute('data-col')
-            let arr = JSON.parse(localStorage.getItem('twoD'))
+            let arr = JSON.parse(localStorage.getItem('3d'))
             if(arr[row][col].size === 0){
                 arr[row][col].chosen = false
             }
             else{
                 arr[row][col].chosen = !arr[row][col].chosen
+                arr[row][col].tranches.forEach((x) => x.chosen = arr[row][col].chosen)
+
             }
-            localStorage.setItem('twoD', JSON.stringify(arr));
+            localStorage.setItem('3d', JSON.stringify(arr));
             renderTrancheTable();
         }
 
@@ -312,7 +322,7 @@
         }
 
         function setPredefined(s) {
-            let arr = JSON.parse(localStorage.getItem('twoD'))
+            let arr = JSON.parse(localStorage.getItem('3d'))
             let p = predefined[s]
             for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
@@ -323,11 +333,11 @@
                     }
                 }
             }
-            localStorage.setItem('twoD', JSON.stringify(arr));
+            localStorage.setItem('3d', JSON.stringify(arr));
             renderTrancheTable();
         }
         function trancheDownloadModalClicked() {
-            let arr = JSON.parse(localStorage.getItem('twoD'))
+            let arr = JSON.parse(localStorage.getItem('3d'))
             let temp = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
              'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
              'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -342,39 +352,53 @@
           'P370','P380','P390','P400','P410','P420', 'P430','P440', 'P450','P460', 'P470','P480','P490','P500','P600',
           'P700', 'P800', 'P900']
             let st = ''
-            let st2 = ''
               for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
                     if (arr[i][j].chosen) {
-                        let path = 'http://files.docking.org/zinc22/2d/' + col[j] +'/' +col[j] +row[i]+'.smi.gz'
                         st = st + col[j] + row[i] +' '
-                        st2 += path + '\n'
                     }
                 }
             }
               $('#selected-tranches').html(st)
-              $('#selected-tranches-2').html(st2)
 
         }
     </script>
 {% endblock %}
 {% block app_content %}
     <div class="row">
+{#        <div class="pull-right">#}
+{#            <div class="dropdown">#}
+{#                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets#}
+{#                    <span class="caret"></span></button>#}
+{#                <ul class="dropdown-menu">#}
+{#                    <li><a href="#" onclick="setPredefined('all')">All</a></li>#}
+{#                    <li><a href="#" onclick="setPredefined('none')">None</a></li>#}
+{#                    <li class="divider"></li>#}
+{#                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>#}
+{#                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>#}
+{#                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>#}
+{#                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>#}
+{#                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>#}
+{#                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>#}
+{#                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>#}
+{#                </ul>#}
+{#            </div>#}
+{#        </div>  #}
         <div class="pull-right">
             <div class="dropdown">
-                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
+                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Charge
                     <span class="caret"></span></button>
                 <ul class="dropdown-menu">
-                    <li><a href="#" onclick="setPredefined('all')">All</a></li>
-                    <li><a href="#" onclick="setPredefined('none')">None</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
-                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
-                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
-                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
-                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
+
+                    <li><a href="#" onclick=""> -4 (J)</a></li>
+                    <li><a href="#" onclick=""> -3 (K)</a></li>
+                    <li><a href="#" onclick=""> -2 (L)</a></li>
+                    <li><a href="#" onclick=""> -1 (M)</a></li>
+                    <li><a href="#" onclick=""> 0 (N)</a></li>
+                    <li><a href="#" onclick=""> 1 (O)</a></li>
+                    <li><a href="#" onclick=""> 2 (P)</a></li>
+                    <li><a href="#" onclick=""> 3 (Q)</a></li>
+                    <li><a href="#" onclick=""> 4 (R)</a></li>
                 </ul>
             </div>
         </div>
@@ -391,35 +415,23 @@
             <!-- Modal -->
 <div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog" aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
-      <div class="modal-content">
-                            <form action="{{ url_for('main.tranches2dDownload') }}" method="post">
-                                <div class="modal-header">
-                                    <button class="close" data-dismiss="modal">&times;</button>
-                                    <h3>Download Tranches</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-group">
-                                        <div>
-                                            <label for="selected-tranches">
-
-                                            </label>
-                                        </div>
-                                        <div class="text-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Download</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
                                             <textarea id="selected-tranches"
                                                       class="tranche-list form-control"
                                                       name="tranches"
                                                       rows="6"
                                                       cols="20"
-                                                    ></textarea>
-                                              <textarea style="display:none;" id="selected-tranches-2"
-                                                      class="tranche-list form-control"
-                                                      name="tranches2"
-                                                      rows="6"
-                                                      cols="20"
-                                                    ></textarea>
+                                                     ></textarea>
                                         </div>
-                                    </div>
-                                    <div class="row">
+            <div class="row">
                                         <div class="col-sm-4">
                                             <div class="form-group">
                                                 <label for="download-since">Only If Modified Since</label>
@@ -431,173 +443,17 @@
                                         </div>
 
                                     </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="btn-toolbar">
-                                        <div class="btn-group pull-right">
+      </div>
+           <div class="modal-footer">
+                   <div class="btn-group pull-right">
                                             <button class="btn btn-primary" type="submit">
                                                 <i class="glyphicon glyphicon-download-alt"></i>
                                                 Download
                                             </button>
                                         </div>
-{#                                        <div class="btn-group btn-group-sm">#}
-{#                                            <button class="btn btn-default dropdown-toggle"#}
-{#                                                    type="button"#}
-{#                                                    data-toggle="dropdown"#}
-{#                                                    aria-expanded="false">#}
-{#                                                {{'{{download_format_labels[download_format]}}'}}#}
-{#                                                <span class="caret"></span>#}
-{#                                                <span class="sr-only">Select Download Format</span>#}
-{#                                            </button>#}
-{#                                            <ul class="dropdown-menu ticked-input-label pull-right" role="menu">#}
-{#                                                <li class="text-center"><strong>#}
-{#                                                    Download Format#}
-{#                                                </strong></li>#}
-{#                                                <li role="presentation" class="divider"></li>#}
-{#                                                <li>#}
-{#                                                    <input type="radio"#}
-{#                                                           name="format"#}
-{#                                                           id="format-smi"#}
-{#                                                           value="smi"#}
-{#                                                           >#}
-{#                                                    <label for="format-smi">SMILES (*.smi)</label>#}
-{#                                                </li>#}
-{#                                                 <li>#}
-{#                                                    <input type="radio"#}
-{#                                                           name="format"#}
-{#                                                           id="format-txt"#}
-{#                                                           value="txt">#}
-{#                                                    <label for="format-txt">Tab-Delimited (*.txt)</label>#}
-{#                                                </li>#}
-{##}
-{#                                            </ul>#}
-{#                                        </div>#}
-{##}
-{#                                        <div class="btn-group btn-group-sm">#}
-{#                                            <button class="btn btn-default dropdown-toggle"#}
-{#                                                    type="button"#}
-{#                                                    data-toggle="dropdown"#}
-{#                                                    aria-expanded="false">#}
-{#                                                {{'{{download_using_labels[download_using]}}'}}#}
-{#                                                <span class="caret"></span>#}
-{#                                                <span class="sr-only">Select Download Method</span>#}
-{#                                            </button>#}
-{#                                            <ul class="dropdown-menu ticked-input-label pull-left" role="menu">#}
-{#                                                <li class="text-center"><strong>#}
-{#                                                    Download Method#}
-{#                                                </strong></li>#}
-{#                                                <li role="presentation" class="divider"></li>#}
-{#                                                <li>#}
-{#                                                    <input type="radio"#}
-{#                                                           name="using"#}
-{#                                                           id="using-url"#}
-{#                                                           value="uri">#}
-{#                                                    <label for="using-url">URLs</label>#}
-{#                                                </li>#}
-{#                                                <li>#}
-{#                                                    <input type="radio"#}
-{#                                                           name="using"#}
-{#                                                           id="using-database_index"#}
-{#                                                           value="database_index">#}
-{#                                                    <label for="using-database_index">DOCK Database Index</label>#}
-{#                                                </li>#}
-{#                                                <li role="presentation" class="divider"></li>#}
-{#                                                <li>#}
-{#                                                    <input type="radio"#}
-{#                                                           name="using"#}
-{#                                                           id="using-curl"#}
-{#                                                           value="curl">#}
-{#                                                    <label for="using-curl">cURL</label>#}
-{#                                                </li>#}
-{#                                                <li>#}
-{#                                                    <input type="radio"#}
-{#                                                           name="using"#}
-{#                                                           id="using-wget"#}
-{#                                                           value="wget">#}
-{#                                                    <label for="using-wget">WGET</label>#}
-{#                                                </li>#}
-{#                                                <li>#}
-{#                                                    <input type="radio"#}
-{#                                                           name="using"#}
-{#                                                           id="using-powershell"#}
-{#                                                           value="powershell">#}
-{#                                                    <label for="using-powershell">PowerShell</label>#}
-{#                                                </li>#}
-{#                                                <li role="presentation" class="divider"></li>#}
-{#                                                <li>#}
-{#                                                    <input type="checkbox"#}
-{#                                                           name="not_divided"#}
-{#                                                           id="download-not-divided">#}
-{#                                                    <label for="download-not-divided">#}
-{#                                                        Flat#}
-{#                                                        (e.g. No AA/OAAA/*)#}
-{#                                                    </label>#}
-{#                                                </li>#}
-{#                                            </ul>#}
-{#                                        </div>#}
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-{#    <div class="modal-content">#}
-{#      <div class="modal-header">#}
-{#        <h5 class="modal-title" id="exampleModalLabel">Download</h5>#}
-{#        <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
-{#          <span aria-hidden="true">&times;</span>#}
-{#        </button>#}
-{#      </div>#}
-{#      <div class="modal-body">#}
-{#        <div class="text-center">#}
-{#            <form action="" method="post" novalidate>#}
-{#        {{ form.hidden_tag() }}#}
-{#        <p>#}
-{#            {{ form.tranches.label }}<br>#}
-{#            {{ form.tranches }}#}
-{#        </p>#}
-{#        <p>#}
-{#            {{ form.format.label }}<br>#}
-{#            {{ form.format}}#}
-{#        </p><p>#}
-{#            {{ form.using.label }}<br>#}
-{#            {{ form.using}}#}
-{#        </p>#}
-{#    </form>#}
-{#                                            <textarea id="selected-tranches"#}
-{#                                                      class="tranche-list form-control"#}
-{#                                                      name="tranches"#}
-{#                                                      rows="6"#}
-{#                                                      cols="20"#}
-{#                                                     ></textarea>#}
-{#            <textarea id="selected-tranches-2"#}
-{#                                                      class="tranche-list form-control"#}
-{#                                                      name="tranches"#}
-{#                                                      rows="6"#}
-{#                                                      cols="20"#}
-{#                                                     ></textarea>#}
-{#                                        </div>#}
-{#            <div class="row">#}
-{#                                        <div class="col-sm-4">#}
-{#                                            <div class="form-group">#}
-{#                                                <label for="download-since">Only If Modified Since</label>#}
-{#                                                <input id="download-since"#}
-{#                                                       class="form-control"#}
-{#                                                       type="date"#}
-{#                                                       name="since">#}
-{#                                            </div>#}
-{#                                        </div>#}
-{##}
-{#                                    </div>#}
-{#      </div>#}
-{#           <div class="modal-footer">#}
-{#                   <div class="btn-group pull-right">#}
-{#                                            <button class="btn btn-primary" type="submit">#}
-{#                                                <i class="glyphicon glyphicon-download-alt"></i>#}
-{#                                                Download#}
-{#                                            </button>#}
-{#                                        </div>#}
-{##}
-{#    </div>#}
-{#  </div>#}
+
+    </div>
+  </div>
 </div>
 
     </div>
@@ -659,7 +515,7 @@
                                 <td>
                                     <div class="div-last">
                               <span>
-                            {{ axes[2][row] }}<br>{{ axes[1][row] }}
+                            {{ axes[2][row] }}/{{ axes[1][row] }}
                         </span>
                                         <br/>
                                         <span id="row-sum-{{ row }}">
