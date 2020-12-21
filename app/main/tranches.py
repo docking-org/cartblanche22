@@ -1,13 +1,11 @@
-from flask import render_template
+from flask import render_template, request, Response
 from app.main import application
 import json
-from sqlalchemy import distinct
 from app.data.models.tranche import TrancheModel
+from app.data.forms.tranchesForms import DownloadForm
 
-@application.route('/tranches/2d', methods=['GET'])
-def tranches2d():
-    tranches = TrancheModel.query.all()
-    axes = [('H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
+
+axes = [('H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
      'H16', 'H17',
           'H18','H19', 'H20', 'H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28', 'H29', 'H30', 'H31', 'H32', 'H33',
           'H34','H35',  'H36', 'H37', 'H38', 'H39', 'H40', 'H41', "H42", 'H43', 'H44', 'H45', 'H46', 'H47', 'H48', 'H49',
@@ -21,12 +19,16 @@ def tranches2d():
              'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
              'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', None)
             ]
-    ticks = [ (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+ticks = [ (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
          30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
          58, 59, 60, 61),
               (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
          30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
          58, 59, 60),]
+@application.route('/tranches/2d', methods=['GET'])
+def tranches2d():
+    form = DownloadForm()
+    tranches = TrancheModel.query.filter_by(charge='-').all()
     cell2D = [[0 for x in range(62)] for y in range(62)]
     cell2DNew = [[{} for x in range(62)] for y in range(61)]
     unfilteredSize = 0
@@ -42,9 +44,34 @@ def tranches2d():
     # print(cell2DNew)
     return render_template('tranches/homeNew.html', tranches = tranches, axes = axes, cell2D=json.dumps(cell2D),
                            cell2DNew=json.dumps(cell2DNew),
-                           ticks=ticks, unfilteredSize=unfilteredSize)
+                           ticks=ticks, unfilteredSize=unfilteredSize, form=form)
 
 
 @application.route('/tranches/3d', methods=['GET'])
 def tranches3d():
-    pass
+    tranches = TrancheModel.query.filter(TrancheModel.charge != '-').all()
+    cell3DNew = [[{'tranches': [], 'size': 0, 'chosen': False} for x in range(62)] for y in range(61)]
+    unfilteredSize = 0
+    for i in tranches:
+        row_idx = axes[0].index(str(i.h_num))
+        col_idx = axes[1].index(str(i.p_num))
+        cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': False, 'charge': i.charge})
+        cell3DNew[col_idx][row_idx]['size'] += i.sum
+        unfilteredSize += i.sum
+    for i in cell3DNew:
+        for j in i:
+            if j['size'] != 0:
+                j['chosen'] = True
+
+    return render_template('tranches/3D.html', tranches=tranches, axes=axes, cell3D=json.dumps(cell3DNew),
+                           ticks=ticks, unfilteredSize=unfilteredSize)
+
+
+@application.route('/tranches/2d/download', methods=['POST'])
+def tranches2dDownload():
+    formData = DownloadForm(request.values)
+    data = formData.tranches2.data
+    print(data)
+    response = Response(data, mimetype='text/plain')
+    response.headers['Content-Disposition'] = 'attachment; downloadFile'
+    return response
