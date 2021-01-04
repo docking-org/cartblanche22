@@ -22,7 +22,7 @@ URI_EXTENSION_TO_MIMETYPE = {
 class Tranche2DFileFactory():
     AVAILABLE_FORMATS = [
         ('txt', 'TXT'),
-        ('smi', 'SMILES'),
+        ('smi.gz', 'SMILES'),
     ]
 
     @property
@@ -31,12 +31,12 @@ class Tranche2DFileFactory():
 
     @property
     def smiles(self):
-        return self.get_format('smi')
+        return self.get_format('smi.gz')
 
 
 class Tranche3DFileFactory():
     AVAILABLE_FORMATS = [
-        ('smi', 'SMILES'),
+        ('smi.gz', 'SMILES'),
         ('db.gz', 'DB'),
         ('db2.gz', 'DB2'),
         ('mol2.gz', 'Mol2'),
@@ -49,7 +49,7 @@ class Tranche3DFileFactory():
 
     @property
     def smi(self):
-        return self.get_list('smi')
+        return self.get_list('smi.gz')
 
     @property
     def db(self):
@@ -84,11 +84,11 @@ class DownloadForm(FlaskForm):
     tranches2 = TextAreaField('tranches2',
                              validators=[],
                              default='')
-    format = SelectMultipleField('format',
+    format = SelectField('format',
                                  choices=(Tranche2DFileFactory.AVAILABLE_FORMATS +
                                           Tranche3DFileFactory.AVAILABLE_FORMATS),
                                  validators=[DataRequired()],
-                                 default=[])
+                                 default='txt')
     using = SelectField('using',
                         choices=[(key, DOWNLOAD_USING_LABELS[key]) for key, _ in URI_EXTENSION_TO_MIMETYPE.items()],
                         validators=[Optional()],
