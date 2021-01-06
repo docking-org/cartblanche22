@@ -190,6 +190,17 @@
             'drug-like': [[0, 57], [9, 31]],
             'big-n-greasy': [[0, 3], [25, 31]]
         };
+        let charges = {
+            "J" : true,
+            "K" : true,
+            "L" : true,
+            "M" : true,
+            "N" : true,
+            "O" : true,
+            "P" : true,
+            "Q" : true,
+            "R" : true
+        }
         $(document).ready(function () {
             let data = {{ cell3D| safe }};
             let cols = new Array(62).fill(true);
@@ -210,24 +221,32 @@
             for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
                     tranches = arr[i][j]
+                    let trancheSizeTotal = 0
+                    let trancheChosenTotal = false;
+                    tranches.tranches.forEach(x =>{
+                        if(x.chosen){
+                            trancheSizeTotal += x.size;
+                        }
+                        trancheChosenTotal = trancheChosenTotal || x.chosen
+                    })
                     let cell = $('#' + i + '-' + j)
-                    cell.html(numberToggle ? bigNumber(tranches.size) : tranches.size)
+                    cell.html(numberToggle ? bigNumber(trancheSizeTotal) : trancheSizeTotal)
                     let td = $('#cell-' + i + '-' + j)
-                    let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(tranches.size)) / log_total));
+                    let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(trancheSizeTotal)) / log_total));
 
                     if (color < 0){
                         color = 0
                     }
                     td.css('background-color', '#' + color.toString(16).repeat(3));
                     cell.css('color', color > 105 ? '#333' : '#ccc');
-                        if (tranches.chosen === true) {
-                        let val = parseInt(tranches.size)
+                    if (tranches.chosen && trancheChosenTotal) {
+                        let val = parseInt(trancheSizeTotal)
                         rowSize[i] += val
                         colSize[j] += val
                         totalSize += val
                         cell.css('opacity', 1)
                         tranches.tranches.forEach(x=>{
-                            if(x.size != 0){
+                            if(x.size != 0 && x.chosen){
                                 trancheCount += 1
                             }
                         })
@@ -258,8 +277,7 @@
                 }
                 else{
                     arr[i][id].chosen = cols[id]
-                    arr[i][id].tranches.forEach((x) => x.chosen = arr[i][id].chosen)
-
+                    {#arr[i][id].tranches.forEach((x) => x.chosen = arr[i][id].chosen)#}
                 }
             }
             localStorage.setItem('3d', JSON.stringify(arr));
@@ -278,7 +296,7 @@
                 }
                 else{
                    arr[id][i].chosen = rows[id]
-                    arr[id][i].tranches.forEach((x) => x.chosen = arr[id][i].chosen)
+                    {#arr[id][i].tranches.forEach((x) => x.chosen = arr[id][i].chosen)#}
                 }
             }
             localStorage.setItem('3d', JSON.stringify(arr));
@@ -295,8 +313,7 @@
             }
             else{
                 arr[row][col].chosen = !arr[row][col].chosen
-                arr[row][col].tranches.forEach((x) => x.chosen = arr[row][col].chosen)
-
+                {#arr[row][col].tranches.forEach((x) => x.chosen = arr[row][col].chosen)#}
             }
             localStorage.setItem('3d', JSON.stringify(arr));
             renderTrancheTable();
@@ -354,13 +371,34 @@
             let st = ''
               for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
-                    if (arr[i][j].chosen) {
-                        st = st + col[j] + row[i] +' '
-                    }
+                    tranches = arr[i][j]
+                    tranches.tranches.forEach(x =>{
+                        if(x.chosen){
+                            st = st + col[j] + row[i] + x.charge + ' '
+                        }
+                    })
                 }
             }
               $('#selected-tranches').html(st)
 
+        }
+        function chargeSelect(li){
+            let bool = $(li).hasClass('active')
+            $(li).toggleClass('active');
+            let charge = li.dataset.val;
+            let arr = JSON.parse(localStorage.getItem('3d'))
+            for (let i = 0; i < 61; i++) {
+                for (let j = 0; j < 62; j++) {
+                    tranches = arr[i][j]
+                    tranches.tranches.forEach(x => {
+                       if (x.charge==charge && x.size!=0){
+                           x.chosen = !bool;
+                       }
+                    })
+                }
+            }
+            localStorage.setItem('3d', JSON.stringify(arr));
+            renderTrancheTable();
         }
     </script>
 {% endblock %}
@@ -389,16 +427,15 @@
                 <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Charge
                     <span class="caret"></span></button>
                 <ul class="dropdown-menu">
-
-                    <li><a href="#" onclick=""> -4 (J)</a></li>
-                    <li><a href="#" onclick=""> -3 (K)</a></li>
-                    <li><a href="#" onclick=""> -2 (L)</a></li>
-                    <li><a href="#" onclick=""> -1 (M)</a></li>
-                    <li><a href="#" onclick=""> 0 (N)</a></li>
-                    <li><a href="#" onclick=""> 1 (O)</a></li>
-                    <li><a href="#" onclick=""> 2 (P)</a></li>
-                    <li><a href="#" onclick=""> 3 (Q)</a></li>
-                    <li><a href="#" onclick=""> 4 (R)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="J"><a href="#"> -4 (J)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="K"><a href="#"> -3 (K)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="L"><a href="#"> -2 (L)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="M"><a href="#"> -1 (M)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="N"><a href="#"> 0 (N)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="O"><a href="#"> 1 (O)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="P"><a href="#"> 2 (P)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="Q"><a href="#"> 3 (Q)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="R"><a href="#"> 4 (R)</a></li>
                 </ul>
             </div>
         </div>
