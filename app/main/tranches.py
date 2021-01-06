@@ -102,7 +102,10 @@ def tranches3d():
     for i in tranches:
         row_idx = axes[0].index(str(i.h_num))
         col_idx = axes[1].index(str(i.p_num))
-        cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': False, 'charge': i.charge})
+        if i.sum == 0:
+            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': False, 'charge': i.charge})
+        else:
+            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': True, 'charge': i.charge})
         cell3DNew[col_idx][row_idx]['size'] += i.sum
         unfilteredSize += i.sum
     for i in cell3DNew:
