@@ -2,10 +2,10 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 from os.path import join, dirname
-from dotenv import load_dotenv
-
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+# from dotenv import load_dotenv
+#
+# dotenv_path = join(dirname(__file__), '.env')
+# load_dotenv(dotenv_path)
 
 
 class Config(object):

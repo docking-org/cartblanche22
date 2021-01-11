@@ -54,7 +54,7 @@ def create_app(config_class=Config):
     
     from app.data.resources.main import Search, Smiles, SmileList
     from app.data.resources.substance import Substance, Substances, SubstanceList
-    from app.data.resources.catalog_content import CatalogContents, CatalogContent
+    from app.data.resources.catalog_content import CatalogContents, CatalogContent, CatalogContentList
     from app.data.resources.tranche import Tranches
 
     admin = Admin(app, name='shoppingcart', template_mode='bootstrap3')
@@ -70,6 +70,7 @@ def create_app(config_class=Config):
     api.add_resource(SubstanceList, '/sublist')
     api.add_resource(CatalogContent, '/catalog')
     api.add_resource(CatalogContents, '/catalogs.<file_type>')
+    api.add_resource(CatalogContentList, '/catlist')
     api.add_resource(Tranches, '/tranches.<file_type>')
     api.add_resource(Smiles, '/smiles.<file_type>')
     api.add_resource(SmileList, '/smilelist')
