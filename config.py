@@ -26,3 +26,20 @@ class Config(object):
         MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
         MAIL_DEFAULT_SENDER = os.getenv('MAIL_USERNAME')
         ADMINS = [os.getenv('MAIL_USERNAME')]
+
+# import os
+#
+# class Config(object):
+#         SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+#         SECURITY_PASSWORD_SALT = "nemeltdavs"
+#         SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://test:@10.20.0.38:5432/zinc22"
+#         TIN_URL = "10.20.1.17:5437"
+#         ZINC_SMALL_WORLD_SERVER = "http://10.20.0.5:8080"
+#         SQLALCHEMY_TRACK_MODIFICATIONS = False
+#         MAIL_SERVER = 'smtp.googlemail.com'
+#         MAIL_PORT = 587
+#         MAIL_USE_TLS = 1
+#         MAIL_USERNAME = 'cartblanche20@gmail.com'
+#         MAIL_PASSWORD = 'molecule20'
+#         MAIL_DEFAULT_SENDER = 'cartblanche20@gmail.com'
+#         ADMINS = ['cartblanche20@gmail.com']

@@ -37,11 +37,11 @@ def searchZinc():
 
 @application.route('/searchZincList', methods=["POST"])
 def searchZincList():
-    data_ = request.form.getlist('listData')[0].split('\r\n').strip()
+    data_ = request.form.getlist('listData')[0].split('\r\n')
     data = []
     for i in data_:
         if i != '':
-            data.append(i)
+            data.append(i.strip())
     d = ','.join(data)
     print(d)
     files = {
