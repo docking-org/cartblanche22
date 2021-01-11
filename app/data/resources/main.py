@@ -14,8 +14,13 @@ from pprint import pprint
 from requests_futures.sessions import FuturesSession
 
 
+def response_hook(resp, *args, **kwargs):
+    resp.data = json.loads(resp.text.split('\n\n')[0][5:])
+    #resp.data = resp.json()
+
 parser = reqparse.RequestParser()
 session = FuturesSession(max_workers=10)
+session.hooks['response'] = response_hook
 
 
 class Search(Resource):
@@ -121,8 +126,7 @@ class SmileList(Resource):
         hlids = []
         for future in as_completed(futures):
             resp = future.result()
-            data = json.loads(resp.text.split('\n\n')[0][5:])
-            hlids.append(data['hlid'])
+            hlids.append(resp.data['hlid'])
 
         result = self.get_result_from_smallworld("type", hlids)
 
