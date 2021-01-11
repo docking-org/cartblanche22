@@ -7,8 +7,9 @@ from app.main.punchout import punchoutOrder
 from app.main.items import addToCartWithVendor
 
 
-@application.route('/saveCartToDb', methods=["POST"])
+@application.route('/saveCartToDb', methods=['POST'])
 def saveCartToDb():
+    print('saveCartToDB')
     data = request.get_json()
     activeCart = Carts.query.get(current_user.activeCart)
     for d in data:

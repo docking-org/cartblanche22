@@ -52,6 +52,7 @@ function cartCheck(is_authenticated, cart_) {
             }
         }
         localStorage.setItem('cart', JSON.stringify(totalCart))
+        alert(totalCart)
         $.ajax({
             type: 'POST',
             url: '/saveCartToDb',
@@ -62,7 +63,7 @@ function cartCheck(is_authenticated, cart_) {
                 console.log('db saved')
             },
             error: function (data) {
-                alert("fail");
+                 console.log('saveCartToDb failed')
             }
         });
         $('#cartCount').html(getCartSize(totalCart))

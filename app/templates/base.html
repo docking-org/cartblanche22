@@ -3,144 +3,135 @@
 {#{% import "bootstrap/google.html" as google %}#}
 
 {% block metas %}
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8">
-<meta name="Description" content="Cartblanche molecule shopping application">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8">
+    <meta name="Description" content="Cartblanche molecule shopping application">
 {% endblock %}
 
 {% block styles %}
-{{super()}}
-<link rel="stylesheet" href="../static/css/base.css">
-<link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css" />
-<link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css" />
-<link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css" />
+    {{ super() }}
+    <link rel="stylesheet" href="../static/css/base.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css"/>
 {% endblock %}
 
 {% block scripts %}
-    {{super()}}
+    {{ super() }}
     {#{{google.uanalytics('UA-10800222-14')}}#}
 
-<script src="../static/js/datatables.min.js"></script>
-<script src="../static/js/jquery-ui.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+    <script src="../static/js/datatables.min.js"></script>
+    <script src="../static/js/jquery-ui.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 
-<script type="text/javascript" src="../static/js/custom/cart.js"></script>
-<script>
+    <script type="text/javascript" src="../static/js/custom/cart.js"></script>
+    <script>
 
-    $(document).ready(() => {
-        $('[data-toggle="tooltip"]').tooltip();
-        if (localStorage.getItem('cart') != null) {
-            console.log('base document.ready working')
-            let cart = JSON.parse(localStorage.getItem('cart'))
-            $('#cartCount').html(getCartSize(cart))
+        $(document).ready(() => {
+            $('[data-toggle="tooltip"]').tooltip();
+            if (localStorage.getItem('cart') != null) {
+                console.log('base document.ready working')
+                let cart = JSON.parse(localStorage.getItem('cart'))
+                $('#cartCount').html(getCartSize(cart))
+            }
+
+        })
+        $('#logoutTab').on('click', () => {
+            console.log('cleaning localstorage')
+            let cart = []
+            localStorage.setItem('cart', JSON.stringify(cart))
+            localStorage.removeItem('items')
+            $.ajax({
+                type: "GET",
+                url: "/logout",
+                success: function (route) {
+                    console.log(route);
+                    window.location.href = route;
+                }
+            });
+
+        })
+        if (localStorage.getItem('punchout') == 'False' && localStorage.getItem('is_authenticated') == 'False') {
+            $('#loginTab').show()
         }
 
-    })
-    $('#logoutTab').on('click', () => {
-        console.log('cleaning localstorage')
-        let cart = []
-        localStorage.setItem('cart', JSON.stringify(cart))
-        localStorage.removeItem('items')
-        $.ajax({
-            type: "GET",
-            url: "/logout",
-            success: function (route) {
-                console.log(route);
-                window.location.href = route;
-            }
-        });
-
-    })
-    if (localStorage.getItem('punchout') == 'False' && localStorage.getItem('is_authenticated') == 'False') {
-        $('#loginTab').show()
-    }
-
-</script>
+    </script>
 {% endblock %}
 
 {% block title %}
-{% if title %}{{ title }} - Molecule Shopping Cart
-{% else %}Welcome to Molecule Shopping Cart
-{% endif %}
+    {% if title %}{{ title }} - Molecule Shopping Cart
+    {% else %}Welcome to Molecule Shopping Cart
+    {% endif %}
 {% endblock %}
 
 {% block navbar %}
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{{ url_for('main.cartblanche') }}">Cartblanche</a>
-        </div>
-        <div class="collapse navbar-collapse" id="myNavbar">
-            <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.sw') }}">Similarity</a></li>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('main.cartblanche') }}">Cartblanche</a>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('main.sw') }}">Similarity</a></li>
 
-                <li><a href="{{ url_for('main.arthor') }}">Substructure</a></li>
-{#                            {% if current_user.has_roles('private') %}#}
+                    <li><a href="{{ url_for('main.arthor') }}">Substructure</a></li>
+                    {% if not current_user.is_anonymous %}
+                        <li><a href="{{ url_for('main.swp') }}">SWP</a></li>
+                        <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
+                    {% endif %}
+                    <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Tranches <span
+                            class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('main.tranches2d') }}">2D</a></li>
+                            <li><a href="{{ url_for('main.tranches3d') }}">3D</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Lookup <span
+                            class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('main.search_zincid') }}">By ZincID</a></li>
+                            <li><a href="{{ url_for('main.search_suppliercode') }}">By Supplier Code</a></li>
+                            <li><a href="{{ url_for('main.search_smiles') }}">By Smiles</a></li>
+                        </ul>
+                    </li>
+                </ul>
 
-{#                {% endif %}#}
-                <!-- <li><input type="text" id="search" placeholder="Search..."></li> -->
-                <!-- <li><a href="{{ url_for('main.cart') }}"><span class="badge"></span></a></li> -->
-                {% if not current_user.is_anonymous %}
-<li><a href="{{url_for('main.swp')}}">SWP</a></li>
-{#                    <li><a href="{{url_for('main.importData')}}">Import</a></li>#}
-
-                <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
-{#                <li><a href="{{ url_for('main.cart') }}">Old Cart</a></li>#}
-                {% endif %}
-<li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Tranches <span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li><a href="{{ url_for('main.tranches2d') }}">2D</a></li>
-          <li><a href="{{ url_for('main.tranches3d') }}">3D</a></li>
-
-      </ul>
-    </li>
-                <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Lookup <span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li><a href="{{ url_for('main.search', var = 'zinc') }}">By ZincID</a></li>
-          <li><a href="{{ url_for('main.search', var = 'zinclist') }}">By list of ZincIDs</a></li>
-{#        <li><a href="{{ url_for('main.search', var = 'file') }}">By File</a></li>#}
-{#        <li><a href="{{ url_for('main.search', var = 'smiles') }}">By Smiles</a></li>#}
-      </ul>
-    </li>
-
-            </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-
-                {% if current_user.is_anonymous %}
-                <!-- <li><a href="{{ url_for('main.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a>
-                </li> -->
-                <li id="loginTab" style="display:none"><a href="{{ url_for('main.login') }}" id="username">
-                        <span class="glyphicon glyphicon-user"></span>
-                        Hello, Sign in!
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_anonymous %}
+                        <li id="loginTab" style="display:none"><a href="{{ url_for('main.login') }}" id="username">
+                            <span class="glyphicon glyphicon-user"></span>
+                            Hello, Sign in!
+                        </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="{{ url_for('main.profile') }}" id="username">
+                            <span class="glyphicon glyphicon-user"></span>
+                            Hello, {{ current_user.username }}
+                            </a>
+                        </li>
+                        <li><a id="logoutTab"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('main.newcart') }}"><span class="glyphicon glyphicon-shopping-cart"
+                                                                      style="font-size:18px"></span><span class="badge"
+                                                                                                          id="cartCount">{{ cart_count }}</span>
                     </a>
-                </li>
-                {% else %}
-                <li><a href="{{ url_for('main.profile') }}" id="username">
-                        <span class="glyphicon glyphicon-user"></span>
-                        Hello, {{current_user.username}}
-                    </a>
-                </li>
-                <li><a id="logoutTab"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
-                </li>
-                {% endif %}
-                <li><a href="{{ url_for('main.newcart') }}"><span class="glyphicon glyphicon-shopping-cart"
-                            style="font-size:18px"></span><span class="badge" id="cartCount">{{cart_count}}</span> </a>
-                </li>
-                            <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">About <span class="caret"></span></a>
-      <ul class="dropdown-menu">
-<li class="dropdown-header">About Us</li>
+                    </li>
+                    <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">About <span
+                            class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header">About Us</li>
                             <li><a href="/about">Credits</a></li>
                             <li><a href="/usage/">Usage</a></li>
                             <li><a target=_blank href="http://docking.org/">Blog</a></li>
@@ -196,31 +187,33 @@
                                 </a>
                             </li>
 
-      </ul>
-    </li>
-            </ul>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-info" role="alert">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-    {# application content needs to be provided in the app_content block #}
-    {% block app_content %}{% endblock %}
-</div>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
 
-<footer>
-    <p><a href="{{ url_for("main.about") }}">Acknowledgements</a> Roger Sayle. Nextmovesoftware.com Arthor. Smallworld.<a
-            href="https://www.nigms.nih.gov/">Supported by NIGMS via GM71896</a> Questions, Discussion, Bug reports,
-        Feature requests <a href="http://irwinlab.compbio.ucsf.edu/">Irwin</a> and Shoichet Labs and UC Regents.</p>
+    <footer>
+        <p><a href="{{ url_for("main.about") }}">Acknowledgements</a> Roger Sayle. Nextmovesoftware.com Arthor.
+            Smallworld.<a
+                    href="https://www.nigms.nih.gov/">Supported by NIGMS via GM71896</a> Questions, Discussion, Bug
+            reports,
+            Feature requests <a href="http://irwinlab.compbio.ucsf.edu/">Irwin</a> and Shoichet Labs and UC Regents.</p>
 
-</footer>
+    </footer>
 {% endblock %}

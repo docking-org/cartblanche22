@@ -2,31 +2,46 @@ from flask import render_template,  url_for, redirect, request
 from app.main import application
 from flask_login import current_user, login_required
 from flask_user import roles_required
-from app.data.forms.searchForms import searchZincForm, searchFileForm, searchZincListForm
+from app.data.forms.searchForms import SearchZincForm
 import requests
 
+base_url = "http://cartblanche22.docking.org/"
 
-@application.route('/search/<var>', methods=["GET"])
-def search(var):
-    print(var)
-    if var == 'zinc':
-        form = searchZincForm()
-    elif var == 'file':
-        form = searchFileForm()
-    elif var == 'zinclist':
-        form = searchZincListForm()
-    return render_template('search/searchby.html', var=var, form=form)
+@application.route('/search/zincid')
+def search_zincid():
+    return render_template('search/search_zincid.html')
 
+
+@application.route('/search/suppliercode')
+def search_suppliercode():
+    return render_template('search/search_suppliercode.html')
+
+
+@application.route('/search/smiles')
+def search_smiles():
+    return render_template('search/search_smiles.html')
+
+# @application.route('/search/', methods=["GET"])
+# def search(var):
+#     print(var)
+#     if var == 'zinc':
+#         form = searchZincForm()
+#     elif var == 'file':
+#         form = searchFileForm()
+#     elif var == 'zinclist':
+#         form = searchZincListForm()
+#     return render_template('search/searchby.html', var=var, form=form)
+#
 
 @application.route('/searchZinc', methods=["POST"])
 def searchZinc():
-    print(request.form.getlist('id'))
-    zinc_id = request.form.getlist('id')[0]
+    formData = SearchZincForm(request.values)
+    zinc_id = formData.zinc_id.data
     files = {
         'zinc_id': zinc_id
     }
     response = requests.get('http://{}/search.json'.format(request.host), params=files)
-    # response = requests.get('http://zinc22.docking.org/search.json', params=files)
+    # response = requests.get(base_url + 'search.json', params=files)
     if response:
         data = response.json()
         print(data)
@@ -37,26 +52,29 @@ def searchZinc():
 
 @application.route('/searchZincList', methods=["POST"])
 def searchZincList():
-    data_ = request.form.getlist('listData')[0].split('\r\n')
-    data = []
-    for i in data_:
-        if i != '':
-            data.append(i.strip())
-    d = ','.join(data)
-    print(d)
-    files = {
-        'zinc_id-in': d
-    }
+    zinc_ids = SearchZincForm(request.values).list_of_zinc_id.data
+    uploaded_file = SearchZincForm(request.files).zinc_file.data
+    if uploaded_file.filename == '':
+        print('empty')
+        files = {
+            'zinc_id-in': zinc_ids
+        }
+    else:
+        uploaded_file = uploaded_file.read().decode("latin-1")
+        lines = uploaded_file.split('\n')
+        files = {
+            'zinc_id-in': ','.join(lines)
+        }
+    print(files)
     response = requests.post('http://{}/sublist'.format(request.host), params=files)
-    # response = requests.post('http://zinc22.docking.org/sublist', params=files)
+    # response = requests.post("http://cartblanche22.docking.org/sublist", params=files)
     print(response)
     if response:
         data = response.json()
-        print(data)
         return render_template('search/search_result.html', data_=data['items'])
     else:
         return render_template('errors/404.html'), 404
-    return render_template('search/search_result.html')
+    return render_template('search/search_zincid.html')
 
 
 @application.route('/sw', methods=['GET', 'POST'])

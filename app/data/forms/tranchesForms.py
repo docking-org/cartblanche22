@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, BooleanField, SubmitField, TextAreaField, SelectMultipleField, DateField
+from wtforms import SelectField, TextAreaField
 
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional
+from wtforms.validators import DataRequired, Optional
 
 DOWNLOAD_USING_LABELS = {
     'uri': 'URLs',
@@ -18,6 +18,7 @@ URI_EXTENSION_TO_MIMETYPE = {
     'wget': 'application/x-ucsf-zinc-uri-downloadscript-wget',
     'powershell': 'application/x-ucsf-zinc-uri-downloadscript-powershell',
 }
+
 
 class Tranche2DFileFactory():
     AVAILABLE_FORMATS = [
@@ -77,18 +78,17 @@ class Tranche3DFileFactory():
 
 
 class DownloadForm(FlaskForm):
-
     tranches = TextAreaField('tranches',
                              validators=[DataRequired()],
                              default='')
     tranches2 = TextAreaField('tranches2',
-                             validators=[],
-                             default='')
+                              validators=[],
+                              default='')
     format = SelectField('format',
-                                 choices=(Tranche2DFileFactory.AVAILABLE_FORMATS +
-                                          Tranche3DFileFactory.AVAILABLE_FORMATS),
-                                 validators=[DataRequired()],
-                                 default='txt')
+                         choices=(Tranche2DFileFactory.AVAILABLE_FORMATS +
+                                  Tranche3DFileFactory.AVAILABLE_FORMATS),
+                         validators=[DataRequired()],
+                         default='txt')
     using = SelectField('using',
                         choices=[(key, DOWNLOAD_USING_LABELS[key]) for key, _ in URI_EXTENSION_TO_MIMETYPE.items()],
                         validators=[Optional()],
@@ -97,6 +97,3 @@ class DownloadForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('csrf_enabled', False)
         super(DownloadForm, self).__init__(*args, **kwargs)
-
-
-

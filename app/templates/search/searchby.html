@@ -55,8 +55,8 @@
     <form action="/searchZincList" method="post" >
         {{ form.hidden_tag() }}
         <p>
-            {{ form.listData.label }}<br>
-            {{ form.listData(rows='10',cols='80') }}
+            {{ form.list_of_zinc_id.label }}<br>
+            {{ form.list_of_zinc_id(rows='10',cols='80') }}
         </p>
 {#        <p>{{ form.submit() }}</p>#}
 

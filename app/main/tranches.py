@@ -89,7 +89,7 @@ def tranches2d():
         cell2D[col_idx][row_idx] = i.sum
         unfilteredSize += i.sum
     # print(cell2DNew)
-    return render_template('tranches/homeNew.html', tranches=tranches, axes=axes, cell2D=json.dumps(cell2D),
+    return render_template('tranches/2D.html', tranches=tranches, axes=axes, cell2D=json.dumps(cell2D),
                            cell2DNew=json.dumps(cell2DNew),
                            ticks=ticks, unfilteredSize=unfilteredSize, form=form)
 
