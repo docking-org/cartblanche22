@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+
+        function searchZinc() {
+            let val = $('#searchValue').val()
+            $.ajax({
+                url: "http://zinc22.docking.org/search.json",
+                dataType: 'json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                data: {'zinc_id': val},
+                crossDomain: true,
+                success: function (result) {
+                    console.log(result)
+                    let smile = result.smiles;
+                    let zinc_id = result.zinc_id;
+                    let supplier_code = result.supplier_code
+                    $('p').append('Smiles : ' + smile).appendTo($('#resultZinc'))
+                    $('p').append('Zinc ID : ' + zinc_id).appendTo($('#resultZinc'))
+                    $('p').append('Supplier Code : ' + supplier_code).appendTo($('#resultZinc'))
+                }
+            });
+        }
+
+    </script>
+{% endblock %}
+{% block app_content %}
+    <h3>Search by Zinc ID</h3>
+    <div class="row">
+        <div class="panel panel-info">
+            <div class="panel-heading">Search Using One (Example : ZINCms000002NiP3)</div>
+            <div class="panel-body">
+                <form action="/searchZinc" method="post" class="form-inline">
+                    <div class="form-group mx-mb-sm-6">
+                        <input class="form-control" placeholder="Search for Substances" name="zinc_id">
+                    <button class="btn btn-info" type="submit">
+                        Search
+                    </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="panel panel-info">
+            <div class="panel-heading">Search Using Many (Under Construction)</div>
+            <div class="panel-body">
+                <form action="/searchZincList" method="post" class="form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="textareazinc">Identifiers separated by comma without space:</label>
+                        <textarea id="textareazinc" class="form-control" name="list_of_zinc_id" rows="6" cols="20" placeholder="ZINC IDs"></textarea>
+                    </div>
+                        <h5>OR Upload a File</h5>
+                    <div class="form-group">
+                        <label for="myfile">Select a file (.txt only):</label>
+                        <input type="file" id="myfile" name="zinc_file" class="form-control" accept=".txt">
+                    </div>
+                    <button class="btn btn-info" type="submit">
+                        Search Many
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

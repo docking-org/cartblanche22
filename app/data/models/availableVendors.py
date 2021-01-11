@@ -1,10 +1,11 @@
-from app import db 
+from app import db
 from datetime import datetime
+
 
 class AvailableVendors(db.Model):
     __bind_key__ = 'zinc22'
     __tablename__ = 'availableVendors'
-    
+
     vendor_id = db.Column(db.Integer, primary_key=True)
     cat_id_fk = db.Column(db.Integer)
     short_name = db.Column(db.String(120))
@@ -16,9 +17,11 @@ class AvailableVendors(db.Model):
     created_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def createAvailableVendors(l):
-        vendor = AvailableVendors(cat_id_fk=l[0], bb=l[1], short_name=l[2], purchasable=l[3], name=l[4], availability=True)
+        vendor = AvailableVendors(cat_id_fk=l[0], bb=l[1], short_name=l[2], purchasable=l[3], name=l[4],
+                                  availability=True)
         db.session.add(vendor)
         db.session.commit()
+
 
 class UserVendors(db.Model):
     __tablename__ = 'user_vendors'
