@@ -15,7 +15,7 @@ from requests_futures.sessions import FuturesSession
 
 
 def response_hook(resp, *args, **kwargs):
-    resp.data = json.loads(resp.text.split('\n\n')[0][5:])
+    resp.data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
     #resp.data = resp.json()
 
 parser = reqparse.RequestParser()
@@ -265,13 +265,12 @@ class SmileList(Resource):
             for hlid in hlids:
                 params['hlid'] = hlid
                 future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=False)
-
                 futures.append(future)
 
             result = []
             for future in as_completed(futures):
                 resp = future.result()
-                result_data = json.loads(resp.text)
+                result_data = resp.data
                 
                 for dt in result_data['data']:
                     res = {}
