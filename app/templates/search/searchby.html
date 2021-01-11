@@ -51,50 +51,23 @@
         <p>{{ form.submit() }}</p>
     {% endif %}
     {% if var == 'zinclist' %}
-        <p>Example:</p>
-        <p>ZINCgs0000000OA0
-ZINCgs0000000OA1
-ZINCgs0000000OA2
-ZINCgs0000000OA3
-ZINCgs0000000OA4
-ZINCgs0000000OA5
-ZINCgs0000000OA6
-ZINCgs0000000OA7
-ZINCgs0000000OA8
-ZINCgs0000000OA9
-ZINCgs0000000OAA
-ZINCgs0000000OAB
-ZINCgs0000000OAC
-ZINCgs0000000OAD
-ZINCgs0000000OAE
-ZINCgs0000000OAF
-ZINCgs0000000OAL
-ZINCgs0000000OAM
-ZINCgs0000000OAN
-ZINCgs0000000OAO
-ZINCgs0000000OAQ
-ZINCgs0000000OAR
-ZINCgs0000000OAS
-ZINCgs0000000OAT
-ZINCgs0000000OAU
-ZINCgs0000000OAV
-ZINCgs0000000OAW
-ZINCgs0000000OAX
-ZINCgs0000000OAY
-ZINCgs0000000OAZ
-ZINCgs0000000OAa
-ZINCgs0000000OAb
-ZINCgs0000000OAc
-ZINCgs0000000OAf
-ZINCgs0000000OAg
-ZINCgs0000000OAh</p>
-    <form action="/searchZincList" method="post" novalidate>
+
+    <form action="/searchZincList" method="post" >
         {{ form.hidden_tag() }}
         <p>
             {{ form.listData.label }}<br>
-            {{ form.listData }}
+            {{ form.listData(rows='10',cols='80') }}
         </p>
-        <p>{{ form.submit() }}</p>
+{#        <p>{{ form.submit() }}</p>#}
+
+
+    <h5> OR </h5>
+    <div class="form-group">
+        <label for="myfile">Select a file(.txt only) :</label>
+        <input type="file" id="myfile" name="myfile" class="btn btn-info">
+    </div>
+    <button type="button" class="btn btn-info" onclick="" data-toggle="modal"
+        data-target="#modal">Search Many</button>
     {% endif %}
 
 </div>

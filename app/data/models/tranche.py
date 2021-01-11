@@ -15,6 +15,8 @@ class TrancheModel(db.Model):
     h_num = db.Column('h_num', db.String(64), nullable=True, default=0)
     p_num = db.Column('p_num', db.String(64), nullable=True, default=0)
 
+    charge = db.Column('charge', db.CHAR(1), nullable=False)
+
     server_mapping_fk = db.Column(db.Integer, db.ForeignKey('server_mapping.sm_id'), nullable=False)
     server_mapping = db.relationship('ServerMappingModel', backref='tranches')
 
