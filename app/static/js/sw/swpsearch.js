@@ -1,6 +1,6 @@
 var sw_server;
 sw_server = '10.20.0.1:5010'; // nm debug deployment
-// sw_server = 'http://gpcr:xtal@swp.docking.org'; // nm debug deployment
+// sw_server = 'http://swp.docking.org'; // nm debug deployment
 var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
@@ -26,7 +26,12 @@ $(document).ready(function () {
     //     url: sw_server + '/search/config',
     //     type: 'GET',
     //       dataType: 'json',
+    //       cors: true ,
     //       contentType:'application/json',
+    //       secure: true,
+    //       headers: {
+    //         'Access-Control-Allow-Origin': '*',
+    //       },
     //       beforeSend: function (xhr) {
     //         xhr.setRequestHeader ("Authorization", "Basic gpcr:xtal");
     //       },
