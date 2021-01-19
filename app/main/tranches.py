@@ -146,12 +146,13 @@ def tranches3dDownload():
     format = formData.format.data
     using = formData.using.data
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
+    add_url_3D = 'zinc22/3d/'
 
     def gen_tranches(tranche):
         hac = tranche[0:3]
         logp = tranche[3:7]
         charge = tranche[-1]
-        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, '', charge)
+        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge)
 
     arr = map(gen_tranches, data_)
     data = '\n'.join(list(arr))
