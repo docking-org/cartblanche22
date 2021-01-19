@@ -2,27 +2,6 @@
 {% block scripts %}
     {{ super() }}
     <script>
-
-        function searchZinc() {
-            let val = $('#searchValue').val()
-            $.ajax({
-                url: "http://zinc22.docking.org/search.json",
-                dataType: 'json',
-                headers: {'Access-Control-Allow-Origin': '*'},
-                data: {'zinc_id': val},
-                crossDomain: true,
-                success: function (result) {
-                    console.log(result)
-                    let smile = result.smiles;
-                    let zinc_id = result.zinc_id;
-                    let supplier_code = result.supplier_code
-                    $('p').append('Smiles : ' + smile).appendTo($('#resultZinc'))
-                    $('p').append('Zinc ID : ' + zinc_id).appendTo($('#resultZinc'))
-                    $('p').append('Supplier Code : ' + supplier_code).appendTo($('#resultZinc'))
-                }
-            });
-        }
-
     </script>
 {% endblock %}
 {% block app_content %}
@@ -31,7 +10,7 @@
         <div class="panel panel-info">
             <div class="panel-heading">Search Using Many (Under Construction)</div>
             <div class="panel-body">
-                <form action="/" method="post" class="form" enctype="multipart/form-data">
+                <form action="/searchSupplierList" method="post" class="form" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="textareasupplier">Supplier code separated by comma without space:</label>
                         <textarea id="textareasupplier" class="form-control" name="list_of_suppliercode" rows="6" cols="20" placeholder="Supplier Codes"></textarea>

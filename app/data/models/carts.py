@@ -39,8 +39,10 @@ class Carts(db.Model):
 
     def addToCartGetId(self, current_user, identifier, img_url, database):
         item = Items.query.filter_by(cart_fk=current_user.activeCart, identifier=identifier).first()
+        print(item)
         if item is None:
-            item = Items(cart_fk = current_user.activeCart, identifier=identifier, compound_img=img_url, database=database)
+            print(img_url, database)
+            item = Items(cart_fk=current_user.activeCart, identifier=identifier, compound_img=img_url, database=database)
             db.session.add(item)
             db.session.commit() 
         return item.item_id

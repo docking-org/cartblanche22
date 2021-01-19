@@ -177,7 +177,7 @@
 {% block scripts %}
     {{ super() }}
     <script>
-        let numberToggle = false;
+        let numberToggle = true;
         let predefined = {
             'all': [[0, 61], [0, 62]],
             'none': [[0, 0], [0, 0]],
@@ -340,18 +340,14 @@
                 'P370', 'P380', 'P390', 'P400', 'P410', 'P420', 'P430', 'P440', 'P450', 'P460', 'P470', 'P480', 'P490', 'P500', 'P600',
                 'P700', 'P800', 'P900']
             let st = ''
-            let st2 = ''
             for (let i = 0; i < 61; i++) {
                 for (let j = 0; j < 62; j++) {
                     if (arr[i][j].chosen) {
-                        let path = 'http://files.docking.org/zinc22/2d/' + col[j] + '/' + col[j] + row[i] + '.smi.gz'
                         st = st + col[j] + row[i] + ' '
-                        st2 += path + '\n'
                     }
                 }
             }
             $('#selected-tranches').html(st)
-            $('#selected-tranches-2').html(st2)
 
         }
     </script>
@@ -412,12 +408,7 @@
                                                       rows="6"
                                                       cols="20"
                                             ></textarea>
-                                    <textarea style="display:none;" id="selected-tranches-2"
-                                              class="tranche-list form-control"
-                                              name="tranches2"
-                                              rows="6"
-                                              cols="20"
-                                    ></textarea>
+
                                 </div>
                             </div>
                             <div class="row">
