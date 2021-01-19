@@ -24,6 +24,7 @@ class AvailableVendors(db.Model):
 
 
 class UserVendors(db.Model):
+    __bind_key__ = 'zinc22'
     __tablename__ = 'user_vendors'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))

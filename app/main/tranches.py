@@ -2,30 +2,30 @@ from flask import render_template, request, Response
 from app.main import application
 import json
 from app.data.models.tranche import TrancheModel
-from app.data.forms.tranchesForms import DownloadForm
+from app.data.forms.tranchesForms import Download2DForm, Download3DForm
 
 
-def URIFormatter(hac, logp, format):
-    return "{}{}/{}{}.{}".format(base_url, hac, hac, logp, format)
+def URIFormatter(hac, logp, format, add_url, charge):
+    return "{}{}{}/{}{}{}.{}".format(base_url, add_url, hac, hac, logp, charge, format)
 
 
-def DBFormatter(hac, logp, format):
-    return "{}/{}{}.{}".format(hac, hac, logp, format)
+def DBFormatter(hac, logp, format, add_url, charge):
+    return "{}/{}{}{}.{}".format(hac, hac, logp, charge, format)
 
 
-def CurlDownloader(hac, logp, format):
-    return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}.{format} {base_url}{hac}/{hac}{logp}.{format}". \
-        format(hac=hac, logp=logp, format=format, base_url=base_url)
+def CurlDownloader(hac, logp, format, add_url, charge):
+    return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format}". \
+        format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge)
 
 
-def WgetDownloader(hac, logp, format):
-    return "mkdir -pv {hac} && wget {base_url}{hac}/{hac}{logp}.{format} -O {hac}/{hac}{logp}.{format}". \
-        format(hac=hac, logp=logp, format=format, base_url=base_url)
+def WgetDownloader(hac, logp, format, add_url, charge):
+    return "mkdir -pv {hac} && wget {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} -O {hac}/{hac}{logp}{charge}.{format}". \
+        format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge)
 
 
-def PowerShellDownloader(hac, logp, format):
-    return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}{hac}/{hac}{logp}.{format} " \
-           "-OutFile {hac}/{hac}{logp}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url)
+def PowerShellDownloader(hac, logp, format, add_url, charge):
+    return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} " \
+           "-OutFile {hac}/{hac}{logp}{charge}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url, add_url_2D=add_url, charge=charge)
 
 
 URI_MIMETYPE_TO_FORMATTER = {
@@ -44,7 +44,7 @@ URI_EXTENSION_TO_MIMETYPE = {
     'powershell': 'application/x-ucsf-zinc-uri-downloadscript-powershell',
 }
 
-base_url = 'http://files.docking.org/zinc22/2d/'
+base_url = 'http://files.docking.org/'
 
 axes = [('H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
          'H16', 'H17',
@@ -74,7 +74,6 @@ ticks = [(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
 
 @application.route('/tranches/2d', methods=['GET'])
 def tranches2d():
-    form = DownloadForm()
     tranches = TrancheModel.query.filter_by(charge='-').all()
     cell2D = [[0 for x in range(62)] for y in range(62)]
     cell2DNew = [[{} for x in range(62)] for y in range(61)]
@@ -91,7 +90,7 @@ def tranches2d():
     # print(cell2DNew)
     return render_template('tranches/2D.html', tranches=tranches, axes=axes, cell2D=json.dumps(cell2D),
                            cell2DNew=json.dumps(cell2DNew),
-                           ticks=ticks, unfilteredSize=unfilteredSize, form=form)
+                           ticks=ticks, unfilteredSize=unfilteredSize)
 
 
 @application.route('/tranches/3d', methods=['GET'])
@@ -119,7 +118,30 @@ def tranches3d():
 
 @application.route('/tranches/2d/download', methods=['POST'])
 def tranches2dDownload():
-    formData = DownloadForm(request.values)
+    formData = Download2DForm(request.values)
+    data_ = formData.tranches.data.split()
+    format = formData.format.data
+    using = formData.using.data
+    mimetype = URI_EXTENSION_TO_MIMETYPE[using]
+    add_url_2D = 'zinc22/2d/'
+
+
+    def gen_tranches(tranche):
+        hac = tranche[0:3]
+        logp = tranche[3:7]
+        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_2D, '')
+
+    arr = map(gen_tranches, data_)
+    data = '\n'.join(list(arr))
+    download_filename = 'ZINC22-downloader-2D-{}.{}'.format(format, using)
+    response = Response(data, mimetype=mimetype)
+    response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
+    return response
+
+
+@application.route('/tranches/3d/download', methods=['POST'])
+def tranches3dDownload():
+    formData = Download3DForm(request.values)
     data_ = formData.tranches.data.split()
     format = formData.format.data
     using = formData.using.data
@@ -128,11 +150,12 @@ def tranches2dDownload():
     def gen_tranches(tranche):
         hac = tranche[0:3]
         logp = tranche[3:7]
-        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format)
+        charge = tranche[-1]
+        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, '', charge)
 
     arr = map(gen_tranches, data_)
     data = '\n'.join(list(arr))
-    download_filename = 'ZINC22-downloader-2D-{}.{}'.format(format, using)
+    download_filename = 'ZINC22-downloader-3D-{}.{}'.format(format, using)
     response = Response(data, mimetype=mimetype)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
     return response

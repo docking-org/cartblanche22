@@ -129,7 +129,8 @@ function updatePurchaseAmount(data, new_purchase) {
     }
     return data;
 }
-function addVendorToCart(identifier, img, db, vendor) {
+function addVendorToCart(identifier, db, img, vendor) {
+    console.log
     data = {
         'identifier': identifier,
         'img': img,

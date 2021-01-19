@@ -424,7 +424,7 @@ function init_table(table, url) {
             "class": "compound",
             "sortable": false,
             "type": "html",
-            "width": "250px",
+            "width": "350px",
             "render": hit_renderer,
         }, {
             "title": "Distance",
@@ -432,12 +432,12 @@ function init_table(table, url) {
             "width": "65px",
             "sortable": true
         }].concat(get_score_columns()).concat([{
-            "title": "Anon Distance",
+            "title": "Anon <br> Distance",
             "name": "topodist",
             "width": "65px",
             "sortable": true
         }, {
-            "title": "Unlabelled MCES",
+            "title": "Unlabelled <br> MCES",
             "name": "mces",
             "width": "50px",
             "sortable": true

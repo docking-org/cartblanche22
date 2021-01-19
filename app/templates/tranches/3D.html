@@ -178,7 +178,7 @@
 {% block scripts %}
     {{ super() }}
     <script>
-        let numberToggle = false;
+        let numberToggle = true;
         let predefined = {
             'all': [[0, 61], [0, 62]],
             'none': [[0, 0], [0, 0]],
@@ -453,43 +453,86 @@
 <div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog" aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Download</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="text-center">
+      <form action="{{ url_for('main.tranches3dDownload') }}" method="post">
+                        <div class="modal-header">
+                            <button class="close" data-dismiss="modal">&times;</button>
+                            <h3>Download Tranches</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div>
+                                    <label for="selected-tranches">
+
+                                    </label>
+                                </div>
+                                <div class="text-center">
                                             <textarea id="selected-tranches"
                                                       class="tranche-list form-control"
                                                       name="tranches"
                                                       rows="6"
                                                       cols="20"
-                                                     ></textarea>
-                                        </div>
-            <div class="row">
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                                <label for="download-since">Only If Modified Since</label>
-                                                <input id="download-since"
-                                                       class="form-control"
-                                                       type="date"
-                                                       name="since">
-                                            </div>
-                                        </div>
+                                            ></textarea>
 
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="download-since">Only If Modified Since</label>
+                                        <input id="download-since"
+                                               class="form-control"
+                                               type="date"
+                                               name="since">
                                     </div>
-      </div>
-           <div class="modal-footer">
-                   <div class="btn-group pull-right">
-                                            <button class="btn btn-primary" type="submit">
-                                                <i class="glyphicon glyphicon-download-alt"></i>
-                                                Download
-                                            </button>
-                                        </div>
+                                </div>
 
-    </div>
+                            </div>
+                        </div>
+         <div class="modal-footer">
+                            <div class="btn-toolbar">
+                                <div class="btn-group pull-right">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="glyphicon glyphicon-download-alt"></i>
+                                        Download
+                                    </button>
+                                </div>
+                                <div class="form-group">
+                                    <select name="format" class="btn btn-info" id="downloadFormat">
+                                        <option value="smi.gz" id="format-smi" selected>
+                                           SMILES (*.smi)
+                                        </option>
+                                        <option id="format-db2.gz" value="db2.gz" >DOCK37 (*.db2.gz)
+                                        </option>
+                                        <option id="format-pdbqt.gz" value="pdbqt.gz" >AutoDock (*.pdbqt.gz)
+                                        </option>
+                                        <option id="format-mol2.gz" value="mol2.gz" >Mol2 (*.mol2.gz)
+                                        </option>
+                                        <option id="format-sdf.gz" value="sdf.gz" >SDF (*.sdf.gz)
+                                        </option>
+                                    </select>
+
+                                    <select name="using" class="btn btn-info" id="downloadUsing">
+                                        <option value="uri" id="using-url">
+                                           URLs
+                                        </option>
+                                        <option id="using-database_index" value="database_index" >DOCK Database Index
+                                        </option>
+                                        <option value="curl" id="using-curl">
+                                          cURL
+                                        </option>
+                                        <option value="wget" id="using-wget">
+                                           WGET
+                                        </option>
+                                        <option value="powershell" id="using-powershell">
+                                           PowerShell
+                                        </option>
+
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+            </form>
+                </div>
   </div>
 </div>
 

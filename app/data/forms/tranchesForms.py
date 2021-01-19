@@ -77,16 +77,12 @@ class Tranche3DFileFactory():
         return self.get_format('sdf.gz')
 
 
-class DownloadForm(FlaskForm):
+class Download2DForm(FlaskForm):
     tranches = TextAreaField('tranches',
                              validators=[DataRequired()],
                              default='')
-    tranches2 = TextAreaField('tranches2',
-                              validators=[],
-                              default='')
     format = SelectField('format',
-                         choices=(Tranche2DFileFactory.AVAILABLE_FORMATS +
-                                  Tranche3DFileFactory.AVAILABLE_FORMATS),
+                         choices=(Tranche2DFileFactory.AVAILABLE_FORMATS),
                          validators=[DataRequired()],
                          default='txt')
     using = SelectField('using',
@@ -96,4 +92,22 @@ class DownloadForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('csrf_enabled', False)
-        super(DownloadForm, self).__init__(*args, **kwargs)
+        super(Download2DForm, self).__init__(*args, **kwargs)
+
+
+class Download3DForm(FlaskForm):
+    tranches = TextAreaField('tranches',
+                             validators=[DataRequired()],
+                             default='')
+    format = SelectField('format',
+                         choices=(Tranche3DFileFactory.AVAILABLE_FORMATS),
+                         validators=[DataRequired()],
+                         default='txt')
+    using = SelectField('using',
+                        choices=[(key, DOWNLOAD_USING_LABELS[key]) for key, _ in URI_EXTENSION_TO_MIMETYPE.items()],
+                        validators=[Optional()],
+                        default='uri')
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('csrf_enabled', False)
+        super(Download3DForm, self).__init__(*args, **kwargs)
