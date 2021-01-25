@@ -19,7 +19,6 @@ var fromSmiInput = false;
 /* Configuration and options */
 
 $(document).ready(function () {
-    console.log("config working")
     $.get(sw_server + '/search/config', function (res) {
         config = res;
         if (!config.WebApp.SearchAsYouDraw)
