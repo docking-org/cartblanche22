@@ -5,8 +5,8 @@ from flask_user import roles_required
 from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm
 import requests
 
-# base_url = "http://cartblanche22.docking.org/"
-base_url = "http://{}/".format(request.host)
+base_url = "http://cartblanche22.docking.org/"
+#base_url = "http://{}/".format(request.host)
 
 @application.route('/search/zincid')
 def search_zincid():

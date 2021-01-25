@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse
+from werkzeug.datastructures import FileStorage
 from app.data.models.tranche import TrancheModel
 from app.data.models.tin.substance import SubstanceModel
 from app.helpers.validation import base10
@@ -6,26 +7,48 @@ from flask import jsonify, redirect
 from flask_csv import send_csv
 import re
 from flask import current_app
-import json 
+import json
 import requests
 import grequests
 from concurrent.futures import as_completed
 from pprint import pprint
+# from requests_futures.sessions import FuturesSession
+
+from concurrent.futures import ProcessPoolExecutor
+from requests import Session
 from requests_futures.sessions import FuturesSession
+import time
 
 
 def response_hook(resp, *args, **kwargs):
-    resp.data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
+    print("response hook!!!!!")
+    print("status.code:", resp.status_code)
+    if resp.text.strip().startswith("data"):
+        print("starts with data")
+        print("resp.text:", resp.text)
+        resp.data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
+    else:
+        print("not start with data")
+        print("resp.text:", resp.text)
+        if resp.text.strip().startswith("<html"):
+            resp.data = "error"
+        else:
+            resp.data = json.loads(resp.text.split('\n\n')[0])
     #resp.data = resp.json()
 
 parser = reqparse.RequestParser()
-session = FuturesSession(max_workers=10)
-session.hooks['response'] = response_hook
+# session = FuturesSession(max_workers=10)
+# session.hooks['response'] = response_hook
 
+
+
+session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
+                         session=Session())
+session.hooks['response'] = response_hook
 
 class Search(Resource):
     def getDataByID(self, args, file_type=None):
-        zinc_id = args.get('zinc_id')  
+        zinc_id = args.get('zinc_id')
         sub_id = base10(zinc_id)
         output_fields = []
         data = SubstanceModel.find_by_sub_id(sub_id)
@@ -46,21 +69,21 @@ class Search(Resource):
         tranche_args = {}
         tranche_args['mwt'] = zinc_id[4:5]
         tranche_args['logp'] = zinc_id[5:6]
-            
-            
+
+
         trancheQuery = TrancheModel.query
         tranche = trancheQuery.filter_by(**tranche_args).first()
 
         data['tranche'] = tranche.to_dict()
         data['zinc_id'] = zinc_id
-        
+
         return jsonify(data)
 
     def get(self, file_type=None):
         parser.add_argument('output_fields', type=str)
         parser.add_argument('zinc_id', type=str)
         args = parser.parse_args()
-        
+
         return self.getDataByID(args, file_type)
 
     def post(self, file_type=None):
@@ -68,16 +91,16 @@ class Search(Resource):
         parser.add_argument('zinc_id', type=str)
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
-        
+
         return self.getDataByID(new_args, file_type)
 
-   
+
 
 class SmileList(Resource):
     # def get(self, file_type=None):
     #     parser.add_argument('smiles-in', type=str)
     #     args = parser.parse_args()
-        
+
     #     return self.getDataBySmiles(args, file_type)
 
 
@@ -86,14 +109,15 @@ class SmileList(Resource):
         parser.add_argument('dist', type=int)
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
-        smiles = new_args.get('smiles-in').split(',')  
+        smiles = new_args.get('smiles-in').split(',')
         new_args['smiles-in'] = smiles
-        
+
         return self.getList(new_args, file_type)
 
-
+    @classmethod
     def getList(self, args, file_type=None):
-        smiles = args.get('smiles-in')
+        smiles = filter(None, args.get('smiles-in'))
+        print("smiles:", smiles)
         dist = 0
         if 'dist' in args:
             dist = args.get('dist')
@@ -101,7 +125,7 @@ class SmileList(Resource):
 
         uri = "{}/search/submit".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
         params = {
-            'smi': 'C1=CC=CC=C1',
+            'smi': '',
             'db': 'zinc22_2d_All.smi.anon',
             'dist': dist,
             'tdn': 4,
@@ -117,25 +141,32 @@ class SmileList(Resource):
         }
 
         futures = []
-        for smile in smiles:
-            params['smi'] = smile
-            future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=True)
-            # future.i = i
-            futures.append(future)
+        params['smi'] = smile
+        print("smile:", smile, " uri: ", uri)
+        future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=True)
+        # future.i = i
+        futures.append(future)
 
         hlids = []
         for future in as_completed(futures):
             resp = future.result()
-            hlids.append(resp.data['hlid'])
+            # print("resp.data from getList")
+            data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
+            print()
+            # print(resp.data)
+            print("before hlids.append(data['hlid'])")
+            hlids.append(data['hlid'])
+            print("APPENDED HLID", data['hlid'])
 
         result = self.get_result_from_smallworld("type", hlids)
-
-        return jsonify(result)
+        print("result = self.get_result_from_smallworld(type, hlids)")
+        print("result:")
+        print(result)
+        return result
 
 
     @classmethod
     def get_result_from_smallworld(cls, type_, hlids, start=0, length=100, cutoff=0.0):
-        scores = {}
         uri = "{}/search/view".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
 
         params = {
@@ -250,29 +281,41 @@ class SmileList(Resource):
             'search[regex]': 'false',
         }
 
-        result_data = {}
-
         ret_data = cls.request_uri(uri, hlids, params)
-        
+        print("ret_data = cls.request_uri(uri, hlids, params)")
+        print("returns ret_datat")
         return ret_data
 
 
-
     @classmethod
-    def request_uri(cls, uri, hlids, params):
+    def request_uri(cls, uri, hlids, params, **count):
         try:
             futures = []
             for hlid in hlids:
                 params['hlid'] = hlid
+                print("????????????????????????????????????????????????????????????????????????????????????")
+                print(hlid, uri)
                 future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=False)
                 futures.append(future)
-
+            time.sleep(3)
             result = []
             for future in as_completed(futures):
+                # print("BEFORE future.result()")
                 resp = future.result()
-                result_data = resp.data
-                
-                for dt in result_data['data']:
+                # print("statuscode:", resp.status_code)
+                # print("resp.text")
+                # print(resp.text)
+                data = json.loads(resp.text.split('\n\n')[0])
+                # result_data = resp.data
+                # if result_data == "error":
+                #     return "Error:::"
+
+                # print("Printing data>>>>>>>>>>>>>>")
+                # print(data)
+                # print("Printing data['data']>>>>>>>>>>>>>>>>>>>")
+                # print(data['data'])
+
+                for dt in data['data']:
                     res = {}
                     res['qrySmiles'] = dt[0]['qrySmiles']
                     res['zinc_id'] = dt[0]['id']
@@ -280,7 +323,13 @@ class SmileList(Resource):
                     res['qryMappedSmiles'] = dt[0]['qryMappedSmiles']
                     res['hitMappedSmiles'] = dt[0]['hitMappedSmiles']
                     result.append(res)
-                    
+
+            print("result>>>>>>>>")
+            print(result)
+
+            if not result and not count:
+                # print("RESULT WAS [] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                cls.request_uri(uri, hlids, params, 1)
             return result
 
         except requests.ConnectionError:
@@ -289,11 +338,14 @@ class SmileList(Resource):
         except ValueError:
             print("Value Error")
             return None
+        except Exception as e:
+            print("Exception:", e)
+            return None
 
         return result
 
 
-class Smiles(Resource): 
+class Smiles(Resource):
     def post(self, file_type=None):
         parser.add_argument('smiles-in', location='files', type=FileStorage, required=True)
         parser.add_argument('dist', type=int)
@@ -306,3 +358,4 @@ class Smiles(Resource):
         new_args['smiles-in'] = lines
 
         return SmileList.getList(new_args, file_type)
+
