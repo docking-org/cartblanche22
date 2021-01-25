@@ -61,7 +61,7 @@ class Substance(Resource):
         sub_ids = args.get('sub_ids').split(',') 
         current_app.config['TIN_URL'] = args.get('tin_url')
 
-        substances =  SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
+        substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
 
         data = [sub.json() for sub in substances]
 
