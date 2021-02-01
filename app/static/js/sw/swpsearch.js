@@ -1,6 +1,8 @@
+var swp_server;
 var sw_server;
 // sw_server = '10.20.0.1:5010'; // nm debug deployment
-sw_server = 'http://swp.docking.org'; // nm debug deployment
+swp_server = 'http://swp.docking.org'; // nm debug deployment
+sw_server = 'http://sw.docking.org'; // nm debug deployment
 var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
@@ -17,54 +19,13 @@ var datasets = {};
 var dtable = null;
 var search_state = null;
 var fromSmiInput = false;
-/* Configuration and options */
 
-$(document).ready(function () {
-    console.log("config working");
-    console.log(sw_server + '/search/config');
-    // $.ajax({
-    //     url: sw_server + '/search/config',
-    //     type: 'GET',
-    //       dataType: 'json',
-    //       cors: true ,
-    //       contentType:'application/json',
-    //       secure: true,
-    //       headers: {
-    //         'Access-Control-Allow-Origin': '*',
-    //       },
-    //       beforeSend: function (xhr) {
-    //         xhr.setRequestHeader ("Authorization", "Basic gpcr:xtal");
-    //       },
-    //     success: function (res) {
-    //         console.log('res', res)
-    //         config = res;
-    //         if (!config.WebApp.SearchAsYouDraw)
-    //             $('.swopt').removeClass('searchasyoudraw');
-    //         add_scoretype_selection(config);
-    //         toggle_scoring();
-    //     },
-    //     error: function (responseData, textStatus, errorThrown) {
-    //         alert('GET failed.');
-    //     }
-    // });
-
-
-    // $.get(sw_server + '/search/config', function (res) {
-    // 	console.log('res', res)
-    // 	config = res;
-    // 	if (!config.WebApp.SearchAsYouDraw)
-    // 		$('.swopt').removeClass('searchasyoudraw');
-    // 	add_scoretype_selection(config);
-    // 	toggle_scoring();
-    // });
-});
 
 function norm_score_name(x) {
     return x.replace(new RegExp(' ', 'g'), '_').toLowerCase();
 }
 
 function add_scoretype_selection(config) {
-    console.log(config)
     $.each(config.ScoreFuncs, function (i, e) {
         if (e.name == "ECFP4" || e.name == "Daylight") {
             e.enabledByDefault = true
@@ -372,7 +333,7 @@ function newSearch(smiles) {
                 return e.name
             }).join(",")
         };
-        source = new EventSource(sw_server + '/search/submit?smi=' + encodeURIComponent(search_state.smi) +
+        source = new EventSource(swp_server + '/search/submit?smi=' + encodeURIComponent(search_state.smi) +
             '&db=' + encodeURIComponent(search_state.db) + '&dist=' + search_state.topodist +
             '&tdn=' + search_state.tdn + '&tup=' + search_state.tup + '&rdn=' + search_state.rdn +
             '&rup=' + search_state.rup + '&ldn=' + search_state.ldn + '&lup=' + search_state.lup +
@@ -461,7 +422,6 @@ function stopStreaming() {
 }
 
 function init_table(table, url) {
-    console.log("table initiated")
     if (!dtable) {
         $('#splash').css('display', 'none');
         var columns = [{
@@ -567,14 +527,13 @@ function export_results() {
             params['columns[' + idx + '][search][value]'] = this.search();
         }
     });
-    window.open(sw_server + '/search/export?' + $.param(params));
+    window.open(swp_server + '/search/export?' + $.param(params));
 }
 
 /* Column Rendering */
 function drag_img(event, smiles) {
     hide_imgpop();
     var url = config.WebApp.ResolverUrl.replace("%s", encodeURIComponent(smiles));
-    console.log(url);
     $.ajax({
         async: false,
         type: 'GET',
@@ -623,7 +582,6 @@ function hit_renderer(data, type, row) {
         .replace("%c", encodeURIComponent(cols))
         .replace("%m", encodeURIComponent(cmap))
         .replace("%w", 50).replace("%h", 30);
-    // console.log(depict_url)
     img.attr('src', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     img.attr('onmouseenter', 'show_imgpop(this);');
     img.attr('onmouseleave', 'hide_imgpop();');
@@ -639,6 +597,9 @@ function hit_renderer(data, type, row) {
     button.attr('onclick', 'toggleCart(this)');
     button.attr('class', 'btn btn-info');
     let cart = JSON.parse(localStorage.getItem('cart'))
+    if(cart==null){
+    cart = []
+  }
     let items = []
     for (i = 0; i < cart.length; i++) {
         items.push(cart[i].identifier)
@@ -671,54 +632,3 @@ function hit_renderer(data, type, row) {
 
     return $('<div>').append(table).html();
 }
-
-
-// function toggleCart(btn) {
-// 	if (btn.getAttribute('class') == 'btn btn-info') {
-// 		$.ajax({
-// 			type: 'POST',
-// 			url: '/addToCart',
-// 			data: JSON.stringify({
-// 				'id': btn.id,
-// 				'database': btn.getAttribute('db'),
-// 				'img_url': btn.getAttribute('img')
-// 			}),
-// 			contentType: "application/json; charset=utf-8",
-// 			dataType: "json",
-// 			success: function (result) {
-// 				$(btn).html('Remove')
-// 				$(btn).attr('class', 'btn btn-danger')
-// 				if (!items.includes(btn.id)) {
-// 					items.push(btn.id)
-// 				}
-// 				$('#cartCount').html(result['count'])
-// 				$.ajax({
-// 					type: 'POST',
-// 					url: '/autoChooseVendor/' + result['item_id'],
-// 					contentType: "application/json; charset=utf-8",
-// 					dataType: "json",
-// 				})
-// 			},
-// 			error: function (data) {
-// 				alert("fail");
-// 			}
-// 		});
-// 	}
-// 	else {
-// 		$.ajax({
-// 			url: '/deleteItem/' + btn.id,
-// 			type: 'DELETE',
-// 			success: function (result) {
-// 				$(btn).html('Add To Cart')
-// 				$(btn).attr('class', 'btn btn-info')
-// 				items.pop(btn.id)
-// 				$('#cartCount').html(result['count'])
-// 			}
-// 		});
-//
-// 	}
-//
-//
-//
-// 	return false;
-// }

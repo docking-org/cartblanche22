@@ -27,8 +27,7 @@
         });
     config = JSON.parse({{ config | tojson }})
 	maps = JSON.parse({{ maps | tojson }})
-    console.log(config)
-        console.log(maps)
+
         if (!config.WebApp.SearchAsYouDraw)
     		$('.swopt').removeClass('searchasyoudraw');
     	add_scoretype_selection(config);
