@@ -3,48 +3,38 @@ from werkzeug.datastructures import FileStorage
 from app.data.models.tranche import TrancheModel
 from app.data.models.tin.substance import SubstanceModel
 from app.helpers.validation import base10
-from flask import jsonify, redirect
+from flask import jsonify, redirect, current_app
 from flask_csv import send_csv
 import re
-from flask import current_app
 import json
 import requests
 import grequests
 from concurrent.futures import as_completed
-from pprint import pprint
-# from requests_futures.sessions import FuturesSession
-
 from concurrent.futures import ProcessPoolExecutor
 from requests import Session
 from requests_futures.sessions import FuturesSession
 import time
 
-
-def response_hook(resp, *args, **kwargs):
-    print("response hook!!!!!")
-    print("status.code:", resp.status_code)
-    if resp.text.strip().startswith("data"):
-        print("starts with data")
-        print("resp.text:", resp.text)
-        resp.data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
-    else:
-        print("not start with data")
-        print("resp.text:", resp.text)
-        if resp.text.strip().startswith("<html"):
-            resp.data = "error"
-        else:
-            resp.data = json.loads(resp.text.split('\n\n')[0])
+# def response_hook(resp, *args, **kwargs):
+#     print("response hook!!!!!")
+#     print("status.code:", resp.status_code)
+#     if resp.text.strip().startswith("data"):
+#         print("starts with data")
+#         print("resp.text:", resp.text)
+#         resp.data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
+#     else:
+#         print("not start with data")
+#         print("resp.text:", resp.text)
+#         if resp.text.strip().startswith("<html"):
+#             resp.data = "error"
+#         else:
+#             resp.data = json.loads(resp.text.split('\n\n')[0])
     #resp.data = resp.json()
 
 parser = reqparse.RequestParser()
-# session = FuturesSession(max_workers=10)
-# session.hooks['response'] = response_hook
-
-
-
 session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
                          session=Session())
-session.hooks['response'] = response_hook
+# session.hooks['response'] = response_hook
 
 class Search(Resource):
     def getDataByID(self, args, file_type=None):
@@ -95,14 +85,12 @@ class Search(Resource):
         return self.getDataByID(new_args, file_type)
 
 
-
 class SmileList(Resource):
     # def get(self, file_type=None):
     #     parser.add_argument('smiles-in', type=str)
     #     args = parser.parse_args()
 
     #     return self.getDataBySmiles(args, file_type)
-
 
     def post(self, file_type=None):
         parser.add_argument('smiles-in', type=str)
@@ -117,7 +105,6 @@ class SmileList(Resource):
     @classmethod
     def getList(self, args, file_type=None):
         smiles = filter(None, args.get('smiles-in'))
-        print("smiles:", smiles)
         dist = 0
         if 'dist' in args:
             dist = args.get('dist')
@@ -141,27 +128,26 @@ class SmileList(Resource):
         }
 
         futures = []
-        params['smi'] = smile
-        print("smile:", smile, " uri: ", uri)
-        future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=True)
-        # future.i = i
-        futures.append(future)
+        for smile in smiles:
+            params['smi'] = smile
+            print(smile, uri)
+            future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=True)
+            # future.i = i
+            futures.append(future)
 
         hlids = []
         for future in as_completed(futures):
             resp = future.result()
-            # print("resp.data from getList")
-            data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
-            print()
-            # print(resp.data)
-            print("before hlids.append(data['hlid'])")
+            try:
+                data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
+            except Exception as e:
+                print("Exception DATA:>>>>>>>>>>>>")
+                print(resp.text)
+                continue
+            print(data['hlid'])
             hlids.append(data['hlid'])
-            print("APPENDED HLID", data['hlid'])
 
-        result = self.get_result_from_smallworld("type", hlids)
-        print("result = self.get_result_from_smallworld(type, hlids)")
-        print("result:")
-        print(result)
+        result = self.get_result_from_smallworld(file_type, hlids)
         return result
 
 
@@ -274,7 +260,7 @@ class SmileList(Resource):
             'columns[16][search][value]': '0-4',
             'columns[16][search][regex]': 'false',
             'order[0][column]': 2,
-            'order[0][dir]': 'desc',
+            'order[0][dir]': 'asc',
             'start': start,
             'length': length,
             'search[value]': '',
@@ -282,67 +268,44 @@ class SmileList(Resource):
         }
 
         ret_data = cls.request_uri(uri, hlids, params)
-        print("ret_data = cls.request_uri(uri, hlids, params)")
-        print("returns ret_datat")
         return ret_data
 
-
     @classmethod
-    def request_uri(cls, uri, hlids, params, **count):
-        try:
-            futures = []
-            for hlid in hlids:
-                params['hlid'] = hlid
-                print("????????????????????????????????????????????????????????????????????????????????????")
-                print(hlid, uri)
-                future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=False)
-                futures.append(future)
-            time.sleep(3)
-            result = []
-            for future in as_completed(futures):
-                # print("BEFORE future.result()")
+    def request_uri(cls, uri, hlids, params, *count):
+        futures = []
+        for hlid in hlids:
+            params['hlid'] = hlid
+            future = session.get(uri, params=params, auth=('gpcr', 'xtal'))
+            futures.append(future)
+
+        # time.sleep(3)
+        result = []
+        for future in as_completed(futures):
+            try:
                 resp = future.result()
-                # print("statuscode:", resp.status_code)
-                # print("resp.text")
-                # print(resp.text)
+                print("statuscode:", resp.status_code)
+                print("resp.text:", resp.text)
                 data = json.loads(resp.text.split('\n\n')[0])
-                # result_data = resp.data
-                # if result_data == "error":
-                #     return "Error:::"
+            except Exception as e:
+                print("Exception:", e)
+                print(resp.text)
+                continue
 
-                # print("Printing data>>>>>>>>>>>>>>")
-                # print(data)
-                # print("Printing data['data']>>>>>>>>>>>>>>>>>>>")
-                # print(data['data'])
+            for dt in data['data']:
+                res = {}
+                res['qrySmiles'] = dt[0]['qrySmiles']
+                res['zinc_id'] = dt[0]['id']
+                res['score'] = round(float(dt[2]), 2)
+                res['qryMappedSmiles'] = dt[0]['qryMappedSmiles']
+                res['hitMappedSmiles'] = dt[0]['hitMappedSmiles']
+                result.append(res)
 
-                for dt in data['data']:
-                    res = {}
-                    res['qrySmiles'] = dt[0]['qrySmiles']
-                    res['zinc_id'] = dt[0]['id']
-                    res['score'] = round(float(dt[2]), 2)
-                    res['qryMappedSmiles'] = dt[0]['qryMappedSmiles']
-                    res['hitMappedSmiles'] = dt[0]['hitMappedSmiles']
-                    result.append(res)
-
-            print("result>>>>>>>>")
-            print(result)
-
-            if not result and not count:
-                # print("RESULT WAS [] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                cls.request_uri(uri, hlids, params, 1)
-            return result
-
-        except requests.ConnectionError:
-            print("Connection Error")
-            return None
-        except ValueError:
-            print("Value Error")
-            return None
-        except Exception as e:
-            print("Exception:", e)
-            return None
+        if not result and not count:
+            print("result was empty !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            cls.request_uri(uri, hlids, params, 1)
 
         return result
+
 
 
 class Smiles(Resource):
@@ -358,4 +321,3 @@ class Smiles(Resource):
         new_args['smiles-in'] = lines
 
         return SmileList.getList(new_args, file_type)
-

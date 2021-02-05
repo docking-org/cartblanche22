@@ -7,6 +7,7 @@ import requests
 from collections import defaultdict
 import grequests
 import json
+import time
 
 parser = reqparse.RequestParser()
 
@@ -39,7 +40,8 @@ class SubstanceList(Resource):
 
         url = 'http://{}/substance'.format(request.host)
         for k, v in dict_ids.items():
-            print(k)
+            print("TIN URLS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+            print(k, v)
 
         resp = (grequests.post(url, data={'sub_ids':','.join([str(i) for i in v]), 'tin_url':k}) for k, v in dict_ids.items())
         data = defaultdict(list)
@@ -58,10 +60,14 @@ class Substance(Resource):
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
 
-        sub_ids = args.get('sub_ids').split(',') 
-        current_app.config['TIN_URL'] = args.get('tin_url')
-
+        sub_ids = (int(id) for id in args.get('sub_ids').split(','))
+        print("REQUESTED TIN_URL from Substance POST", args.get('tin_url'))
+        time1 = time.time()
         substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
+        time2 = time.time()
+        print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
+
+
 
         data = [sub.json() for sub in substances]
 
@@ -82,5 +88,5 @@ class Substances(Resource):
 
         return SubstanceList.getList(args, file_type)
         
-    
+
 

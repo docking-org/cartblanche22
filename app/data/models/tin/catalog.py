@@ -3,7 +3,7 @@ from app.data.models.tin.substance import SubstanceModel
 
 
 class CatalogModel(db.Model):
-    __bind_key__ = 'tin'
+    #__bind_key__ = 'tin'
     __tablename__ = 'catalog'
 
     cat_id = db.Column(db.Integer, primary_key=True)
@@ -34,7 +34,7 @@ class CatalogModel(db.Model):
 
 
 class CatalogContentModel(db.Model):
-    __bind_key__ = 'tin'
+    #__bind_key__ = 'tin'
     __tablename__ = 'catalog_content'
 
 
@@ -47,8 +47,9 @@ class CatalogContentModel(db.Model):
     
     substances = db.relationship("SubstanceModel", secondary="catalog_substance")
 
+
 class CatalogSubstanceModel(db.Model):
-    __bind_key__ = 'tin'
+    #__bind_key__ = 'tin'
     __tablename__ = 'catalog_substance'
 
     cat_sub_itm_id = db.Column(db.BigInteger, primary_key=True)

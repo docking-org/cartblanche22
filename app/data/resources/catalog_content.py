@@ -54,8 +54,7 @@ class CatalogContent(Resource):
         parser.add_argument('supplier_codes', type=str)
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
-        lines = args.get('supplier_codes').split(',') 
-        current_app.config['TIN_URL'] = args.get('tin_url')
+        lines = args.get('supplier_codes').split(',')
         catContents =  CatalogContentModel.query.filter(CatalogContentModel.supplier_code.in_(lines)).all()
         data = []
         for cc in catContents:
