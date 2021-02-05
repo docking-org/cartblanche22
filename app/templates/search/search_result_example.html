@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block scripts %}
+{{ super() }}
+<script>
+</script>
+{% endblock %}
+{% block app_content %}
+<div>
+<h3>Search results</h3>
+<div class="card-group">
+    {%  for i in range(9) %}
+    <div class="card col-sm-4 col-md-4 col-lg-4" style="margin-bottom: 8px;" >
+  <img class="card-img-top" style="width:100%; height: 15vh"
+       src="https://sw.docking.org/depict/svg?w=50&h=30h&smi=CC(=O)OCCNC(=O)CCc1nc(-c2ccc(Cl)cc2)no1&qry=%q&cols=%c&cmap=%m"
+       alt="Image of CC(=O)OCCNC(=O)CCc1nc(-c2ccc(Cl)cc2)no1">
+  <div class="card-body">
+    <h5 class="card-title">Zinc Id : ZINCgs0000000OA0</h5>
+      <ul style="word-wrap: break-word;list-style-type:none;" class="list-group list-group-flush">
+{#    <li class="list-group-item">Smiles : {{ data.smiles }}</li>#}
+    <li class="">Catalog Name : S_Enamine</li>
+    <li class="">Supplier code : s_22__9598818__134210</li>
+    <li class="">Smiles : CC(=O)OCCNC(=O)CCc1nc(-c2ccc(Cl)cc2)no1}</li>
+    <li class="">Tranche : H22P220  </li>
+{#    <li class=""><button class="btn btn-info" style="float:right">Add to Cart</button></li>#}
+  </ul>
+  </div>
+     <div class="card-footer" style="text-align:center">
+     <button class="btn btn-info" >Add to Cart</button>
+    </div>
+</div>
+    {%  endfor %}
+</div>
+</div>
+{% endblock %}

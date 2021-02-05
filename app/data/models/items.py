@@ -12,7 +12,7 @@ class Items(db.Model):
     quantity = db.Column(db.Float, default=10)
     unit = db.Column(db.String(10), default='mg')
     compound_img = db.Column(db.String(512))
-    database = db.Column(db.String(120), nullable = False)
+    database = db.Column(db.String(120), nullable=False)
     price = db.Column(db.Float)
     vendors = db.relationship('Vendors', backref='item', lazy='dynamic')
     created_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)

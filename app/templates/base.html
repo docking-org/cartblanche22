@@ -10,10 +10,10 @@
 
 {% block styles %}
     {{ super() }}
-    <link rel="stylesheet" href="../static/css/base.css">
+    <link rel="stylesheet" href = "{{ url_for('static', filename = 'css/base.css') }}">
     <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css"/>
     <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css"/>
-    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">
+{#    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">#}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css"/>
 {% endblock %}
@@ -34,16 +34,13 @@
     <script>
 
         $(document).ready(() => {
-            $('[data-toggle="tooltip"]').tooltip();
             if (localStorage.getItem('cart') != null) {
-                console.log('base document.ready working')
                 let cart = JSON.parse(localStorage.getItem('cart'))
                 $('#cartCount').html(getCartSize(cart))
             }
 
         })
         $('#logoutTab').on('click', () => {
-            console.log('cleaning localstorage')
             let cart = []
             localStorage.setItem('cart', JSON.stringify(cart))
             localStorage.removeItem('items')
@@ -51,7 +48,6 @@
                 type: "GET",
                 url: "/logout",
                 success: function (route) {
-                    console.log(route);
                     window.location.href = route;
                 }
             });
@@ -103,6 +99,7 @@
                             <li><a href="{{ url_for('main.search_zincid') }}">By ZincID</a></li>
                             <li><a href="{{ url_for('main.search_suppliercode') }}">By Supplier Code</a></li>
                             <li><a href="{{ url_for('main.search_smiles') }}">By Smiles</a></li>
+                            <li><a href="{{ url_for('main.search_example') }}">Result example</a></li>
                         </ul>
                     </li>
                 </ul>

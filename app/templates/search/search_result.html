@@ -16,7 +16,9 @@
     <h5 class="card-title">Zinc Id : {{ data.zinc_id }}</h5>
       <ul style="word-wrap: break-word;" class="list-group list-group-flush">
 {#    <li class="list-group-item">Smiles : {{ data.smiles }}</li>#}
+       {% if data.catalogs %}
     <li class="list-group-item">Catalog Name : {{ data.catalogs[0].catalog_name }}</li>
+      {% endif %}
     <li class="list-group-item">Supplier code : {{ data.supplier_code[0] }}</li>
     <li class="list-group-item">Smiles : {{ data.smiles }}</li>
           {% if data.tranche %}

@@ -18,15 +18,6 @@ var search_state = null;
 var fromSmiInput = false;
 /* Configuration and options */
 
-$(document).ready(function () {
-    $.get(sw_server + '/search/config', function (res) {
-        config = res;
-        if (!config.WebApp.SearchAsYouDraw)
-            $('.swopt').removeClass('searchasyoudraw');
-        add_scoretype_selection(config);
-        toggle_scoring();
-    });
-});
 
 function norm_score_name(x) {
     return x.replace(new RegExp(' ', 'g'), '_').toLowerCase();
@@ -92,15 +83,13 @@ function toggle_align() {
     redraw();
 }
 /* Db Info */
-function db_maps(select) {
-    $.get(sw_server + '/search/maps', function (data) {
-        for (var key in data) {
+function db_maps(select, data) {
+     for (var key in data) {
             datasets[key] = data[key];
             if (data[key].enabled === true && data[key].status === 'Available') {
                 select.append('<option value=' + key + '>' + data[key].name + '</option>');
             }
         }
-    });
 }
 /* Range Sliders */
 function install_range_slider(param, limit) {
@@ -527,7 +516,6 @@ function export_results() {
 function drag_img(event, smiles) {
     hide_imgpop();
     var url = config.WebApp.ResolverUrl.replace("%s", encodeURIComponent(smiles));
-    console.log(url);
     $.ajax({
         async: false,
         type: 'GET',
@@ -591,6 +579,9 @@ function hit_renderer(data, type, row) {
     button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     button.attr('onclick', 'toggleCart(this)');
     let cart = JSON.parse(localStorage.getItem('cart'))
+    if(cart==null){
+    cart = []
+  }
     let items = []
     for (i = 0; i < cart.length; i++) {
         items.push(cart[i].identifier)
@@ -623,71 +614,3 @@ function hit_renderer(data, type, row) {
 
     return $('<div>').append(table).html();
 }
-
-
-// function toggleCart(btn) {
-// 	let cart = JSON.parse(localStorage.getItem('cart'))
-// 	let items = []
-// 	for (i = 0; i < cart.length; i++) {
-// 		items.push(cart[i].identifier)
-// 	}
-// 	if (btn.getAttribute('class') == 'btn btn-info') {
-// 		let item = {
-// 			'identifier': btn.id,
-// 			'db': btn.getAttribute('db'),
-// 			'img': btn.getAttribute('img'),
-// 			'supplier': []
-// 		}
-// 		cart.push(item)
-// 		localStorage.setItem('cart', JSON.stringify(cart))
-// 		$(btn).html('Remove')
-// 		$(btn).attr('class', 'btn btn-danger')
-// 		$('#cartCount').html(cart.length)
-// 		if (localStorage.getItem('is_authenticated') === 'True') {
-// 			console.log('add')
-// 			$.ajax({
-// 				type: 'POST',
-// 				url: '/addToCart',
-// 				data: JSON.stringify({
-// 					'id': btn.id,
-// 					'database': btn.getAttribute('db'),
-// 					'img_url': btn.getAttribute('img')
-// 				}),
-// 				contentType: "application/json; charset=utf-8",
-// 				dataType: "json",
-// 				success: function (result) {
-// 					console.log('db saved: ' + btn.id)
-// 				},
-// 				error: function (data) {
-// 					alert("fail when adding to server molecule:" + btn.id);
-// 				}
-// 			});
-// 		}
-
-
-// 	}
-// 	else {
-// 		for (i = 0; i < cart.length; i++) {
-// 			if (cart[i].identifier == btn.id) {
-// 				cart.pop(i)
-// 			}
-// 		}
-// 		localStorage.setItem('cart', JSON.stringify(cart))
-// 		$(btn).html('Add To Cart')
-// 		$(btn).attr('class', 'btn btn-info')
-// 		$('#cartCount').html(cart.length)
-// 		if (localStorage.getItem('is_authenticated') === 'True') {
-// 			console.log('delete')
-// 			$.ajax({
-// 				url: '/deleteItem/' + btn.id,
-// 				type: 'DELETE',
-// 				success: function (result) {
-// 					console.log('db deleted: ' + btn.id)
-// 				}
-// 			});
-// 		}
-
-
-// 	}
-// 	return false;
-// }

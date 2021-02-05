@@ -5,11 +5,9 @@ function getVendors(bool, identifier, db) {
         url: "/getVendors/" + identifier + "/" + db,
         async: bool,
         success: function (res) {
-            console.log(res)
             data = res.vendors;
         },
         error: function (err) {
-            console.log(err)
             return 'failed to get vendors'
         }
     });
@@ -25,12 +23,10 @@ function updateTotalAmount() {
             total += item.supplier[j].purchase * item.supplier[j].price
         }
     }
-    console.log(total)
     return total.toFixed(2);
 }
 
 function cartToArray() {
-    console.log('cartToArray function is working')
     let cart = JSON.parse(localStorage.getItem('cart'))
     let data = []
     let num = 1
@@ -115,7 +111,6 @@ function updatePurchaseAmount(data, new_purchase) {
                         contentType: "application/json",
                         dataType: 'json',
                         success: (res) => {
-                            console.log(res)
                         },
                         error: (res) => {
                             alert(res)

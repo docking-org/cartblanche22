@@ -29,7 +29,6 @@ function Arthor(url) {
   this.configPromise = $.get(this.url + '/config').then((function (arthor) {
     return function (response) {
       arthor.config = response;
-      console.log(arthor.config)
       return response;
     };
   })(this));
@@ -90,8 +89,9 @@ function Arthor(url) {
   this.setTable = function (table) {
     var changed = this.table !== table;
     this.table = table;
-    if (changed && arthor.config.WebApp.SearchAsYouDraw)
-      this.notify();
+    if (changed && arthor.config.WebApp.SearchAsYouDraw){
+            this.notify();
+    }
   };
 
   this.setSearchType = function (type) {
