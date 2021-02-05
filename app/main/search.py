@@ -5,13 +5,19 @@ import requests
 import re
 
 base_url = "http://cartblanche22.docking.org/"
+swp_server = 'http://swp.docking.org'
 sw_server = 'http://swp.docking.org'
+
+
+@application.route('/search/example')
+def search_example():
+    return render_template('search/search_result_example.html')
 
 
 @application.route('/search/view')
 def search_view():
     params = request.query_string.decode("utf-8")
-    response = requests.get(sw_server + '/search/view', params=params, auth=('gpcr', 'xtal'))
+    response = requests.get(swp_server + '/search/view', params=params, auth=('gpcr', 'xtal'))
     return response.json()
 
 
@@ -55,6 +61,7 @@ def searchSmilesList():
         files = {
             'smiles-in': ','.join(lines)
         }
+        print(lines)
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
@@ -118,7 +125,18 @@ def searchZincList():
 
 @application.route('/sw', methods=['GET', 'POST'])
 def sw():
-    return render_template('search/sw.html')
+    print('sw')
+    try:
+        config = requests.get('http://sw.docking.org/search/config').json()
+    except:
+        return render_template('errors/500.html')
+    try:
+        maps = requests.get('htp://sw.docking.org/search/maps').json()
+    except:
+        return render_template('errors/500.html')
+    print(json.dumps(config))
+    print(json.dumps(maps))
+    return render_template('search/sw.html', config=json.dumps(config), maps=json.dumps(maps)), 200
 
 
 @application.route('/swp', methods=['GET', 'POST'])

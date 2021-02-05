@@ -10,7 +10,7 @@ from app.main.items import addToCartWithVendor
 @application.route('/saveCartToDb', methods=['POST'])
 def saveCartToDb():
     print('saveCartToDB')
-    data = request.get_json()
+    data = request.get_json()['totalCart']
     activeCart = Carts.query.get(current_user.activeCart)
     for d in data:
         if len(d['supplier']) == 0:

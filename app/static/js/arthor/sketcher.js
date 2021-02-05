@@ -48,7 +48,6 @@ function jsmeOnLoad() {
       if (!fromSmiInput) {
         prevTextInput = null;
         $('#smiles-in').val(smiles);
-        console.log('jsmeOnLoad')
       }
     });
   }
@@ -71,7 +70,6 @@ function set_smiles(callback) {
             callback(smiles);
             if (!fromSmiInput) {
               $('#smiles-in').val(smiles);
-                      console.log('set_smiles')
 
             }
             fromSmiInput = false;
@@ -117,7 +115,6 @@ function resolve_structure(input) {
   if (!smi)
     return;
   var url = arthor.config.WebApp.RESOLVER;
-  console.log('ftom resolve: ' + url)
   url = url.replace("%s", encodeURIComponent(smi));
   $.get(url).then(function (molfile) {
     if (molfile)
@@ -130,19 +127,16 @@ function resolve_structure(input) {
 }
 
 function load_smiles(input) {
-  console.log('zurj chadahnuu haray l da')
   if (fromSmiInput) return;
   var smi = $(input).val();
   var url = 'https://sw.docking.org/util/smi2mol?smi=%s'
 
 
   url = url.replace("%s", encodeURIComponent(smi));
-  console.log(url)
   $.get(url,
     function (res) {
       if (res) {
         if (sketcher == 'jsme') {
-          console.log(res)
           fromSmiInput = true;
           jsmeApplet.readMolFile(res);
           fromSmiInput = false;

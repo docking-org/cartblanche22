@@ -1,7 +1,6 @@
 function timeoutCheck(is_authenticated, cart_) {
     let timeout = localStorage.getItem('timeout');
     if (new Date(timeout) < new Date() && is_authenticated == 'False') {
-        console.log('ustgay')
         let cart = JSON.parse(cart_)
         localStorage.setItem('cart', JSON.stringify(cart))
         $('#cartCount').html('0')
@@ -52,11 +51,12 @@ function cartCheck(is_authenticated, cart_) {
             }
         }
         localStorage.setItem('cart', JSON.stringify(totalCart))
-        alert(totalCart)
         $.ajax({
             type: 'POST',
             url: '/saveCartToDb',
-            data: JSON.stringify(totalCart),
+            data:  JSON.stringify({
+                'totalCart': totalCart,
+            }),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (result) {

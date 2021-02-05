@@ -14,7 +14,6 @@ function vendorRequest(identifier, db, img, btn, hg) {
                 let assigned = result.assigned
                 result = result.vendor
                 if (assigned) {
-                    console.log('iishee orood bn')
                     let vendor = {
                         'cat_name': result['cat_name'],
                         'price': result['price'],

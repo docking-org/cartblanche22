@@ -20,8 +20,9 @@
 {% block scripts %}
 {{super()}}
 <script type="text/javascript" src="../static/js/arthor/smi.min.js"></script>
-<script type="text/javascript" src="../static/js/arthor/datatables.min.js"></script>
-<script type="text/javascript" src="../static/js/arthor/jsme/jsme.nocache.js"></script>
+{#<script type="text/javascript" src="../static/js/arthor/datatables.min.js"></script>#}
+{#<script type="text/javascript" src="../static/js/arthor/jsme/jsme.nocache.js"></script>#}
+<script type="text/javascript" src="../static/js/jsme/jsme.nocache.js"></script>
 <script type="text/javascript" src="../static/js/arthor/odometer.min.js"></script>
 <script type="text/javascript" src="../static/js/arthor/at_mesg.js"></script>
 <script type="text/javascript" src="../static/js/custom/cart.js"></script>
@@ -52,13 +53,11 @@
 
   $(document).ready(function () {
     if (localStorage.getItem('cart') != null) {
-      console.log('arthor document.ready working')
       let cart = JSON.parse(localStorage.getItem('cart'))
       $('#cartCount').html(getCartSize(cart))
     }
     arthor.getConfig()
       .done(function (response) {
-
         if (response.WebApp.SearchAsYouDraw)
           $('#arthor_search_button').removeClass('onclick');
         else
@@ -69,7 +68,8 @@
           $('#ar_opt_box').addClass('no-resolver');
         }
       });
-    arthor.getTables()
+      setTimeout(()=>{
+           arthor.getTables()
       .done(function (response) {
         var $list = $('#arthor_table_list');
         $list.empty();
@@ -84,7 +84,7 @@
         if (localStorage && localStorage.table)
           setTable($('#arthor_table_list li[value="' + localStorage.table + '"]')[0]);
         else
-          setTable($('#arthor_table_list li.selected')[0]);
+          setTable($('#arthor_table_list li.selected')[0])
         if (localStorage && localStorage.searchType)
           setSearchType($('#arthor_search_list li[value="' + localStorage.searchType + '"]')[0]);
         else
@@ -106,6 +106,8 @@
           redraw();
         });
       });
+      }, 1000)
+
 
     $('#content').width($('#content').parent().width() - 450);
     var redrawFunc = null;
@@ -288,7 +290,7 @@
         placeholder="Smiles-in">
       <ul id="arthor_search_list">
 {#        <li value="SIM" onclick="setSearchType(this)" class="first">Similarity</li>#}
-        <li value="SUB" onclick="setSearchType(this)">Substructure</li>
+        <li value="SUB" onclick="setSearchType(this)" class="selected">Substructure</li>
         <li value="SMA" onclick="setSearchType(this)" class="last">SMARTS</li>
       </ul>
       <button id="arthor_search_button" onclick="if(!arthor.config.WebApp.SearchAsYouDraw){arthor.notify();}">
