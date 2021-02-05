@@ -9,14 +9,19 @@
 {% if data_ %}
     {%  for data in data_ %}
     <div class="card col-sm-4 col-md-4 col-lg-4" style="">
-  <img class="card-img-top" style="width:100%; height: 15vh"src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}"&qry=%q&cols=%c&cmap=%m" alt="Image of {{ data.smiles }}">
+  <img class="card-img-top" style="width:100%; height: 15vh"
+       src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}"&qry=%q&cols=%c&cmap=%m"
+       alt="Image of {{ data.smiles }}">
   <div class="card-body">
     <h5 class="card-title">Zinc Id : {{ data.zinc_id }}</h5>
-      <ul class="list-group list-group-flush">
+      <ul style="word-wrap: break-word;" class="list-group list-group-flush">
 {#    <li class="list-group-item">Smiles : {{ data.smiles }}</li>#}
     <li class="list-group-item">Catalog Name : {{ data.catalogs[0].catalog_name }}</li>
     <li class="list-group-item">Supplier code : {{ data.supplier_code[0] }}</li>
-    <li class="list-group-item">Tranche : {{ data.tranche }}</li>
+    <li class="list-group-item">Smiles : {{ data.smiles }}</li>
+          {% if data.tranche %}
+    <li class="list-group-item">Tranche : {{ data.tranche.h_num }}{{ data.tranche.p_num }}</li>
+          {%  endif %}
   </ul>
 
   </div>

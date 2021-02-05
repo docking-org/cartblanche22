@@ -1,12 +1,19 @@
-from flask import render_template,  url_for, redirect, request
+from flask import render_template, request, json
 from app.main import application
-from flask_login import current_user, login_required
-from flask_user import roles_required
 from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm
 import requests
+import re
 
 base_url = "http://cartblanche22.docking.org/"
-#base_url = "http://{}/".format(request.host)
+sw_server = 'http://swp.docking.org'
+
+
+@application.route('/search/view')
+def search_view():
+    params = request.query_string.decode("utf-8")
+    response = requests.get(sw_server + '/search/view', params=params, auth=('gpcr', 'xtal'))
+    return response.json()
+
 
 @application.route('/search/zincid')
 def search_zincid():
@@ -22,24 +29,13 @@ def search_suppliercode():
 def search_smiles():
     return render_template('search/search_smiles.html')
 
-# @application.route('/search/', methods=["GET"])
-# def search(var):
-#     print(var)
-#     if var == 'zinc':
-#         form = searchZincForm()
-#     elif var == 'file':
-#         form = searchFileForm()
-#     elif var == 'zinclist':
-#         form = searchZincListForm()
-#     return render_template('search/searchby.html', var=var, form=form)
-#
 
 @application.route('/searchZinc', methods=["POST"])
 def searchZinc():
     formData = SearchZincForm(request.values)
     zinc_id = formData.zinc_id.data
     files = {
-        'zinc_id': zinc_id
+        'zinc_id': zinc_id.replace(" ", "")
     }
     response = requests.get(base_url + 'search.json', params=files)
     if response:
@@ -47,7 +43,7 @@ def searchZinc():
         print(data)
         return render_template('search/search_result.html', data_=[data])
     else:
-        return render_template('errors/404.html'), 404
+        return render_template('errors/500.html'), 500
 
 
 @application.route('/searchSmilesList', methods=["POST"])
@@ -55,25 +51,24 @@ def searchSmilesList():
     smiles = SearchSmilesForm(request.values).list_of_smiles.data
     uploaded_file = SearchSmilesForm(request.files).smiles_file.data
     if uploaded_file.filename == '':
-        print('empty')
+        lines = re.split('; |, |\*|\n|\r|,| |\t|\.', smiles)
         files = {
-            'smiles-in': smiles
+            'smiles-in': ','.join(lines)
         }
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
-        lines = uploaded_file.split('\n')
+        lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
         files = {
             'smiles-in': ','.join(lines),
             'dist': '0'
         }
-    print(files)
     response = requests.post(base_url + "smilelist", params=files)
-    print(response)
     if response:
         data = response.json()
-        return render_template('search/search_result.html', data_=data['items'])
+        print(data)
+        return render_template('search/search_result_smile.html', data_=data)
     else:
-        return render_template('errors/404.html'), 404
+        return render_template('errors/search404.html', lines=lines), 404
     return render_template('search/search_smiles.html')
 
 
@@ -82,24 +77,20 @@ def searchSupplierList():
     supplier_codes = SearchSupplierForm(request.values).list_of_suppliercode.data
     uploaded_file = SearchSupplierForm(request.files).supplier_file.data
     if uploaded_file.filename == '':
-        print('supplier file empty')
-        files = {
-            'supplier_code-in': supplier_codes
-        }
+        lines = re.split('; |, |\*|\n|\r|,| |\t|\.', supplier_codes)
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
-        lines = uploaded_file.split('\n')
-        files = {
-            'supplier_code-in': ','.join(lines)
-        }
-    print(files)
+        lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
+    files = {
+        'supplier_code-in': ','.join(lines),
+    }
     response = requests.post(base_url + 'catlist', params=files)
-    print(response)
     if response:
         data = response.json()
+        print(data)
         return render_template('search/search_result.html', data_=data['items'])
     else:
-        return render_template('errors/404.html'), 404
+        return render_template('errors/search404.html', lines=lines), 404
     return render_template('search/search_suppliercode.html')
 
 
@@ -108,55 +99,41 @@ def searchZincList():
     zinc_ids = SearchZincForm(request.values).list_of_zinc_id.data
     uploaded_file = SearchZincForm(request.files).zinc_file.data
     if uploaded_file.filename == '':
-        print('empty')
-        files = {
-            'zinc_id-in': zinc_ids
-        }
+        lines = re.split('; |, |\*|\n|\r|,| |\t|\.', zinc_ids)
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
-        lines = uploaded_file.split('\n')
-        files = {
-            'zinc_id-in': ','.join(lines)
-        }
-    print(files)
-    # response = requests.post('http://{}/sublist'.format(request.host), params=files)
+        lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
+    files = {
+        'zinc_id-in': ','.join(lines)
+    }
     response = requests.post(base_url + "sublist", params=files)
-    print(response)
     if response:
         data = response.json()
+        print(data)
         return render_template('search/search_result.html', data_=data['items'])
     else:
-        return render_template('errors/404.html'), 404
+        return render_template('errors/search404.html', lines=lines), 404
     return render_template('search/search_zincid.html')
 
 
 @application.route('/sw', methods=['GET', 'POST'])
 def sw():
-    # identifiers = []
-    # for i in current_user.items_in_cart:
-    #     identifiers.append(i.identifier)
-    # return render_template('search/sw.html', items=identifiers)
     return render_template('search/sw.html')
 
 
 @application.route('/swp', methods=['GET', 'POST'])
 def swp():
-    return render_template('search/swp.html')
-    if current_user.has_roles('private'):
-        # identifiers = []
-        # for i in current_user.items_in_cart:
-        #     identifiers.append(i.identifier)
-        # return render_template('search/swp.html', items=identifiers)
-        return render_template('search/swp.html')
-    else:
-        return redirect(url_for('main.sw'))
+    try:
+        config = requests.get('http://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
+    except:
+        return render_template('errors/500.html')
+    try:
+        maps = requests.get('http://swp.docking.org/search/maps', auth=('gpcr', 'xtal')).json()
+    except:
+        return render_template('errors/500.html')
+    return render_template('search/swp.html', config=json.dumps(config), maps=json.dumps(maps))
 
 
 @application.route('/arthor', methods=['GET', 'POST'])
 def arthor():
-    # identifiers = []
-    # for i in current_user.items_in_cart:
-    #     identifiers.append(i.identifier)
-    # return render_template('search/arthor.html', items=identifiers)
     return render_template('search/arthor.html')
-

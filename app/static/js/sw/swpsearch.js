@@ -1,6 +1,6 @@
 var sw_server;
-sw_server = '10.20.0.1:5010'; // nm debug deployment
-// sw_server = 'http://swp.docking.org'; // nm debug deployment
+// sw_server = '10.20.0.1:5010'; // nm debug deployment
+sw_server = 'http://swp.docking.org'; // nm debug deployment
 var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
@@ -49,14 +49,14 @@ $(document).ready(function () {
     // });
 
 
-    $.get(sw_server + '/search/config', function (res) {
-    	console.log('res', res)
-    	config = res;
-    	if (!config.WebApp.SearchAsYouDraw)
-    		$('.swopt').removeClass('searchasyoudraw');
-    	add_scoretype_selection(config);
-    	toggle_scoring();
-    });
+    // $.get(sw_server + '/search/config', function (res) {
+    // 	console.log('res', res)
+    // 	config = res;
+    // 	if (!config.WebApp.SearchAsYouDraw)
+    // 		$('.swopt').removeClass('searchasyoudraw');
+    // 	add_scoretype_selection(config);
+    // 	toggle_scoring();
+    // });
 });
 
 function norm_score_name(x) {
@@ -126,15 +126,21 @@ function toggle_align() {
 }
 
 /* Db Info */
-function db_maps(select) {
-    $.get(sw_server + '/search/maps', function (data) {
-        for (var key in data) {
+function db_maps(select, data) {
+     for (var key in data) {
             datasets[key] = data[key];
             if (data[key].enabled === true && data[key].status === 'Available') {
                 select.append('<option value=' + key + '>' + data[key].name + '</option>');
             }
         }
-    });
+    // $.get(sw_server + '/search/maps', function (data) {
+    //     for (var key in data) {
+    //         datasets[key] = data[key];
+    //         if (data[key].enabled === true && data[key].status === 'Available') {
+    //             select.append('<option value=' + key + '>' + data[key].name + '</option>');
+    //         }
+    //     }
+    // });
 }
 
 /* Range Sliders */
@@ -366,7 +372,12 @@ function newSearch(smiles) {
                 return e.name
             }).join(",")
         };
-        source = new EventSource(sw_server + '/search/submit?smi=' + encodeURIComponent(search_state.smi) + '&db=' + encodeURIComponent(search_state.db) + '&dist=' + search_state.topodist + '&tdn=' + search_state.tdn + '&tup=' + search_state.tup + '&rdn=' + search_state.rdn + '&rup=' + search_state.rup + '&ldn=' + search_state.ldn + '&lup=' + search_state.lup + '&maj=' + search_state.maj + '&min=' + search_state.min + '&sub=' + search_state.sub + '&scores=' + search_state.scores);
+        source = new EventSource(sw_server + '/search/submit?smi=' + encodeURIComponent(search_state.smi) +
+            '&db=' + encodeURIComponent(search_state.db) + '&dist=' + search_state.topodist +
+            '&tdn=' + search_state.tdn + '&tup=' + search_state.tup + '&rdn=' + search_state.rdn +
+            '&rup=' + search_state.rup + '&ldn=' + search_state.ldn + '&lup=' + search_state.lup +
+            '&maj=' + search_state.maj + '&min=' + search_state.min + '&sub=' + search_state.sub +
+            '&scores=' + search_state.scores, {withCredentials:true});
         $('#statusspan').html("Waiting...");
     } else {
         console.log("ERROR: Browser does not support server-sent events");
@@ -384,7 +395,7 @@ function newSearch(smiles) {
             if (d.status === "FIRST") {
                 // console.log(d);
                 $('#statusspan').html("Searching... (" + format_search_stats(d) + ")");
-                var url = sw_server + '/search/view/?hlid=' + d.hlid;
+                var url = '/search/view?hlid=' + d.hlid;
                 init_table($('#results'), url);
                 $('.dataTables_scrollBody').css('background', 'repeating-linear-gradient(45deg, #edeeff, #edeeff 10px, #fff 10px, #fff 20px)');
             } else if (d.status === "MORE") {
@@ -459,7 +470,7 @@ function init_table(table, url) {
             "class": "compound",
             "sortable": false,
             "type": "html",
-            "width": "250px",
+            "width": "350px",
             "render": hit_renderer,
         }, {
             "title": "Distance",
@@ -485,7 +496,7 @@ function init_table(table, url) {
             filter: true,
             "ajax": {
                 "url": url,
-                "type": 'GET'
+                "type": 'GET',
             },
             "dom": 'rtpi',
             "scrollX": true,
