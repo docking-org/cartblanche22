@@ -3,11 +3,11 @@ from flask import request, current_app
 import re
 
 
-def setUrl(zinc_id: str):
-    url = getTINUrl(zinc_id)
-    if url:
-        print("Setting TIN URL: ", url)
-        current_app.config['TIN_URL'] = url
+# def setUrl(zinc_id: str):
+#     url = getTINUrl(zinc_id)
+#     if url:
+#         print("Setting TIN URL: ", url)
+#         current_app.config['TIN_URL'] = url
 
 
 def getTINUrl(zinc_id: str):

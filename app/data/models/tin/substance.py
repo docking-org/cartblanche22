@@ -3,7 +3,7 @@ import sqlalchemy
 from sqlalchemy.ext.associationproxy import association_proxy
 
 class SubstanceModel(db.Model):
-    __bind_key__ = 'tin'
+    #__bind_key__ = 'tin'
     __tablename__ = 'substance'
 
     sub_id = db.Column(db.BigInteger, primary_key=True, nullable=False,
