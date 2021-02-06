@@ -11,7 +11,7 @@ import re
 
 
 def getTINUrl(zinc_id: str):
-    pattern =  "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
+    pattern = "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
     args = {}
     if re.match(pattern, zinc_id):
         args['mwt'] = zinc_id[4:5]

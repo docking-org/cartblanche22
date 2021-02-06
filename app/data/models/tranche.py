@@ -1,6 +1,7 @@
 from app import db
 import datetime
 
+
 class TrancheModel(db.Model):
     __bind_key__ = 'zinc22'
     __tablename__ = 'tranche'
