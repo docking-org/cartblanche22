@@ -11,7 +11,6 @@ from flask_mail import Mail
 from flask_restful import Api
 from flask_cors import CORS
 from flask_restful import reqparse
-from app.helpers.validation import getTINUrl
 
 
 class MultiTenantSQLAlchemy(SQLAlchemy):
@@ -31,8 +30,6 @@ class MultiTenantSQLAlchemy(SQLAlchemy):
 
 
 
-
-# db = SQLAlchemy()
 db = MultiTenantSQLAlchemy()
 migrate = Migrate(compare_type=True)
 login = LoginManager()
@@ -213,6 +210,7 @@ def create_app(config_class=Config):
     from app.data.models.ip_address import IPAddressModel
     from app.data.models.server_mapping import ServerMappingModel
     from app.data.models.tin.substance import SubstanceModel
+    from app.data.models.tranche import TrancheModel
     from app.data.models.tin.catalog import CatalogModel, CatalogContentModel, CatalogSubstanceModel, CatalogModel
     
     from app.data.resources.main import Search, Smiles, SmileList
@@ -251,6 +249,7 @@ def create_app(config_class=Config):
 
     @app.before_request
     def before_request_callback():
+        from app.helpers.validation import getTINUrl
         parser = reqparse.RequestParser()
         parser.add_argument('tin_url', type=str)
         parser.add_argument('zinc_id', type=str)
