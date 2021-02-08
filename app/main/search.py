@@ -14,6 +14,11 @@ def search_example():
     return render_template('search/search_result_example.html')
 
 
+@application.route('/search/mol/example')
+def search_mol_example():
+    return render_template('molecule/mol_example.html')
+
+
 @application.route('/search/view')
 def search_view():
     params = request.query_string.decode("utf-8")
@@ -24,6 +29,11 @@ def search_view():
 @application.route('/search/zincid')
 def search_zincid():
     return render_template('search/search_zincid.html')
+
+
+@application.route('/search/random')
+def search_random():
+    return render_template('search/search_random.html')
 
 
 @application.route('/search/suppliercode')
@@ -59,7 +69,8 @@ def searchSmilesList():
     if uploaded_file.filename == '':
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', smiles)
         files = {
-            'smiles-in': ','.join(lines)
+            'smiles-in': ','.join(lines),
+            'dist': '0'
         }
         print(lines)
     else:
@@ -69,12 +80,13 @@ def searchSmilesList():
             'smiles-in': ','.join(lines),
             'dist': '0'
         }
-    response = requests.post(base_url + "smilelist", params=files)
+    response = requests.post(base_url + "smiles-in", params=files)
     if response:
         data = response.json()
         print(data)
         return render_template('search/search_result_smile.html', data_=data)
     else:
+        print(response)
         return render_template('errors/search404.html', lines=lines), 404
     return render_template('search/search_smiles.html')
 
@@ -131,7 +143,7 @@ def sw():
     except:
         return render_template('errors/500.html')
     try:
-        maps = requests.get('htp://sw.docking.org/search/maps').json()
+        maps = requests.get('http://sw.docking.org/search/maps').json()
     except:
         return render_template('errors/500.html')
     print(json.dumps(config))
@@ -139,7 +151,7 @@ def sw():
     return render_template('search/sw.html', config=json.dumps(config), maps=json.dumps(maps)), 200
 
 
-@application.route('/swp', methods=['GET', 'POST'])
+@application.route('/swp', methods=[    'GET', 'POST'])
 def swp():
     try:
         config = requests.get('http://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
