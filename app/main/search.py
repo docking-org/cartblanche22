@@ -46,24 +46,31 @@ def search_smiles():
     return render_template('search/search_smiles.html')
 
 
-@application.route('/searchZinc', methods=["POST"])
+@application.route('/searchZinc', methods=["POST", "GET"])
 def searchZinc():
-    formData = SearchZincForm(request.values)
-    zinc_id = formData.zinc_id.data
+    if request.method == "POST":
+        print('searchZinc')
+        formData = SearchZincForm(request.values)
+        zinc_id = formData.zinc_id.data
+        zinc_id = zinc_id.replace(" ", "")
+
+    else:
+        zinc_id = request.values.get('zinc_id')
     files = {
-        'zinc_id': zinc_id.replace(" ", "")
+            'zinc_id': zinc_id
     }
     response = requests.get(base_url + 'search.json', params=files)
     if response:
         data = response.json()
         print(data)
-        return render_template('search/search_result.html', data_=[data])
+        return render_template('molecule/mol_index.html', data=data)
     else:
-        return render_template('errors/500.html'), 500
+        return render_template('errors/search404.html', lines=files), 404
 
 
 @application.route('/searchSmilesList', methods=["POST"])
 def searchSmilesList():
+    print('searchSmilesList')
     smiles = SearchSmilesForm(request.values).list_of_smiles.data
     uploaded_file = SearchSmilesForm(request.files).smiles_file.data
     if uploaded_file.filename == '':
@@ -80,7 +87,7 @@ def searchSmilesList():
             'smiles-in': ','.join(lines),
             'dist': '0'
         }
-    response = requests.post(base_url + "smiles-in", params=files)
+    response = requests.post(base_url + "smilelist", params=files)
     if response:
         data = response.json()
         print(data)
@@ -93,6 +100,7 @@ def searchSmilesList():
 
 @application.route('/searchSupplierList', methods=["POST"])
 def searchSupplierList():
+    print('searchSupplierList')
     supplier_codes = SearchSupplierForm(request.values).list_of_suppliercode.data
     uploaded_file = SearchSupplierForm(request.files).supplier_file.data
     if uploaded_file.filename == '':
@@ -103,18 +111,20 @@ def searchSupplierList():
     files = {
         'supplier_code-in': ','.join(lines),
     }
-    response = requests.post(base_url + 'catlist', params=files)
+    response = requests.post(base_url + 'smilelist', params=files)
     if response:
         data = response.json()
         print(data)
         return render_template('search/search_result.html', data_=data['items'])
     else:
+        print(response)
         return render_template('errors/search404.html', lines=lines), 404
     return render_template('search/search_suppliercode.html')
 
 
 @application.route('/searchZincList', methods=["POST"])
 def searchZincList():
+    print('searchZincList')
     zinc_ids = SearchZincForm(request.values).list_of_zinc_id.data
     uploaded_file = SearchZincForm(request.files).zinc_file.data
     if uploaded_file.filename == '':
@@ -131,6 +141,7 @@ def searchZincList():
         print(data)
         return render_template('search/search_result.html', data_=data['items'])
     else:
+        print(response)
         return render_template('errors/search404.html', lines=lines), 404
     return render_template('search/search_zincid.html')
 
