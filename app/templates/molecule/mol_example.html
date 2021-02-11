@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+    </script>
+{% endblock %}
+{% block app_content %}
+    <div class="row">
+        <div class="col-sm-9">
+            <div class="row">
+                <h1>
+                    <a href="/substances/ZINC000084687284/" title="Permalink to ZINCgs0000000OA0">
+                        ZINCgs0000000OA0
+                    </a>
+                    (Name)
+                </h1>
+                <div class="clearfix">
+                    <strong class="pull-left">In:</strong>
+                    <ul class="list-inline">
+                        <li><a href="/substances/subsets/not-for-sale/" title="Browse the not-for-sale subset">
+                            list of database
+                        </a></li>
+{#                        <li><a href="/substances/subsets/reactive/" title="Browse the reactive subset">#}
+{#                            reactive#}
+{#                        </a></li>#}
+
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <table class="table table-striped table-condensed table-hover table-numeric">
+                    <thead>
+                    <tr>
+                        <th>Added</th>
+                        <th>Availability</th>
+                        <th>Since</th>
+                        <th><abbr title="Molecular Weight">Mwt</abbr></th>
+                        <th><abbr title="Partition Coefficient">logP</abbr></th>
+{#                        <th>Download</th>#}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>2021-02-05</td>
+                        <td>Annotated</td>
+                        <td>2021-02-05</td>
+                        <td>92.05</td>
+                        <td>-0.189</td>
+
+{#                        <td>#}
+{#                            <div class="btn-group btn-group-no-wrap">#}
+{#                                <button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown"#}
+{#                                        aria-expanded="false">#}
+{#                        <span class="glyphicon glyphicon-download-alt" aria-label="Download" title="Download">#}
+{#                            <span class="sr-only">Download</span>#}
+{#                        </span>#}
+{#                                    <span class="caret"></span>#}
+{#                                </button>#}
+{##}
+{#                                <ul class="dropdown-menu pull-right" role="menu">#}
+{#                                    <li><a href="/substances/ZINC000084687284.smi">SMILES</a></li>#}
+{#                                    <li><a href="/substances/ZINC000084687284.sdf">SDF</a></li>#}
+{#                                    <li><a href="/substances/ZINC000084687284.csv">CSV</a></li>#}
+{#                                    <li><a href="/substances/ZINC000084687284.xml">XML</a></li>#}
+{#                                    <li><a href="/substances/ZINC000084687284.json">JSON</a></li>#}
+{#                                </ul>#}
+{##}
+{#                            </div>#}
+{#                        </td>#}
+                    </tr>
+                    </tbody>
+                </table>
+                <table class="table table-striped table-condensed table-hover table-numeric">
+                    <thead>
+                    <tr>
+                        <th>Mol Formula</th>
+                        <th>Rings</th>
+                        <th>Heavy Atoms</th>
+                        <th>Hetero Atoms</th>
+                        <th>Fraction sp<sup>3</sup></th>
+                        <th title="mwt,LogP,Reactivity,Purchsability">Tranche</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>C2H4O4</td>
+                        <td>1</td>
+                        <td>6</td>
+                        <td>4</td>
+                        <td>1.00</td>
+                        <td>
+                            <a href="/substances/?tranche_name=ABGF">
+                                ABGF
+                            </a>
+                        </td>
+
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row collapse-inputgroups">
+                <div class="input-group input-sm">
+                    <label for="substance-smiles-field" id="substance-smiles-field-label" class="input-group-addon"
+                           title="Click to copy to clipboard">SMILES</label>
+                    <input type="text" class="form-control" id="substance-smiles-field" readonly="" value="CC(=O)OCCNC(=O)CCc1nc(-c2ccc(Cl)cc2)no1">
+                    <span class="input-group-btn">
+        <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-smiles-field"
+                title="Copy SMILES to clipboard">
+            <span class="glyphicon glyphicon-copy"></span> <span class="sr-only">Copy</span>
+        </button>
+      </span>
+                </div>
+{#                <div class="input-group input-sm">#}
+{#                    <label for="substance-inchi-field" id="substance-inchi-field-label" class="input-group-addon"#}
+{#                           title="Click to copy to clipboard">InChI</label>#}
+{#                    <input type="text" class="form-control" id="substance-inchi-field" readonly=""#}
+{#                           value="InChI=1S/C2H4O4/c1-3-5-2-6-4-1/h1-2H2">#}
+{#                    <span class="input-group-btn">#}
+{#        <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-inchi-field"#}
+{#                title="Copy InChI to clipboard">#}
+{#            <span class="glyphicon glyphicon-copy"></span> <span class="sr-only">Copy</span>#}
+{#        </button>#}
+{#      </span>#}
+{#                </div>#}
+{#                <div class="input-group input-sm">#}
+{#                    <label for="substance-inchikey-field" id="substance-inchikey-field-label" class="input-group-addon"#}
+{#                           title="Click to copy to clipboard">InChI Key</label>#}
+{#                    <input class="form-control" id="substance-inchikey-field" value="UYVWNPAMKCDKRB-UHFFFAOYSA-N"#}
+{#                           readonly="">#}
+{#                    <span class="input-group-btn">#}
+{#        <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-inchikey-field"#}
+{#                title="Copy InChI Key to clipboard">#}
+{#            <span class="glyphicon glyphicon-copy"></span>#}
+{#        <span class="sr-only">Copy</span></button>#}
+{#      </span>#}
+{#                </div>#}
+            </div>
+
+        </div>
+        <div class="col-sm-3">
+            <div class="thumbnail">
+                <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi=CC(=O)OCCNC(=O)CCc1nc(-c2ccc(Cl)cc2)no1&qry=%q&cols=%c&cmap=%m" alt="ZINCgs0000000OA0">
+
+                <div class="caption text-center">
+                    <a href="">Draw</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    <table class="table table-striped table-condensed table-hover table-numeric">
+        <thead>
+                    <tr>
+                        <th>Supplier</th>
+                        <th>Catalog Name</th>
+                        <th>Ships within</th>
+                        <th>Price</th>
+                        <th>Pack</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in range(1, 11) %}
+                    <tr>
+                        <td>Supplier {{ i }}</td>
+                        <td>Catalog name {{ i }}</td>
+                        <td>{{ i }} days</td>
+                        <td>{{ i * 10}}</td>
+                        <td>
+                            <select>
+                                <option>1g</option>
+                                <option>5g</option>
+                                <option>25g</option>
+                            </select>
+                        </td>
+                                               <td>
+
+                           <button class="btn btn-info"><span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span> Add to cart</button>
+                        </td>
+
+
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+    </table>
+    </div>
+{% endblock %}

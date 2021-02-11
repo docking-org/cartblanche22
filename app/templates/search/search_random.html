@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+    </script>
+{% endblock %}
+{% block app_content %}
+    <h3>Download random molecules</h3>
+    <div class="row">
+        <div class="panel panel-info">
+            <div class="panel-heading">Download</div>
+            <div class="panel-body">
+                <form action="" method="" class="form-inline">
+                   <div class="form-group">
+                                    <select name="kind" class="btn btn-info" id="kindformat">
+                                        <option value="zincid" id="kind-zincid" selected>
+                                           ZINC ID
+                                        </option>
+                                        <option id="kind-smiles" value="smiles" >SMILES
+                                        </option>
+                                    </select>
+                       <select name="amount" class="btn btn-info" id="amountformat">
+                                        <option value="100" id="amount-100" selected>
+                                           100
+                                        </option>
+                           <option value="500" id="amount-500" >
+                               500
+                                        </option>
+                           <option value="1000" id="amount-1000" >
+                                           1000
+                                        </option>
+
+                                    </select>
+                       <select name="format" class="btn btn-info" id="format">
+                                        <option value="txt" id="format-txt" selected>
+                                           .txt
+                                        </option>
+
+                                    </select>
+
+                                  <button class="btn btn-primary" type="submit">
+                                        <i class="glyphicon glyphicon-download-alt"></i>
+                                        Download
+                                    </button>
+                                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

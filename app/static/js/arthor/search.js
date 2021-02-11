@@ -44,13 +44,14 @@ function updateTotal(request) {
     }
   })
     .done(function (response) {
+      console.log('line47', response)
       if (response.draw === draw) {
         if (response.hasMore) {
           setTimeout(function () { updateTotal(request); },
             UPDATE_INTERVAL_MS);
         } else {
           $('#res-panel').removeClass("waiting");
-          hit_count_od.update(response.recordsTotal);
+          hit_count_od.update(response.recordsFiltered);
           if (arthor.type === 'Similarity')
             $('#search_type').html("Scored and ranked");
           else
@@ -80,11 +81,12 @@ function fetchPage(request) {
     }
   })
     .done(function (response) {
+      console.log('response', response)
       if (response.draw === draw) {
         arthor.queryResponse = response.query;
         if (!response.hasMore && arthor.time === null) {
           arthor.time = response.time;
-          hit_count_od.update(response.recordsTotal);
+          hit_count_od.update(response.recordsFiltered);
           if (arthor.type === 'Similarity')
             $('#search_type').html("Scored and ranked");
           else
