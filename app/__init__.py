@@ -67,12 +67,12 @@ def create_app(config_class=Config):
         '10.20.1.16:5449': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5449/tin',
         '10.20.1.17:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5434/tin',
         '10.20.1.17:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5435/tin',
-        '10.20.9.17:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.9.17:5436/tin',
-        '10.20.9.17:5437': 'postgresql+psycopg2://tinuser:usertin@10.20.9.17:5437/tin',
-        '10.20.9.17:5438': 'postgresql+psycopg2://tinuser:usertin@10.20.9.17:5438/tin',
-        '10.20.9.17:5439': 'postgresql+psycopg2://tinuser:usertin@10.20.9.17:5439/tin',
-        '10.20.9.17:5440': 'postgresql+psycopg2://tinuser:usertin@10.20.9.17:5440/tin',
-        '10.20.9.17:5441': 'postgresql+psycopg2://tinuser:usertin@10.20.9.17:5441/tin',
+        '10.20.1.17:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5436/tin',
+        '10.20.1.17:5437': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
+        '10.20.1.17:5438': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5438/tin',
+        '10.20.1.17:5439': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5439/tin',
+        '10.20.1.17:5440': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5440/tin',
+        '10.20.1.17:5441': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5441/tin',
         '10.20.1.17:5442': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5442/tin',
         '10.20.1.17:5443': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5443/tin',
         '10.20.1.17:5444': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5444/tin',
@@ -249,23 +249,17 @@ def create_app(config_class=Config):
 
     @app.before_request
     def before_request_callback():
-        from app.helpers.validation import getTINUrl
         parser = reqparse.RequestParser()
         parser.add_argument('tin_url', type=str)
-        parser.add_argument('zinc_id', type=str)
         args = parser.parse_args()
         tin_url = args.get('tin_url')
-        zinc_id = args.get('zinc_id')
         print("before_request ********************************************************************************")
         print("** requested tin_url", tin_url)
         if tin_url:
             db.choose_tenant(tin_url)
-        elif zinc_id:
-            db.choose_tenant(getTINUrl(zinc_id))
         else:
             db.choose_tenant("tin")
         print("END before_request ********************************************************************************")
 
     return app
-
 
