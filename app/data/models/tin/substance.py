@@ -1,6 +1,7 @@
 from app import db
-import sqlalchemy
 from sqlalchemy.ext.associationproxy import association_proxy
+from app.helpers.validation import base62
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 
 class SubstanceModel(db.Model):
     #__bind_key__ = 'tin'
@@ -26,8 +27,14 @@ class SubstanceModel(db.Model):
     def find_by_sub_id(cls, sub_id):
         return cls.query.filter_by(sub_id=sub_id).first()
 
-    def json(self):
-        return {'sub_id': self.sub_id, 'smiles': self.smiles, 'supplier_code': [ c.supplier_code for c in self.catalogs], 'catalogs': [ c.catalog.json() for c in self.catalogs]}
+    @hybrid_property
+    def base62(self):
+        return "ZINC{}".format(base62(self.sub_id))
 
-    def json2(self, zinc_id):
-        return {'zinc_id': zinc_id, 'sub_id': self.sub_id, 'smiles': self.smiles, 'supplier_code': [ c.supplier_code for c in self.catalogs], 'catalogs': [ c.catalog.json() for c in self.catalogs]}
+    def json(self):
+        return {
+            'sub_id': self.sub_id,
+            'smiles': self.smiles,
+            'supplier_code': [ c.supplier_code for c in self.catalogs],
+            'catalogs': [ c.catalog.json() for c in self.catalogs]
+        }

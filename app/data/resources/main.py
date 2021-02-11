@@ -3,8 +3,9 @@ from werkzeug.datastructures import FileStorage
 from app.data.models.tranche import TrancheModel
 from app.data.models.tin.substance import SubstanceModel
 from app.helpers.validation import base10
-from flask import jsonify, redirect, current_app
+from flask import jsonify, redirect, current_app, request
 from flask_csv import send_csv
+from app.helpers.validation import getTINUrl
 import re
 import json
 import requests
@@ -36,43 +37,66 @@ session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
                          session=Session())
 # session.hooks['response'] = response_hook
 
+
 class Search(Resource):
+    # def getDataByID(self, args, file_type=None):
+    #     zinc_id = args.get('zinc_id')
+    #     sub_id = base10(zinc_id)
+    #     output_fields = []
+    #     data = SubstanceModel.find_by_sub_id(sub_id)
+    #     if data is None:
+    #         return {'message': 'Substance not found with sub_id: {}'.format(sub_id)}, 404
+    #
+    #     if file_type == 'csv':
+    #         keys = data.json().keys()
+    #         return send_csv([data.json()], "search.csv", keys)
+    #     else:
+    #         data = data.json()
+    #         if 'output_fields' in args and args.get('output_fields'):
+    #             output_fields = args.get('output_fields').split(',')
+    #             new_dict = { output_field: data[output_field] for output_field in output_fields }
+    #             data = new_dict
+    #
+    #     tranche_args = {'mwt': zinc_id[4:5], 'logp': zinc_id[5:6]}
+    #
+    #     trancheQuery = TrancheModel.query
+    #     tranche = trancheQuery.filter_by(**tranche_args).first()
+    #
+    #     data['tranche'] = tranche.to_dict()
+    #     data['zinc_id'] = zinc_id
+    #
+    #     return jsonify(data)
+
     def getDataByID(self, args, file_type=None):
         zinc_id = args.get('zinc_id')
-        sub_id = base10(zinc_id)
-        output_fields = []
-        data = SubstanceModel.find_by_sub_id(sub_id)
-        if data is None:
-            return {'message': 'Substance not found with sub_id: {}'.format(sub_id)}, 404
+        tin_url = args.get('tin_url')
+        url = 'http://{}/substance'.format(request.host)
 
+        params = {'sub_ids': base10(zinc_id), 'tin_url': tin_url}
+        print("url:", url, " params:", params)
+        try:
+            uResponse = requests.post(url, params=params)
+            Jresponse = uResponse.text
+            data = json.loads(Jresponse)
+        except requests.ConnectionError:
+            print("Connection Error")
+            raise ConnectionError("Connection Error")
 
-        if file_type == 'csv':
-            keys = data.json().keys()
-            return send_csv([data.json()], "search.csv", keys)
-        else:
-            data = data.json()
-            if 'output_fields' in args and args.get('output_fields'):
-                output_fields = args.get('output_fields').split(',')
-                new_dict = { output_field: data[output_field] for output_field in output_fields }
-                data = new_dict
+        if data:
+            data[0]['zinc_id'] = zinc_id
 
-        tranche_args = {}
-        tranche_args['mwt'] = zinc_id[4:5]
-        tranche_args['logp'] = zinc_id[5:6]
-
-
-        trancheQuery = TrancheModel.query
-        tranche = trancheQuery.filter_by(**tranche_args).first()
-
-        data['tranche'] = tranche.to_dict()
-        data['zinc_id'] = zinc_id
-
-        return jsonify(data)
+        return data
 
     def get(self, file_type=None):
         parser.add_argument('output_fields', type=str)
         parser.add_argument('zinc_id', type=str)
         args = parser.parse_args()
+
+        # Passing tin_url to change tin database in below function
+        # @app.before_request
+        # def before_request_callback():
+        tin_url = getTINUrl(args.get('zinc_id'))
+        args['tin_url'] = tin_url
 
         return self.getDataByID(args, file_type)
 
@@ -82,7 +106,15 @@ class Search(Resource):
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
 
+        # Passing tin_url to change tin database in below function
+        # @app.before_request
+        # def before_request_callback():
+        tin_url = getTINUrl(args.get('zinc_id'))
+        new_args['tin_url'] = tin_url
+
         return self.getDataByID(new_args, file_type)
+
+
 
 
 class SmileList(Resource):
