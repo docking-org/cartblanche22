@@ -7,6 +7,7 @@ import requests
 from collections import defaultdict
 import grequests
 import json
+import time
 
 parser = reqparse.RequestParser()
 
@@ -27,7 +28,7 @@ class CatalogContentList(Resource):
         tin_list = []
         server_mappings = ServerMappingModel.query.distinct(
             ServerMappingModel.ip_fk,
-            ServerMappingModel.port_fk).limit(2).all()
+            ServerMappingModel.port_fk).all()
 
         for sm in server_mappings:
             if sm.tranches:
@@ -55,7 +56,12 @@ class CatalogContent(Resource):
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
         lines = args.get('supplier_codes').split(',')
-        catContents =  CatalogContentModel.query.filter(CatalogContentModel.supplier_code.in_(lines)).all()
+        time1 = time.time()
+        catContents = CatalogContentModel.query.filter(CatalogContentModel.supplier_code.in_(lines)).all()
+
+        time2 = time.time()
+        print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
+
         data = []
         for cc in catContents:
             data.extend([sub.json() for sub in cc.substances])
