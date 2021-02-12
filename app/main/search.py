@@ -63,7 +63,7 @@ def searchZinc():
     if response:
         data = response.json()
         print(data)
-        return render_template('molecule/mol_index.html', data=data)
+        return render_template('molecule/mol_index.html', data=data[0])
     else:
         return render_template('errors/search404.html', lines=files), 404
 

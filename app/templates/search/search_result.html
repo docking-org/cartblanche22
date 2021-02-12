@@ -10,12 +10,12 @@
             {%  for data in data_ %}
                 <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
                     <div class="zinc-tile thumbnail">
-                        <h4 class="zinc-id caption">
-                            <a href="{{ url_for('main.searchZinc', zinc_id = None) }}" title="More about ZINC84687284">ZincID
+                        <h5 class="zinc-id caption">
+                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id) }}" title="More about ZINC84687284">{{ data.zinc_id }}
                                 <div class="small name">
 
                                     <abbr title="Name">
-                                        <nobr>Name</nobr>
+                                        <nobr></nobr>
                                     </abbr>
 
                                 </div>
@@ -32,7 +32,7 @@
 
                                 </div>
                             </a>
-                        </h4>
+                        </h5>
                     </div>
                 </div>
             {% endfor %}
