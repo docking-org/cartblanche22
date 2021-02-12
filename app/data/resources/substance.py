@@ -3,6 +3,7 @@ from app.data.models.tin.substance import SubstanceModel
 from app.data.models.tin.catalog import CatalogSubstanceModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, getTINUrl
+from app.data.models.tranche import TrancheModel
 from flask import jsonify, current_app, request
 import requests
 from collections import defaultdict
@@ -44,14 +45,26 @@ class SubstanceList(Resource):
         url = 'http://{}/substance'.format(request.host)
         for k, v in dict_ids.items():
             print("TIN URLS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-            print(k, v)
+            print(k)
 
-        resp = (grequests.post(url, data={'sub_ids':','.join([str(i) for i in v]), 'tin_url':k}) for k, v in dict_ids.items())
+        resp = (grequests.post(url,
+                               data={
+                                   'sub_ids':','.join([str(i) for i in v]),
+                                   'tin_url':k,
+                                   'output_fields': args.get('output_fields')
+                               }) for k, v in dict_ids.items())
         data = defaultdict(list)
         data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if 'Not found' not in res.text])
+
         for dt in data['items']:
             for d in dt:
                 d['zinc_id'] = dict_subid_zinc_id.get(d.get('sub_id'))[0]
+                tranche_args = {'mwt': d['zinc_id'][4:5], 'logp': d['zinc_id'][5:6]}
+
+                trancheQuery = TrancheModel.query
+                tranche = trancheQuery.filter_by(**tranche_args).first()
+
+                d['tranche'] = tranche.to_dict()
 
         if not data['items']:
             return {'message': 'Not found'}, 404
@@ -64,6 +77,7 @@ class Substance(Resource):
     def post(self, file_type=None):
         parser.add_argument('sub_ids', type=str)
         parser.add_argument('tin_url', type=str)
+        parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
 
         sub_ids = (int(id) for id in args.get('sub_ids').split(','))
@@ -77,7 +91,19 @@ class Substance(Resource):
         if substances is None:
             return {'message': 'Substance not found with sub_id(s): {}'.format(sub_ids)}, 404
 
-        data = [sub.json() for sub in substances]
+        # data = [sub.json() for sub in substances]
+        data = []
+        for sub in substances:
+            data_dict = sub.json()
+            if 'output_fields' in args and args.get('output_fields'):
+                output_fields = args.get('output_fields').split(',')
+                # Adding mandatory fields
+                if 'sub_id' not in output_fields:
+                    output_fields.append('sub_id')
+                new_dict = {output_field: data_dict[output_field] for output_field in output_fields}
+                data_dict = new_dict
+            data.append(data_dict)
+
 
         if data:
             return jsonify(data)

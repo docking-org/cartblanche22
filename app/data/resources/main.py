@@ -3,6 +3,7 @@ from werkzeug.datastructures import FileStorage
 from app.data.models.tranche import TrancheModel
 from app.data.models.tin.substance import SubstanceModel
 from app.helpers.validation import base10
+from app.data.resources.substance import SubstanceList
 from flask import jsonify, redirect, current_app, request
 from flask_csv import send_csv
 from app.helpers.validation import getTINUrl
@@ -64,39 +65,18 @@ class Search(Resource):
     #
     #     data['tranche'] = tranche.to_dict()
     #     data['zinc_id'] = zinc_id
-    #
+
     #     return jsonify(data)
 
     def getDataByID(self, args, file_type=None):
         zinc_id = args.get('zinc_id')
-        tin_url = args.get('tin_url')
-        url = 'http://{}/substance'.format(request.host)
-
-        params = {'sub_ids': base10(zinc_id), 'tin_url': tin_url}
-        print("url:", url, " params:", params)
-        try:
-            uResponse = requests.post(url, params=params)
-            Jresponse = uResponse.text
-            data = json.loads(Jresponse)
-        except requests.ConnectionError:
-            print("Connection Error")
-            raise ConnectionError("Connection Error")
-
-        if data:
-            data[0]['zinc_id'] = zinc_id
-
-        return data
+        args['zinc_id-in'] = [zinc_id]
+        return SubstanceList.getList(args, file_type)
 
     def get(self, file_type=None):
         parser.add_argument('output_fields', type=str)
         parser.add_argument('zinc_id', type=str)
         args = parser.parse_args()
-
-        # Passing tin_url to change tin database in below function
-        # @app.before_request
-        # def before_request_callback():
-        tin_url = getTINUrl(args.get('zinc_id'))
-        args['tin_url'] = tin_url
 
         return self.getDataByID(args, file_type)
 
@@ -106,15 +86,7 @@ class Search(Resource):
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
 
-        # Passing tin_url to change tin database in below function
-        # @app.before_request
-        # def before_request_callback():
-        tin_url = getTINUrl(args.get('zinc_id'))
-        new_args['tin_url'] = tin_url
-
         return self.getDataByID(new_args, file_type)
-
-
 
 
 class SmileList(Resource):
