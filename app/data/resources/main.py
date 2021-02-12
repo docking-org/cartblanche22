@@ -3,6 +3,7 @@ from werkzeug.datastructures import FileStorage
 from app.data.models.tranche import TrancheModel
 from app.data.models.tin.substance import SubstanceModel
 from app.helpers.validation import base10
+from app.data.resources.substance import SubstanceList
 from flask import jsonify, redirect, current_app, request
 from flask_csv import send_csv
 from app.helpers.validation import getTINUrl
@@ -69,22 +70,8 @@ class Search(Resource):
 
     def getDataByID(self, args, file_type=None):
         zinc_id = args.get('zinc_id')
-        tin_url = args.get('tin_url')
-        url = 'http://{}/substance'.format(request.host)
-
-        params = {'sub_ids': base10(zinc_id), 'tin_url': tin_url}
-        print("url:", url, " params:", params)
-        try:
-            uResponse = requests.post(url, params=params)
-            Jresponse = uResponse.text
-            data = json.loads(Jresponse)
-        except requests.ConnectionError:
-            print("Connection Error")
-            raise ConnectionError("Connection Error")
-
-        if data:
-            data[0]['zinc_id'] = zinc_id
-
+        args['zinc_id-in'] = [zinc_id]
+        data = SubstanceList.getList(args, file_type)
         return data
 
     def get(self, file_type=None):
@@ -113,8 +100,6 @@ class Search(Resource):
         new_args['tin_url'] = tin_url
 
         return self.getDataByID(new_args, file_type)
-
-
 
 
 class SmileList(Resource):

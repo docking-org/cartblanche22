@@ -3,6 +3,7 @@ from app.data.models.tin.substance import SubstanceModel
 from app.data.models.tin.catalog import CatalogSubstanceModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, getTINUrl
+from app.data.models.tranche import TrancheModel
 from flask import jsonify, current_app, request
 import requests
 from collections import defaultdict
@@ -52,6 +53,13 @@ class SubstanceList(Resource):
         for dt in data['items']:
             for d in dt:
                 d['zinc_id'] = dict_subid_zinc_id.get(d.get('sub_id'))[0]
+                tranche_args = {'mwt': d['zinc_id'][4:5], 'logp': d['zinc_id'][5:6]}
+
+                trancheQuery = TrancheModel.query
+                tranche = trancheQuery.filter_by(**tranche_args).first()
+
+                d['tranche'] = tranche.to_dict()
+
 
         if not data['items']:
             return {'message': 'Not found'}, 404
