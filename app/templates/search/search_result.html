@@ -6,30 +6,37 @@
 {% endblock %}
 {% block app_content %}
 <div>
-{% if data_ %}
-    {%  for data in data_ %}
-    <div class="card col-sm-4 col-md-4 col-lg-4" style="">
-  <img class="card-img-top" style="width:100%; height: 15vh"
-       src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}"&qry=%q&cols=%c&cmap=%m"
-       alt="Image of {{ data.smiles }}">
-  <div class="card-body">
-    <h5 class="card-title">Zinc Id : {{ data.zinc_id }}</h5>
-      <ul style="word-wrap: break-word;" class="list-group list-group-flush">
-{#    <li class="list-group-item">Smiles : {{ data.smiles }}</li>#}
-       {% if data.catalogs %}
-    <li class="list-group-item">Catalog Name : {{ data.catalogs[0].catalog_name }}</li>
-      {% endif %}
-    <li class="list-group-item">Supplier code : {{ data.supplier_code[0] }}</li>
-    <li class="list-group-item">Smiles : {{ data.smiles }}</li>
-          {% if data.tranche %}
-    <li class="list-group-item">Tranche : {{ data.tranche.h_num }}{{ data.tranche.p_num }}</li>
-          {%  endif %}
-  </ul>
+ <div class="row">
+            {%  for data in data_ %}
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
+                    <div class="zinc-tile thumbnail">
+                        <h5 class="zinc-id caption">
+                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id) }}" title="More about ZINC84687284">{{ data.zinc_id }}
+                                <div class="small name">
 
-  </div>
-</div>
-    {%  endfor %}
-{% endif %}
+                                    <abbr title="Name">
+                                        <nobr></nobr>
+                                    </abbr>
+
+                                </div>
+
+                                <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}"&qry=%q&cols=%c&cmap=%m"
+                                     alt="zincid" style="width:100%; height: 15vh">
+                                <div class="zinc-tile annotation small">
+                                    <ul style="word-wrap: break-word;list-style-type:none;"
+                                        class="list-group list-group-flush">
+{#                                        <li class=""> {{ data.smiles }}</li>#}
+{#                                        <li class=""> s_22__9598818__134210</li>#}
+{#                                        <li class=""> H22P220</li>#}
+                                    </ul>
+
+                                </div>
+                            </a>
+                        </h5>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
 </div>
 
 {% endblock %}
