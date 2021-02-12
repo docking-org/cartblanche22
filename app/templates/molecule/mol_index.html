@@ -42,11 +42,17 @@
                     </thead>
                     <tbody>
                     <tr>
-
+{% if data.tranche %}
                         <td>{{ data.tranche.mwt }}</td>
                         <td>{{ data.tranche.logp }}</td>
                         <td>{{ data.tranche.h_num}}{{ data.tranche.p_num}}</td>
                         <td>{{ data.tranche.tranche_id }}</td>
+                        {%  else %}
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        {% endif %}
 
 {#                        <td>#}
 {#                            <div class="btn-group btn-group-no-wrap">#}
