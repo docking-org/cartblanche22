@@ -6,16 +6,25 @@
 {% endblock %}
 {% block app_content %}
 <div class="row">
+
     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
                  <h5>We found {{ data_| length}} matches</h5>
 
          </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 pull-right">
-        <a class="pull-right" href="{{ url_for('main.downloadSearchResult', data=data_) }}">
+            {% if search == 'zinc' %}
+        <a class="pull-right" href="{{ url_for('main.downloadZincListResult',value=value) }}">
             <button class="btn btn-info" name="Search">
             Download <i class="fa fa-download fa-x" aria-hidden="true"></i>
             </button>
         </a>
+            {% elif search == 'supplier' %}
+             <a class="pull-right" href="{{ url_for('main.downloadSupplierResult',value=value) }}">
+            <button class="btn btn-info" name="Search">
+            Download <i class="fa fa-download fa-x" aria-hidden="true"></i>
+            </button>
+        </a>
+            {%  endif %}
         </div>
 
     </div>
