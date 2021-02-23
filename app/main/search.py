@@ -1,4 +1,4 @@
-from flask import render_template, request, json
+from flask import render_template, request, json, redirect, url_for, session
 from app.main import application
 from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm
 import requests
@@ -53,7 +53,6 @@ def searchZinc():
         formData = SearchZincForm(request.values)
         zinc_id = formData.zinc_id.data
         zinc_id = zinc_id.replace(" ", "")
-
     else:
         zinc_id = request.values.get('zinc_id')
     files = {
@@ -63,39 +62,23 @@ def searchZinc():
     if response:
         data = response.json()
         print(data)
-        return render_template('molecule/mol_index.html', data=data[0])
+        return render_template('molecule/mol_index.html', data=data['items'][0])
     else:
         return render_template('errors/search404.html', lines=files), 404
 
 
 @application.route('/searchSmilesList', methods=["POST"])
 def searchSmilesList():
-    print('searchSmilesList')
     smiles = SearchSmilesForm(request.values).list_of_smiles.data
+    dist = SearchSmilesForm(request.values).dist.data
     uploaded_file = SearchSmilesForm(request.files).smiles_file.data
     if uploaded_file.filename == '':
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', smiles)
-        files = {
-            'smiles-in': ','.join(lines),
-            'dist': '0'
-        }
-        print(lines)
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
-        files = {
-            'smiles-in': ','.join(lines),
-            'dist': '0'
-        }
-    response = requests.post(base_url + "smilelist", params=files)
-    if response:
-        data = response.json()
-        print(data)
-        return render_template('search/search_result_smile.html', data_=data)
-    else:
-        print(response)
-        return render_template('errors/search404.html', lines=lines), 404
-    return render_template('search/search_smiles.html')
+    value = ','.join(lines)
+    return redirect(url_for('main.showSmilesResult', value=value, dist=dist))
 
 
 @application.route('/searchSupplierList', methods=["POST"])
@@ -108,18 +91,8 @@ def searchSupplierList():
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
-    files = {
-        'supplier_code-in': ','.join(lines),
-    }
-    response = requests.post(base_url + 'smilelist', params=files)
-    if response:
-        data = response.json()
-        print(data)
-        return render_template('search/search_result.html', data_=data['items'])
-    else:
-        print(response)
-        return render_template('errors/search404.html', lines=lines), 404
-    return render_template('search/search_suppliercode.html')
+    value = ','.join(lines)
+    return redirect(url_for('main.showSupplierResult', value=value))
 
 
 @application.route('/searchZincList', methods=["POST"])
@@ -132,29 +105,23 @@ def searchZincList():
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
-    files = {
-        'zinc_id-in': ','.join(lines)
-    }
-    response = requests.post(base_url + "sublist", params=files)
-    if response:
-        data = response.json()
-        print(data)
-        return render_template('search/search_result.html', data_=data['items'])
-    else:
-        print(response)
-        return render_template('errors/search404.html', lines=lines), 404
-    return render_template('search/search_zincid.html')
+    value = ','.join(lines)
+    return redirect(url_for('main.showZincListResult', value=value))
 
 
 @application.route('/sw', methods=['GET', 'POST'])
 def sw():
     print('sw')
+    config = requests.get('https://sw.docking.org/search/config').json()
+    maps = requests.get('https://sw.docking.org/search/maps').json()
+    print(config)
+    print(maps)
     try:
-        config = requests.get('http://sw.docking.org/search/config').json()
+        config = requests.get('https://sw.docking.org/search/config').json()
     except:
         return render_template('errors/500.html')
     try:
-        maps = requests.get('http://sw.docking.org/search/maps').json()
+        maps = requests.get('https://sw.docking.org/search/maps').json()
     except:
         return render_template('errors/500.html')
     print(json.dumps(config))
@@ -165,11 +132,11 @@ def sw():
 @application.route('/swp', methods=[    'GET', 'POST'])
 def swp():
     try:
-        config = requests.get('http://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
+        config = requests.get('https://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
     except:
         return render_template('errors/500.html')
     try:
-        maps = requests.get('http://swp.docking.org/search/maps', auth=('gpcr', 'xtal')).json()
+        maps = requests.get('https://swp.docking.org/search/maps', auth=('gpcr', 'xtal')).json()
     except:
         return render_template('errors/500.html')
     return render_template('search/swp.html', config=json.dumps(config), maps=json.dumps(maps))

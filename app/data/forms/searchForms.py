@@ -5,6 +5,14 @@ from wtforms.validators import DataRequired
 class SearchSmilesForm(FlaskForm):
     list_of_smiles = TextAreaField(validators=[])
     smiles_file = FileField('Text File', validators=[])
+    dist = SelectField('dist',
+                         choices=(
+                             ('0', '0'),
+                             ('1', '1'),
+                             ('2', '2'),
+                         ),
+                         validators=[DataRequired()],
+                         default='0')
     submit = SubmitField('Search')
 
 
