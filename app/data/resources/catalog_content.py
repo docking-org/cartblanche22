@@ -8,6 +8,7 @@ from collections import defaultdict
 import grequests
 import json
 import time
+from sqlalchemy import func
 
 parser = reqparse.RequestParser()
 
@@ -38,10 +39,10 @@ class CatalogContentList(Resource):
 
         s_codes = ','.join(supplier_codes)
         url = 'http://{}/catalog'.format(request.host)
-        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k}) for k, v in tin_urls.items())
+        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k, 'zinc_id_start': v}, timeout=100) for k, v in tin_urls.items())
 
         data = defaultdict(list)
-        data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if 'Not found' not in res.text])
+        data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text])
 
         if not data['items']:
             return {'message': 'Not found'}, 404
@@ -54,20 +55,25 @@ class CatalogContent(Resource):
     def post(self):
         parser.add_argument('supplier_codes', type=str)
         parser.add_argument('tin_url', type=str)
+        parser.add_argument('zinc_id_start', type=str)
         args = parser.parse_args()
-        lines = args.get('supplier_codes').split(',')
-        time1 = time.time()
-        catContents = CatalogContentModel.query.filter(CatalogContentModel.supplier_code.in_(lines)).all()
+        lines = args.get('supplier_codes').lower().split(',')
+        try:
+            time1 = time.time()
+            catContents = CatalogContentModel.query.filter(func.lower(CatalogContentModel.supplier_code).in_(lines)).all()
 
-        time2 = time.time()
-        print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
+            time2 = time.time()
+            print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
 
-        data = []
-        for cc in catContents:
-            data.extend([sub.json() for sub in cc.substances])
+            data = []
+            for cc in catContents:
+                data.extend([sub.json2(args.get('zinc_id_start')) for sub in cc.substances])
 
-        if data:
-            return jsonify(data)
+            if data:
+                return jsonify(data)
+
+        except Exception as e:
+            print("Exception!!!!!!!!!!: ", args.get('tin_url'), " error:", e)
         return {'message': 'Not found'}, 404
 
 
