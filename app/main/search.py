@@ -112,12 +112,16 @@ def searchZincList():
 @application.route('/sw', methods=['GET', 'POST'])
 def sw():
     print('sw')
+    config = requests.get('https://sw.docking.org/search/config').json()
+    maps = requests.get('https://sw.docking.org/search/maps').json()
+    print(config)
+    print(maps)
     try:
-        config = requests.get('http://sw.docking.org/search/config').json()
+        config = requests.get('https://sw.docking.org/search/config').json()
     except:
         return render_template('errors/500.html')
     try:
-        maps = requests.get('http://sw.docking.org/search/maps').json()
+        maps = requests.get('https://sw.docking.org/search/maps').json()
     except:
         return render_template('errors/500.html')
     print(json.dumps(config))
@@ -128,11 +132,11 @@ def sw():
 @application.route('/swp', methods=[    'GET', 'POST'])
 def swp():
     try:
-        config = requests.get('http://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
+        config = requests.get('https://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
     except:
         return render_template('errors/500.html')
     try:
-        maps = requests.get('http://swp.docking.org/search/maps', auth=('gpcr', 'xtal')).json()
+        maps = requests.get('https://swp.docking.org/search/maps', auth=('gpcr', 'xtal')).json()
     except:
         return render_template('errors/500.html')
     return render_template('search/swp.html', config=json.dumps(config), maps=json.dumps(maps))

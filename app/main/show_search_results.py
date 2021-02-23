@@ -114,6 +114,7 @@ def showZincListResult():
         'zinc_id-in': value
     }
     response = requests.post(base_url + 'sublist', params=files)
+    print(response)
     if response:
         data = response.json()
         return render_template('search/search_result.html', data_=data['items'], value=value, search='zinc')
