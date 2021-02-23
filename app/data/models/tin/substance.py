@@ -29,7 +29,16 @@ class SubstanceModel(db.Model):
 
     @hybrid_property
     def base62(self):
-        return "ZINC{}".format(base62(self.sub_id))
+        return base62(self.sub_id)
+
+    def json2(self, zinc_start):
+        return {
+            'zinc_id': "{}{}".format(zinc_start, self.base62),
+            'sub_id': self.sub_id,
+            'smiles': self.smiles,
+            'supplier_code': [ c.supplier_code for c in self.catalogs],
+            'catalogs': [ c.catalog.json() for c in self.catalogs]
+        }
 
     def json(self):
         return {
