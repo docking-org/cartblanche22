@@ -5,36 +5,13 @@
 </script>
 {% endblock %}
 {% block app_content %}
-<div class="row">
-
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-                 <h5>We found {{ data_| length}} matches</h5>
-
-         </div>
-        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 pull-right">
-            {% if search == 'zinc' %}
-        <a class="pull-right" href="{{ url_for('main.downloadZincListResult',value=value) }}">
-            <button class="btn btn-info" name="Search">
-            Download <i class="fa fa-download fa-x" aria-hidden="true"></i>
-            </button>
-        </a>
-            {% elif search == 'supplier' %}
-             <a class="pull-right" href="{{ url_for('main.downloadSupplierResult',value=value) }}">
-            <button class="btn btn-info" name="Search">
-            Download <i class="fa fa-download fa-x" aria-hidden="true"></i>
-            </button>
-        </a>
-            {%  endif %}
-        </div>
-
-    </div>
-    <br>
+<div>
  <div class="row">
             {%  for data in data_ %}
                 <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
                     <div class="zinc-tile thumbnail">
                         <h5 class="zinc-id caption">
-                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id) }}" title="More about">{{ data.zinc_id }}
+                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id) }}" title="More about ZINC84687284">{{ data.zinc_id }}
                                 <div class="small name">
 
                                     <abbr title="Name">
@@ -48,11 +25,9 @@
                                 <div class="zinc-tile annotation small">
                                     <ul style="word-wrap: break-word;list-style-type:none;"
                                         class="list-group list-group-flush">
-                                        {% if not data.zinc_id %}
-                                        <li class=""> {{ data.smiles }}</li>
-                                        <li class=""> {{ data.sub_id }}</li>
+{#                                        <li class=""> {{ data.smiles }}</li>#}
+{#                                        <li class=""> s_22__9598818__134210</li>#}
 {#                                        <li class=""> H22P220</li>#}
-                                        {% endif %}
                                     </ul>
 
                                 </div>

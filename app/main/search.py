@@ -1,4 +1,4 @@
-from flask import render_template, request, json, redirect, url_for, session
+from flask import render_template, request, json
 from app.main import application
 from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm
 import requests
@@ -53,6 +53,7 @@ def searchZinc():
         formData = SearchZincForm(request.values)
         zinc_id = formData.zinc_id.data
         zinc_id = zinc_id.replace(" ", "")
+
     else:
         zinc_id = request.values.get('zinc_id')
     files = {
@@ -62,23 +63,39 @@ def searchZinc():
     if response:
         data = response.json()
         print(data)
-        return render_template('molecule/mol_index.html', data=data['items'][0])
+        return render_template('molecule/mol_index.html', data=data[0])
     else:
         return render_template('errors/search404.html', lines=files), 404
 
 
 @application.route('/searchSmilesList', methods=["POST"])
 def searchSmilesList():
+    print('searchSmilesList')
     smiles = SearchSmilesForm(request.values).list_of_smiles.data
-    dist = SearchSmilesForm(request.values).dist.data
     uploaded_file = SearchSmilesForm(request.files).smiles_file.data
     if uploaded_file.filename == '':
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', smiles)
+        files = {
+            'smiles-in': ','.join(lines),
+            'dist': '0'
+        }
+        print(lines)
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
-    value = ','.join(lines)
-    return redirect(url_for('main.showSmilesResult', value=value, dist=dist))
+        files = {
+            'smiles-in': ','.join(lines),
+            'dist': '0'
+        }
+    response = requests.post(base_url + "smilelist", params=files)
+    if response:
+        data = response.json()
+        print(data)
+        return render_template('search/search_result_smile.html', data_=data)
+    else:
+        print(response)
+        return render_template('errors/search404.html', lines=lines), 404
+    return render_template('search/search_smiles.html')
 
 
 @application.route('/searchSupplierList', methods=["POST"])
@@ -91,8 +108,18 @@ def searchSupplierList():
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
-    value = ','.join(lines)
-    return redirect(url_for('main.showSupplierResult', value=value))
+    files = {
+        'supplier_code-in': ','.join(lines),
+    }
+    response = requests.post(base_url + 'smilelist', params=files)
+    if response:
+        data = response.json()
+        print(data)
+        return render_template('search/search_result.html', data_=data['items'])
+    else:
+        print(response)
+        return render_template('errors/search404.html', lines=lines), 404
+    return render_template('search/search_suppliercode.html')
 
 
 @application.route('/searchZincList', methods=["POST"])
@@ -105,8 +132,18 @@ def searchZincList():
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
-    value = ','.join(lines)
-    return redirect(url_for('main.showZincListResult', value=value))
+    files = {
+        'zinc_id-in': ','.join(lines)
+    }
+    response = requests.post(base_url + "sublist", params=files)
+    if response:
+        data = response.json()
+        print(data)
+        return render_template('search/search_result.html', data_=data['items'])
+    else:
+        print(response)
+        return render_template('errors/search404.html', lines=lines), 404
+    return render_template('search/search_zincid.html')
 
 
 @application.route('/sw', methods=['GET', 'POST'])
