@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>We found 0 matches</h2>
-<p> Sorry for the inconvenience!</p>
+<h1>An unexpected error has occurred</h1>
+<p>We can't find your search. Sorry for the inconvenience!</p>
     <p>{{ lines }}</p>
 <p><a href="{{ url_for('main.cartblanche') }}">Go to main page</a></p>
 {% endblock %}
