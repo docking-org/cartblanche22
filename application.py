@@ -6,7 +6,7 @@ if __name__ == '__main__':
     from gevent import monkey
     from psycogreen.gevent import patch_psycopg
 
-    monkey.patch_all(subprocess=True)
+    monkey.patch_all(subprocess=True, ssl=False)
     patch_psycopg()
     application.debug = True
     print("before application run")

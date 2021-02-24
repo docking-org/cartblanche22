@@ -22,7 +22,7 @@ setup(
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
 
-    version='0.20210223.1',
+    version='0.20210223.2',
 
     description='Shopping cart v1.0',
     long_description='',

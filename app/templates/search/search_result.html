@@ -2,16 +2,109 @@
 {% block scripts %}
 {{ super() }}
 <script>
+function toggleZincCart(button) {
+    let btn = $(button)
+    if (btn.hasClass('addZinc')){
+        btn.removeClass('addZinc')
+    }
+    else{
+        btn.addClass('addZinc')
+        console.log('deleted from cart')
+    }
+}
+function toggleAddToCart(button) {
+    let btn = $(button)
+    if (btn.hasClass('addAllZinc')){
+        btn.removeClass('addAllZinc')
+        btn.html("Add all to cart")
+        btn.removeClass('btn-danger')
+        btn.addClass('btn-info')
+        $('.addZinc').removeClass('addZinc')
+        console.log('deleted from cart')
+    }
+    else{
+        btn.addClass('addAllZinc')
+        btn.html("Remove all from cart")
+        btn.removeClass('btn-info')
+        btn.addClass('btn-danger')
+        $('.zinc-results').addClass('addZinc')
+        console.log('added to cart')
+    }
+}
+function addToCart(){
+    {#let cart = JSON.parse(localStorage.getItem('cart'))#}
+    {#let item = {}#}
+    {#    item.identifier = identifier#}
+    {#    item.db = db#}
+    {#    item.img = img#}
+    {#    item.supplier = []#}
+    {#let index = totalCart.findIndex(item => item.identifier == dbcart[i].identifier)#}
+    {#        if (index == -1) {#}
+    {#            totalCart.push(dbcart[i])#}
+    {#        }#}
+    {#cart.push(item)#}
+    {#localStorage.setItem('cart', JSON.stringify(cart))#}
+}
 </script>
 {% endblock %}
+{% block styles %}
+      {{ super() }}
+    <style>
+    {#h5 {#}
+    {#    text-align: center;#}
+    .zinc-results{
+        opacity: 1;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .addZinc{
+        opacity : 0.6;
+        border: 1px solid #5bc0de;
+    }
+
+
+    .zinc-results :hover{
+        opacity: 0.6;
+    }
+
+
+    </style>
+{% endblock %}
 {% block app_content %}
-<div>
+<div class="row">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                 <h5>We found {{ data_| length}} matches</h5>
+         </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 pull-right">
+         <button class="btn btn-info pull-right" onclick="toggleAddToCart(this)" >
+            Add all to cart
+            </button>
+            {% if search == 'zinc' %}
+        <a class="pull-right" href="{{ url_for('main.downloadZincListResult',value=value) }}">
+            <button class="btn btn-info" name="Search">
+            Download <i class="fa fa-download fa-x" aria-hidden="true"></i>
+            </button>
+        </a>
+            {% elif search == 'supplier' %}
+             <a class="pull-right" href="{{ url_for('main.downloadSupplierResult',value=value) }}">
+            <button class="btn btn-info" name="Search">
+            Download <i class="fa fa-download fa-x" aria-hidden="true"></i>
+            </button>
+        </a>
+            {%  endif %}
+        </div>
+
+    </div>
+    <br>
  <div class="row">
             {%  for data in data_ %}
                 <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
-                    <div class="zinc-tile thumbnail">
-                        <h5 class="zinc-id caption">
-                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id) }}" title="More about ZINC84687284">{{ data.zinc_id }}
+                    <div class="zinc-results" onclick="toggleZincCart(this)" data-identifier={{ data.zinc_id }}
+                            data-smiles={{ data.smiles }} data-img='https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}'>
+                        <h5 class="caption">
+                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id) }}" title="More about">{{ data.zinc_id }}
                                 <div class="small name">
 
                                     <abbr title="Name">
@@ -19,24 +112,25 @@
                                     </abbr>
 
                                 </div>
-
+                                                        </a>
                                 <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}"&qry=%q&cols=%c&cmap=%m"
                                      alt="zincid" style="width:100%; height: 15vh">
                                 <div class="zinc-tile annotation small">
                                     <ul style="word-wrap: break-word;list-style-type:none;"
                                         class="list-group list-group-flush">
-{#                                        <li class=""> {{ data.smiles }}</li>#}
-{#                                        <li class=""> s_22__9598818__134210</li>#}
+                                        {% if not data.zinc_id %}
+                                        <li class=""> {{ data.smiles }}</li>
+                                        <li class=""> {{ data.sub_id }}</li>
 {#                                        <li class=""> H22P220</li>#}
+                                        {% endif %}
                                     </ul>
 
                                 </div>
-                            </a>
                         </h5>
+                       <p><i class="fa fa-check-circle fa-x cart-icon" aria-hidden="true" style="display: none"></i></p>
                     </div>
                 </div>
             {% endfor %}
-        </div>
 </div>
 
 {% endblock %}
