@@ -27,5 +27,17 @@
             </div>
         </div>
     </div>
+    <div class="row">
+    <h4>CURL commands for searching Supplier Code</h4>
+        <p>Below curl command returns a json file with all possible fields. </p>
+        <p>With text file:</p>
+<code>
+curl http://cartblanche22.docking.org/catalogs.json -F supplier_code-in=@sup.txt
+ </code>
+    <p>Without text file (Separated by ,):</p>
+        <code>
+curl http://cartblanche22.docking.org/catlist -F supplier_code-in="s_1070__3705440__1080206"
+</code>
+    </div>
 
 {% endblock %}

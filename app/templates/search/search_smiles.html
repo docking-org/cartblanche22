@@ -42,5 +42,16 @@
             </div>
         </div>
     </div>
-
+ <div class="row">
+    <h4>CURL commands for searching Smiles</h4>
+     <p>Below curl command returns a json file with all possible fields. </p>
+     <p>With text file:</p>
+<code>
+curl http://cartblanche22.docking.org/smiles.json -F smiles-in=@smiles.txt -F dist=0
+ </code>
+    <p>Without text file (Separated by ,):</p>
+        <code>
+curl http://cartblanche22.docking.org/smilelist -F smiles-in="[C+]2(=C1CCCCC1)=CC=CC=C2,C1=CC=CC=C1C2=CC=CC=C2" -F dist=0
+</code>
+    </div>
 {% endblock %}
