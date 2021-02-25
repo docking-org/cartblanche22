@@ -5,6 +5,7 @@ var marvinjs = null;
 var fromSmiInput = false;
 
 function jsmeOnLoad() {
+	console.log('jsmeOnLoad')
 	if (sketcher == "jsme") {
 		jsmeApplet = new JSApplet.JSME("sketcher", "420px", "500px", {
 			"options": "newlook"
