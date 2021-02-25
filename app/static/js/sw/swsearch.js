@@ -1,5 +1,5 @@
 var sw_server;
-sw_server = 'http://sw.docking.org'; // nm debug deployment
+sw_server = 'https://sw.docking.org'; // nm debug deployment
 var config = {}
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
@@ -17,7 +17,17 @@ var dtable = null;
 var search_state = null;
 var fromSmiInput = false;
 /* Configuration and options */
+$(document).ready(function () {
 
+	console.log("config working")
+	$.get(sw_server + '/search/config', function (res) {
+		config = res;
+		if (!config.WebApp.SearchAsYouDraw)
+			$('.swopt').removeClass('searchasyoudraw');
+		add_scoretype_selection(config);
+		toggle_scoring();
+	});
+});
 
 function norm_score_name(x) {
     return x.replace(new RegExp(' ', 'g'), '_').toLowerCase();
@@ -83,13 +93,15 @@ function toggle_align() {
     redraw();
 }
 /* Db Info */
-function db_maps(select, data) {
-     for (var key in data) {
-            datasets[key] = data[key];
-            if (data[key].enabled === true && data[key].status === 'Available') {
-                select.append('<option value=' + key + '>' + data[key].name + '</option>');
-            }
-        }
+function db_maps(select) {
+	$.get(sw_server + '/search/maps', function (data) {
+		for (var key in data) {
+			datasets[key] = data[key];
+			if (data[key].enabled === true && data[key].status === 'Available') {
+				select.append('<option value=' + key + '>' + data[key].name + '</option>');
+			}
+		}
+	});
 }
 /* Range Sliders */
 function install_range_slider(param, limit) {
@@ -287,6 +299,7 @@ function refresh() {
 }
 
 function molChanged(smiles) {
+    console.log('molchanged')
     if (config.WebApp.SearchAsYouDraw) {
                 newSearch(smiles);
         //adding hg database check

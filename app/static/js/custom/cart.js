@@ -134,6 +134,7 @@ function toggleCart(btn) {
 //     });
 // }
 function getCartSize(cart_) {
+    console.log('getCartSize')
     // let cart = JSON.parse(localStorage.getItem('cart'))
     let count = 0
     for (let i = 0; i < cart_.length; i++) {

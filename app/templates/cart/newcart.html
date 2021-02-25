@@ -145,7 +145,10 @@
         }).draw();
         $('#table').on("click", "#delete", function () {
             let data = table.row($(this).parents('tr')).data()
-            deleteVendorFromCart(data.identifier, data.cat_name, data.supplier_code, data.quantity, data.unit, data.price);
+            console.log('from delete clocking', data)
+            if(data.supplier_code != 'not assigned'){
+                deleteVendorFromCart(data.identifier, data.cat_name, data.supplier_code, data.quantity, data.unit, data.price);
+            }
             table.row($(this).parents('tr')).remove().draw(false);
             let count = parseInt($('#cartCount').html()) - 1
             $("#cartCount").html(count)

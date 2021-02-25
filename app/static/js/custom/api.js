@@ -148,7 +148,7 @@ function addVendorToCart(identifier, db, img, vendor) {
 
 }
 function deleteVendorFromCart(identifier, cat_name, supplier_code, quantity, unit, price) {
-    // console.log('calling deleteVendorFromCart')
+    console.log('calling deleteVendorFromCart')
     let cart = JSON.parse(localStorage.getItem('cart'))
     let i = cart.findIndex(obj => obj.identifier == identifier)
     let supplier = cart[i].supplier

@@ -1,8 +1,8 @@
 var swp_server;
 var sw_server;
 // sw_server = '10.20.0.1:5010'; // nm debug deployment
-swp_server = 'http://swp.docking.org'; // nm debug deployment
-sw_server = 'http://sw.docking.org'; // nm debug deployment
+swp_server = 'https://swp.docking.org'; // nm debug deployment
+sw_server = 'https://sw.docking.org'; // nm debug deployment
 var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
@@ -19,6 +19,33 @@ var datasets = {};
 var dtable = null;
 var search_state = null;
 var fromSmiInput = false;
+
+$(document).ready(function () {
+
+	console.log("swp config working")
+    $.ajax({
+          type: 'GET',
+          url:  swp_server + '/search/config',
+          crossDomain: true,
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', 'Basic ' + btoa(unescape(encodeURIComponent('gpcr' + ':' + 'xtal'))))
+          },
+          success: function (res) {
+config = res;
+		if (!config.WebApp.SearchAsYouDraw)
+			$('.swopt').removeClass('searchasyoudraw');
+		add_scoretype_selection(config);
+		toggle_scoring();
+          }
+});
+	// $.get(swp_server + '/search/config', function (res) {
+	// 	config = res;
+	// 	if (!config.WebApp.SearchAsYouDraw)
+	// 		$('.swopt').removeClass('searchasyoudraw');
+	// 	add_scoretype_selection(config);
+	// 	toggle_scoring();
+	// });
+});
 
 
 function norm_score_name(x) {
@@ -88,20 +115,14 @@ function toggle_align() {
 
 /* Db Info */
 function db_maps(select, data) {
-     for (var key in data) {
+    $.get('https://cors-anywhere.herokuapp.com/' + swp_server + '/search/maps', function (data) {
+        for (var key in data) {
             datasets[key] = data[key];
             if (data[key].enabled === true && data[key].status === 'Available') {
                 select.append('<option value=' + key + '>' + data[key].name + '</option>');
             }
         }
-    // $.get(sw_server + '/search/maps', function (data) {
-    //     for (var key in data) {
-    //         datasets[key] = data[key];
-    //         if (data[key].enabled === true && data[key].status === 'Available') {
-    //             select.append('<option value=' + key + '>' + data[key].name + '</option>');
-    //         }
-    //     }
-    // });
+    });
 }
 
 /* Range Sliders */

@@ -111,6 +111,7 @@ def searchZincList():
 
 @application.route('/sw', methods=['GET', 'POST'])
 def sw():
+    return render_template('search/sw.html')
     print('sw')
     config = requests.get('https://sw.docking.org/search/config').json()
     maps = requests.get('https://sw.docking.org/search/maps').json()
@@ -129,8 +130,10 @@ def sw():
     return render_template('search/sw.html', config=json.dumps(config), maps=json.dumps(maps)), 200
 
 
+
 @application.route('/swp', methods=[    'GET', 'POST'])
 def swp():
+    return render_template('search/swp.html')
     try:
         config = requests.get('https://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
     except:

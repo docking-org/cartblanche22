@@ -25,15 +25,17 @@
                 {#redraw(JSON.parse('{{ items | tojson }}'));#}
             }
         });
-    config = JSON.parse({{ config | tojson }})
-	maps = JSON.parse({{ maps | tojson }})
-
-        if (!config.WebApp.SearchAsYouDraw)
-    		$('.swopt').removeClass('searchasyoudraw');
-    	add_scoretype_selection(config);
-    	toggle_scoring();
-        db_maps($('#dbsel'), maps);
+         db_maps($('#dbsel'));
         toggle_scoring();
+    {#config = JSON.parse({{ config | tojson }})#}
+	{#maps = JSON.parse({{ maps | tojson }})#}
+    {##}
+    {#    if (!config.WebApp.SearchAsYouDraw)#}
+    {#		$('.swopt').removeClass('searchasyoudraw');#}
+    {#	add_scoretype_selection(config);#}
+    {#	toggle_scoring();#}
+    {#    db_maps($('#dbsel'), maps);#}
+    {#    toggle_scoring();#}
     });
 </script>
 <script type="text/javascript">
