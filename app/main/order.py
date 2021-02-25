@@ -3,7 +3,7 @@ from flask_login import current_user
 from app.main import application
 from app.data.models.users import Users
 from app import db
-from app.email import prepare_email_chemspace
+from app.email_send import prepare_email_chemspace
 import tablib
 
 

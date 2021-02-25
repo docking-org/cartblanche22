@@ -6,7 +6,7 @@ from werkzeug.urls import url_parse
 from app.data.models.users import Users
 from app.data.models.carts import Carts
 from app import db
-from app.email import send_password_reset_email
+from app.email_send import send_password_reset_email
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
