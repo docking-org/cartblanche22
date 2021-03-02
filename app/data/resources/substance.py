@@ -10,6 +10,8 @@ from collections import defaultdict
 import grequests
 import json
 import time
+from flask_csv import send_csv
+from datetime import datetime
 
 parser = reqparse.RequestParser()
 
@@ -34,6 +36,8 @@ class SubstanceList(Resource):
             if zinc_id:
                 if prev_vals != zinc_id[4:6]:
                     url = getTINUrl(zinc_id)
+                    if not url:
+                        return {'message': 'No server is mapped to {}. Please contact with Irwin Lab.'.format(zinc_id)}, 404
                     prev_url = url
                     prev_vals = zinc_id[4:6]
                 else:
@@ -52,7 +56,7 @@ class SubstanceList(Resource):
                                    'sub_ids':','.join([str(i) for i in v]),
                                    'tin_url':k,
                                    'output_fields': args.get('output_fields')
-                               }) for k, v in dict_ids.items())
+                               }, timeout=15) for k, v in dict_ids.items())
         data = defaultdict(list)
         data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if 'Not found' not in res.text])
 
@@ -70,7 +74,13 @@ class SubstanceList(Resource):
             return {'message': 'Not found'}, 404
 
         data['items'] = data['items'][0]
-        return jsonify(data)
+
+        if file_type == 'csv':
+            keys = list(data['items'][0].keys())
+            str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+            return send_csv(data['items'], "zinc_id_search_{}.csv".format(str_time), keys)
+        else:
+            return jsonify(data)
 
 
 class Substance(Resource):
@@ -103,7 +113,6 @@ class Substance(Resource):
                 new_dict = {output_field: data_dict[output_field] for output_field in output_fields}
                 data_dict = new_dict
             data.append(data_dict)
-
 
         if data:
             return jsonify(data)

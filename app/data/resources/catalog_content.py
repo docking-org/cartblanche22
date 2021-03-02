@@ -9,6 +9,8 @@ import grequests
 import json
 import time
 from sqlalchemy import func
+from flask_csv import send_csv
+from datetime import datetime
 
 parser = reqparse.RequestParser()
 
@@ -39,7 +41,7 @@ class CatalogContentList(Resource):
 
         s_codes = ','.join(supplier_codes)
         url = 'http://{}/catalog'.format(request.host)
-        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k, 'zinc_id_start': v}, timeout=100) for k, v in tin_urls.items())
+        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k, 'zinc_id_start': v}, timeout=15) for k, v in tin_urls.items())
 
         data = defaultdict(list)
         data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text])
@@ -48,6 +50,12 @@ class CatalogContentList(Resource):
             return {'message': 'Not found'}, 404
 
         data['items'] = data['items'][0]
+        if file_type == 'csv':
+            keys = list(data['items'][0].keys())
+            str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+            return send_csv(data['items'], "supplier_code_{}.csv".format(str_time), keys)
+        else:
+            return jsonify(data)
         return jsonify(data)
 
 
