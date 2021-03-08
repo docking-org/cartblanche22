@@ -253,13 +253,13 @@ def create_app(config_class=Config):
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
         tin_url = args.get('tin_url')
-        print("before_request ********************************************************************************")
-        print("** requested tin_url", tin_url)
+        # print("before_request ********************************************************************************")
+        # print("** requested tin_url", tin_url)
         if tin_url:
             db.choose_tenant(tin_url)
         else:
             db.choose_tenant("tin")
-        print("END before_request ********************************************************************************")
+        # print("END before_request ********************************************************************************")
 
     return app
 
