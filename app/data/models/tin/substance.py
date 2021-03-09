@@ -2,6 +2,8 @@ from app import db
 from sqlalchemy.ext.associationproxy import association_proxy
 from app.helpers.validation import base62
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from sqlalchemy import func
+from sqlalchemy.orm import load_only
 
 class SubstanceModel(db.Model):
     #__bind_key__ = 'tin'
@@ -22,6 +24,14 @@ class SubstanceModel(db.Model):
 
     catalogs = db.relationship("CatalogContentModel",  secondary="catalog_substance")
 
+    @classmethod
+    def get_random(cls, limit):
+        return cls.query.options(load_only('sub_id')).offset(
+            func.floor(
+                func.random() *
+                db.session.query(func.count(cls.sub_id))
+            )
+        ).limit(limit).all()
 
     @classmethod
     def find_by_sub_id(cls, sub_id):
@@ -38,6 +48,12 @@ class SubstanceModel(db.Model):
             'smiles': self.smiles,
             'supplier_code': [ c.supplier_code for c in self.catalogs],
             'catalogs': [ c.catalog.json() for c in self.catalogs]
+        }
+
+    def json_ids(self):
+        return {
+            'sub_id': self.sub_id,
+            'smiles': self.smiles
         }
 
     def json(self):

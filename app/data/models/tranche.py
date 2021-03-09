@@ -23,7 +23,7 @@ class TrancheModel(db.Model):
 
     def to_dict(self):
         return {
-            'tranche_id': self.tranche_id,
+            # 'tranche_id': self.tranche_id,
             'mwt': self.mwt, 
             'logp': self.logp, 
             'h_num': self.h_num, 

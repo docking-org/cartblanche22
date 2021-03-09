@@ -16,6 +16,7 @@ from concurrent.futures import ProcessPoolExecutor
 from requests import Session
 from requests_futures.sessions import FuturesSession
 import time
+from datetime import datetime
 
 # def response_hook(resp, *args, **kwargs):
 #     print("response hook!!!!!")
@@ -98,6 +99,7 @@ class SmileList(Resource):
 
     def post(self, file_type=None):
         parser.add_argument('smiles-in', type=str)
+        parser.add_argument('adist', type=int)
         parser.add_argument('dist', type=int)
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
@@ -109,7 +111,11 @@ class SmileList(Resource):
     @classmethod
     def getList(self, args, file_type=None):
         smiles = filter(None, args.get('smiles-in'))
-        dist = 0
+        adist = 2
+        if 'adist' in args:
+            adist = args.get('adist')
+
+        dist = 4
         if 'dist' in args:
             dist = args.get('dist')
 
@@ -118,7 +124,7 @@ class SmileList(Resource):
         params = {
             'smi': '',
             'db': 'zinc22_2d_All.smi.anon',
-            'dist': dist,
+            'dist': adist,
             'tdn': 4,
             'tup': 4,
             'rdn': 4,
@@ -151,12 +157,18 @@ class SmileList(Resource):
             print(data['hlid'])
             hlids.append(data['hlid'])
 
-        result = self.get_result_from_smallworld(file_type, hlids)
-        return result
+        result = self.get_result_from_smallworld(file_type, hlids, dist)
+
+        if file_type in ['csv', 'txt']:
+            keys = list(result[0].keys())
+            str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+            return send_csv(result, "smiles_search_{}.csv".format(str_time), keys)
+        else:
+            return result
 
 
     @classmethod
-    def get_result_from_smallworld(cls, type_, hlids, start=0, length=100, cutoff=0.0):
+    def get_result_from_smallworld(cls, type_, hlids, dist=4, start=0, length=100):
         uri = "{}/search/view".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
 
         params = {
@@ -171,7 +183,7 @@ class SmileList(Resource):
             'columns[1][name]': 'dist',
             'columns[1][searchable]': 'true',
             'columns[1][orderable]': 'true',
-            'columns[1][search][value]': '0-4',
+            'columns[1][search][value]': '0-{}'.format(dist),
             'columns[1][search][regex]': 'false',
             'columns[2][data]': 2,
             'columns[2][name]': 'ecfp4',
@@ -311,10 +323,10 @@ class SmileList(Resource):
         return result
 
 
-
 class Smiles(Resource):
     def post(self, file_type=None):
         parser.add_argument('smiles-in', location='files', type=FileStorage, required=True)
+        parser.add_argument('adist', type=int)
         parser.add_argument('dist', type=int)
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
