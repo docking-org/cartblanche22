@@ -15,7 +15,6 @@ from flask_restful import reqparse
 
 class MultiTenantSQLAlchemy(SQLAlchemy):
     def choose_tenant(self, bind_key):
-        print("bind_key", bind_key)
         if hasattr(g, 'tenant'):
             raise RuntimeError('Switching tenant in the middle of the request.')
         g.tenant = bind_key
@@ -25,9 +24,7 @@ class MultiTenantSQLAlchemy(SQLAlchemy):
             if not hasattr(g, 'tenant'):
                 raise RuntimeError('No tenant chosen.')
             bind = g.tenant
-            print("binding tenant", bind)
         return super().get_engine(app=app, bind=bind)
-
 
 
 db = MultiTenantSQLAlchemy()
@@ -141,6 +138,7 @@ def create_app(config_class=Config):
         '10.20.5.34:5445': 'postgresql+psycopg2://tinuser:usertin@10.20.5.34:5445/tin',
         '10.20.5.34:5446': 'postgresql+psycopg2://tinuser:usertin@10.20.5.34:5446/tin',
         '10.20.5.34:5447': 'postgresql+psycopg2://tinuser:usertin@10.20.5.34:5447/tin',
+        '10.20.5.34:5448': 'postgresql+psycopg2://tinuser:usertin@10.20.5.34:5448/tin',
         '10.20.5.34:5449': 'postgresql+psycopg2://tinuser:usertin@10.20.5.34:5449/tin',
         '10.20.5.34:5450': 'postgresql+psycopg2://tinuser:usertin@10.20.5.34:5450/tin',
         '10.20.5.34:5451': 'postgresql+psycopg2://tinuser:usertin@10.20.5.34:5451/tin',
@@ -168,6 +166,7 @@ def create_app(config_class=Config):
         '10.20.9.19:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5436/tin',
         '10.20.9.19:5437': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5437/tin',
         '10.20.9.19:5442': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5442/tin',
+        '10.20.9.19:5443': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5443/tin',
         '10.20.9.20:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5434/tin',
         '10.20.9.20:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5435/tin',
         '10.20.9.20:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5436/tin',
@@ -176,6 +175,8 @@ def create_app(config_class=Config):
         '10.20.9.20:5439': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5439/tin',
         '10.20.9.20:5440': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5440/tin',
         '10.20.9.20:5441': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5441/tin',
+        '10.20.9.20:5442': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5442/tin',
+        '10.20.9.20:5444': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5444/tin',
         '10.20.1.21:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5434/tin',
         '10.20.1.21:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5435/tin',
         '10.20.1.21:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5436/tin',
@@ -190,14 +191,13 @@ def create_app(config_class=Config):
         '10.20.1.21:5445': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5445/tin'
     }
 
-
     login.init_app(app)
     login.login_view = 'main.login'
 
     mail.init_app(app)
 
     bootstrap.init_app(app)
-    
+
     from app.data.models.users import Users
     from app.data.models.roles import Roles
     from app.data.models.carts import Carts
@@ -205,16 +205,15 @@ def create_app(config_class=Config):
     from app.data.models.vendors import Vendors
     from app.data.models.availableVendors import AvailableVendors
 
-
     from app.data.models.port_number import PortNumberModel
     from app.data.models.ip_address import IPAddressModel
     from app.data.models.server_mapping import ServerMappingModel
     from app.data.models.tin.substance import SubstanceModel
     from app.data.models.tranche import TrancheModel
     from app.data.models.tin.catalog import CatalogModel, CatalogContentModel, CatalogSubstanceModel, CatalogModel
-    
+
     from app.data.resources.main import Search, Smiles, SmileList
-    from app.data.resources.substance import Substance, Substances, SubstanceList
+    from app.data.resources.substance import Substance, Substances, SubstanceList, SubstanceRandomList, SubstanceRandom
     from app.data.resources.catalog_content import CatalogContents, CatalogContent, CatalogContentList
     from app.data.resources.tranche import Tranches
 
@@ -223,7 +222,6 @@ def create_app(config_class=Config):
     admin.add_view(ModelView(Roles, db.session))
     admin.add_view(ModelView(Vendors, db.session))
     admin.add_view(ModelView(AvailableVendors, db.session))
-
 
     api.add_resource(Search, '/search.<file_type>')
     api.add_resource(Substance, '/substance')
@@ -234,7 +232,13 @@ def create_app(config_class=Config):
     api.add_resource(CatalogContentList, '/catlist')
     api.add_resource(Tranches, '/tranches.<file_type>')
     api.add_resource(Smiles, '/smiles.<file_type>')
-    api.add_resource(SmileList, '/smilelist')
+    smilelist_routes = [
+        '/smilelist',
+        '/smilelist.<file_type>',
+    ]
+    api.add_resource(SmileList, *smilelist_routes)
+    api.add_resource(SubstanceRandom, '/substance/random.<file_type>')
+    api.add_resource(SubstanceRandomList, '/subrandom')
 
     from app.errors import application as errors_bp
     app.register_blueprint(errors_bp)

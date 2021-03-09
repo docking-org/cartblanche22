@@ -50,7 +50,7 @@ class CatalogContentList(Resource):
             return {'message': 'Not found'}, 404
 
         data['items'] = data['items'][0]
-        if file_type == 'csv':
+        if file_type in ['csv', 'txt']:
             keys = list(data['items'][0].keys())
             str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
             return send_csv(data['items'], "supplier_code_{}.csv".format(str_time), keys)

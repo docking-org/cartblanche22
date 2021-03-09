@@ -1,9 +1,9 @@
 from flask_restful import Resource, reqparse
 from app.data.models.tin.substance import SubstanceModel
-from app.data.models.tin.catalog import CatalogSubstanceModel
+from app.data.models.server_mapping import ServerMappingModel
+from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, getTINUrl
-from app.data.models.tranche import TrancheModel
 from flask import jsonify, current_app, request
 import requests
 from collections import defaultdict
@@ -12,6 +12,7 @@ import json
 import time
 from flask_csv import send_csv
 from datetime import datetime
+from sqlalchemy import func
 
 parser = reqparse.RequestParser()
 
@@ -20,9 +21,10 @@ class SubstanceList(Resource):
     def post(self, file_type=None):
         parser.add_argument('zinc_id-in', type=str)
         args = parser.parse_args()
-        zinc_ids = args.get('zinc_id-in').split(',')  
+        zinc_ids = args.get('zinc_id-in').split(',')
         args['zinc_id-in'] = zinc_ids
         return self.getList(args, file_type)
+
 
     @classmethod
     def getList(cls, args, file_type=None):
@@ -58,7 +60,7 @@ class SubstanceList(Resource):
                                    'output_fields': args.get('output_fields')
                                }, timeout=15) for k, v in dict_ids.items())
         data = defaultdict(list)
-        data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if 'Not found' not in res.text])
+        data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text])
 
         for dt in data['items']:
             for d in dt:
@@ -75,7 +77,7 @@ class SubstanceList(Resource):
 
         data['items'] = data['items'][0]
 
-        if file_type == 'csv':
+        if file_type in ['csv', 'txt']:
             keys = list(data['items'][0].keys())
             str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
             return send_csv(data['items'], "zinc_id_search_{}.csv".format(str_time), keys)
@@ -130,6 +132,81 @@ class Substances(Resource):
         args['zinc_id-in'] = lines
 
         return SubstanceList.getList(args, file_type)
-        
 
+
+class SubstanceRandomList(Resource):
+    def post(self, file_type=None):
+        parser.add_argument('random', type=str)
+        parser.add_argument('tin_url', type=str)
+        args = parser.parse_args()
+        random = args.get('random')
+
+        try:
+            print("tin:", args.get('tin_url'))
+            time1 = time.time()
+            # random_substances = SubstanceModel.query.order_by(func.random()).limit(random)
+            # random_substances = SubstanceModel.query.offset(func.floor(func.random() * SubstanceModel.query.count())).limit(random)
+            random_substances = SubstanceModel.get_random(random)
+
+            time2 = time.time()
+            print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
+
+            data = [sub.json_ids() for sub in random_substances]
+            if data:
+                return jsonify(data)
+
+        except Exception as e:
+            print("Exception!!!!!!!!!!: ", args.get('tin_url'), " error:", e)
+        return {'message': 'Not found'}, 404
+
+
+class SubstanceRandom(Resource):
+    def get(self, file_type=None):
+        parser.add_argument('count', type=str)
+        args = parser.parse_args()
+        return self.getRandom(args, file_type)
+
+    def post(self, file_type=None):
+        parser.add_argument('count', type=str)
+        args = parser.parse_args()
+        return self.getRandom(args, file_type)
+
+    @classmethod
+    def getRandom(cls, args, file_type=None):
+        count = int(args.get('count'))
+
+        server_mappings = ServerMappingModel.query.distinct(
+            ServerMappingModel.ip_fk,
+            ServerMappingModel.port_fk).all()
+
+        per_server_count = int(round(count / len(server_mappings))) + 100
+
+        tin_urls = {}
+        tin_list = []
+        for sm in server_mappings:
+            if sm.tranches:
+                url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
+                tin_list.append(url)
+                tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
+
+        url = 'http://{}/subrandom'.format(request.host)
+        resp = (grequests.post(url, data={'tin_url': k, 'random': per_server_count}, timeout=15) for
+                k, v in tin_urls.items())
+
+        data = defaultdict(list)
+        data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text])
+
+        if not data['items']:
+            return {'message': 'Not found'}, 404
+
+        data['items'] = data['items'][0]
+
+        if file_type in ['csv', 'txt']:
+            keys = list(data['items'][0].keys())
+            str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+            return send_csv(data['items'], "substance_search_{}.csv".format(str_time), keys)
+        else:
+            return jsonify(data)
+
+        return None
 
