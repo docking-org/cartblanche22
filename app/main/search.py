@@ -72,6 +72,7 @@ def searchSmilesList():
     smiles = SearchSmilesForm(request.values).list_of_smiles.data
     dist = SearchSmilesForm(request.values).dist.data
     uploaded_file = SearchSmilesForm(request.files).smiles_file.data
+    print(dist, smiles)
     if uploaded_file.filename == '':
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', smiles)
     else:
