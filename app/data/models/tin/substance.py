@@ -46,8 +46,8 @@ class SubstanceModel(db.Model):
             'zinc_id': "{}{}".format(zinc_start, self.base62),
             'sub_id': self.sub_id,
             'smiles': self.smiles,
-            'supplier_code': [ c.supplier_code for c in self.catalogs],
-            'catalogs': [ c.catalog.json() for c in self.catalogs]
+            'supplier_code': [c.supplier_code for c in self.catalogs],
+            'catalogs': [c.catalog.json() for c in self.catalogs]
         }
 
     def json_ids(self):
@@ -60,6 +60,6 @@ class SubstanceModel(db.Model):
         return {
             'sub_id': self.sub_id,
             'smiles': self.smiles,
-            'supplier_code': [ c.supplier_code for c in self.catalogs],
-            'catalogs': [ c.catalog.json() for c in self.catalogs]
+            'supplier_code': [c.supplier_code for c in self.catalogs],
+            'catalogs': [c.catalog.json() for c in self.catalogs]
         }

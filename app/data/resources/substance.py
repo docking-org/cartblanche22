@@ -20,6 +20,7 @@ parser = reqparse.RequestParser()
 class SubstanceList(Resource):
     def post(self, file_type=None):
         parser.add_argument('zinc_id-in', type=str)
+        parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
         zinc_ids = args.get('zinc_id-in').split(',')
         args['zinc_id-in'] = zinc_ids
@@ -29,11 +30,16 @@ class SubstanceList(Resource):
     @classmethod
     def getList(cls, args, file_type=None):
         zinc_ids = args.get('zinc_id-in')  
-
+        output_fields = args.get('output_fields')
         dict_ids = defaultdict(list)
         dict_subid_zinc_id = defaultdict(list)
         prev_url = ""
         prev_vals = ""
+        overlimit_count = 0
+        chunk = 2000
+        if args.get('chunk'):
+            chunk = args.get('chunk')
+
         for zinc_id in zinc_ids:
             if zinc_id:
                 if prev_vals != zinc_id[4:6]:
@@ -44,33 +50,44 @@ class SubstanceList(Resource):
                     prev_vals = zinc_id[4:6]
                 else:
                     url = prev_url
-                dict_ids[url].append(base10(zinc_id))
+
+                if len(dict_ids[url]) > chunk:
+                    dict_ids["{}-{}".format(url, overlimit_count)] = dict_ids[url]
+                    dict_ids[url] = [base10(zinc_id)]
+                    overlimit_count += 1
+                else:
+                    dict_ids[url].append(base10(zinc_id))
                 dict_subid_zinc_id[int(base10(zinc_id))].append(zinc_id)
 
 
         url = 'http://{}/substance'.format(request.host)
         for k, v in dict_ids.items():
             print("TIN URLS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-            print(k)
+            print(k, len(v))
 
         resp = (grequests.post(url,
                                data={
                                    'sub_ids':','.join([str(i) for i in v]),
-                                   'tin_url':k,
-                                   'output_fields': args.get('output_fields')
+                                   'tin_url':k.split('-')[0],
+                                   'output_fields': output_fields
                                }, timeout=15) for k, v in dict_ids.items())
+
         data = defaultdict(list)
         data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text])
 
         for dt in data['items']:
             for d in dt:
-                d['zinc_id'] = dict_subid_zinc_id.get(d.get('sub_id'))[0]
-                tranche_args = {'mwt': d['zinc_id'][4:5], 'logp': d['zinc_id'][5:6]}
+                if not args.get('output_fields') or 'zinc_id' in output_fields:
+                    d['zinc_id'] = dict_subid_zinc_id.get(d.get('sub_id'))[0]
+                    if not args.get('output_fields') or 'sub_id' not in output_fields:
+                        d.pop('sub_id')
+                    if not args.get('output_fields') or 'tranche' in output_fields:
+                        tranche_args = {'mwt': d['zinc_id'][4:5], 'logp': d['zinc_id'][5:6]}
 
-                trancheQuery = TrancheModel.query
-                tranche = trancheQuery.filter_by(**tranche_args).first()
+                        trancheQuery = TrancheModel.query
+                        tranche = trancheQuery.filter_by(**tranche_args).first()
 
-                d['tranche'] = tranche.to_dict()
+                        d['tranche'] = tranche.to_dict()
 
         if not data['items']:
             return {'message': 'Not found'}, 404
@@ -109,10 +126,13 @@ class Substance(Resource):
             data_dict = sub.json()
             if 'output_fields' in args and args.get('output_fields'):
                 output_fields = args.get('output_fields').split(',')
-                # Adding mandatory fields
+                # sub_id will need for generating zinc_id in different function
                 if 'sub_id' not in output_fields:
                     output_fields.append('sub_id')
-                new_dict = {output_field: data_dict[output_field] for output_field in output_fields}
+
+                # Removing zinc_id and it is gonna add in different function
+                output_fields.remove('zinc_id')
+                new_dict = {output_field: data_dict[output_field] for output_field in output_fields }
                 data_dict = new_dict
             data.append(data_dict)
 
@@ -124,6 +144,8 @@ class Substance(Resource):
 class Substances(Resource): 
     def post(self, file_type=None):
         parser.add_argument('zinc_id-in', location='files', type=FileStorage, required=True)
+        parser.add_argument('chunk', type=int)
+        parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
 
         uploaded_file = args.get('zinc_id-in').stream.read().decode("latin-1")

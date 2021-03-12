@@ -226,7 +226,11 @@ def create_app(config_class=Config):
     api.add_resource(Search, '/search.<file_type>')
     api.add_resource(Substance, '/substance')
     api.add_resource(Substances, '/substances.<file_type>')
-    api.add_resource(SubstanceList, '/sublist')
+    sublist_routes = [
+        '/sublist',
+        '/sublist.<file_type>',
+    ]
+    api.add_resource(SubstanceList, *sublist_routes)
     api.add_resource(CatalogContent, '/catalog')
     api.add_resource(CatalogContents, '/catalogs.<file_type>')
     api.add_resource(CatalogContentList, '/catlist')
