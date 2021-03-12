@@ -1,6 +1,6 @@
-from flask import render_template, request, json, redirect, url_for, session
+from flask import render_template, request, json, redirect, url_for, session, Response
 from app.main import application
-from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm
+from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm, SearchRandom
 import requests
 import re
 
@@ -31,9 +31,30 @@ def search_zincid():
     return render_template('search/search_zincid.html')
 
 
-@application.route('/search/random')
+@application.route('/search/random', methods=["POST", "GET"])
 def search_random():
-    return render_template('search/search_random.html')
+    if request.method == 'GET':
+        return render_template('search/search_random.html')
+    elif request.method == 'POST':
+        amount = SearchRandom(request.values).amount.data
+        print(amount)
+        files = {
+            'count': amount
+        }
+        try:
+            response = requests.post('http://cartblanche22.docking.org/substance/random.txt', data=files, timeout=15)
+            print(response)
+            print(response.data)
+            # data = response.json()
+            # print(data)
+            data = ''
+            download_filename = 'random.txt'
+            response = Response(json.dumps(data), mimetype='text/plain')
+            response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
+            return response
+        except requests.exceptions.Timeout as e:
+            print(e)
+            return render_template('errors/404.html', desc='Random search is not working due to server overload', lines='random not working'), 404
 
 
 @application.route('/search/suppliercode')
@@ -71,15 +92,16 @@ def searchZinc():
 def searchSmilesList():
     smiles = SearchSmilesForm(request.values).list_of_smiles.data
     dist = SearchSmilesForm(request.values).dist.data
+    adist = SearchSmilesForm(request.values).adist.data
     uploaded_file = SearchSmilesForm(request.files).smiles_file.data
-    print(dist, smiles)
+    print(dist, adist, smiles)
     if uploaded_file.filename == '':
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', smiles)
     else:
         uploaded_file = uploaded_file.read().decode("latin-1")
         lines = re.split('; |, |\*|\n|\r|,| |\t|\.', uploaded_file)
     value = ','.join(lines)
-    return redirect(url_for('main.showSmilesResult', value=value, dist=dist))
+    return redirect(url_for('main.showSmilesResult', value=value, dist=dist, adist=adist))
 
 
 @application.route('/searchSupplierList', methods=["POST"])

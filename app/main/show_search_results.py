@@ -72,19 +72,21 @@ def downloadSmilesResult():
 def showSmilesResult():
     value = request.args['value']
     dist = request.args['dist']
+    adist = request.args['adist']
     print('from downloadSmilesResult')
     print(value)
     files = {
         'smiles-in': value,
         'dist': dist,
+        'adist': adist,
     }
-    response = requests.post(base_url + 'smilelist', params=files)
-    if response:
+    try:
+        response = requests.post(base_url + 'smilelist', params=files, timeout=60)
         data = response.json()
         print(data)
         return render_template('search/search_result_smile.html', data_=data, value=value, dist=dist)
-    else:
-        print(response)
+    except requests.exceptions.Timeout as e:
+        print(e)
         return render_template('errors/search404.html', lines=value), 404
 
 

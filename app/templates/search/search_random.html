@@ -10,7 +10,7 @@
         <div class="panel panel-info">
             <div class="panel-heading">Download</div>
             <div class="panel-body">
-                <form action="" method="" class="form-inline">
+                <form action="/search/random" method="POST" class="form-inline">
                    <div class="form-group">
 
                        <select name="amount" class="btn btn-info" id="amountformat">
@@ -56,6 +56,14 @@
             </div>
         </div>
     </div>
+ <div class="row">
+    <h4>CURL commands for downloading random smiles</h4>
+     <p>Below curl command returns a json, txt or csv file with all possible fields.
+</p>
+<code>
+curl http://cartblanche22.docking.org/substance/random.txt list -F count=100
+ </code>
 
+    </div>
 
 {% endblock %}
