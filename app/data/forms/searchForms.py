@@ -10,9 +10,24 @@ class SearchSmilesForm(FlaskForm):
                              ('0', '0'),
                              ('1', '1'),
                              ('2', '2'),
+                             ('3', '3'),
+                             ('4', '4'),
+                             ('5', '5'),
+
                          ),
                          validators=[DataRequired()],
                          default='0')
+    adist = SelectField('adist',
+                       choices=(
+                           ('0', '0'),
+                           ('1', '1'),
+                           ('2', '2'),
+                           ('3', '3'),
+                           ('4', '4'),
+                           ('5', '5'),
+                       ),
+                       validators=[DataRequired()],
+                       default='0')
     submit = SubmitField('Search')
 
 

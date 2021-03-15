@@ -10,15 +10,9 @@
         <div class="panel panel-info">
             <div class="panel-heading">Download</div>
             <div class="panel-body">
-                <form action="" method="" class="form-inline">
+                <form action="/search/random" method="POST" class="form-inline">
                    <div class="form-group">
-                                    <select name="kind" class="btn btn-info" id="kindformat">
-                                        <option value="zincid" id="kind-zincid" selected>
-                                           ZINC ID
-                                        </option>
-                                        <option id="kind-smiles" value="smiles" >SMILES
-                                        </option>
-                                    </select>
+
                        <select name="amount" class="btn btn-info" id="amountformat">
                                         <option value="100" id="amount-100" selected>
                                            100
@@ -28,6 +22,21 @@
                                         </option>
                            <option value="1000" id="amount-1000" >
                                            1000
+                                        </option>
+                           <option value="5000" id="amount-5000" >
+                                           5000
+                                        </option>
+                           <option value="10000" id="amount-10000" >
+                                           10000
+                                        </option>
+                           <option value="50000" id="amount-50000" >
+                                           50000
+                                        </option>
+                            <option value="100000" id="amount-100000" >
+                                           100000
+                                        </option>
+                           <option value="500000" id="amount-500000" >
+                                           500000
                                         </option>
 
                                     </select>
@@ -47,6 +56,14 @@
             </div>
         </div>
     </div>
+ <div class="row">
+    <h4>CURL commands for downloading random smiles</h4>
+     <p>Below curl command returns a json, txt or csv file with all possible fields.
+</p>
+<code>
+curl http://cartblanche22.docking.org/substance/random.txt list -F count=100
+ </code>
 
+    </div>
 
 {% endblock %}

@@ -204,6 +204,7 @@ def create_app(config_class=Config):
     from app.data.models.items import Items
     from app.data.models.vendors import Vendors
     from app.data.models.availableVendors import AvailableVendors
+    from app.data.models.default_prices import DefaultPrices
 
     from app.data.models.port_number import PortNumberModel
     from app.data.models.ip_address import IPAddressModel
@@ -222,6 +223,7 @@ def create_app(config_class=Config):
     admin.add_view(ModelView(Roles, db.session))
     admin.add_view(ModelView(Vendors, db.session))
     admin.add_view(ModelView(AvailableVendors, db.session))
+    admin.add_view(ModelView(DefaultPrices, db.session))
 
     api.add_resource(Search, '/search.<file_type>')
     api.add_resource(Substance, '/substance')

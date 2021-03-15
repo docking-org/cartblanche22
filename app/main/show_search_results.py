@@ -72,20 +72,24 @@ def downloadSmilesResult():
 def showSmilesResult():
     value = request.args['value']
     dist = request.args['dist']
+    adist = request.args['adist']
     print('from downloadSmilesResult')
     print(value)
     files = {
         'smiles-in': value,
         'dist': dist,
+        'adist': adist,
     }
-    response = requests.post(base_url + 'smilelist', params=files)
-    if response:
+    try:
+        response = requests.post(base_url + 'smilelist', params=files, timeout=60)
         data = response.json()
         print(data)
         return render_template('search/search_result_smile.html', data_=data, value=value, dist=dist)
-    else:
-        print(response)
-        return render_template('errors/search404.html', lines=value), 404
+    except requests.exceptions.Timeout as e:
+        print(e)
+        return render_template('errors/search404.html', header="We can't find your search. Our server responds too slow", lines=value), 404
+    except:
+        return render_template('errors/search404.html', header='We found 0 matches', lines=value), 404
 
 
 @application.route('/showSupplierResult/', methods=["GET"])
@@ -96,14 +100,16 @@ def showSupplierResult():
     files = {
         'supplier_code-in': value
     }
-    response = requests.post(base_url + 'catlist', params=files)
-    if response:
+    try:
+        response = requests.post(base_url + 'catlist', params=files, timeout=60)
         data = response.json()
+        print(data)
         return render_template('search/search_result.html', data_=data['items'], value=value, search='supplier')
-    else:
-        print(response)
-        return render_template('errors/search404.html', lines=value), 404
-
+    except requests.exceptions.Timeout as e:
+        print(e)
+        return render_template('errors/search404.html', header="We can't find your search. Our server responds too slow", lines=value), 404
+    except:
+        return render_template('errors/search404.html', header='We found 0 matches', lines=value), 404
 
 @application.route('/showZincListResult/', methods=["GET"])
 def showZincListResult():
@@ -113,12 +119,13 @@ def showZincListResult():
     files = {
         'zinc_id-in': value
     }
-    response = requests.post(base_url + 'sublist', params=files)
-    print(response)
-    if response:
+    try:
+        response = requests.post(base_url + 'sublist', params=files, timeout=60)
         data = response.json()
+        print(data)
         return render_template('search/search_result.html', data_=data['items'], value=value, search='zinc')
-    else:
-        print(response)
-        return render_template('errors/search404.html', lines=value), 404
-
+    except requests.exceptions.Timeout as e:
+        print(e)
+        return render_template('errors/search404.html', header="We can't find your search. Our server responds too slow", lines=value), 404
+    except:
+        return render_template('errors/search404.html', header='We found 0 matches', lines=value), 404
