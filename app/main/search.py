@@ -3,6 +3,8 @@ from app.main import application
 from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm, SearchRandom
 import requests
 import re
+from app.data.models.default_prices import DefaultPrices
+from flask_login import current_user
 
 base_url = "http://cartblanche22.docking.org/"
 swp_server = 'http://swp.docking.org'
@@ -42,7 +44,7 @@ def search_random():
             'count': amount
         }
         try:
-            response = requests.post('http://cartblanche22.docking.org/substance/random.txt', data=files, timeout=15)
+            response = requests.post('http://cartblanche22.docking.org/substance/random.txt', params=files, timeout=15)
             print(response)
             print(response.data)
             # data = response.json()
@@ -81,9 +83,14 @@ def searchZinc():
     }
     response = requests.get(base_url + 'search.json', params=files)
     if response:
+        prices = None
+        if current_user.is_authenticated and current_user.has_roles('ucsf'):
+            prices = DefaultPrices.query.filter_by(organization='ucsf')
+        else:
+            prices = DefaultPrices.query.filter_by(organization='public')
         data = response.json()
         print(data)
-        return render_template('molecule/mol_index.html', data=data['items'][0])
+        return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices)
     else:
         return render_template('errors/search404.html', lines=files), 404
 
@@ -118,7 +125,7 @@ def searchSupplierList():
     return redirect(url_for('main.showSupplierResult', value=value))
 
 
-@application.route('/searchZincList', methods=["POST"])
+@application.route('/searchZincList', methods=["POST", "GET"])
 def searchZincList():
     print('searchZincList')
     zinc_ids = SearchZincForm(request.values).list_of_zinc_id.data
