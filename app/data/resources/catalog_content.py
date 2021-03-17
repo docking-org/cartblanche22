@@ -11,6 +11,7 @@ import time
 from sqlalchemy import func
 from flask_csv import send_csv
 from datetime import datetime
+import itertools
 
 parser = reqparse.RequestParser()
 
@@ -43,19 +44,18 @@ class CatalogContentList(Resource):
         url = 'http://{}/catalog'.format(request.host)
         resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k, 'zinc_id_start': v}, timeout=15) for k, v in tin_urls.items())
 
+        results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
+        flat_list = itertools.chain.from_iterable(results)
         data = defaultdict(list)
-        data['items'].extend([json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text])
+        data['items'] = list(flat_list)
 
         if not data['items']:
             return {'message': 'Not found'}, 404
 
-        data['items'] = data['items'][0]
         if file_type in ['csv', 'txt']:
             keys = list(data['items'][0].keys())
             str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
             return send_csv(data['items'], "supplier_code_{}.csv".format(str_time), keys)
-        else:
-            return jsonify(data)
         return jsonify(data)
 
 
@@ -71,6 +71,9 @@ class CatalogContent(Resource):
             catContents = CatalogContentModel.query.filter(func.lower(CatalogContentModel.supplier_code).in_(lines)).all()
 
             time2 = time.time()
+            strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
+            strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
+            print('{:s} !!!!!!!!!! started at {} and finished at {}'.format(args.get('tin_url'), strtime1, strtime2))
             print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
 
             data = []

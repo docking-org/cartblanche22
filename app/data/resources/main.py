@@ -6,7 +6,6 @@ from app.helpers.validation import base10
 from app.data.resources.substance import SubstanceList
 from flask import jsonify, redirect, current_app, request
 from flask_csv import send_csv
-from app.helpers.validation import getTINUrl
 import re
 import json
 import requests
