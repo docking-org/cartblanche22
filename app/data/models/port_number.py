@@ -22,7 +22,7 @@ class PortNumberModel(db.Model):
         db.session.commit()
 
     def __str__(self):
-        return self.ip
+        return str(self.port)
 
     def __repr__(self):
         return '<PortNumber {}>'.format(self.port)
