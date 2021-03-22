@@ -2,6 +2,48 @@
 {% block scripts %}
     {{ super() }}
     <script>
+    $(document).ready(() => {
+
+});
+    function addVendor(btn){
+        let price = btn.getAttribute('data-price')
+        let identifier = btn.getAttribute('data-id')
+        let img = btn.getAttribute('data-img')
+        let catalog = btn.getAttribute('data-catalog')
+        let quantity = btn.getAttribute('data-quantity')
+        let unit = btn.getAttribute('data-unit')
+        let shipping = btn.getAttribute('data-shipping')
+        let db = ''
+        let vendor = {}
+            vendor['shipping'] = shipping
+            vendor['cat_name'] = catalog
+            vendor['supplier_code'] = catalog
+            vendor['price'] = price
+            vendor['unit'] = unit
+            vendor['quantity'] = quantity
+            vendor['purchase'] = 1
+        {#will be added later#}
+        {#addVendorToCart(identifier, db, img, vendor)#}
+        $(btn).html('Added to Cart')
+        let cart = JSON.parse(localStorage.getItem('cart'))
+        let index = cart.findIndex(i => i.identifier == identifier)
+        if (index == -1) {
+            let item = {}
+            item.identifier = identifier
+            item.db = db
+            item.img = img
+            item.supplier = [vendor]
+            cart.push(item)
+            console.log('added cart')
+        }
+        else{
+           cart[index]['supplier'].push(vendor)
+
+        }
+        localStorage.setItem('cart', JSON.stringify(cart))
+            $('#cartCount').html(getCartSize(cart))
+
+    }
     </script>
 {% endblock %}
 {% block app_content %}
@@ -185,7 +227,19 @@
 
                                                <td>
 
-                           <button class="btn btn-info"><span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span> Add to cart</button>
+                           <button class="btn btn-info"
+                                   data-catalog="{{ p.category_name }}"
+                                   data-price="{{ p.price}}"
+                                   data-quantity="{{ p.quantity }}"
+                                   data-unit="{{ p.unit }}"
+                                   data-shipping="{{ p.shipping }}"
+                                   data-id="{{ data.zinc_id }}"
+                                   data-img="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles}}&qry=%q&cols=%c&cmap=%m"
+                                   onclick="addVendor(this)">
+                               <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>
+                               Add to cart
+                           </button>
+
                         </td>
 
 

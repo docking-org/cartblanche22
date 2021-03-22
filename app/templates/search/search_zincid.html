@@ -46,13 +46,13 @@
     <h4>CURL commands for searching single ZincID</h4>
         <p>Below curl command returns a json file with all possible fields. </p>
 <code>
-curl http://cartblanche22.docking.org/search.json -F zinc_id=ZINCms000002NiP3
+curl https://cartblanche22.docking.org/search.json -F zinc_id=ZINCms000002NiP3
  </code>
     <p>
 If you want to specify output fields, you can add output_fields. In this example it will return only smiles, sub_id. Please note that there are always tranche and zinc_id fields by default.  Also please do not forget to add -F before every field.
 </p>
         <code>
-curl http://cartblanche22.docking.org/search.json -F zinc_id=ZINCms000002NiP3 -F output_fields='smiles,sub_id'
+curl https://cartblanche22.docking.org/search.json -F zinc_id=ZINCms000002NiP3 -F output_fields='smiles,sub_id'
 </code>
     </div>
 
@@ -60,11 +60,11 @@ curl http://cartblanche22.docking.org/search.json -F zinc_id=ZINCms000002NiP3 -F
     <h4>CURL commands for searching multiple ZincIDs</h4>
         <p>Below curl command returns a json file with all possible fields. With text file:</p>
 <code>
-curl http://cartblanche22.docking.org/substances.json -F zinc_id-in=@/nfs/exd/zinc-22/H16/H16P220/H16P220-N.txt
+curl https://cartblanche22.docking.org/substances.json -F zinc_id-in=@/nfs/exd/zinc-22/H16/H16P220/H16P220-N.txt
  </code>
     <p>Without text file (Separated by ,):</p>
         <code>
-curl http://cartblanche22.docking.org/sublist -F zinc_id-in="ZINCgs0000000OAi,ZINCgs0000000OAj"
+curl https://cartblanche22.docking.org/sublist -F zinc_id-in="ZINCgs0000000OAi,ZINCgs0000000OAj"
 
 </code>
     </div>

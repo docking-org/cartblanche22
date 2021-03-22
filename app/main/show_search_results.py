@@ -1,7 +1,7 @@
 from flask import render_template, request, json, Response
 from app.main import application
 import requests
-base_url = "http://cartblanche22.docking.org/"
+base_url = "https://cartblanche22.docking.org/"
 swp_server = 'https://swp.docking.org'
 sw_server = 'https://sw.docking.org'
 

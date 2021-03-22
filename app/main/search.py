@@ -6,9 +6,9 @@ import re
 from app.data.models.default_prices import DefaultPrices
 from flask_login import current_user
 
-base_url = "http://cartblanche22.docking.org/"
-swp_server = 'http://swp.docking.org'
-sw_server = 'http://swp.docking.org'
+base_url = "https://cartblanche22.docking.org/"
+swp_server = 'https://swp.docking.org'
+sw_server = 'https://swp.docking.org'
 
 
 @application.route('/search/example')
@@ -44,7 +44,7 @@ def search_random():
             'count': amount
         }
         try:
-            response = requests.post('http://cartblanche22.docking.org/substance/random.txt', params=files, timeout=15)
+            response = requests.post('https://cartblanche22.docking.org/substance/random.txt', params=files, timeout=15)
             print(response)
             print(response.data)
             # data = response.json()
@@ -82,6 +82,7 @@ def searchZinc():
             'zinc_id': zinc_id
     }
     response = requests.get(base_url + 'search.json', params=files)
+    print(response)
     if response:
         prices = None
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
