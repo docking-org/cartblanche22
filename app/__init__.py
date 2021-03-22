@@ -2,7 +2,7 @@ from flask import Flask, g, current_app, request
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_user import UserManager
 from flask_bootstrap import Bootstrap
 from flask_admin import Admin
@@ -218,12 +218,16 @@ def create_app(config_class=Config):
     from app.data.resources.catalog_content import CatalogContents, CatalogContent, CatalogContentList
     from app.data.resources.tranche import Tranches
 
+    class MyModelView(ModelView):
+        def is_accessible(self):
+            return current_user.is_authenticated and current_user.has_roles('admin')
+
     admin = Admin(app, name='shoppingcart', template_mode='bootstrap3')
-    admin.add_view(ModelView(Users, db.session))
-    admin.add_view(ModelView(Roles, db.session))
-    admin.add_view(ModelView(Vendors, db.session))
-    admin.add_view(ModelView(AvailableVendors, db.session))
-    admin.add_view(ModelView(DefaultPrices, db.session))
+    admin.add_view(MyModelView(Users, db.session))
+    admin.add_view(MyModelView(Roles, db.session))
+    admin.add_view(MyModelView(Vendors, db.session))
+    admin.add_view(MyModelView(AvailableVendors, db.session))
+    admin.add_view(MyModelView(DefaultPrices, db.session))
 
     api.add_resource(Search, '/search.<file_type>')
     api.add_resource(Substance, '/substance')
