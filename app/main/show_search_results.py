@@ -81,7 +81,7 @@ def showSmilesResult():
         'adist': adist,
     }
     try:
-        response = requests.post(base_url + 'smilelist', params=files, timeout=60)
+        response = requests.post(base_url + 'smilelist', params=files, timeout=120)
         data = response.json()
         print(data)
         return render_template('search/search_result_smile.html', data_=data, value=value, dist=dist)
@@ -101,7 +101,7 @@ def showSupplierResult():
         'supplier_code-in': value
     }
     try:
-        response = requests.post(base_url + 'catlist', params=files, timeout=60)
+        response = requests.post(base_url + 'catlist', params=files, timeout=120)
         data = response.json()
         print(data)
         return render_template('search/search_result.html', data_=data['items'], value=value, search='supplier')
@@ -120,7 +120,7 @@ def showZincListResult():
         'zinc_id-in': value
     }
     try:
-        response = requests.post(base_url + 'sublist', params=files, timeout=60)
+        response = requests.post(base_url + 'sublist', params=files, timeout=120)
         data = response.json()
         print(data)
         return render_template('search/search_result.html', data_=data['items'], value=value, search='zinc')

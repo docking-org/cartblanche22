@@ -16,6 +16,22 @@
 {#    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">#}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css"/>
+    <style>
+
+  .ui-tooltip {
+    padding: 10px 20px;
+    color: black;
+      width: 30%;
+    border-radius: 20px;
+    font: 14px "Helvetica Neue", Sans-Serif;
+    {#box-shadow: 0 0 7px black;#}
+      opacity: 1;
+      background-color: white;
+              position: absolute;
+    margin-left:10px;
+  }
+
+    </style>
 {% endblock %}
 
 {% block scripts %}
@@ -29,9 +45,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>#}
 
     <script type="text/javascript" src="../static/js/custom/cart.js"></script>
     <script>
+    $(function () {
+  $('[data-toggle="tooltip"]').tooltip({
+       boundary: 'window',
+         position: {
+        my: "center bottom-10",
+        at: "center top",
+        using: function( position, feedback ) {
+          $( this ).css( position );
+          $( "<div>" )
+            .addClass( "arrow" )
+            .addClass( feedback.vertical )
+            .addClass( feedback.horizontal )
+            .appendTo( this );
+        }
+      }
+  })
+})
 
         $(document).ready(() => {
             if (localStorage.getItem('cart') != null) {
@@ -79,9 +113,17 @@
             </div>
             <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('main.sw') }}">Similarity</a></li>
+                    <li><a href="{{ url_for('main.sw') }}" class="test"
+                           data-toggle="tooltip" data-placement="bottom"
+                                title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
+                            Similarity
 
-                    <li><a href="{{ url_for('main.arthor') }}">Substructure</a></li>
+                    </a>
+
+                    </li>
+
+                    <li><a href="{{ url_for('main.arthor') }}" data-toggle="tooltip" data-placement="bottom"
+                           title="Arthor : Search by substructure or pattern (SMARTS)">Substructure</a></li>
                     {% if not current_user.is_anonymous %}
                         <li><a href="{{ url_for('main.swp') }}">SWP</a></li>
                         <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>

@@ -8,11 +8,11 @@
     <h3>Search by Supplier Code</h3>
     <div class="row">
         <div class="panel panel-info">
-            <div class="panel-heading">Search Using Many (Under Construction)</div>
+            <div class="panel-heading">Search Using Many</div>
             <div class="panel-body">
                 <form action="/searchSupplierList" method="post" class="form" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="textareasupplier">Supplier code separated by comma without space:</label>
+                        <label for="textareasupplier">One supplier code per Line</label>
                         <textarea id="textareasupplier" class="form-control" name="list_of_suppliercode" rows="6" cols="20" placeholder="Supplier Codes"></textarea>
                     </div>
                         <h5>OR Upload a File</h5>
@@ -30,14 +30,18 @@
     <div class="row">
     <h4>CURL commands for searching Supplier Code</h4>
         <p>Below curl command returns a json file with all possible fields. </p>
-        <p>With text file:</p>
+        <p>If you want to curl with text file:</p>
 <code>
 curl https://cartblanche22.docking.org/catalogs.json -F supplier_code-in=@sup.txt
  </code>
-    <p>Without text file (Separated by ,):</p>
+        <p></p>
+    <p>Curl without text file (supplier codes separated by ,):</p>
         <code>
-curl https://cartblanche22.docking.org/catlist -F supplier_code-in="s_1070__3705440__1080206, s_240690__16499450__17311340"
+curl https://cartblanche22.docking.org/catlist -F supplier_code-in="s_1070__3705440__1080206,s_240690__16499450__17311340"
 </code>
+        <p></p>
+         <p>If you want to learn more about search, please go to <a href="http://wiki.docking.org/index.php/Zinc22:Searching" target="_blank"> Zinc22 documentation on wiki page</a></p>
+
     </div>
 
 {% endblock %}
