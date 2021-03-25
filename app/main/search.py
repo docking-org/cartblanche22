@@ -41,22 +41,21 @@ def search_random():
         amount = SearchRandom(request.values).amount.data
         print(amount)
         files = {
-            'count': amount
+            'count': 10
         }
         try:
-            response = requests.post('https://cartblanche22.docking.org/substance/random.txt', params=files, timeout=15)
+            response = requests.post('https://cartblanche22.docking.org/substance/random.json', params=files)
+            print('worked')
             print(response)
-            print(response.data)
-            # data = response.json()
+            # print(response.data)
+            data = response.json()
             # print(data)
-            data = ''
             download_filename = 'random.txt'
             response = Response(json.dumps(data), mimetype='text/plain')
             response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
             return response
-        except requests.exceptions.Timeout as e:
-            print(e)
-            return render_template('errors/404.html', desc='Random search is not working due to server overload', lines='random not working'), 404
+        except:
+            return render_template('errors/404.html', desc='Random search is not working.', lines='random not working'), 404
 
 
 @application.route('/search/suppliercode')
