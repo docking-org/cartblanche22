@@ -75,7 +75,6 @@ ticks = [(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
 @application.route('/tranches/2d', methods=['GET'])
 def tranches2d():
     tranches = TrancheModel.query.filter_by(charge='-').all()
-    cell2D = [[0 for x in range(62)] for y in range(62)]
     cell2DNew = [[{} for x in range(62)] for y in range(61)]
     unfilteredSize = 0
     for i in tranches:
@@ -85,10 +84,9 @@ def tranches2d():
             cell2DNew[col_idx][row_idx] = {'size': i.sum, 'chosen': False}
         else:
             cell2DNew[col_idx][row_idx] = {'size': i.sum, 'chosen': True}
-        cell2D[col_idx][row_idx] = i.sum
         unfilteredSize += i.sum
-    # print(cell2DNew)
-    return render_template('tranches/2D.html', tranches=tranches, axes=axes, cell2D=json.dumps(cell2D),
+    print(cell2DNew)
+    return render_template('tranches/2D.html', tranches=tranches, axes=axes,
                            cell2DNew=json.dumps(cell2DNew),
                            ticks=ticks, unfilteredSize=unfilteredSize)
 
