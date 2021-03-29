@@ -47,3 +47,11 @@ footer>p {
 	text-align: left;
 	color: #aaa;
 }
+
+.dropdown-header {
+    background: #eee;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px 20px;
+}

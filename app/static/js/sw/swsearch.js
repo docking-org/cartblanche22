@@ -1,5 +1,5 @@
 var sw_server;
-sw_server = 'http://sw.docking.org'; // nm debug deployment
+sw_server = 'https://sw.docking.org'; // nm debug deployment
 var config = {}
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
@@ -424,7 +424,7 @@ function init_table(table, url) {
             "class": "compound",
             "sortable": false,
             "type": "html",
-            "width": "250px",
+            "width": "350px",
             "render": hit_renderer,
         }, {
             "title": "Distance",
@@ -432,12 +432,12 @@ function init_table(table, url) {
             "width": "65px",
             "sortable": true
         }].concat(get_score_columns()).concat([{
-            "title": "Anon Distance",
+            "title": "Anon <br> Distance",
             "name": "topodist",
             "width": "65px",
             "sortable": true
         }, {
-            "title": "Unlabelled MCES",
+            "title": "Unlabelled <br> MCES",
             "name": "mces",
             "width": "50px",
             "sortable": true

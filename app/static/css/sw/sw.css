@@ -169,8 +169,8 @@ button.search i.fa:hover {
 #sketcher {
 	display: block;
 	width: 420px;
-	height: 310px;
-	margin: auto;
+	height: 470px;
+	margin: 10px;
 }
 .swrange input[type='number'] {
 	-moz-appearance: textfield;
