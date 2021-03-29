@@ -73,7 +73,7 @@ class SubstanceList(Resource):
                     dict_ids[url].append(base10(zinc_id))
                 dict_subid_zinc_id[int(base10(zinc_id))].append(zinc_id)
 
-        url = 'http://{}/substance'.format(request.host)
+        url = 'https://{}/substance'.format(request.host)
         for k, v in dict_ids.items():
             print("TIN URLS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
             print(k, len(v))
@@ -198,8 +198,9 @@ class SubstanceRandomList(Resource):
             time2 = time.time()
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
-            print('{:s} !!!!!!!!!! started at {} and finished at {}'.format(args.get('tin_url'), strtime1, strtime2))
-            print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
+            print('{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(args.get('tin_url'),
+                                                                                              strtime1, strtime2,
+                                                                                              (time2 - time1) % 60))
 
             data = [sub.json_ids() for sub in random_substances]
             if data:
@@ -213,36 +214,43 @@ class SubstanceRandomList(Resource):
 class SubstanceRandom(Resource):
     def get(self, file_type=None):
         parser.add_argument('count', type=str)
+        parser.add_argument('timeout', type=int)
         args = parser.parse_args()
         return self.getRandom(args, file_type)
 
     def post(self, file_type=None):
         parser.add_argument('count', type=str)
+        parser.add_argument('timeout', type=int)
         args = parser.parse_args()
         return self.getRandom(args, file_type)
 
     @classmethod
     def getRandom(cls, args, file_type=None):
         count = int(args.get('count'))
+        timeout = 40
+        if args.get('timeout'):
+            timeout = args.get('timeout')
+        # server_mappings = ServerMappingModel.query.distinct(
+        #     ServerMappingModel.ip_fk,
+        #     ServerMappingModel.port_fk).all()
+        #
+        # per_server_count = int(round(count / len(server_mappings))) + 100
+        #
+        # tin_urls = {}
+        # tin_list = []
 
-        server_mappings = ServerMappingModel.query.distinct(
-            ServerMappingModel.ip_fk,
-            ServerMappingModel.port_fk).all()
+        # for sm in server_mappings:
+        #     if sm.tranches:
+        #         url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
+        #         tin_list.append(url)
+        #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
 
-        per_server_count = int(round(count / len(server_mappings))) + 100
+        tin_urls = getAllTINUrl()
+        per_server_count = int(round(count / len(tin_urls))) + 100
 
-        tin_urls = {}
-        tin_list = []
-        for sm in server_mappings:
-            if sm.tranches:
-                url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
-                tin_list.append(url)
-                tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
-
-        url = 'http://{}/subrandom'.format(request.host)
-        resp = (grequests.post(url, data={'tin_url': k, 'random': per_server_count}, timeout=15) for
+        url = 'https://{}/subrandom'.format(request.host)
+        resp = (grequests.post(url, data={'tin_url': v, 'random': per_server_count}, timeout=timeout) for
                 k, v in tin_urls.items())
-
 
         results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
         flat_list = itertools.chain.from_iterable(results)
@@ -260,5 +268,4 @@ class SubstanceRandom(Resource):
         else:
             return jsonify(data)
 
-        return None
 

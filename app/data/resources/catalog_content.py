@@ -41,7 +41,7 @@ class CatalogContentList(Resource):
                 tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
 
         s_codes = ','.join(supplier_codes)
-        url = 'http://{}/catalog'.format(request.host)
+        url = 'https://{}/catalog'.format(request.host)
         resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k, 'zinc_id_start': v}, timeout=15) for k, v in tin_urls.items())
 
         results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
