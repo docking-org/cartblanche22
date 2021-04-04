@@ -7,6 +7,7 @@ from app.data.models.users import Users
 from app.data.models.carts import Carts
 from app import db
 from app.email_send import send_password_reset_email
+from flask import Markup
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -16,7 +17,7 @@ def login():
     if form.validate_on_submit():
         user = Users.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash(Markup('Invalid username or password, Forgot your password? <a href="/reset_password_request" class="alert-link">Click here to reset password </a>'))
             return redirect(url_for('main.login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
