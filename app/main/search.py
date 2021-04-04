@@ -163,7 +163,7 @@ def sw():
 
 @application.route('/swp', methods=[    'GET', 'POST'])
 def swp():
-    return render_template('search/swp.html')
+    # return render_template('search/swp.html')
     try:
         config = requests.get('https://swp.docking.org/search/config', auth=('gpcr', 'xtal')).json()
     except:
@@ -172,6 +172,8 @@ def swp():
         maps = requests.get('https://swp.docking.org/search/maps', auth=('gpcr', 'xtal')).json()
     except:
         return render_template('errors/500.html')
+    print(config)
+    print(maps)
     return render_template('search/swp.html', config=json.dumps(config), maps=json.dumps(maps))
 
 

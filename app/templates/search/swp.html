@@ -25,7 +25,15 @@
                 {#redraw(JSON.parse('{{ items | tojson }}'));#}
             }
         });
-         db_maps($('#dbsel'));
+        db_maps($('#dbsel'));
+        toggle_scoring();
+        config = {{config|safe}};
+        maps = {{maps|safe}};
+        if (!config.WebApp.SearchAsYouDraw)
+    		$('.swopt').removeClass('searchasyoudraw');
+    	add_scoretype_selection(config);
+    	toggle_scoring();
+        db_maps($('#dbsel'), maps);
         toggle_scoring();
     {#config = JSON.parse({{ config | tojson }})#}
 	{#maps = JSON.parse({{ maps | tojson }})#}

@@ -130,7 +130,17 @@
                     </thead>
                     <tbody>
                     <tr>
+                        {% if data.catalogs[0].catalog_name == 'm' %}
+                        <td>Enamine_M</td>
+                        {%  elif data.catalogs[0].catalog_name == 's' %}
+                        <td>Enamine_S</td>
+                        {%  elif data.catalogs[0].catalog_name == 'wuxi' %}
+                        <td>wuxi</td>
+                        {%  elif data.catalogs[0].catalog_name == 'mcule' %}
+                        <td>mcule</td>
+                        {% else %}
                         <td>{{ data.catalogs[0].catalog_name }}</td>
+                        {%  endif %}
                         <td>{{ data.catalogs[0].short_name }}</td>
                         <td>{{ data.sub_id }}</td>
                     </tr>
