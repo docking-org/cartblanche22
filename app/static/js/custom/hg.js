@@ -1,11 +1,10 @@
 function checkHg(smiles, modal, table, db) {
 
     $.ajax({
-        url: "http://zinc21.docking.org/substances.txt",
+        url: "https://zinc21.docking.org/substances.txt",
         dataType: 'text',
         data: {"ecfp4_fp-tanimoto-40": smiles},
         success: function (data) {
-            console.log('hg', data);
             if (data.length > 0) {
                 let res = data.split('\n')
                 let data_ = []

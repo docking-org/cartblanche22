@@ -619,11 +619,16 @@ function hit_renderer(data, type, row) {
         .append('<br/><b>MF:</b> ' + data.mf);
     $props.css('font-size', 'smaller');
     div.append($props);
-    var row = $('<tr></tr>');
+    var row = $('<tr onclick="trToggle(this)"></tr>');
     row.append($("<td style='width: 50px; margin:50px;'></td>").append(button));
     row.append($("<td style='width: 150px;'></td>").append(img));
     row.append($("<td style='line-height: 100%;'></td>").append(div));
     table.append(row);
 
     return $('<div>').append(table).html();
+}
+function trToggle(tr) {
+    // console.log(tr.rowIndex)
+    // $(tr).css('background-color', 'red')
+    // console.log('working')
 }

@@ -27,7 +27,7 @@ function smileToggle(button, data){
 function removeSmile(data){
      let item = {}
         item.identifier = data.zinc_id
-        item.db = ''
+        item.db = 'zinc22'
         item.img = 'https://sw.docking.org/depict/svg?w=50&h=30h&smi=' + data.hitMappedSmiles + '&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow'
         item.supplier = []
     let btn = $('#' + item.identifier)
@@ -45,7 +45,7 @@ function removeSmile(data){
 function addSmile(data){
      let item = {}
         item.identifier = data.zinc_id
-        item.db = ''
+        item.db = 'zinc22'
         item.img = 'https://sw.docking.org/depict/svg?w=50&h=30h&smi=' + data.hitMappedSmiles + '&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow'
         item.supplier = []
     let btn = $('#' + item.identifier)
@@ -136,7 +136,7 @@ function addAllToCart(button, data) {
                 <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
                     <div class="zinc-tile thumbnail" onclick="smileToggle(this, {{data|safe}})" id={{ data.zinc_id }}>
                         <h5 class="zinc-id caption">
-                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id ) }}" title="More about ZINC84687284">{{ data.zinc_id }}
+                            <a href="/searchZinc/{{data.zinc_id}}" title="More about ZINC84687284">{{ data.zinc_id }}
                                 <div class="small name">
 
                                     <abbr title="Name">
