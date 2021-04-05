@@ -65,20 +65,20 @@ def search_suppliercode():
 
 @application.route('/search/smiles')
 def search_smiles():
-    return render_template('search/search_smiles.html')
+    return render_template('search/search_smiles.html')\
 
 
-@application.route('/searchZinc', methods=["POST", "GET"])
-def searchZinc():
-    if request.method == "POST":
-        print('searchZinc')
-        formData = SearchZincForm(request.values)
-        zinc_id = formData.zinc_id.data
-        zinc_id = zinc_id.replace(" ", "")
-    else:
-        zinc_id = request.values.get('zinc_id')
+@application.route('/search/smiles/vendor')
+def search_smiles_vendor():
+    return render_template('search/search_smiles_vendor.html')
+
+
+@application.route('/searchZinc/<identifier>', methods=["GET"])
+def searchZinc(identifier):
+    # zinc_id = request.values.get('zinc_id')
+    print(identifier)
     files = {
-            'zinc_id': zinc_id
+            'zinc_id': identifier
     }
     response = requests.get(base_url + 'search.json', params=files)
     print(response)
@@ -92,7 +92,7 @@ def searchZinc():
         print(data)
         return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices)
     else:
-        return render_template('errors/search404.html', lines=files), 404
+        return render_template('errors/search404.html', lines=files, href='/newcart', header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
 
 
 @application.route('/searchSmilesList', methods=["POST"])

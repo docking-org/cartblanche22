@@ -73,22 +73,19 @@ def showSmilesResult():
     value = request.args['value']
     dist = request.args['dist']
     adist = request.args['adist']
-    print('from downloadSmilesResult')
+    print('from showSmilesResult')
     print(value)
     files = {
         'smiles-in': value,
         'dist': dist,
         'adist': adist,
     }
-    try:
-        response = requests.post(base_url + 'smilelist', params=files, timeout=120)
+    response = requests.post(base_url + 'smilelist', params=files, timeout=120)
+    if response:
         data = response.json()
         print(data)
         return render_template('search/search_result_smile.html', data_=data, value=value, dist=dist)
-    except requests.exceptions.Timeout as e:
-        print(e)
-        return render_template('errors/search404.html', header="We can't find your search. Our server responds too slow", lines=value), 404
-    except:
+    else:
         return render_template('errors/search404.html', header='We found 0 matches', lines=value), 404
 
 
@@ -119,13 +116,11 @@ def showZincListResult():
     files = {
         'zinc_id-in': value
     }
-    try:
-        response = requests.post(base_url + 'sublist', params=files, timeout=120)
+    response = requests.post(base_url + 'sublist', params=files, timeout=120)
+    if response:
         data = response.json()
+        print('lalalal')
         print(data)
-        return render_template('search/search_result.html', data_=data['items'], value=value, search='zinc')
-    except requests.exceptions.Timeout as e:
-        print(e)
-        return render_template('errors/search404.html', header="We can't find your search. Our server responds too slow", lines=value), 404
-    except:
-        return render_template('errors/search404.html', header='We found 0 matches', lines=value), 404
+        return render_template('search/search_result.html', data_=data['items'], value=value, search='zinc'), 200
+    else:
+        return render_template('errors/search404.html', header='We found 0 matches', lines=value, href='/search/zincid'), 404

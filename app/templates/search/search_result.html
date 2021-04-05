@@ -44,7 +44,7 @@ function addAllToCart(button, data) {
 function removeZinc(data){
      let item = {}
         item.identifier = data.zinc_id
-        item.db = ''
+        item.db = 'zinc22'
         item.img = 'https://sw.docking.org/depict/svg?w=50&h=30h&smi=' + data.smiles + '&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow'
         item.supplier = []
     let btn = $('#' + item.identifier)
@@ -62,7 +62,7 @@ function removeZinc(data){
 function addZinc(data){
      let item = {}
         item.identifier = data.zinc_id
-        item.db = ''
+        item.db = 'zinc22'
         item.img = 'https://sw.docking.org/depict/svg?w=50&h=30h&smi=' + data.smiles + '&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow'
         item.supplier = []
     let btn = $('#' + item.identifier)
@@ -75,6 +75,7 @@ function addZinc(data){
     }
     localStorage.setItem('cart', JSON.stringify(cart))
         $('#cartCount').html(getCartSize(cart))
+
 
 }
 function zincToggle(button, data){
@@ -146,7 +147,7 @@ function zincToggle(button, data){
                 <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
                     <div class="zinc-results"  onclick="zincToggle(this, {{data|safe}})" id={{ data.zinc_id }}>
                         <h5 class="caption">
-                            <a href="{{ url_for('main.searchZinc', zinc_id = data.zinc_id) }}" title="More about">{{ data.zinc_id }}
+                            <a href="/searchZinc/{{ data.zinc_id }}" title="More about">{{ data.zinc_id }}
                                 <div class="small name">
 
                                     <abbr title="Name">

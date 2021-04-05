@@ -77,7 +77,12 @@
                 },
                 {
                     "mData": function (data) {
-                        return "<a><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
+                        if(data.db.includes('zinc22')){
+                            return "<a href='/searchZinc/" + data.identifier +"'><p id=''>" + data.identifier + "<br/>" + data.db + "</p></a>";
+                        }
+                        else{
+                            return "<a><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
+                        }
                     }
                 },
                 {
@@ -167,7 +172,9 @@
 
         $('#table').on("click", "#identifier", function () {
             let data = table.row($(this).parents('tr')).data()
-            $.ajax({
+            if (data.db.includes('zinc22')){
+                console.log(data.identifier)
+                         $.ajax({
                 type: "POST",
                 url: "/processItem",
                 data: JSON.stringify(data),
@@ -179,6 +186,22 @@
                     window.location.href = route;
                 }
             });
+            }
+            else{
+                     $.ajax({
+                type: "POST",
+                url: "/processItem",
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    var route = data.result;
+                    console.log(route);
+                    window.location.href = route;
+                }
+            });
+            }
+
         });
     });
     $('#checkout').on('click', () => {
@@ -189,7 +212,7 @@
         $.ajax({
             type: "POST",
             url: "/processCheckout",
-            data: JSON.stringify({ 'cart': cart, 'total': total }),
+            data: JSON.stringify({'cart': cart, 'total': total}),
             contentType: "application/json",
             dataType: 'json',
             success: function (route) {
@@ -197,7 +220,11 @@
             }
         });
     })
-
+function setMolIndexLink(){
+{#        console.log(            let data = table.row($(this).parents('tr')).data()#}
+{#)#}
+{#        $('#identifier')#}
+}
 </script>
 {% endblock %}
 
