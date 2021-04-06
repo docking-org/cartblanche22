@@ -108,6 +108,7 @@ def showSupplierResult():
     except:
         return render_template('errors/search404.html', header='We found 0 matches', lines=value), 404
 
+
 @application.route('/showZincListResult/', methods=["GET"])
 def showZincListResult():
     value = request.args['value']
