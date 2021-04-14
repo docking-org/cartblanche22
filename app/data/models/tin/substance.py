@@ -4,6 +4,15 @@ from app.helpers.validation import base62
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
+import random
+import sqlalchemy as sa
+
+TABLE_ROW_COUNT_SQL = \
+    """ SELECT CAST(reltuples AS BIGINT) AS num_rows
+        FROM pg_catalog.pg_class
+        WHERE oid = CAST(:table AS pg_catalog.regclass)
+    """
+
 
 class SubstanceModel(db.Model):
     #__bind_key__ = 'tin'
@@ -32,6 +41,14 @@ class SubstanceModel(db.Model):
                 db.session.query(func.count(cls.sub_id))
             )
         ).limit(limit).all()
+
+    @classmethod
+    def get_random2(cls, limit):
+        rowcount_query = sa.text(TABLE_ROW_COUNT_SQL)
+        count = db.session.connection().execute(rowcount_query, table='substance').scalar()
+        print("Row Count: ===========================================", count)
+        offset = int(count * random.random())-int(limit)
+        return cls.query.offset(offset).limit(limit)
 
     @classmethod
     def find_by_sub_id(cls, sub_id):

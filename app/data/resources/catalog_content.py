@@ -73,8 +73,9 @@ class CatalogContent(Resource):
             time2 = time.time()
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
-            print('{:s} !!!!!!!!!! started at {} and finished at {}'.format(args.get('tin_url'), strtime1, strtime2))
-            print('{:s} !!!!!!!!!! function took {:.3f} ms'.format(args.get('tin_url'), (time2 - time1) * 1000.0))
+            print('{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(args.get('tin_url'),
+                                                                                              strtime1, strtime2,
+                                                                                              (time2 - time1) % 60))
 
             data = []
             for cc in catContents:

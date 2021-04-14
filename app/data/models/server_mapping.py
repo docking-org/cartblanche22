@@ -12,12 +12,11 @@ class ServerMappingModel(db.Model):
     port_fk = db.Column(db.Integer, db.ForeignKey('port_number.port_id'), nullable=False)
     port_number = db.relationship('PortNumberModel', backref='server_mappings')
 
-
     def __init__(self, ip_address, port_number):
         self.ip_address = ip_address
-        self.ip_fk = ip_address.id
+        self.ip_fk = ip_address.ip_id
         self.port_number = port_number
-        self.port_fk = port.id
+        self.port_fk = port_number.port_id
 
     def save_to_db(self):
         db.session.add(self)
