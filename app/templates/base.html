@@ -44,6 +44,7 @@
     <script src="{{ url_for('static', filename = 'js/jquery-ui.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/custom/cart.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/custom/hg.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/base.js') }}"></script>
 {#    <script src="../static/js/datatables.min.js"></script>#}
 {#    <script src="../static/js/jquery-ui.min.js"></script>#}
     <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
@@ -55,6 +56,12 @@
 
 {#    <script type="text/javascript" src="../static/js/custom/cart.js"></script>#}
     <script>
+    console.log('shoppingCart', shoppingCart)
+    shoppingCart.addItemToCart('s', 3, 1)
+    shoppingCart.addItemToCart('dsf', 2, 1)
+    shoppingCart.addItemToCart('sada', 6, 2)
+        console.log('shoppingCart', shoppingCart)
+
     $(function () {
   $('[data-toggle="tooltip"]').tooltip({
        boundary: 'window',

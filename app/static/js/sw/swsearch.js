@@ -578,12 +578,13 @@ function hit_renderer(data, type, row) {
         .replace("%m", encodeURIComponent(cmap))
         .replace("%w", 50).replace("%h", 30);
 
+    var id = datasets[search_state.db].prefix + data.id;
     img.attr('src', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     img.attr('onmouseenter', 'show_imgpop(this);');
     img.attr('onmouseleave', 'hide_imgpop();');
+    img.attr('onclick', 'vava(this);');
     img.attr('ondragstart', 'drag_img(event, "' + data.hitSmiles + '");');
     var div = $("<div></div>");
-    var id = datasets[search_state.db].prefix + data.id;
     var href = datasets[search_state.db].url.replace("%s", data.id);
     button.attr('id', id);
     button.attr('data-identifier', id);
@@ -631,4 +632,9 @@ function trToggle(tr) {
     // console.log(tr.rowIndex)
     // $(tr).css('background-color', 'red')
     // console.log('working')
+}
+function vava(d) {
+    console.log('caca')
+    console.log(d)
+    d.css('background-color', 'red')
 }
