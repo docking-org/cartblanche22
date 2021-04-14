@@ -3,7 +3,7 @@ from app.data.models.tin.substance import SubstanceModel
 from app.data.models.server_mapping import ServerMappingModel
 from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
-from app.helpers.validation import base10, getAllTINUrl
+from app.helpers.validation import base10, getAllTINUrl, getAllUniqueTINServers
 from flask import jsonify, current_app, request
 from collections import defaultdict
 import grequests
@@ -12,6 +12,14 @@ import time
 from flask_csv import send_csv
 from datetime import datetime
 import itertools
+import logging
+import requests
+import random
+
+logging.basicConfig(filename="std.log",
+					format='%(asctime)s %(message)s',
+					filemode='w')
+logger=logging.getLogger()
 
 parser = reqparse.RequestParser()
 
@@ -142,6 +150,8 @@ class Substance(Resource):
         strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
         print('{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(args.get('tin_url'), strtime1, strtime2, (time2 - time1)%60))
         print("{} server returned {} results and {} result was expecting".format(args.get('tin_url'), len(substances), sub_ids_len))
+        if len(substances) != sub_ids_len:
+            logger.info(args.get('sub_ids'))
 
         if substances is None:
             return {'message': 'Substance not found with sub_id(s): {}'.format(sub_ids)}, 404
@@ -193,7 +203,7 @@ class SubstanceRandomList(Resource):
             time1 = time.time()
             # random_substances = SubstanceModel.query.order_by(func.random()).limit(random)
             # random_substances = SubstanceModel.query.offset(func.floor(func.random() * SubstanceModel.query.count())).limit(random)
-            random_substances = SubstanceModel.get_random(random)
+            random_substances = SubstanceModel.get_random2(random)
 
             time2 = time.time()
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
@@ -213,55 +223,75 @@ class SubstanceRandomList(Resource):
 
 class SubstanceRandom(Resource):
     def get(self, file_type=None):
-        parser.add_argument('count', type=str)
+        parser.add_argument('count', type=int)
         parser.add_argument('timeout', type=int)
         args = parser.parse_args()
         return self.getRandom(args, file_type)
 
     def post(self, file_type=None):
-        parser.add_argument('count', type=str)
+        parser.add_argument('count', type=int)
         parser.add_argument('timeout', type=int)
         args = parser.parse_args()
         return self.getRandom(args, file_type)
 
     @classmethod
     def getRandom(cls, args, file_type=None):
-        count = int(args.get('count'))
-        timeout = 40
+        requested_count = int(args.get('count'))
+        timeout = 1
         if args.get('timeout'):
             timeout = args.get('timeout')
-        # server_mappings = ServerMappingModel.query.distinct(
-        #     ServerMappingModel.ip_fk,
-        #     ServerMappingModel.port_fk).all()
-        #
-        # per_server_count = int(round(count / len(server_mappings))) + 100
-        #
-        # tin_urls = {}
-        # tin_list = []
 
-        # for sm in server_mappings:
-        #     if sm.tranches:
-        #         url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
-        #         tin_list.append(url)
-        #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
+        tin_urls = getAllUniqueTINServers()
+        print("tin_urls", tin_urls)
+        server_len = len(tin_urls)
+        print("round(requested_count / server_len) ", round(requested_count / server_len) )
+        per_server_count = int(requested_count / server_len) + 500
+        print("requested_count", requested_count)
+        # def hook(r, returned_count=0, **kwargs):
+        #     print("r-------------------------------------------------------------------", r.text[:20])
+        #     print("returned_count", returned_count)
+        #     data_arr = json.loads(r.text.strip())
+        #     print(type(data_arr[0]))
+        #     print(data_arr[0].get('smiles'))
+        #     print(len(data_arr) > 0)
+        #     if data_arr and len(data_arr) > 0 and data_arr[0].get('smiles'):
+        #         print("********************************************************")
+        #         print("len(data_arr)", len(data_arr))
+        #         returned_count += len(data_arr)
+        #         print(returned_count)
+        #     return r
 
-        tin_urls = getAllTINUrl()
-        per_server_count = int(round(count / len(tin_urls))) + 100
+        # url = 'https://{}/subrandom'.format(request.host)
+        # resp = (grequests.post(url, data={'tin_url': v, 'random': per_server_count}, hooks={'response': [hook, returned_count]}, timeout=timeout) for
+        #         k, v in tin_urls.items())
+
+        # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
+        # flat_list = itertools.chain.from_iterable(results)
 
         url = 'https://{}/subrandom'.format(request.host)
-        resp = (grequests.post(url, data={'tin_url': v, 'random': per_server_count}, timeout=timeout) for
-                k, v in tin_urls.items())
-
-        results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
-        flat_list = itertools.chain.from_iterable(results)
+        result_list = []
+        max_try = 100
+        while len(result_list) < requested_count and max_try > 0:
+            max_try -= 1
+            params = {'tin_url': random.choice(tin_urls), 'random': per_server_count}
+            try:
+                print(params)
+                uResponse = requests.post(url, params=params, timeout=timeout)
+                dl = json.loads(uResponse.text)
+                if dl and len(dl) > 0 and dl[0].get('smiles'):
+                    result_list.extend(dl)
+            except Exception as e:
+                print("Exception", e)
+            print("Current colledted results ********************************************************* :", len(result_list))
 
         data = defaultdict(list)
-        data['items'] = list(flat_list)
+        data['items'] = list(result_list)
 
         if not data['items']:
             return {'message': 'Not found'}, 404
 
         if file_type in ['csv', 'txt']:
+            print("data************************", data)
             keys = list(data['items'][0].keys())
             str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
             return send_csv(data['items'], "substance_search_{}.csv".format(str_time), keys)

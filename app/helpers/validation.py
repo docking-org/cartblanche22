@@ -12,6 +12,21 @@ from sqlalchemy import func
 #         print("Setting TIN URL: ", url)
 #         current_app.config['TIN_URL'] = url
 
+def getAllUniqueTINServers():
+    urls = []
+    server_mappings_fk = ServerMappingModel.query.with_entities(
+        func.min(ServerMappingModel.sm_id).label("sm_id"),
+        ServerMappingModel.ip_fk,
+        ServerMappingModel.port_fk
+    ).group_by(ServerMappingModel.ip_fk, ServerMappingModel.port_fk).subquery()
+
+    server_mappings = ServerMappingModel.query.filter(ServerMappingModel.sm_id == server_mappings_fk.c.sm_id).all()
+
+    for sm in server_mappings:
+        urls.append("{}:{}".format(sm.ip_address.ip, sm.port_number.port))
+
+    return urls
+
 def getAllTINUrl():
     urls = {}
 

@@ -122,7 +122,7 @@ class SmileList(Resource):
         uri = "{}/search/submit".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
         params = {
             'smi': '',
-            'db': 'zinc22_2d_All.smi.anon',
+            'db': 'zinc_2d_All.smi.anon',
             'dist': adist,
             'tdn': 4,
             'tup': 4,
