@@ -3,9 +3,25 @@
 {% block scripts %}
 {{ super() }}
 <script>
-    $("#submit").submit(() => {
-        console.log('sign in button clicked!');
-    });
+    {#$("#submit").submit(() => {#}
+    {#    alert('sign in button clicked! submit');#}
+    {#$("form").submit(() =>{#}
+    {#    alert('sign in button clicked!');#}
+    {#    $.ajax({#}
+    {#        type: 'POST',#}
+    {#        url: '/saveCartToDbTest',#}
+    {#        data:  JSON.stringify({#}
+    {#            'totalCart': shoppingCart.getCart(),#}
+    {#        }),#}
+    {#        contentType: "application/json; charset=utf-8",#}
+    {#        dataType: "json",#}
+    {#        success: function (result) {#}
+    {#            console.log('db saved')#}
+    {#        },#}
+    {#        error: function (data) {#}
+    {#             console.log('saveCartToDb failed')#}
+    {#        }#}
+    {#    });#}
 </script>
 {% endblock %}
 {% block app_content %}

@@ -14,18 +14,6 @@ function getVendors(bool, identifier, db) {
     return data;
 }
 
-function updateTotalAmount() {
-    let cart = JSON.parse(localStorage.getItem('cart'))
-    let total = 0
-    for (let i = 0; i < cart.length; i++) {
-        let item = cart[i]
-        for (let j = 0; j < item.supplier.length; j++) {
-            total += item.supplier[j].purchase * item.supplier[j].price
-        }
-    }
-    return total.toFixed(2);
-}
-
 function cartToArray() {
     let cart = JSON.parse(localStorage.getItem('cart'))
     let data = []

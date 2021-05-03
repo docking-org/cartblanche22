@@ -7,6 +7,9 @@ from app.data.models.items import Items
 from app.data.models.items import Vendors
 # from app.main.vendors import getVendors
 import json
+from app import db
+
+
 
 
 @application.route('/addToCart', methods=['POST'])
@@ -56,13 +59,15 @@ def deleteItem(identifier):
 @application.route('/showItem')
 def showItem():
     data = json.loads(request.args.get('data'))
-    return render_template('cart/item.html', identifier=data['identifier'], img=data['img'], db=data['db'])
+    print(data)
+    return render_template('cart/item.html', identifier=data['identifier'], img=data['img'], db=data['db'], smile=data['smile'])
 
 
 @application.route("/processItem", methods=['POST'])
 def processItem():
     data = request.get_json()
+    print(data)
     return jsonify({
         'result': url_for('main.showItem',
-                          data=json.dumps({"identifier": data['identifier'], "img": data['img'], "db": data['db']}))
+                          data=json.dumps({"identifier": data['identifier'], "img": data['img'], "db": data['db'], "smile":data['smile']}))
     })

@@ -17,45 +17,12 @@ import asyncio
 from app.main.items import addToCartWithVendor
 
 
-@application.route('/updateVendor', methods=['PUT'])
-def updateVendor():
-    if current_user.is_authenticated:
-        activeCart = Carts.query.get(current_user.activeCart)
-        data = request.get_json()
-        item = Items.query.filter_by(identifier=data['identifier'], cart_fk=current_user.activeCart).first()
-        vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],
-                                         supplier_code=data['supplier_code'], price=float(data['price']),
-                                         pack_quantity=float(data['quantity']), unit=data['unit']).first()
-        vendor.updatePurchaseQuantity(data['purchase'])
-    return jsonify('successfully updated vendor purchase to db')
 
 
-@application.route('/addVendor', methods=['POST'])
-def addVendor():
-    if current_user.is_authenticated:
-        activeCart = Carts.query.get(current_user.activeCart)
-        data = request.get_json()
-        item_id = activeCart.addToCartGetId(current_user, data['identifier'], data['img'], data['db'])
-        vendor_ = Vendors.addVendor(item_id, data['vendor'])
-        print('added succeesfully')
-        print(vendor_)
-    return jsonify('successfullt added vendor to db')
 
 
-@application.route('/deleteVendor', methods=['POST'])
-def deleteVendor():
-    if current_user.is_authenticated:
-        data = request.get_json()
-        item = Items.query.filter_by(identifier=data['identifier'], cart_fk=current_user.activeCart).first()
-        vendors =  Vendors.query.filter_by(item_fk=item.item_id).all()
-        if len(vendors) <= 1:
-            item.deleteItem()
-        else:            
-            vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],
-                                             supplier_code=data['supplier_code'], price=float(data['price']),
-                                             pack_quantity=float(data['quantity']), unit=data['unit']).first()
-            vendor.deleteVendor()
-    return jsonify('successfully deleted vendor from db')
+
+
 
 
 @application.route('/vendorsFromZinc', methods=['GET'])
@@ -109,12 +76,10 @@ def autoChooseVendor(item_id):
 
 @application.route('/getVendors/<identifier>/<db>', methods= ['GET'])
 def getVendors(identifier, db):
-    print('geTVEndors')
     payload = {'molecule_id' : identifier , 'source_database' : db}
     response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data', params=payload)
     # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
     vendors = []
-    print(response)
     if response and len(response.json()) > 0:
         res = response.json()
         i = 0
@@ -130,7 +95,6 @@ def getVendors(identifier, db):
                 temp['shipping'] = pack['shipping']
                 temp['DT_RowId'] = i
                 vendors.append(temp)
-    print(vendors)
     return jsonify({'vendors': vendors})
 
 
