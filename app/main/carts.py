@@ -3,8 +3,88 @@ from app.main import application
 from flask_login import current_user
 from app.data.models.carts import Carts
 from app.data.models.items import Items
+from app.data.models.vendors import Vendors
 from app.main.punchout import punchoutOrder
 from app.main.items import addToCartWithVendor
+from app import db
+
+
+@application.route('/addItem', methods=['POST'])
+def addItem():
+    item = request.get_json()['data']
+    print('adding item:  ', item)
+    new_item = Items(cart_fk=current_user.activeCart, identifier=item['identifier'], compound_img=item['smile'],
+                     database=item['db'])
+    db.session.add(new_item)
+    db.session.commit()
+    for s in item['supplier']:
+        vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
+                         purchase_quantity=s['quantity'],
+                         supplier_code=s['supplier_code'], price=float(s['price']),
+                         pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
+        db.session.add(vendor)
+        db.session.commit()
+        print('add vendor for new item')
+    return jsonify('successfully added item to cart db')
+
+
+@application.route('/addVendorTest', methods=['POST'])
+def addVendorTest():
+    if current_user.is_authenticated:
+        data = request.get_json()['data']
+        identifier = data['identifier']
+        sup = data['sup']
+        item = Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first()
+        vendor = Vendors(item_fk=item.item_id, cat_name=sup['cat_name'],
+                         purchase_quantity=sup['purchase'],
+                         supplier_code=sup['supplier_code'], price=float(sup['price']),
+                         pack_quantity=float(sup['quantity']), unit=sup['unit'], shipping_str=sup['shipping'])
+        db.session.add(vendor)
+        db.session.commit()
+        print('adding vendor:  ', vendor)
+        return jsonify('successfully added vendor to db')
+    return jsonify("user not logged in")
+
+
+@application.route('/deleteItemTest', methods=['DELETE'])
+def deleteItemTest():
+    if current_user.is_authenticated:
+        data = request.get_json()['data']
+        identifier = data['identifier']
+        Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first().deleteItem()
+        return jsonify('successfully deleted an item from db')
+    return jsonify("user not logged in")
+
+
+@application.route('/deleteVendorTest', methods=['POST'])
+def deleteVendorTest():
+    if current_user.is_authenticated:
+        data = request.get_json()['data']
+        item = Items.query.filter_by(identifier=data['identifier'], cart_fk=current_user.activeCart).first()
+        vendors = Vendors.query.filter_by(item_fk=item.item_id).all()
+        if len(vendors) <= 1:
+            item.deleteItem()
+        else:
+            vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],
+                                             supplier_code=data['supplier_code'], price=float(data['price']),
+                                             pack_quantity=float(data['quantity']), unit=data['unit']).first()
+            vendor.deleteVendor()
+        return jsonify('successfully deleted vendor from db')
+    return jsonify("user not logged in")
+
+
+@application.route('/updateVendorTest', methods=['POST'])
+def updateVendorTest():
+    if current_user.is_authenticated:
+        data = request.get_json()['data']
+        identifier = data['identifier']
+        item = Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first()
+        print(data)
+        vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],
+                                         supplier_code=data['supplier_code'], price=float(data['price']),
+                                         pack_quantity=float(data['quantity']), unit=data['unit']).first()
+        vendor.updatePurchaseQuantity(data['purchase'])
+    return jsonify('successfully updated vendor purchase to db')
 
 
 @application.route('/saveCartToDb', methods=['POST'])
@@ -14,26 +94,70 @@ def saveCartToDb():
     activeCart = Carts.query.get(current_user.activeCart)
     for d in data:
         if len(d['supplier']) == 0:
-            activeCart.addToCartGetId(current_user, d['identifier'], d['img'], d['db'])
+            activeCart.addToCartGetId(current_user, d['identifier'], d['smile'], d['db'])
         else:
             for v in d['supplier']:
-                addToCartWithVendor(d['identifier'], d['img'], d['db'], v)
+                addToCartWithVendor(d['identifier'], d['smile'], d['db'], v)
     # response = Response(, 200, mimetype="application/json")
     # print(response)
-    return jsonify('successfully integrated  localStorageData to db')
+    return jsonify('successfully integrated  localStorageData to db')\
 
 
-@application.route('/newcart', methods= ['GET',  'POST'])
-def newcart():
-    return render_template('cart/newcart.html')
+@application.route('/saveCartToDbTest', methods=['POST'])
+def saveCartToDbTest():
+    print('saveCartToDB')
+    data = request.get_json()['totalCart']
+    print(data)
+    for d in data:
+        item = Items.query.filter_by(identifier=d['identifier'], cart_fk=current_user.activeCart).first()
+        if item:
+            suppliers = d['supplier']
+            if len(suppliers) > 0:
+                for s in suppliers:
+                    vendor = Vendors.query.filter_by(cat_name=s['cat_name'], supplier_code=s['supplier_code'],price=s[
+                            'price'], pack_quantity=s['quantity'], unit=s['unit'], shipping_str=s[
+                            'shipping']).first()
+                    if vendor:
+                        vendor.updatePurchaseQuantity(max(s['purchase'], vendor.purchase_quantity))
+                    else:
+                        vendor = Vendors(item_fk=item.item_id, cat_name=s['cat_name'],
+                                         purchase_quantity=s['purchase'],
+                                         supplier_code=s['supplier_code'], price=float(s['price']),
+                                         pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
+                        db.session.add(vendor)
+                        db.session.commit()
+                        print('added vendor in found item')
+        else:
+            new_item = Items(cart_fk=current_user.activeCart, identifier=d['identifier'], compound_img=d['smile'],
+                             database=d['db'])
+            db.session.add(new_item)
+            db.session.commit()
+            print('add item: ', d['identifier'])
+            print('new_item: ',new_item)
+            suppliers = d['supplier']
+            for s in suppliers:
+                vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
+                                 purchase_quantity=s['purchase'],
+                                 supplier_code=s['supplier_code'], price=float(s['price']),
+                                 pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
+                db.session.add(vendor)
+                db.session.commit()
+                print('add vendor for new item')
+    response = populateCart()
+    return jsonify(response)
 
-@application.route('/cart', methods= ['GET',  'POST'])
+
+@application.route('/cart', methods=['GET',  'POST'])
 def cart():
-    items = Items.query.filter_by(cart_fk=current_user.activeCart).all()
-    totalPrices=[]
-    totalQuantities=[]
-    punchoutOrderMessage, url = punchoutOrder()
-    return render_template('cart/cart.html', data=items, prices=totalPrices, quantities=totalQuantities, punchoutOrderMessage=punchoutOrderMessage, url=url)
+    return render_template('cart/shoppingcart.html')
+
+# @application.route('/cart', methods= ['GET',  'POST'])
+# def cart():
+#     items = Items.query.filter_by(cart_fk=current_user.activeCart).all()
+#     totalPrices=[]
+#     totalQuantities=[]
+#     punchoutOrderMessage, url = punchoutOrder()
+#     return render_template('cart/cart.html', data=items, prices=totalPrices, quantities=totalQuantities, punchoutOrderMessage=punchoutOrderMessage, url=url)
 
 @application.route('/carts', methods= ['GET',  'POST'])
 def carts():
@@ -90,7 +214,7 @@ def populateCart():
             item = {}
             item['identifier'] = c.identifier
             item['db'] = c.database
-            item['img'] = c.compound_img
+            item['smile'] = c.compound_img
             supplier = []
             for v in c.vendors:
                 vendor = {}

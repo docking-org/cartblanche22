@@ -10,26 +10,32 @@
 
 {% block styles %}
     {{ super() }}
-    <link rel="stylesheet" href = "{{ url_for('static', filename = 'css/base.css') }}">
-    <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css"/>
-{#    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">#}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/base.css') }}">
+{#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/datatables.min.css') }}">#}
+{#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery-ui.min.css') }}">#}
+{#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/fontawesome-all.min.css') }}">#}
+    {#    <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css"/>#}
+    {#    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css"/>#}
+    {#    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">#}
+    {#    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">#}
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <style>
 
-  .ui-tooltip {
-    padding: 10px 20px;
-    color: black;
-      width: 30%;
-    border-radius: 20px;
-    font: 14px "Helvetica Neue", Sans-Serif;
-    {#box-shadow: 0 0 7px black;#}
-      opacity: 1;
-      background-color: white;
-              position: absolute;
-    margin-left:10px;
-  }
+        .ui-tooltip {
+            padding: 10px 20px;
+            color: black;
+            width: 30%;
+            border-radius: 20px;
+            font: 14px "Helvetica Neue", Sans-Serif;
+        {#box-shadow: 0 0 7px black;#} opacity: 1;
+            background-color: white;
+            position: absolute;
+            margin-left: 10px;
+        }
 
     </style>
 {% endblock %}
@@ -37,47 +43,41 @@
 {% block scripts %}
     {{ super() }}
     {#{{google.uanalytics('UA-10800222-14')}}#}
-
-    <script src="../static/js/datatables.min.js"></script>
-    <script src="../static/js/jquery-ui.min.js"></script>
+    <script src="{{ url_for('static', filename = 'js/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/jquery-ui.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/custom/cart.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/custom/hg.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/base.js') }}"></script>
     <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
-{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>#}
-
-    <script type="text/javascript" src="../static/js/custom/cart.js"></script>
     <script>
-    $(function () {
-  $('[data-toggle="tooltip"]').tooltip({
-       boundary: 'window',
-         position: {
-        my: "center bottom-10",
-        at: "center top",
-        using: function( position, feedback ) {
-          $( this ).css( position );
-          $( "<div>" )
-            .addClass( "arrow" )
-            .addClass( feedback.vertical )
-            .addClass( feedback.horizontal )
-            .appendTo( this );
-        }
-      }
-  })
-})
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                boundary: 'window',
+                position: {
+                    my: "center bottom-10",
+                    at: "center top",
+                    using: function (position, feedback) {
+                        $(this).css(position);
+                        $("<div>")
+                            .addClass("arrow")
+                            .addClass(feedback.vertical)
+                            .addClass(feedback.horizontal)
+                            .appendTo(this);
+                    }
+                }
+            })
+        })
 
         $(document).ready(() => {
-            if (localStorage.getItem('cart') != null) {
-                let cart = JSON.parse(localStorage.getItem('cart'))
-                $('#cartCount').html(getCartSize(cart))
-            }
-
+            $('#cartCount').html(shoppingCart.countCart())
+            localStorage.setItem('is_authenticated', '{{current_user.is_authenticated}}')
         })
         $('#logoutTab').on('click', () => {
-            let cart = []
-            localStorage.setItem('cart', JSON.stringify(cart))
-            localStorage.removeItem('items')
+            shoppingCart.clearCart();
             $.ajax({
                 type: "GET",
                 url: "/logout",
@@ -113,17 +113,18 @@
             </div>
             <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('main.sw') }}" class="test"
+                    <li>
+                        <a href="{{ url_for('main.sw') }}" class="test"
                            data-toggle="tooltip" data-placement="bottom"
-                                title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
-                            Similarity
-
-                    </a>
-
+                           title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
+                        Similarity
+                        </a>
                     </li>
-
-                    <li><a href="{{ url_for('main.arthor') }}" data-toggle="tooltip" data-placement="bottom"
-                           title="Arthor : Search by substructure or pattern (SMARTS)">Substructure</a></li>
+                    <li>
+                        <a href="{{ url_for('main.arthor') }}" data-toggle="tooltip" data-placement="bottom"
+                           title="Arthor : Search by substructure or pattern (SMARTS)">Substructure
+                        </a>
+                    </li>
                     {% if not current_user.is_anonymous %}
                         <li><a href="{{ url_for('main.swp') }}">SWP</a></li>
                         <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
@@ -141,7 +142,8 @@
                             <li><a href="{{ url_for('main.search_zincid') }}">By ZincID</a></li>
                             <li><a href="{{ url_for('main.search_suppliercode') }}">By Supplier Code</a></li>
                             <li><a href="{{ url_for('main.search_smiles') }}">By Smiles in ZINC-22</a></li>
-                            <li><a href="{{ url_for('main.search_smiles_vendor') }}">By Smiles in Vendor catalogs</a></li>
+{#                            <li><a href="{{ url_for('main.search_smiles_vendor') }}">By Smiles in Vendor catalogs</a>#}
+                            </li>
                             <li><a href="{{ url_for('main.search_random') }}">Download random molecules</a></li>
                         </ul>
                     </li>
@@ -149,7 +151,7 @@
 
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_anonymous %}
-                        <li id="loginTab" style="display:none"><a href="{{ url_for('main.login') }}" id="username">
+                        <li id="loginTab"><a href="{{ url_for('main.login') }}" id="username">
                             <span class="glyphicon glyphicon-user"></span>
                             Hello, Sign in!
                         </a>
@@ -157,13 +159,13 @@
                     {% else %}
                         <li>
                             <a href="{{ url_for('main.profile') }}" id="username">
-                            <span class="glyphicon glyphicon-user"></span>
-                            Hello, {{ current_user.username }}
+                                <span class="glyphicon glyphicon-user"></span>
+                                Hello, {{ current_user.username }}
                             </a>
                         </li>
                         <li><a id="logoutTab"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
                     {% endif %}
-                    <li><a href="{{ url_for('main.newcart') }}"><span class="glyphicon glyphicon-shopping-cart"
+                    <li><a href="{{ url_for('main.cart') }}"><span class="glyphicon glyphicon-shopping-cart"
                                                                       style="font-size:18px"></span><span class="badge"
                                                                                                           id="cartCount">{{ cart_count }}</span>
                     </a>

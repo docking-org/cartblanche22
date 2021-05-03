@@ -116,8 +116,8 @@
             type: 'GET',
             success: function (result) {
                 console.log(result['data'])
-                localStorage.setItem('cart', JSON.stringify(result['data']))
-                $('#cartCount').html(getCartSize(result['data']))
+                shoppingCart.dbCart(result['data'])
+                updateCartNums();
             }
         });
     }

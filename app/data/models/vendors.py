@@ -29,7 +29,6 @@ class Vendors(db.Model):
     def deleteVendor(self):
         db.session.delete(self)
         db.session.commit()
-        print('vendor deleted')
 
     def createVendor(item, item_id):
         print("creating vendor {} : {}".format(item, item_id))

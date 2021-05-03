@@ -1,24 +1,57 @@
-from flask import render_template, request, json, redirect, url_for, session, Response
+from flask import render_template, request, json, redirect, url_for, session, Response, jsonify
 from app.main import application
 from app.data.forms.searchForms import SearchZincForm, SearchSmilesForm, SearchSupplierForm, SearchRandom
 import requests
 import re
 from app.data.models.default_prices import DefaultPrices
 from flask_login import current_user
+import urllib.parse
 
 base_url = "https://cartblanche22.docking.org/"
 swp_server = 'https://swp.docking.org'
 sw_server = 'https://swp.docking.org'
 
-
-@application.route('/search/example')
-def search_example():
-    return render_template('search/search_result_example.html')
-
-
-@application.route('/search/mol/example')
-def search_mol_example():
-    return render_template('molecule/mol_example.html')
+@application.route('/search/api')
+def search_api():
+    data = [
+        {"catalogs":[{"catalog_name":"m","short_name":"m"}],
+         "smiles":"C=C(C)CN(C)[C@H](C)CNC(=O)c1nc(C)n2ccccc12",
+         "supplier_code":["m_275030__14114248__14126248__12659170"],
+         "tranche":{"h_num":"H22","logp":"s","mwt":"m","p_num":"P220"},
+         "zinc_id":"ZINCms000002NiP3"
+         },
+        {"catalogs": [{"catalog_name": "m", "short_name": "m"}],
+         "smiles": "C=C(C)CN(C)[C@H](C)CNC(=O)c1nc(C)n2ccccc12",
+         "supplier_code": ["m_275030__14114248__14126248__12659170"],
+         "tranche": {"h_num": "H22", "logp": "s", "mwt": "m", "p_num": "P220"},
+         "zinc_id": "ZINCms000002NiP4"
+         },
+        {"catalogs": [{"catalog_name": "m", "short_name": "m"}],
+         "smiles": "C=C(C)CN(C)[C@H](C)CNC(=O)c1nc(C)n2ccccc12",
+         "supplier_code": ["m_275030__14114248__14126248__12659170"],
+         "tranche": {"h_num": "H22", "logp": "s", "mwt": "m", "p_num": "P220"},
+         "zinc_id": "ZINCms000002NiP5"
+         },
+        {"catalogs": [{"catalog_name": "m", "short_name": "m"}],
+         "smiles": "C=C(C)CN(C)[C@H](C)CNC(=O)c1nc(C)n2ccccc12",
+         "supplier_code": ["m_275030__14114248__14126248__12659170"],
+         "tranche": {"h_num": "H22", "logp": "s", "mwt": "m", "p_num": "P220"},
+         "zinc_id": "ZINCms000002NiP6"
+         },
+        {"catalogs": [{"catalog_name": "m", "short_name": "m"}],
+         "smiles": "C=C(C)CN(C)[C@H](C)CNC(=O)c1nc(C)n2ccccc12",
+         "supplier_code": ["m_275030__14114248__14126248__12659170"],
+         "tranche": {"h_num": "H22", "logp": "s", "mwt": "m", "p_num": "P220"},
+         "zinc_id": "ZINCms000002NiP7"
+         },
+        {"catalogs": [{"catalog_name": "m", "short_name": "m"}],
+         "smiles": "C=C(C)CN(C)[C@H](C)CNC(=O)c1nc(C)n2ccccc12",
+         "supplier_code": ["m_275030__14114248__14126248__12659170"],
+         "tranche": {"h_num": "H22", "logp": "s", "mwt": "m", "p_num": "P220"},
+         "zinc_id": "ZINCms000002NiP8"
+         },
+    ]
+    return jsonify({'items': data})
 
 
 @application.route('/search/view')
@@ -81,18 +114,31 @@ def searchZinc(identifier):
             'zinc_id': identifier
     }
     response = requests.get(base_url + 'search.json', params=files)
-    print(response)
     if response:
         prices = None
+        role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
-            prices = DefaultPrices.query.filter_by(organization='ucsf')
+            role = 'ucsf'
         else:
-            prices = DefaultPrices.query.filter_by(organization='public')
+            role = 'public'
         data = response.json()
+        supplier_codes = data['items'][0]['supplier_code']
         print(data)
-        return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices)
+        print(supplier_codes)
+        prices = []
+        for s in supplier_codes:
+            if 'mcule' in s.lower():
+                prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+            elif 'w' in s.lower():
+                prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
+            elif 's' in s.lower():
+                prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
+            elif 'm' in s.lower():
+                prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
+        smile = data['items'][0]['smiles']
+        return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices, smile=urllib.parse.quote(smile))
     else:
-        return render_template('errors/search404.html', lines=files, href='/newcart', header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
+        return render_template('errors/search404.html', lines=files, href='/search/zincid', header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
 
 
 @application.route('/searchSmilesList', methods=["POST"])

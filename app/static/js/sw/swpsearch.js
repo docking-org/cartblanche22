@@ -600,20 +600,26 @@ function hit_renderer(data, type, row) {
     button.attr('data-identifier', id);
     button.attr('data-db', search_state.db);
     button.attr('data-hg', false);
+    button.attr('data-smile', hsmi)
     button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     button.attr('onclick', 'toggleCart(this)');
     button.attr('class', 'btn btn-info');
     let cart = JSON.parse(localStorage.getItem('cart'))
-    if(cart==null){
-    cart = []
-  }
-    let items = []
-    for (i = 0; i < cart.length; i++) {
-        items.push(cart[i].identifier)
-    }
-    if (items.includes(id)) {
-        button.html('Remove')
+  //   if(cart==null){
+  //   cart = []
+  // }
+  //   let items = []
+  //   for (i = 0; i < cart.length; i++) {
+  //       items.push(cart[i].identifier)
+  //   }
+  //   if (items.includes(id)) {
+  //       button.html('Remove')
+  //       button.attr('class', 'btn btn-danger')
+  //   }
+     if(shoppingCart.inCart(id)){
+                button.html('Remove')
         button.attr('class', 'btn btn-danger')
+
     }
     if (href) {
         div.append("<b><a target='_blank' href='" + href + "'>" + id + "</a></b>");

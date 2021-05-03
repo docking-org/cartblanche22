@@ -12,10 +12,9 @@ def cartblanche():
     response = []
     identifiers = []
     is_authenticated = False
-    cart_count=0
+    cart_count = 0
     punchout = False
     checkCart = False
-    print(session)
     url = ''
     if 'url' in session.keys():
         url = session['url']
@@ -27,7 +26,7 @@ def cartblanche():
             item = {}
             item['identifier'] = c.identifier
             item['db'] = c.database
-            item['img'] = c.compound_img
+            item['smile'] = c.compound_img
             supplier = []
             for v in c.vendors:
                 vendor = {}
@@ -46,7 +45,7 @@ def cartblanche():
         if 'checkCart' in session.keys():
             checkCart = session['checkCart']
             session['checkCart'] = False
-    return render_template('cartblanche.html', cart=json.dumps(response), items = json.dumps(identifiers),
+    return render_template('cartblanche.html', cart=json.dumps(response), items=json.dumps(identifiers),
                            is_authenticated=is_authenticated, cart_count=cart_count, url=url, punchout=punchout,
                            checkCart=checkCart)
 

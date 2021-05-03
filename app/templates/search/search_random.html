@@ -2,6 +2,46 @@
 {% block scripts %}
     {{ super() }}
     <script>
+        $("form#data").submit(function (e) {
+            $('#exampleModal').modal('show');
+            $('#spinnerbody').html("<i class='fa fa-spinner fa-pulse fa-x fa-fw'></i>We are working on it...")
+            $('#exampleModalLabel').html('Please wait...')
+            e.preventDefault();
+            var formData = new FormData();
+            let amountformat = $('#amountformat').val()
+            let format = $('#format').val()
+            formData.append('count', amountformat);
+            $.ajax({
+                url: 'https://cartblanche22.docking.org/substance/random.' + format,
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: formData,
+                type: 'POST',
+                success: function (response) {
+                    if (format == 'json') {
+                        var blob = new Blob([JSON.stringify(response)], {
+                            type: 'application/json',
+                        });
+                    } else {
+                        blob = new Blob([response], {type: 'text/' + format})
+
+                    }
+                    saveAs(blob, "random" + amountformat + '.' + format)
+                    $('#exampleModal').modal('hide');
+                },
+                statusCode: {
+                    404: function (responseObject, textStatus, jqXHR) {
+                        $('#exampleModalLabel').html("Failed")
+                        $('#spinnerbody').html("Error occured. Error code: " + error.status);
+                    },
+                },
+                error: function (error) {
+                    $('#exampleModalLabel').html("Failed")
+                    $('#spinnerbody').html("Error occured. Error code: " + error.status)
+                }
+            });
+        });
     </script>
 {% endblock %}
 {% block app_content %}
@@ -10,60 +50,78 @@
         <div class="panel panel-info">
             <div class="panel-heading">Download</div>
             <div class="panel-body">
-                <form action="/search/random" method="POST" class="form-inline">
-                   <div class="form-group">
+                <form id='data' action="" method="POST" class="form-inline">
+                    <div class="form-group">
 
-                       <select name="amount" class="btn btn-info" id="amountformat">
-                                        <option value="100" id="amount-100" selected>
-                                           100
-                                        </option>
-                           <option value="500" id="amount-500" >
-                               500
-                                        </option>
-                           <option value="1000" id="amount-1000" >
-                                           1000
-                                        </option>
-                           <option value="5000" id="amount-5000" >
-                                           5000
-                                        </option>
-                           <option value="10000" id="amount-10000" >
-                                           10000
-                                        </option>
-                           <option value="50000" id="amount-50000" >
-                                           50000
-                                        </option>
-                            <option value="100000" id="amount-100000" >
-                                           100000
-                                        </option>
-                           <option value="500000" id="amount-500000" >
-                                           500000
-                                        </option>
+                        <select name="amount" class="btn btn-info" id="amountformat">
+                            <option value="100" id="amount-100" selected>
+                                100
+                            </option>
+                            <option value="500" id="amount-500">
+                                500
+                            </option>
+                            <option value="1000" id="amount-1000">
+                                1000
+                            </option>
+                            <option value="5000" id="amount-5000">
+                                5000
+                            </option>
+                            <option value="10000" id="amount-10000">
+                                10000
+                            </option>
+                            {#                           <option value="50000" id="amount-50000" >#}
+                            {#                                           50000#}
+                            {#                                        </option>#}
+                            {#                            <option value="100000" id="amount-100000" >#}
+                            {#                                           100000#}
+                            {#                                        </option>#}
+                            {#                           <option value="500000" id="amount-500000" >#}
+                            {#                                           500000#}
+                            {#                                        </option>#}
 
-                                    </select>
-                       <select name="format" class="btn btn-info" id="format">
-                                        <option value="txt" id="format-txt" selected>
-                                           .txt
-                                        </option>
-
-                                    </select>
-
-                                  <button class="btn btn-primary" type="submit">
-                                        <i class="glyphicon glyphicon-download-alt"></i>
-                                        Download
-                                    </button>
-                                </div>
+                        </select>
+                        <select name="format" class="btn btn-info" id="format">
+                            <option value="txt" id="format-txt" selected>
+                                .txt
+                            </option>
+                            <option value="csv" id="format-csv">
+                                .csv
+                            </option>
+                            <option value="json" id="format-json">
+                                .json
+                            </option>
+                        </select>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="glyphicon glyphicon-download-alt"></i>
+                            Download
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
- <div class="row">
-    <h4>CURL commands for downloading random smiles</h4>
-     <p>Below curl command returns a json, txt or csv file with all possible fields.
-</p>
-<code>
-curl https://cartblanche22.docking.org/substance/random.txt -F count=100
- </code>
-
+    <div class="row">
+        <h4>CURL commands for downloading random smiles</h4>
+        <p>Below curl command returns a json, txt or csv file with all possible fields.
+        </p>
+        <code>
+            curl https://cartblanche22.docking.org/substance/random.txt -F count=100
+        </code>
     </div>
-
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h3 id="spinnerbody"><i class="fa fa-spinner fa-pulse fa-x fa-fw"></i> Searching...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

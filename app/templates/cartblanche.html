@@ -10,9 +10,8 @@
         localStorage.setItem('checkCart', '{{checkCart}}')
         timeoutCheck('{{is_authenticated}}', '{{cart|safe}}');
         if(localStorage.getItem('checkCart') == 'True'){
-                    cartCheck('{{is_authenticated}}', '{{cart|safe}}');
+                    cartCheck('{{is_authenticated}}');
         }
-        console.log("jquery: ready");
     });
 </script>
 {% endblock %}

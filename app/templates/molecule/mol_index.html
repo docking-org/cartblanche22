@@ -2,48 +2,29 @@
 {% block scripts %}
     {{ super() }}
     <script>
-    $(document).ready(() => {
-
-});
-    function addVendor(btn){
-        let price = btn.getAttribute('data-price')
-        let identifier = btn.getAttribute('data-id')
-        let img = btn.getAttribute('data-img')
-        let catalog = btn.getAttribute('data-catalog')
-        let quantity = btn.getAttribute('data-quantity')
-        let unit = btn.getAttribute('data-unit')
-        let shipping = btn.getAttribute('data-shipping')
-        let db = ''
-        let vendor = {}
-            vendor['shipping'] = shipping
-            vendor['cat_name'] = catalog
-            vendor['supplier_code'] = catalog
-            vendor['price'] = price
-            vendor['unit'] = unit
-            vendor['quantity'] = quantity
-            vendor['purchase'] = 1
-        {#will be added later#}
-        {#addVendorToCart(identifier, db, img, vendor)#}
-        $(btn).html('Added to Cart')
-        let cart = JSON.parse(localStorage.getItem('cart'))
-        let index = cart.findIndex(i => i.identifier == identifier)
-        if (index == -1) {
-            let item = {}
-            item.identifier = identifier
-            item.db = db
-            item.img = img
-            item.supplier = [vendor]
-            cart.push(item)
-            console.log('added cart')
+        function toggleVendor(btn) {
+            let price = btn.getAttribute('data-price')
+            let identifier = btn.getAttribute('data-id')
+            let smile = btn.getAttribute('data-smile')
+            let db = btn.getAttribute('data-db')
+            let supplier_code = btn.getAttribute('data-catalog')
+            let cat_name = btn.getAttribute('data-catalog')
+            let quantity = btn.getAttribute('data-quantity')
+            let unit = btn.getAttribute('data-unit')
+            let shipping = btn.getAttribute('data-shipping')
+            let purchase = 1
+            if (btn.getAttribute('class') == 'btn btn-info') {
+                shoppingCart.addVendorToCart(identifier, db, smile, cat_name, supplier_code, price, purchase, quantity, unit, shipping)
+                $(btn).html('Remove')
+                $(btn).attr('class', 'btn btn-danger')
+            } else {
+                shoppingCart.removeVendorFromCart(identifier, cat_name, supplier_code, quantity, unit, price)
+                $(btn).html('Add To Cart')
+                $(btn).attr('class', 'btn btn-info')
+            }
+            $('#cartCount').html(shoppingCart.countCart())
         }
-        else{
-           cart[index]['supplier'].push(vendor)
 
-        }
-        localStorage.setItem('cart', JSON.stringify(cart))
-            $('#cartCount').html(getCartSize(cart))
-
-    }
     </script>
 {% endblock %}
 {% block app_content %}
@@ -59,13 +40,6 @@
                 <div class="clearfix">
                     <strong class="pull-left">In:</strong>
                     <ul class="list-inline">
-{#                        <li><a href="/substances/subsets/not-for-sale/" title="Browse the not-for-sale subset">#}
-{#                            list of database#}
-{#                        </a></li>#}
-{#                        <li><a href="/substances/subsets/reactive/" title="Browse the reactive subset">#}
-{#                            reactive#}
-{#                        </a></li>#}
-
                     </ul>
                 </div>
             </div>
@@ -79,43 +53,22 @@
                         <th>Tranche</th>
                         <th></th>
 
-{#                        <th>Download</th>#}
+                        {#                        <th>Download</th>#}
                     </tr>
                     </thead>
                     <tbody>
                     <tr>
-{% if data.tranche %}
-                        <td>{{ data.tranche.mwt }}</td>
-                        <td>{{ data.tranche.logp }}</td>
-                        <td>{{ data.tranche.h_num}}{{ data.tranche.p_num}}</td>
-                        <td></td>
-                        {%  else %}
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        {% if data.tranche %}
+                            <td>{{ data.tranche.mwt }}</td>
+                            <td>{{ data.tranche.logp }}</td>
+                            <td>{{ data.tranche.h_num }}{{ data.tranche.p_num }}</td>
+                            <td></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         {% endif %}
-
-{#                        <td>#}
-{#                            <div class="btn-group btn-group-no-wrap">#}
-{#                                <button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown"#}
-{#                                        aria-expanded="false">#}
-{#                        <span class="glyphicon glyphicon-download-alt" aria-label="Download" title="Download">#}
-{#                            <span class="sr-only">Download</span>#}
-{#                        </span>#}
-{#                                    <span class="caret"></span>#}
-{#                                </button>#}
-{##}
-{#                                <ul class="dropdown-menu pull-right" role="menu">#}
-{#                                    <li><a href="/substances/ZINC000084687284.smi">SMILES</a></li>#}
-{#                                    <li><a href="/substances/ZINC000084687284.sdf">SDF</a></li>#}
-{#                                    <li><a href="/substances/ZINC000084687284.csv">CSV</a></li>#}
-{#                                    <li><a href="/substances/ZINC000084687284.xml">XML</a></li>#}
-{#                                    <li><a href="/substances/ZINC000084687284.json">JSON</a></li>#}
-{#                                </ul>#}
-{##}
-{#                            </div>#}
-{#                        </td>#}
                     </tr>
                     </tbody>
                 </table>
@@ -130,17 +83,17 @@
                     </thead>
                     <tbody>
                     <tr>
-                        {% if data.catalogs[0].catalog_name == 'm' %}
-                        <td>Enamine_M</td>
-                        {%  elif data.catalogs[0].catalog_name == 's' %}
-                        <td>Enamine_S</td>
-                        {%  elif data.catalogs[0].catalog_name == 'wuxi' %}
-                        <td>wuxi</td>
-                        {%  elif data.catalogs[0].catalog_name == 'mcule' %}
-                        <td>mcule</td>
+                        {%if data.catalogs[0].catalog_name == 'mcule' %}
+                            <td>mcule</td>
+                        {% elif data.catalogs[0].catalog_name == 'm' %}
+                            <td>Enamine_M</td>
+                        {% elif data.catalogs[0].catalog_name == 's' %}
+                            <td>Enamine_S</td>
+                        {% elif data.catalogs[0].catalog_name == 'wuxi' %}
+                            <td>wuxi</td>
                         {% else %}
-                        <td>{{ data.catalogs[0].catalog_name }}</td>
-                        {%  endif %}
+                            <td>{{ data.catalogs[0].catalog_name }}</td>
+                        {% endif %}
                         <td>{{ data.catalogs[0].short_name }}</td>
                         <td>{{ data.sub_id }}</td>
                     </tr>
@@ -153,7 +106,8 @@
                 <div class="input-group input-sm">
                     <label for="substance-smiles-field" id="substance-smiles-field-label" class="input-group-addon"
                            title="Click to copy to clipboard">SMILES</label>
-                    <input type="text" class="form-control" id="substance-smiles-field" readonly="" value={{ data.smiles }}>
+                    <input type="text" class="form-control" id="substance-smiles-field" readonly=""
+                           value={{ data.smiles }}>
                     <span class="input-group-btn">
         <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-smiles-field"
                 title="Copy SMILES to clipboard">
@@ -161,101 +115,77 @@
         </button>
       </span>
                 </div>
-{#                <div class="input-group input-sm">#}
-{#                    <label for="substance-inchi-field" id="substance-inchi-field-label" class="input-group-addon"#}
-{#                           title="Click to copy to clipboard">InChI</label>#}
-{#                    <input type="text" class="form-control" id="substance-inchi-field" readonly=""#}
-{#                           value="InChI=1S/C2H4O4/c1-3-5-2-6-4-1/h1-2H2">#}
-{#                    <span class="input-group-btn">#}
-{#        <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-inchi-field"#}
-{#                title="Copy InChI to clipboard">#}
-{#            <span class="glyphicon glyphicon-copy"></span> <span class="sr-only">Copy</span>#}
-{#        </button>#}
-{#      </span>#}
-{#                </div>#}
-{#                <div class="input-group input-sm">#}
-{#                    <label for="substance-inchikey-field" id="substance-inchikey-field-label" class="input-group-addon"#}
-{#                           title="Click to copy to clipboard">InChI Key</label>#}
-{#                    <input class="form-control" id="substance-inchikey-field" value="UYVWNPAMKCDKRB-UHFFFAOYSA-N"#}
-{#                           readonly="">#}
-{#                    <span class="input-group-btn">#}
-{#        <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-inchikey-field"#}
-{#                title="Copy InChI Key to clipboard">#}
-{#            <span class="glyphicon glyphicon-copy"></span>#}
-{#        <span class="sr-only">Copy</span></button>#}
-{#      </span>#}
-{#                </div>#}
             </div>
 
         </div>
         <div class="col-sm-3">
             <div class="thumbnail">
-                <img style="width:100%; height: 15vh" src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles}}&qry=%q&cols=%c&cmap=%m" alt="ZINCgs0000000OA0">
+                <img style="width:100%; height: 15vh"
+                     src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ smile }}&qry=%q&cols=%c&cmap=%m"
+                     alt="ZINCgs0000000OA0">
 
                 <div class="caption text-center">
                     <a href="">Draw</a>
                 </div>
             </div>
 
-                    <table class="table table-striped table-condensed table-hover table-numeric">
-                    <thead>
-                    <tr>
-                        <th>Supplier Codes</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for supplier in data.supplier_code %}
+            <table class="table table-striped table-condensed table-hover table-numeric">
+                <thead>
+                <tr>
+                    <th>Supplier Codes</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for supplier in data.supplier_code %}
                     <tr>
                         <td>{{ supplier }}</td>
                     </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
 
 
     </div>
     <div class="row">
-    <table class="table table-striped table-condensed table-hover table-numeric">
-        <thead>
-                    <tr>
-                        <th>Organization</th>
-                        <th>Catalog Name</th>
-                        <th>Pack</th>
-                        <th>Ships within</th>
-                        <th>Price</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for p in prices %}
-                    <tr>
-                        <td>{{ p.organization }} </td>
-                        <td>{{ p.category_name }}</td>
-                        <td> {{ p.quantity }} {{ p.unit }}</td>
-                        <td> {{ p.shipping }} </td>
-                        <td> {{ p.price}} </td>
+        <table class="table table-striped table-condensed table-hover table-numeric">
+            <thead>
+            <tr>
+                <th>Organization</th>
+                <th>Catalog Name</th>
+                <th>Pack</th>
+                <th>Ships within</th>
+                <th>Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for p in prices %}
+                <tr>
+                    <td>{{ p.organization }} </td>
+                    <td>{{ p.category_name }}</td>
+                    <td> {{ p.quantity }} {{ p.unit }}</td>
+                    <td> {{ p.shipping }} </td>
+                    <td> {{ p.price }} </td>
 
-                                               <td>
+                    <td>
 
-                           <button class="btn btn-info"
-                                   data-catalog="{{ p.category_name }}"
-                                   data-price="{{ p.price}}"
-                                   data-quantity="{{ p.quantity }}"
-                                   data-unit="{{ p.unit }}"
-                                   data-shipping="{{ p.shipping }}"
-                                   data-id="{{ data.zinc_id }}"
-                                   data-img="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles}}&qry=%q&cols=%c&cmap=%m"
-                                   onclick="addVendor(this)">
-                               <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>
-                               Add to cart
-                           </button>
-
-                        </td>
-
-
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-    </table>
+{#                        <button class="btn btn-info vendorBtn"#}
+{#                                data-catalog="{{ p.category_name }}"#}
+{#                                data-price="{{ p.price }}"#}
+{#                                data-quantity="{{ p.quantity }}"#}
+{#                                data-unit="{{ p.unit }}"#}
+{#                                data-shipping="{{ p.shipping }}"#}
+{#                                data-id="{{ data.zinc_id }}"#}
+{#                                data-db = "zinc22"#}
+{#                                data-smile =" {{ data.smiles }}"#}
+{#                                onclick="toggleVendor(this)">#}
+{#                            <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>#}
+{#                            Add to cart#}
+{#                        </button>#}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

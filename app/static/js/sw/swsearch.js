@@ -578,30 +578,37 @@ function hit_renderer(data, type, row) {
         .replace("%m", encodeURIComponent(cmap))
         .replace("%w", 50).replace("%h", 30);
 
+    var id = datasets[search_state.db].prefix + data.id;
     img.attr('src', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     img.attr('onmouseenter', 'show_imgpop(this);');
     img.attr('onmouseleave', 'hide_imgpop();');
+    img.attr('onclick', 'vava(this);');
     img.attr('ondragstart', 'drag_img(event, "' + data.hitSmiles + '");');
     var div = $("<div></div>");
-    var id = datasets[search_state.db].prefix + data.id;
     var href = datasets[search_state.db].url.replace("%s", data.id);
     button.attr('id', id);
     button.attr('data-identifier', id);
     button.attr('data-hg', false);
     button.attr('data-db', search_state.db_name);
     button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
+    button.attr('data-smile', data.hitSmiles.split(" ")[0])
     button.attr('onclick', 'toggleCart(this)');
-    let cart = JSON.parse(localStorage.getItem('cart'))
-    if(cart==null){
-    cart = []
-  }
-    let items = []
-    for (i = 0; i < cart.length; i++) {
-        items.push(cart[i].identifier)
-    }
-    if (items.includes(id)) {
-        button.html('Remove')
+  //   let cart = JSON.parse(localStorage.getItem('cart'))
+  //   if(cart==null){
+  //   cart = []
+  // }
+    // let items = []
+    // for (i = 0; i < cart.length; i++) {
+    //     items.push(cart[i].identifier)
+    // }
+    // if (items.includes(id)) {
+    //     button.html('Remove')
+    //     button.attr('class', 'btn btn-danger')
+    // }
+    if(shoppingCart.inCart(id)){
+                button.html('Remove')
         button.attr('class', 'btn btn-danger')
+
     }
     if (href) {
         div.append("<b><a target='_blank' href='" + href + "'>" + id + "</a></b>");
@@ -631,4 +638,9 @@ function trToggle(tr) {
     // console.log(tr.rowIndex)
     // $(tr).css('background-color', 'red')
     // console.log('working')
+}
+function vava(d) {
+    console.log('caca')
+    console.log(d)
+    d.css('background-color', 'red')
 }

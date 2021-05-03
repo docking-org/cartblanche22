@@ -19,53 +19,69 @@ function update() {
 
 //used
 //sync authenticated users cart data in database with localStorage cart data
-function cartCheck(is_authenticated, cart_) {
-    localStorage.setItem('checkCart', 'False')
-    // if user is authenticated, localStorage cart data should match with user's database cart data
-    if (localStorage.getItem('cart') == null) {
-        let cart = JSON.parse(cart_)
-        localStorage.setItem('cart', JSON.stringify(cart))
-    }
-    if (is_authenticated == 'True') {
-        let dbcart = JSON.parse(cart_)
-        let totalCart = JSON.parse(localStorage.getItem('cart'))
-        for (let i = 0; i < dbcart.length; i++) {
-            let index = totalCart.findIndex(item => item.identifier == dbcart[i].identifier)
-            if (index == -1) {
-                totalCart.push(dbcart[i])
-            } else {
-                let supplier_db = dbcart[i].supplier
-                let supplier_total = totalCart[index].supplier
-                for (let j = 0; j < supplier_db.length; j++) {
-                    let sup_index = supplier_total.findIndex(supplier =>
-                        supplier.cat_name == supplier_db[j].cat_name &&
-                        supplier.supplier_code == supplier_db[j].supplier_code &&
-                        supplier.quantity == supplier_db[j].quantity && supplier.unit == supplier_db[j].unit)
-                    if (sup_index == -1) {
-                        supplier_total.push(supplier_db[j])
-                    } else {
-
-                        supplier_total[sup_index].purchase = Math.max(supplier_db[j].purchase, supplier_total[sup_index].purchase)
-                    }
-                }
-            }
-        }
-        localStorage.setItem('cart', JSON.stringify(totalCart))
-        $.ajax({
+function cartCheck(is_authenticated) {
+    localStorage.setItem('checkCart', 'False');
+    $.ajax({
             type: 'POST',
-            url: '/saveCartToDb',
+            url: '/saveCartToDbTest',
             data:  JSON.stringify({
-                'totalCart': totalCart,
+                'totalCart': shoppingCart.getCart(),
             }),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (result) {
-                console.log('db saved')
+                console.log(result);
+                shoppingCart.dbCart(result);
             },
             error: function (data) {
                  console.log('saveCartToDb failed')
             }
         });
-        $('#cartCount').html(getCartSize(totalCart))
-    }
+    // if user is authenticated, localStorage cart data should match with user's database cart data
+    // if (localStorage.getItem('cart') == null) {
+    //     let cart = JSON.parse(cart_)
+    //     localStorage.setItem('cart', JSON.stringify(cart))
+    // }
+    // if (is_authenticated == 'True') {
+    //     console.log(cart_)
+    //     let dbcart = JSON.parse(cart_);
+    //     console.log(dbcart)
+    //     // let totalCart = JSON.parse(localStorage.getItem('cart'))
+    //     let totalCart = shoppingCart.getCart();
+    //     for (let i = 0; i < dbcart.length; i++) {
+    //         let item = dbcart[i];
+    //         if (shoppingCart.inCart(item.identifier)){
+    //             let suppliers = item.supplier;
+    //             for(let s = 0; s < suppliers.length; s++){
+    //                 let sup = suppliers[s];
+    //                 if(!shoppingCart.inVendor(item.identifier, sup.cat_name, sup.supplier_code, sup.quantity, sup.unit, sup.price)){
+    //                     shoppingCart.addVendorToCart(item.identifier, sup.cat_name, sup.supplier_code,sup.price,sup.purchase, sup.quantity, sup.unit, sup.shipping);
+    //                 }
+    //                 else{
+    //                     shoppingCart.updatePurchaseAmount(item.identifier, sup.cat_name, sup.supplier_code, sup.quantity, sup.unit, sup.price, sup.purchase);
+    //                 }
+    //             }
+    //         }
+    //         else{
+    //             shoppingCart.addItemToCart(item.identifier, item.db, item.smile);
+    //         }
+    //     }
+    //     // localStorage.setItem('cart', JSON.stringify(totalCart))
+    //     // $.ajax({
+    //     //     type: 'POST',
+    //     //     url: '/saveCartToDb',
+    //     //     data:  JSON.stringify({
+    //     //         'totalCart': shoppingCart.getCart(),
+    //     //     }),
+    //     //     contentType: "application/json; charset=utf-8",
+    //     //     dataType: "json",
+    //     //     success: function (result) {
+    //     //         console.log('db saved')
+    //     //     },
+    //     //     error: function (data) {
+    //     //          console.log('saveCartToDb failed')
+    //     //     }
+    //     // });
+    //     $('#cartCount').html(getCartSize(totalCart))
+    // }
 }

@@ -20,17 +20,25 @@ function checkHg(smiles, modal, table, db) {
                             .replace("%w", 50).replace("%h", 30);
                         let bg = 'bgcolor=clear&hgstyle=outerglow'
                         t['img'] = depict_url + '&' + bg
-                        let cart = JSON.parse(localStorage.getItem('cart'))
-                        let index = cart.findIndex(item => item.identifier == temp[0])
-                        if (index == -1) {
-                            t['val'] = 'Add to Cart'
-                            t['class'] = 'btn btn-info'
+                        // let cart = JSON.parse(localStorage.getItem('cart'))
+                        if(shoppingCart.inCart(temp[0])){
+                            t['val'] = 'Remove';
+                            t['class'] = 'btn btn-danger';
                         }
-                        else {
-                            t['val'] = 'Remove'
-                            t['class'] = 'btn btn-danger'
+                    else{
+                            t['val'] = 'Add to Cart';
+                            t['class'] = 'btn btn-info';
                         }
-                        data_.push(t)
+                        // let index = cart.findIndex(item => item.identifier == temp[0])
+                        // if (index == -1) {
+                        //     t['val'] = 'Add to Cart'
+                        //     t['class'] = 'btn btn-info'
+                        // }
+                        // else {
+                        //     t['val'] = 'Remove'
+                        //     t['class'] = 'btn btn-danger'
+                        // }
+                        data_.push(t);
                     }
                 }
                 showHg(data_, modal, table)
@@ -56,6 +64,7 @@ function showHg(data, modal, table) {
             {
                 "mData": function (data) {
                         return  "<button data-hg='true' class='"+ data.class + "'" + "data-img ='"+data.img+"'"+
+                            "data-smile ='"+data.smiles+"'"+
                             "data-db ='"+data.db+"'"+
                             "data-identifier ='"+data.identifier+"'"+
                             "onclick ='"+'toggleCart(this)'+"'"+
