@@ -1,73 +1,28 @@
 from flask_restful import Resource, reqparse
 from werkzeug.datastructures import FileStorage
-from app.data.models.tranche import TrancheModel
-from app.data.models.tin.substance import SubstanceModel
-from app.helpers.validation import base10
 from app.data.resources.substance import SubstanceList
-from flask import jsonify, redirect, current_app, request
+from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
+from flask import jsonify, redirect, current_app, request, make_response
 from flask_csv import send_csv
-import re
 import json
+from itertools import repeat
 import requests
-import grequests
+import time
 from concurrent.futures import as_completed
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from requests import Session
 from requests_futures.sessions import FuturesSession
-import time
 from datetime import datetime
-
-# def response_hook(resp, *args, **kwargs):
-#     print("response hook!!!!!")
-#     print("status.code:", resp.status_code)
-#     if resp.text.strip().startswith("data"):
-#         print("starts with data")
-#         print("resp.text:", resp.text)
-#         resp.data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
-#     else:
-#         print("not start with data")
-#         print("resp.text:", resp.text)
-#         if resp.text.strip().startswith("<html"):
-#             resp.data = "error"
-#         else:
-#             resp.data = json.loads(resp.text.split('\n\n')[0])
-    #resp.data = resp.json()
 
 parser = reqparse.RequestParser()
 session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
                          session=Session())
+
+
 # session.hooks['response'] = response_hook
 
 
 class Search(Resource):
-    # def getDataByID(self, args, file_type=None):
-    #     zinc_id = args.get('zinc_id')
-    #     sub_id = base10(zinc_id)
-    #     output_fields = []
-    #     data = SubstanceModel.find_by_sub_id(sub_id)
-    #     if data is None:
-    #         return {'message': 'Substance not found with sub_id: {}'.format(sub_id)}, 404
-    #
-    #     if file_type == 'csv':
-    #         keys = data.json().keys()
-    #         return send_csv([data.json()], "search.csv", keys)
-    #     else:
-    #         data = data.json()
-    #         if 'output_fields' in args and args.get('output_fields'):
-    #             output_fields = args.get('output_fields').split(',')
-    #             new_dict = { output_field: data[output_field] for output_field in output_fields }
-    #             data = new_dict
-    #
-    #     tranche_args = {'mwt': zinc_id[4:5], 'logp': zinc_id[5:6]}
-    #
-    #     trancheQuery = TrancheModel.query
-    #     tranche = trancheQuery.filter_by(**tranche_args).first()
-    #
-    #     data['tranche'] = tranche.to_dict()
-    #     data['zinc_id'] = zinc_id
-
-    #     return jsonify(data)
-
     def getDataByID(self, args, file_type=None):
         zinc_id = args.get('zinc_id')
         args['zinc_id-in'] = [zinc_id]
@@ -90,12 +45,6 @@ class Search(Resource):
 
 
 class SmileList(Resource):
-    # def get(self, file_type=None):
-    #     parser.add_argument('smiles-in', type=str)
-    #     args = parser.parse_args()
-
-    #     return self.getDataBySmiles(args, file_type)
-
     def post(self, file_type=None):
         parser.add_argument('smiles-in', type=str)
         parser.add_argument('adist', type=int)
@@ -118,10 +67,40 @@ class SmileList(Resource):
         if 'dist' in args:
             dist = args.get('dist')
 
-
         uri = "{}/search/submit".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
+        hlids = self.get_hlids(smiles, repeat(uri), repeat(adist))
+        result = self.get_result_from_smallworld(file_type, hlids, dist)
+        filtered_result = [r for r in result if r]
+
+        str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+        if file_type == 'csv':
+            keys = list(filtered_result[0].keys())
+            return send_csv(filtered_result, "smiles_search_{}.csv".format(str_time), keys)
+        elif file_type == 'txt':
+            Formatter = OBJECT_MIMETYPE_TO_FORMATTER["text/plain"]
+            keys = list(filtered_result[0].keys())
+            formatter = Formatter(fields=keys)
+            ret_list = ""
+            for line in formatter(filtered_result):
+                ret_list += line
+
+            download_filename = "search_{}.txt".format(str_time)
+            response = make_response(ret_list, 200)
+            response.mimetype = "text/plain"
+            response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
+            return response
+        else:
+            return filtered_result
+
+    @classmethod
+    def get_hlids(cls, smiles, uri, adist):
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            return executor.map(cls.get_hlid, smiles, uri, adist, timeout=60)
+
+    @classmethod
+    def get_hlid(cls, smile, uri, adist):
         params = {
-            'smi': '',
+            'smi': smile,
             'db': 'zinc_2d_All.smi.anon',
             'dist': adist,
             'tdn': 4,
@@ -136,34 +115,53 @@ class SmileList(Resource):
             'scores': 'Atom Alignment,ECFP4,Daylight'
         }
 
-        futures = []
-        for smile in smiles:
-            params['smi'] = smile
-            print(smile, uri)
-            future = session.get(uri, params=params, auth=('gpcr', 'xtal'), stream=True)
-            # future.i = i
-            futures.append(future)
+        length = 4
+        try:
+            time1 = time.time()
+            from contextlib import closing
+            with closing(requests.get(uri, params=params, auth=('gpcr', 'xtal'), stream=True,
+                                      headers={'Connection': 'close'}, timeout=5)) as r:
+                print(r.url)
+                iterator = r.iter_lines()
+                status_more_count = 0
+                counts_to_wait_more = 1
+                status_3 = 1
+                if length > 1:
+                    # how many times to wait MORE
+                    counts_to_wait_more = length
+                for n, l in enumerate(iterator, start=1):
+                    first_line = l[5:]
+                    if len(l) > 0:
+                        status = json.loads(first_line)['status']
+                        print(status)
+                        if status == 'MORE':
+                            if status_more_count > counts_to_wait_more:
+                                r.close()
+                                break
+                            status_more_count += 1
+                        if status == 'Ground Control to Major Tom' or status == 'END':
+                            if status_3 > 4 or status == 'END':
+                                r.close()
+                                break
+                            status_3 += 1
+            print(first_line)
+            data = json.loads(first_line)
+            print(data)
+        except requests.ConnectionError:
+            print("Connection Error")
+            return None
+        except ValueError:
+            print("Value Error")
+            return None
 
-        hlids = []
-        for future in as_completed(futures):
-            resp = future.result()
-            try:
-                data = json.loads(resp.text.split('\n\n')[0].strip("data:"))
-            except Exception as e:
-                print("Exception DATA:>>>>>>>>>>>>")
-                print(resp.text)
-                continue
-            print(data['hlid'])
-            hlids.append(data['hlid'])
+        time2 = time.time()
+        strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
+        strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
+        print('SmallWorld submit request started at {} and finished at {}. It took {:.3f} s'.format(strtime1, strtime2, (time2 - time1) % 60))
 
-        result = self.get_result_from_smallworld(file_type, hlids, dist)
-
-        if file_type in ['csv', 'txt']:
-            keys = list(result[0].keys())
-            str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
-            return send_csv(result, "smiles_search_{}.csv".format(str_time), keys)
-        else:
-            return result
+        hlid = data['hlid']
+        print(hlid)
+        return hlid
 
 
     @classmethod
@@ -282,30 +280,24 @@ class SmileList(Resource):
             'search[regex]': 'false',
         }
 
-        ret_data = cls.request_uri(uri, hlids, params)
+        ret_data = cls.request_uri_hlids(repeat(uri), hlids, repeat(params))
         return ret_data
 
     @classmethod
-    def request_uri(cls, uri, hlids, params, *count):
-        futures = []
-        for hlid in hlids:
-            params['hlid'] = hlid
-            future = session.get(uri, params=params, auth=('gpcr', 'xtal'))
-            futures.append(future)
+    def request_uri_hlids(cls, uri, hlids, params, *count):
+        with ThreadPoolExecutor(max_workers=13) as executor:
+            return executor.map(cls.request_uri_hlid, uri, hlids, params, timeout=60)
 
-        # time.sleep(3)
+    @classmethod
+    def request_uri_hlid(cls, uri, hlid, params):
         result = []
-        for future in as_completed(futures):
-            try:
-                resp = future.result()
-                print("statuscode:", resp.status_code)
-                print("resp.text:", resp.text)
-                data = json.loads(resp.text.split('\n\n')[0])
-            except Exception as e:
-                print("Exception:", e)
-                print(resp.text)
-                continue
-
+        try:
+            params['hlid'] = hlid
+            resp = requests.get(uri, params=params, auth=('gpcr', 'xtal'), stream=False)
+            print("statuscode:", resp.status_code)
+            print("resp.text:", resp.text)
+            data = json.loads(resp.text.split('\n\n')[0])
+            print("data:", data)
             for dt in data['data']:
                 res = {}
                 res['qrySmiles'] = dt[0]['qrySmiles']
@@ -315,9 +307,15 @@ class SmileList(Resource):
                 res['hitMappedSmiles'] = dt[0]['hitMappedSmiles']
                 result.append(res)
 
-        if not result and not count:
-            print("result was empty !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            cls.request_uri(uri, hlids, params, 1)
+        except Exception as e:
+            print("Exception:", e)
+            print(resp.text)
+        except requests.ConnectionError:
+            print("Connection Error")
+            return None
+        except ValueError:
+            print("Value Error")
+            return None
 
         return result
 

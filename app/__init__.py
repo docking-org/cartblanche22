@@ -43,8 +43,8 @@ def create_app(config_class=Config):
     app.config['SQLALCHEMY_BINDS'] = {
         'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
         # 'zinc22': 'postgresql+psycopg2://test:@localhost:6532/zinc22',
-        'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
-        # 'tin': 'postgresql+psycopg2://tinuser:usertin@localhost:6537/tin',
+        # 'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
+        'tin': 'postgresql+psycopg2://tinuser:usertin@localhost:5434/tin',
         # 'tin2': 'postgresql+psycopg2://tinuser:usertin@localhost:5447/tin'
         '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5434/tin',
         '10.20.1.16:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5435/tin',
@@ -165,8 +165,13 @@ def create_app(config_class=Config):
         '10.20.9.19:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5435/tin',
         '10.20.9.19:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5436/tin',
         '10.20.9.19:5437': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5437/tin',
+        '10.20.9.19:5438': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5438/tin',
+        '10.20.9.19:5439': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5439/tin',
+        '10.20.9.19:5440': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5440/tin',
+        '10.20.9.19:5441': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5441/tin',
         '10.20.9.19:5442': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5442/tin',
         '10.20.9.19:5443': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5443/tin',
+        '10.20.9.19:5444': 'postgresql+psycopg2://tinuser:usertin@10.20.9.19:5444/tin',
         '10.20.9.20:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5434/tin',
         '10.20.9.20:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5435/tin',
         '10.20.9.20:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5436/tin',
@@ -176,6 +181,7 @@ def create_app(config_class=Config):
         '10.20.9.20:5440': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5440/tin',
         '10.20.9.20:5441': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5441/tin',
         '10.20.9.20:5442': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5442/tin',
+        '10.20.9.20:5443': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5443/tin',
         '10.20.9.20:5444': 'postgresql+psycopg2://tinuser:usertin@10.20.9.20:5444/tin',
         '10.20.1.21:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5434/tin',
         '10.20.1.21:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5435/tin',
@@ -188,7 +194,8 @@ def create_app(config_class=Config):
         '10.20.1.21:5442': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5442/tin',
         '10.20.1.21:5443': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5443/tin',
         '10.20.1.21:5444': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5444/tin',
-        '10.20.1.21:5445': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5445/tin'
+        '10.20.1.21:5445': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5445/tin',
+        '10.20.1.21:5446': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5446/tin'
     }
 
     login.init_app(app)
@@ -267,13 +274,9 @@ def create_app(config_class=Config):
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
         tin_url = args.get('tin_url')
-        # print("before_request ********************************************************************************")
-        # print("** requested tin_url", tin_url)
         if tin_url:
             db.choose_tenant(tin_url)
         else:
             db.choose_tenant("tin")
-        # print("END before_request ********************************************************************************")
 
     return app
-
