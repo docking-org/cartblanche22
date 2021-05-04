@@ -31,7 +31,10 @@ class SubstanceModel(db.Model):
                              "(high is better)")
     date_updated = db.Column(db.Date, nullable=True)
 
-    catalogs = db.relationship("CatalogContentModel",  secondary="catalog_substance")
+    catalog_contents = db.relationship("CatalogContentModel",
+                                       secondary="catalog_substance",
+                                       backref="substances",
+                                       lazy='joined')
 
     @classmethod
     def get_random(cls, limit):
@@ -47,7 +50,12 @@ class SubstanceModel(db.Model):
         rowcount_query = sa.text(TABLE_ROW_COUNT_SQL)
         count = db.session.connection().execute(rowcount_query, table='substance').scalar()
         print("Row Count: ===========================================", count)
-        offset = int(count * random.random())-int(limit)
+        offset = abs(int(count * random.random())-int(limit))
+        return cls.query.offset(offset).limit(limit)
+
+    @classmethod
+    def get_random3(cls, limit):
+        offset = func.floor(func.random() * 100)
         return cls.query.offset(offset).limit(limit)
 
     @classmethod
@@ -63,8 +71,8 @@ class SubstanceModel(db.Model):
             'zinc_id': "{}{}".format(zinc_start, self.base62),
             'sub_id': self.sub_id,
             'smiles': self.smiles,
-            'supplier_code': [c.supplier_code for c in self.catalogs],
-            'catalogs': [c.catalog.json() for c in self.catalogs]
+            'supplier_code': [c.supplier_code for c in self.catalog_contents],
+            'catalogs': [c.catalog.json() for c in self.catalog_contents]
         }
 
     def json_ids(self):
@@ -77,6 +85,18 @@ class SubstanceModel(db.Model):
         return {
             'sub_id': self.sub_id,
             'smiles': self.smiles,
-            'supplier_code': [c.supplier_code for c in self.catalogs],
-            'catalogs': [c.catalog.json() for c in self.catalogs]
+            'supplier_code': [c.supplier_code for c in self.catalog_contents],
+            'catalogs': [c.catalog.json() for c in self.catalog_contents]
         }
+
+    def json_algolia(self, tin_url):
+        return {
+            'objectID': self.sub_id,
+            'smiles': self.smiles,
+            'inchikey': self.inchikey,
+            'purchasable': self.purchasable,
+            'supplier_code': [c.supplier_code for c in self.catalog_contents],
+            'catalogs': [c.catalog.json2() for c in self.catalog_contents],
+            'server': tin_url
+        }
+

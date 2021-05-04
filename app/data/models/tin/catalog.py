@@ -22,6 +22,15 @@ class CatalogModel(db.Model):
     def json(self):
         return {'catalog_name': self.name, 'short_name': self.short_name}
 
+    def json2(self):
+        return {
+            'catalog_name': self.name,
+            'version': self.version,
+            'short_name': self.short_name,
+            'free': self.free,
+            'purchasable': self.purchasable
+        }
+
     @property
     def token(self):
         return self.short_name.rstrip()
@@ -45,7 +54,7 @@ class CatalogContentModel(db.Model):
     supplier_code = db.Column(db.String, index=True, nullable=False)
     depleted = db.Column(db.Boolean, default=False)
     
-    substances = db.relationship("SubstanceModel", secondary="catalog_substance")
+    # substances = db.relationship("SubstanceModel", secondary="catalog_substance", back_populates="catalog_contents")
 
 
 class CatalogSubstanceModel(db.Model):
@@ -56,9 +65,8 @@ class CatalogSubstanceModel(db.Model):
     cat_content_fk = db.Column(db.BigInteger, db.ForeignKey('catalog_content.cat_content_id'))
     sub_id_fk = db.Column(db.BigInteger, db.ForeignKey('substance.sub_id'))
 
-    substance = db.relationship(SubstanceModel, backref=db.backref('catalog_substance', uselist=False))
-    catalog_content = db.relationship(CatalogContentModel, backref=db.backref('catalog_substance', uselist=False))
-
+    # substance = db.relationship(SubstanceModel, backref=db.backref('catalog_substance', uselist=False))
+    # catalog_content = db.relationship(CatalogContentModel, backref=db.backref('catalog_substance', uselist=False))
 
 
 
