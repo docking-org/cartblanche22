@@ -5,6 +5,7 @@ from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
 from flask import jsonify, redirect, current_app, request, make_response
 from flask_csv import send_csv
 import json
+import itertools
 from itertools import repeat
 import requests
 import time
@@ -70,7 +71,9 @@ class SmileList(Resource):
         uri = "{}/search/submit".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
         hlids = self.get_hlids(smiles, repeat(uri), repeat(adist))
         result = self.get_result_from_smallworld(file_type, hlids, dist)
-        filtered_result = [r for r in result if r]
+
+        flat_list = itertools.chain.from_iterable(result)
+        filtered_result = [r for r in flat_list if r]
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':

@@ -1,6 +1,6 @@
 from app import db
 from sqlalchemy.ext.associationproxy import association_proxy
-from app.helpers.validation import base62
+from app.helpers.validation import base62, get_smiles_letters
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
@@ -63,40 +63,42 @@ class SubstanceModel(db.Model):
         return cls.query.filter_by(sub_id=sub_id).first()
 
     @hybrid_property
-    def base62(self):
-        return base62(self.sub_id)
+    def zinc_id(self):
+        if self.tranche:
+            return "ZINC{}{}{}".format(self.tranche['mwt'], self.tranche['logp'], base62(self.sub_id).zfill(10))
+        return "Unknown"
 
-    def json2(self, zinc_start):
-        return {
-            'zinc_id': "{}{}".format(zinc_start, self.base62),
-            'sub_id': self.sub_id,
-            'smiles': self.smiles,
-            'supplier_code': [c.supplier_code for c in self.catalog_contents],
-            'catalogs': [c.catalog.json() for c in self.catalog_contents]
-        }
+    @hybrid_property
+    def tranche(self):
+        return get_smiles_letters(self.smiles)
 
     def json_ids(self):
         return {
-            'sub_id': self.sub_id,
+            'zinc_id': self.zinc_id,
             'smiles': self.smiles
         }
 
     def json(self):
         return {
+            'tranche': self.tranche,
+            'zinc_id': self.zinc_id,
             'sub_id': self.sub_id,
             'smiles': self.smiles,
             'supplier_code': [c.supplier_code for c in self.catalog_contents],
             'catalogs': [c.catalog.json() for c in self.catalog_contents]
         }
 
-    def json_algolia(self, tin_url):
-        return {
-            'objectID': self.sub_id,
+    def json_all(self, tin_url):
+        res = {
+            'sub_id': self.sub_id,
+            'zinc_id': self.zinc_id,
             'smiles': self.smiles,
-            'inchikey': self.inchikey,
+            'inchikey': str(self.inchikey).strip(),
             'purchasable': self.purchasable,
             'supplier_code': [c.supplier_code for c in self.catalog_contents],
-            'catalogs': [c.catalog.json2() for c in self.catalog_contents],
+            'catalogs': [c.catalog.json() for c in self.catalog_contents],
             'server': tin_url
         }
+
+        return {**res, **self.tranche}
 
