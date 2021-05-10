@@ -87,22 +87,6 @@ def updateVendorTest():
     return jsonify('successfully updated vendor purchase to db')
 
 
-@application.route('/saveCartToDb', methods=['POST'])
-def saveCartToDb():
-    print('saveCartToDB')
-    data = request.get_json()['totalCart']
-    activeCart = Carts.query.get(current_user.activeCart)
-    for d in data:
-        if len(d['supplier']) == 0:
-            activeCart.addToCartGetId(current_user, d['identifier'], d['smile'], d['db'])
-        else:
-            for v in d['supplier']:
-                addToCartWithVendor(d['identifier'], d['smile'], d['db'], v)
-    # response = Response(, 200, mimetype="application/json")
-    # print(response)
-    return jsonify('successfully integrated  localStorageData to db')\
-
-
 @application.route('/saveCartToDbTest', methods=['POST'])
 def saveCartToDbTest():
     print('saveCartToDB')

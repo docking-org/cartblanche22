@@ -39,19 +39,25 @@ def processPunchoutOrder():
     if 'buyerCookie' in session.keys():
         buyerCookie = session['buyerCookie']
     message += "<BuyerCookie>{}</BuyerCookie>".format(buyerCookie)
-    PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>{}</Money></Total></PunchOutOrderMessageHeader>".format(session['total'])
+    PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>{}</Money></Total></PunchOutOrderMessageHeader>".format(
+        session['total'])
     message += PunchOutOrderMessageHeader
     for item in session['cart']:
         for vendor in item['supplier']:
             itemIn = "<ItemIn quantity='{}'>".format(vendor['purchase'])
-            itemId = "<ItemID><SupplierPartID>{}_{}{}</SupplierPartID></ItemID>".format(vendor['supplier_code'], vendor['quantity'], vendor['unit'])
-            itemDetail = "<ItemDetail><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'><ShortName>{}_{}{}</ShortName>Pack size: {}{};Cat No.: {}; Supplier: {}</Description><UnitOfMeasure>PK</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor['price'], vendor['supplier_code'], vendor['quantity'], vendor['unit'], vendor['quantity'], vendor['unit'], vendor['supplier_code'], vendor['cat_name'])
+            itemId = "<ItemID><SupplierPartID>{}_{}{}</SupplierPartID></ItemID>".format(vendor['supplier_code'],
+                                                                                        vendor['quantity'],
+                                                                                        vendor['unit'])
+            itemDetail = "<ItemDetail><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'><ShortName>{}_{}{}</ShortName>Pack size: {}{};Cat No.: {}; Supplier: {}</Description><UnitOfMeasure>PK</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(
+                vendor['price'], vendor['supplier_code'], vendor['quantity'], vendor['unit'], vendor['quantity'],
+                vendor['unit'], vendor['supplier_code'], vendor['cat_name'])
             message = message + itemIn + itemId + itemDetail + '</ItemIn>'
     message += '</PunchOutOrderMessage></Message>'
     data += message
     data += '</cXML>'
     # main = '<input type="hidden" name="cxml-urlencoded" value="' + data + '">'
     return data
+
 
 def punchoutOrder():
     randStr = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
@@ -80,13 +86,18 @@ def punchoutOrder():
     if 'buyerCookie' in session.keys():
         buyerCookie = session['buyerCookie']
     message += "<BuyerCookie>{}</BuyerCookie>".format(buyerCookie)
-    PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>{}</Money></Total></PunchOutOrderMessageHeader>".format(current_user.totalPrice)
+    PunchOutOrderMessageHeader = "<PunchOutOrderMessageHeader operationAllowed='edit'><Total><Money currency='USD'>{}</Money></Total></PunchOutOrderMessageHeader>".format(
+        current_user.totalPrice)
     message += PunchOutOrderMessageHeader
     for item in current_user.items_in_cart:
         for vendor in item.vendors:
             itemIn = "<ItemIn quantity='{}'>".format(vendor.purchase_quantity)
-            itemId = "<ItemID><SupplierPartID>{}_{}{}</SupplierPartID></ItemID>".format(vendor.supplier_code, vendor.pack_quantity, vendor.unit)
-            itemDetail = "<ItemDetail><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'><ShortName>{}_{}{}</ShortName>Pack size: {}{};Cat No.: {}; Supplier: {}</Description><UnitOfMeasure>PK</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(vendor.price, vendor.supplier_code, vendor.pack_quantity, vendor.unit, vendor.pack_quantity, vendor.unit, vendor.supplier_code, vendor.cat_name)
+            itemId = "<ItemID><SupplierPartID>{}_{}{}</SupplierPartID></ItemID>".format(vendor.supplier_code,
+                                                                                        vendor.pack_quantity,
+                                                                                        vendor.unit)
+            itemDetail = "<ItemDetail><UnitPrice><Money currency='USD'>{}</Money></UnitPrice><Description xml:lang='en'><ShortName>{}_{}{}</ShortName>Pack size: {}{};Cat No.: {}; Supplier: {}</Description><UnitOfMeasure>PK</UnitOfMeasure><Classification domain='UNSPSC'>12350000</Classification></ItemDetail>".format(
+                vendor.price, vendor.supplier_code, vendor.pack_quantity, vendor.unit, vendor.pack_quantity,
+                vendor.unit, vendor.supplier_code, vendor.cat_name)
             message = message + itemIn + itemId + itemDetail + '</ItemIn>'
     message += '</PunchOutOrderMessage></Message>'
     data += message
@@ -95,9 +106,10 @@ def punchoutOrder():
     url = ""
     if 'url' in session.keys():
         url = session['url']
-    return(data, url)
+    return (data, url)
 
-@application.route('/punchoutSetup', methods= ['POST'])
+
+@application.route('/punchoutSetup', methods=['POST'])
 def punchoutSetup():
     xml_data = request.get_data()
     content_dict = xmltodict.parse(xml_data)
@@ -117,15 +129,15 @@ def punchoutSetup():
         </cXML>'''
         return Response(data, mimetype='text/xml')
     token = jwt.encode(
-            {'user_id': user.id, 'exp': time() + 1800, 'url':url, 'buyerCookie':buyerCookie},
-            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+        {'user_id': user.id, 'exp': time() + 1800, 'url': url, 'buyerCookie': buyerCookie},
+        current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
     data += '''
     <Response>
     <Status code="200" text="OK"/>
     <PunchOutSetupResponse>
     <StartPage>
      '''
-    url = ''.join(['<URL>0.0.0.0:5067/punchoutStart/',token, '</URL>'])
+    url = ''.join(['<URL>0.0.0.0:5067/punchoutStart/', token, '</URL>'])
     data += url
     data += '''
     </StartPage>
@@ -134,8 +146,9 @@ def punchoutSetup():
     </cXML>
     '''
     return Response(data, mimetype='text/xml')
-    
-@application.route('/punchoutStart/<token>', methods= ['GET', 'POST'])
+
+
+@application.route('/punchoutStart/<token>', methods=['GET', 'POST'])
 def punchoutStart(token):
     # # decoding token
     print(token)
@@ -153,11 +166,12 @@ def punchoutStart(token):
     except:
         return jsonify('something wrong with starting the page, token expired or user not found')
 
+
 def genProlog(cXMLvers, randStr):
     vers = "1.2.014";
     sysID = "http://xml.cXML.org/schemas/cXML/" + vers + "/cXML.dtd";
     dt = datetime.datetime.now()
-    nowNum = int(round(time()*1000))
+    nowNum = int(round(time() * 1000))
     timeStr = dt.strftime("%y-%m-%dT%H:%M:%S")
     # data = '<?xml version="1.0" encoding="UTF-8"?>\n';
     data = '<!DOCTYPE cXML SYSTEM "' + sysID + '">';

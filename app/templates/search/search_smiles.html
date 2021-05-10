@@ -181,15 +181,16 @@
     </script>
 {% endblock %}
 {% block app_content %}
-    <h3>Search by Smiles</h3>
     <div class="row" id="searchInput">
         <div class="panel panel-info">
-            <div class="panel-heading">Search Using Many</div>
+            <div class="panel-heading">Search by Smiles</div>
             <div class="panel-body">
                 <form id='data' action="/" method="post" class="form" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="textareasmiles">One smile per Line</label>
-                        <p>C1CCC(C2CNNC2)C1 <br> C1=CC=CC=C1C2=CC=CC=C2</p>
+                        <p>Test Data:
+                            <br> c1ccc(-c2nncnn2)cc1
+                        <br>C1CCC(C2CNNC2)C1 <br> C1=CC=CC=C1C2=CC=CC=C2</p>
 
                         <textarea id="textareasmiles" class="form-control" name="list_of_smiles" rows="6" cols="20"
                                   placeholder="Smiles"></textarea>
@@ -201,7 +202,7 @@
                     </div>
                     <label for="distformat">dist:</label>
                     <select name="dist" class="btn btn-info" id="distformat">
-                        <option value="0" id="dist-0" selected>
+                        <option value="0" id="dist-0">
                             0
                         </option>
                         <option value="1" id="dist-1">
@@ -213,7 +214,7 @@
                         <option value="3" id="dist-3">
                             3
                         </option>
-                        <option value="4" id="dist-4">
+                        <option value="4" id="dist-4" selected>
                             4
                         </option>
                         <option value="5" id="dist-5">
@@ -223,7 +224,7 @@
                     </select>
                     <label for="adistformat">anon dist:</label>
                     <select name="adist" class="btn btn-info" id="adistformat">
-                        <option value="0" id="adist-0" selected>
+                        <option value="0" id="adist-0" >
                             0
                         </option>
                         <option value="1" id="adist-1">
@@ -235,7 +236,7 @@
                         <option value="3" id="adist-3">
                             3
                         </option>
-                        <option value="4" id="adist-4">
+                        <option value="4" id="adist-4" selected>
                             4
                         </option>
                         <option value="5" id="adist-5">
@@ -252,6 +253,7 @@
     </div>
     <div class="row" id="zincResults" style="display: none">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+            <button class="btn btn-info"><a href="{{ url_for('main.search_smiles') }}">Back</a></button>
             <h5>We found <span id="foundNum"></span> matches</h5>
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 pull-right">
@@ -269,12 +271,18 @@
     </div>
     <div class="row" id="desc">
         <h4>CURL commands for searching Smiles</h4>
-        <p>Below curl command returns a json file with all possible fields. </p>
-        <p>If you want curl with text file:</p>
-        <code>
-            curl https://cartblanche22.docking.org/smiles.json -F smiles-in=@smiles.txt -F dist=0 -F adist=0
+        <p>Below curl command returns a file with all possible fields. </p>
+        <p>to get .txt file:   <code>
+            curl https://cartblanche22.docking.org/smiles.txt -F smiles-in=@smiles.txt -F dist=4 -F adist=4
         </code>
-        <p></p>
+        </p>
+
+        <p>to get .json file:   <code>
+            curl https://cartblanche22.docking.org/smiles.json -F smiles-in=@smiles.txt -F dist=4 -F adist=4
+        </code></p>
+        <p>to get .csv file:   <code>
+            curl https://cartblanche22.docking.org/smiles.csv -F smiles-in=@smiles.txt -F dist=4 -F adist=4
+        </code></p>
         <p>If you want to learn more about search, please go to <a
                 href="http://wiki.docking.org/index.php/Zinc22:Searching" target="_blank"> Zinc22 documentation on wiki
             page</a></p>
