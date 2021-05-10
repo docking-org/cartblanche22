@@ -42,8 +42,7 @@ class CatalogContentList(Resource):
 
         s_codes = ','.join(supplier_codes)
         url = 'https://{}/catalog'.format(request.host)
-        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k, 'zinc_id_start': v}, timeout=15) for
-                k, v in tin_urls.items())
+        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k}, timeout=15) for k in tin_urls.keys())
 
         results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
         flat_list = itertools.chain.from_iterable(results)
@@ -78,7 +77,6 @@ class CatalogContent(Resource):
     def post(self):
         parser.add_argument('supplier_codes', type=str)
         parser.add_argument('tin_url', type=str)
-        parser.add_argument('zinc_id_start', type=str)
         args = parser.parse_args()
         lines = args.get('supplier_codes').lower().split(',')
         try:
@@ -95,7 +93,7 @@ class CatalogContent(Resource):
 
             data = []
             for cc in catContents:
-                data.extend([sub.json2(args.get('zinc_id_start')) for sub in cc.substances])
+                data.extend([sub.json() for sub in cc.substances])
 
             if data:
                 return jsonify(data)

@@ -257,6 +257,7 @@ def create_app(config_class=Config):
     api.add_resource(SubstanceRandom, '/substance/random.<file_type>')
     api.add_resource(SubstanceRandomList, '/subrandom')
 
+
     from app.errors import application as errors_bp
     app.register_blueprint(errors_bp)
 

@@ -4,15 +4,12 @@ from app.data.models.ip_address import IPAddressModel
 from app.data.models.port_number import PortNumberModel
 import re
 from sqlalchemy import func
+from rdkit.Chem import MolFromSmiles
+from rdkit.Chem.Descriptors import MolLogP
+from rdkit.Chem.SaltRemover import SaltRemover
 
 
-# def setUrl(zinc_id: str):
-#     url = getTINUrl(zinc_id)
-#     if url:
-#         print("Setting TIN URL: ", url)
-#         current_app.config['TIN_URL'] = url
-
-def getAllUniqueTINServers():
+def get_all_unique_tin_servers():
     urls = []
     server_mappings_fk = ServerMappingModel.query.with_entities(
         func.min(ServerMappingModel.sm_id).label("sm_id"),
@@ -27,7 +24,8 @@ def getAllUniqueTINServers():
 
     return urls
 
-def getAllTINUrl():
+
+def get_all_tin_url():
     urls = {}
 
     tranches = TrancheModel.query.with_entities(
@@ -57,7 +55,7 @@ def getAllTINUrl():
     return urls
 
 
-def getSingleTINUrl(zinc_id: str):
+def get_single_tin_url(zinc_id: str):
     pattern = "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
     args = {}
     if re.match(pattern, zinc_id):
@@ -79,6 +77,7 @@ def base10(zinc_id: str):
         base10 += digits.index(c) * pow(62, i)
     return base10
 
+
 def base62(n):
     digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     b62_str = ""
@@ -87,3 +86,56 @@ def base62(n):
         b62_str += digits[r]
     b62_str += digits[n]
     return b62_str[::-1]
+
+
+remover = SaltRemover()
+logp_mapping = {
+    'M500': '0', 'M400': '1', 'M300': '2', 'M200': '3', 'M100': '4', 'M000': '5',
+    'P000': '6', 'P010': '7', 'P020': '8', 'P030': '9', 'P040': 'a', 'P050': 'b', 'P060': 'c', 'P070': 'd',
+    'P080': 'e', 'P090': 'f', 'P100': 'g', 'P110': 'h', 'P120': 'i', 'P130': 'j', 'P140': 'k', 'P150': 'l',
+    'P160': 'm', 'P170': 'n', 'P180': 'o', 'P190': 'p', 'P200': 'q', 'P210': 'r', 'P220': 's', 'P230': 't',
+    'P240': 'u', 'P250': 'v', 'P260': 'w', 'P270': 'x', 'P280': 'y', 'P290': 'z', 'P300': 'A', 'P310': 'B',
+    'P320': 'C', 'P330': 'D', 'P340': 'E', 'P350': 'F', 'P360': 'G', 'P370': 'H', 'P380': 'I', 'P390': 'J',
+    'P400': 'K', 'P410': 'L', 'P420': 'M', 'P430': 'N', 'P440': 'O', 'P450': 'P', 'P460': 'Q', 'P470': 'R',
+    'P480': 'S', 'P490': 'T', 'P500': 'U', 'P600': 'V', 'P700': 'W', 'P700': 'X', 'P900': 'Y', '': 'Z'
+}
+
+def get_mwt(h_num):
+    if h_num <= 9:
+        return h_num
+    elif h_num <= 35:
+        return chr(h_num + 87)
+    else:
+        return chr(h_num + 29)
+
+def scale_logp_value(logp):
+    if logp < -9.0:
+        logp = -9.0
+    elif logp > 9.0:
+        logp = 9.0
+    if logp < 0.0 or logp >= 5.0:
+        logp = 100 * int(logp)
+    else:
+        logp = 10 * int(10 * logp)
+    return logp
+
+
+def get_smiles_letters(smiles):
+    mol = MolFromSmiles(smiles)
+    if mol:
+        if '.' in smiles:
+            mol = remover.StripMol(mol)
+        logp = MolLogP(mol)
+        num_heavy_atoms = mol.GetNumHeavyAtoms()
+        if num_heavy_atoms > 99:
+            num_heavy_atoms = 99
+        sign = 'M' if logp < 0.0 else 'P'
+        p_num = "{}{}".format(sign, str(abs(scale_logp_value(logp))).zfill(3))
+        tranche_args = {
+            'h_num': "H{}".format(str(num_heavy_atoms).zfill(2)),
+            'p_num': p_num,
+            'mwt': str(get_mwt(num_heavy_atoms)),
+            'logp': logp_mapping[p_num]
+        }
+        return tranche_args
+    return {}

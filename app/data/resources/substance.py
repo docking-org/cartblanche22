@@ -1,9 +1,8 @@
 from flask_restful import Resource, reqparse
 from app.data.models.tin.substance import SubstanceModel
-from app.data.models.server_mapping import ServerMappingModel
 from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
-from app.helpers.validation import base10, getAllTINUrl, getAllUniqueTINServers
+from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
 from flask import jsonify, current_app, request, make_response
 from collections import defaultdict
@@ -16,7 +15,6 @@ import itertools
 import logging
 import requests
 import random
-import app
 
 # from app.formatters import (
 #     CsvFormatter,
@@ -64,7 +62,12 @@ class SubstanceList(Resource):
     @classmethod
     def getList(cls, args, file_type=None):
         zinc_ids = sorted(args.get('zinc_id-in'))
-        output_fields = args.get('output_fields')
+        output_fields = ""
+        if args.get('output_fields'):
+            output_fields = args.get('output_fields')
+        show_missing = ""
+        if args.get('show_missing'):
+            show_missing = args.get('show_missing')
         dict_ids = defaultdict(list)
         dict_subid_zinc_id = defaultdict(list)
         debug = {}
@@ -78,7 +81,7 @@ class SubstanceList(Resource):
         if args.get('timeout'):
             timeout = args.get('timeout')
 
-        urls = getAllTINUrl()
+        urls = get_all_tin_url()
 
         for zinc_id in zinc_ids:
             if zinc_id:
@@ -110,16 +113,17 @@ class SubstanceList(Resource):
                                    'sub_ids': ','.join([str(i) for i in v]),
                                    'tin_url': k.split('-')[0],
                                    'output_fields': output_fields,
-                                   'show_missing': args.get('show_missing')
+                                   'show_missing': show_missing
                                }, timeout=timeout) for k, v in dict_ids.items())
         print("after response")
         data = defaultdict(list)
 
         results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
 
-        if args.get('show_missing').lower() == 'on':
+        if show_missing.lower() == 'on':
+
             def get_zinc_ids(vals):
-                return ["zinc_id:{}, sub_id:{}".format(dict_subid_zinc_id.get(int(v))[0], v) for v in vals]
+                return ["{} {}".format(dict_subid_zinc_id.get(int(v))[0], v) for v in vals]
 
             res = [{k: get_zinc_ids(vals) for k, vals in res.items()} for res in results]
             return res
@@ -128,17 +132,6 @@ class SubstanceList(Resource):
 
         data['items'] = list(flat_list)
         print("received count. data['items']:", len(data['items']))
-
-        for item in data['items']:
-            if not args.get('output_fields') or 'zinc_id' in output_fields:
-                item['zinc_id'] = dict_subid_zinc_id.get(item.get('sub_id'))[0]
-                if not args.get('output_fields') or 'sub_id' not in output_fields:
-                    item.pop('sub_id')
-                if not args.get('output_fields') or 'tranche' in output_fields:
-                    tranche_args = {'mwt': item['zinc_id'][4:5], 'logp': item['zinc_id'][5:6]}
-                    trancheQuery = TrancheModel.query
-                    tranche = trancheQuery.filter_by(**tranche_args).first()
-                    item['tranche'] = tranche.to_dict()
 
         if not data['items']:
             return {'message': 'Not found'}, 404
@@ -201,20 +194,17 @@ class Substance(Resource):
             sub_id_list.remove(str(data_dict['sub_id']))
 
             if 'output_fields' in args and args.get('output_fields'):
+
                 output_fields = args.get('output_fields').replace(" ", "").split(",")
-                # sub_id will need for generating zinc_id in different function
-                if 'sub_id' not in output_fields:
-                    output_fields.append('sub_id')
-                    
                 output_fields = [i for i in data_dict.keys() if i in output_fields]
 
                 new_dict = {output_field: data_dict[output_field] for output_field in output_fields}
                 data_dict = new_dict
             data.append(data_dict)
 
-        if args.get('show_missing').lower() == 'on':
+        if args.get('show_missing') and args.get('show_missing').lower() == 'on':
             print("missing sub_ids:", sub_id_list)
-            return jsonify({ args.get('tin_url'): sub_id_list})
+            return jsonify({args.get('tin_url'): sub_id_list})
 
         if data:
             return jsonify(data)
@@ -241,6 +231,7 @@ class SubstanceRandomList(Resource):
     def post(self, file_type=None):
         parser.add_argument('random', type=str)
         parser.add_argument('tin_url', type=str)
+        parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
         random = args.get('random')
 
@@ -256,7 +247,12 @@ class SubstanceRandomList(Resource):
                                                                                               strtime1, strtime2,
                                                                                               (time2 - time1) % 60))
 
-            data = [sub.json_ids() for sub in random_substances]
+            if args.get('output_fields'):
+                outputs = args.get('output_fields').replace(' ', '').split(',')
+                json_ids = [sub.json_ids() for sub in random_substances]
+                data = [{k: v for k, v in d.items() if k in outputs} for d in json_ids]
+            else:
+                data = [sub.json_ids() for sub in random_substances]
 
             if data:
                 return jsonify(data)
@@ -270,12 +266,14 @@ class SubstanceRandom(Resource):
     def get(self, file_type=None):
         parser.add_argument('count', type=int)
         parser.add_argument('timeout', type=int)
+        parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
         return self.getRandom(args, file_type)
 
     def post(self, file_type=None):
         parser.add_argument('count', type=int)
         parser.add_argument('timeout', type=int)
+        parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
         return self.getRandom(args, file_type)
 
@@ -285,8 +283,11 @@ class SubstanceRandom(Resource):
         timeout = 1
         if args.get('timeout'):
             timeout = args.get('timeout')
+        output_fields = ""
+        if args.get('output_fields'):
+            output_fields = args.get('output_fields')
 
-        tin_urls = getAllUniqueTINServers()
+        tin_urls = get_all_unique_tin_servers()
         print("tin_urls", tin_urls)
         server_len = len(tin_urls)
         print("round(requested_count / server_len) ", round(requested_count / server_len))
@@ -299,7 +300,8 @@ class SubstanceRandom(Resource):
 
         while len(result_list) < requested_count and max_try > 0:
             max_try -= 1
-            params = {'tin_url': random.choice(tin_urls), 'random': per_server_count}
+            params = {'tin_url': random.choice(tin_urls), 'random': per_server_count,
+                      'output_fields': output_fields}
 
             try:
                 print(params)
@@ -339,4 +341,3 @@ class SubstanceRandom(Resource):
             return response
         else:
             return jsonify(data)
-
