@@ -1,150 +1,116 @@
 {% extends 'base.html' %}
 {% block scripts %}
-{{ super() }}
-<script src="../static/js/custom/cartblanche.js"></script>
-
-<script>
-    $(document).ready(function () {
-        localStorage.setItem('punchout', '{{punchout}}')
-        localStorage.setItem('is_authenticated', '{{is_authenticated}}')
-        localStorage.setItem('checkCart', '{{checkCart}}')
-        timeoutCheck('{{is_authenticated}}', '{{cart|safe}}');
-        if(localStorage.getItem('checkCart') == 'True'){
-                    cartCheck('{{is_authenticated}}');
-        }
-    });
-</script>
+    {{ super() }}
+    <script src="../static/js/custom/cartblanche.js"></script>
+    <script>
+        $(document).ready(function () {
+            localStorage.setItem('punchout', '{{punchout}}')
+            localStorage.setItem('is_authenticated', '{{is_authenticated}}')
+            timeoutCheck('{{is_authenticated}}');
+            if ('{{loadCartFromDb}}' === 'True') {
+                loadCartFromDb();
+            }
+        });
+    </script>
 {% endblock %}
 {% block app_content %}
-<div class="jumbotron row less-jumbo">
-    <div class="col-md-6">
-        <h1>Cartblanche</h1>
-        <p>
-            Welcome to Cartblanche, a free shopping cart portal based on ZINC and using Arthor and Smallworld.
-            Cartblanche allows you to search for and find purchasing information for over 10^10 commercially available
-            compounds.
-        </p>
-    </div>
-    <div class="col-md-6">
-        <p>
-            Cartblanche is provided by the <a target="_blank" href="http://irwinlab.compbio.ucsf.edu">Irwin</a>
-            and <a target="_blank" href="http://bkslab.org">Shoichet</a> Laboratories in the
-            Department of Pharmaceutical Chemistry at the University of California, San Francisco (UCSF).
-            We thank <a target="_blank" href="http://www.nigms.nih.gov">NIGMS</a> for financial support (GM71896).
-        </p>
-        <p>
-            To cite Cartblanche, please reference: Sterling and Irwin, <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model, 2015
+    <div class="jumbotron row less-jumbo">
+        <div class="col-md-6">
+            <h1>Cartblanche</h1>
+            <p>
+                Welcome to Cartblanche, a free shopping cart portal based on ZINC and using Arthor and Smallworld.
+                Cartblanche allows you to search for and find purchasing information for over 10^10 commercially
+                available
+                compounds.
+            </p>
+        </div>
+        <div class="col-md-6">
+            <p>
+                Cartblanche is provided by the <a target="_blank" href="http://irwinlab.compbio.ucsf.edu">Irwin</a>
+                and <a target="_blank" href="http://bkslab.org">Shoichet</a> Laboratories in the
+                Department of Pharmaceutical Chemistry at the University of California, San Francisco (UCSF).
+                We thank <a target="_blank" href="http://www.nigms.nih.gov">NIGMS</a> for financial support (GM71896).
+            </p>
+            <p>
+                To cite Cartblanche, please reference: Sterling and Irwin, <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model, 2015
                 <a href="http://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559"
-                    target="_blank">http://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559</a></em>.
-            You may also wish to cite our previous papers: Irwin, Sterling, Mysinger, Bolstad and Coleman,
-            <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model, 2012</em>
-            <a target="_blank" href="http://pubs.acs.org/doi/abs/10.1021/ci3001277">
-                DOI: 10.1021/ci3001277</a> or Irwin and Shoichet, <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model.
+                   target="_blank">http://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559</a></em>.
+                You may also wish to cite our previous papers: Irwin, Sterling, Mysinger, Bolstad and Coleman,
+                <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model, 2012</em>
+                <a target="_blank" href="http://pubs.acs.org/doi/abs/10.1021/ci3001277">
+                    DOI: 10.1021/ci3001277</a> or Irwin and Shoichet, <em>J.&nbsp;Chem.&nbsp;Inf.&nbsp;Model.
                 2005;45(1):177-82</em>
-            <a target="_blank" href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1360656/pdf/nihms2574.pdf">PDF</a>,
-            <a target="_blank"
-                href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=pubmed&amp;dopt=Abstract&amp;list_uids=15667143">DOI</a>.
-        </p>
-
+                <a target="_blank" href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1360656/pdf/nihms2574.pdf">PDF</a>,
+                <a target="_blank"
+                   href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=pubmed&amp;dopt=Abstract&amp;list_uids=15667143">DOI</a>.
+            </p>
+        </div>
     </div>
-</div><!-- /.jumbotron -->
-
-<div class="row">
-    <div class="col-md-4 col-lg-3">
-        <div class="row">
-            <div class="col-xs-6 col-md-12">
-                <h2>Getting Started</h2>
-                <ul>
-
-
-                    <li>
-                        <a href="{{ url_for('main.sw') }}" >
-                            Search molecule using Smallworld
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('main.arthor') }}">
-                            Search molecule using Arthor
-                        </a>
-                    </li>
-
-                 {% if current_user.is_anonymous %}
-                    <li>
-                        <a href="{{ url_for('main.login') }}">
-                            Sign in
-                        </a>
-                    </li>
-                     {%  else  %}
-                     <li>
-                        <a href="{{ url_for('main.change_password') }}" target="_blank">
-                            Do you want to change your password?
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('main.profile') }}" target="_blank">
-                            My profile
-                        </a>
-                    </li>
-                     <li>
-                        <a href="{{ url_for('main.profile') }}" target="_blank">
-                            Prioritize your vendor preferences
-                        </a>
-                    </li>
-                     <li>
-                        <a href="{{ url_for('main.importData') }}" target="_blank">
-                            Import molecules from .txt file or identifiers...
-                        </a>
-                    </li>
-                    {%  endif %}
-                <li>
-                                       <a href="{{ url_for("main.about") }}" target="_blank">Acknowledgements</a>
-
-                    </li>
-
-
-                </ul>
+    <div class="row">
+        <div class="col-md-4 col-lg-3">
+            <div class="row">
+                <div class="col-xs-6 col-md-12">
+                    <h2>Getting Started</h2>
+                    <ul>
+                        <li>
+                            <a href="{{ url_for('main.sw') }}">
+                                Search molecule using Smallworld
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('main.arthor') }}">
+                                Search molecule using Arthor
+                            </a>
+                        </li>
+                        {% if current_user.is_anonymous %}
+                            <li>
+                                <a href="{{ url_for('main.login') }}">
+                                    Sign in
+                                </a>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a href="{{ url_for('main.change_password') }}" target="_blank">
+                                    Do you want to change your password?
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('main.profile') }}" target="_blank">
+                                    My profile
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('main.profile') }}" target="_blank">
+                                    Prioritize your vendor preferences
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('main.importData') }}" target="_blank">
+                                    Import molecules from .txt file or identifiers...
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li>
+                            <a href="{{ url_for("main.about") }}" target="_blank">Acknowledgements</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-{#            <div class="col-xs-6 col-md-12">#}
-{#                <h2>Explore Resources</h2>#}
-{#                <dl class="dl-inline">#}
-{#                    <dt>Chemistry</dt>#}
-{#                    <dd><a href="/tranches/home/" title="Download Chemical Space Tranches">Tranches</a>,#}
-{#                    </dd>#}
-{#                    <dd><a href="/substances/home/" title="Browse and search for substances">Substances</a></dd>,#}
-{#                    <dd><a href="/protomers/" title="Browse and search for 3D representations">3D#}
-{#                            <abbr title="representations">Representations</a></dd>,#}
-{#                    <dd><a href="/rings/" title="Find and explore rings in ZINC">Rings</a></dd>,#}
-{#                    <dd><a href="/patterns/" title="Browse ZINC by molecular patterns">Patterns</a>#}
-{#                    </dd>#}
-{#                    <dt>And More</dt>#}
-{#                    <dd><a href="/catalogs/">Catalogs</a></dd>,#}
-{#                    <dd><a href="/genes/">Genes</a></dd>,#}
-{#                    <dd><a href="/atccodes/">ATC Codes</a></dd>#}
-{#                </dl>#}
-{#            </div>#}
+        </div>
+        <div class="col-md-4 col-lg-5">
+            <h2>Ask Questions</h2>
+            <li>
+                Email us : cartblanche20@gmail.com
+            </li>
+        </div>
+        <div class="col-md-4">
+            <h2>News</h2>
+            <div class="well well-sm">
+                <strong>Caveat Emptor</strong>: We do not guarantee the quality of any molecule for any
+                purpose and take no responsibility for errors arising from the use of
+                this application. Cartblanche is provided in the hope that it will be useful,
+                but you must use it at your own risk.
+            </div>
         </div>
     </div>
-    <div class="col-md-4 col-lg-5">
-        <h2>Ask Questions</h2>
-        <li>
-            Email us : cartblanche20@gmail.com
-        </li>
-    </div>
-    <div class="col-md-4">
-
-        <h2>News</h2>
-
-
-        <div class="well well-sm">
-            <strong>Caveat Emptor</strong>: We do not guarantee the quality of any molecule for any
-            purpose and take no responsibility for errors arising from the use of
-            this application. Cartblanche is provided in the hope that it will be useful,
-            but you must use it at your own risk.
-        </div>
-    </div>
-</div>
-<!-- /.row -->
-
-
-
 {% endblock %}
