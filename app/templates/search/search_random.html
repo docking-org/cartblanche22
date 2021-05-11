@@ -104,9 +104,16 @@
         <h4>CURL commands for downloading random smiles</h4>
         <p>Below curl command returns a json, txt or csv file with all possible fields.
         </p>
-        <code>
+        <p>to get .txt file: <code>
             curl https://cartblanche22.docking.org/substance/random.txt -F count=100
-        </code>
+        </code></p>
+        <p>to get .json file: <code>
+            curl https://cartblanche22.docking.org/substance/random.json -F count=100
+        </code></p>
+        <p>to get .csv file: <code>
+            curl https://cartblanche22.docking.org/substance/random.csv -F count=100
+        </code></p>
+
     </div>
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
          aria-hidden="true">

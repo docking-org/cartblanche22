@@ -57,13 +57,11 @@ def reset_password_request():
         return redirect(url_for('main.sw'))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
+        flash('If you are registered user email should be sent to your email. Check your email for the instructions to reset your password')
         user = Users.query.filter_by(email=form.email.data).first()
         if user:
             send_password_reset_email(user)
-            flash('Check your email for the instructions to reset your password')
             return redirect(url_for('main.login'))
-        else:
-            flash(Markup('We do not have an user with this email. <a href="/register" class="alert-link">Click here to register </a>'))
     return render_template('auth/reset_password_request.html',
                            title='Reset Password', form=form)
 

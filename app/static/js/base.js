@@ -255,7 +255,7 @@ let shoppingCart = (function () {
         }
         return false;
     }
-    obj.dbCart = function (dbcart) {
+    obj.loadFromDbCartData = function (dbcart) {
         cart = []
         for (let i = 0; i < dbcart.length; i++) {
             item = dbcart[i]
