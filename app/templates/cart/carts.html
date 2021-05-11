@@ -116,7 +116,7 @@
             type: 'GET',
             success: function (result) {
                 console.log(result['data'])
-                shoppingCart.dbCart(result['data'])
+                shoppingCart.loadFromDbCartData(result['data'])
                 updateCartNums();
             }
         });

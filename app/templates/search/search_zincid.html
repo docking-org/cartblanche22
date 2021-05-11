@@ -185,6 +185,11 @@
                 <form id="data" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="myTextarea">One Identifier per Line</label>
+                        <p>Test Data:<br>
+                        ZINCar0000000p56<br>
+                            ZINCde000000YNim<br>
+                            ZINCms000002NiP3
+                        </p>
                         <textarea id="myTextarea" class="form-control" rows="6" cols="20"
                                   placeholder="ZINC IDs"></textarea>
                     </div>
@@ -201,6 +206,7 @@
     </div>
     <div class="row" id="zincResults" style="display: none">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+            <button class="btn btn-info"><a href="{{ url_for('main.search_zincid') }}">Back</a></button>
             <h5>We found <span id="foundNum"></span> matches</h5>
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 pull-right">
@@ -216,14 +222,23 @@
     <div class="row" id="molResults" style="display: none">
     </div>
     <div class="row" id="desc">
-        <h4>CURL commands for searching ZincIDs</h4>
-        <p>Below curl command returns a json file with all possible fields. </p>
-        <p>If you want to curl with text file:</p>
-        <code>
-            curl https://cartblanche22.docking.org/substances.json -F
-            zinc_id-in=@/nfs/exd/zinc-22/H16/H16P220/H16P220-N.txt
-        </code>
-        <p></p>
+    <p>You can get result with different formats. Below curl command returns a file with all possible fields.
+            If you want to specify output fields, you can add output_fields.
+            For the first example it will return only smiles, sub_id.
+            Please note that there are always tranche and zinc_id fields by default.
+            </p>
+        <h4>CURL commands for searching single ZincID</h4>
+        <p>to get .txt file: <code>https://cartblanche22.docking.org/search.txt?zinc_id=ZINCms000002NiP3 -F output_fields='smiles,sub_id'</code></p>
+        <p>to get .json file: <code>https://cartblanche22.docking.org/search.json?zinc_id=ZINCms000002NiP3</code></p>
+        <p>to get .csv file:  <code>https://cartblanche22.docking.org/search.csv?zinc_id=ZINCms000002NiP3</code></p>
+        <h4>CURL commands for searching multiple ZincIDs</h4>
+        <p>to get .txt file: <code>curl https://cartblanche22.docking.org/substances.txt -F
+            zinc_id-in=@test.txt -F output_fields='smiles,sub_id'
+</code></p>
+        <p>to get .json file: <code>curl https://cartblanche22.docking.org/substances.json -F
+            zinc_id-in=@test.txt</code></p>
+        <p>to get .csv file: <code>curl https://cartblanche22.docking.org/substances.csv -F
+            zinc_id-in=@test.txt</code></p>
 
         <p>If you want to learn more about search, please go to <a
                 href="http://wiki.docking.org/index.php/Zinc22:Searching" target="_blank"> Zinc22 documentation on wiki

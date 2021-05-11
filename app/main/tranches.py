@@ -25,7 +25,8 @@ def WgetDownloader(hac, logp, format, add_url, charge):
 
 def PowerShellDownloader(hac, logp, format, add_url, charge):
     return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} " \
-           "-OutFile {hac}/{hac}{logp}{charge}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url, add_url_2D=add_url, charge=charge)
+           "-OutFile {hac}/{hac}{logp}{charge}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url,
+                                                                add_url_2D=add_url, charge=charge)
 
 
 URI_MIMETYPE_TO_FORMATTER = {
@@ -122,7 +123,6 @@ def tranches2dDownload():
     using = formData.using.data
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
     add_url_2D = 'zinc22/2d/'
-
 
     def gen_tranches(tranche):
         hac = tranche[0:3]

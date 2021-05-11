@@ -3,4 +3,4 @@ from flask import Blueprint
 application = Blueprint('main', __name__)
 
 from app.main import auth, carts, items, search, vendors, pages, punchout, importData, checkout, configs, \
-    order, tranches, show_search_results, default_prices
+    order, tranches, default_prices
