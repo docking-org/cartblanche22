@@ -143,7 +143,7 @@ class SmileList(Resource):
                                 break
                             status_more_count += 1
                         if status == 'Ground Control to Major Tom' or status == 'END':
-                            if status_3 > 4 or status == 'END':
+                            if status_3 > 2 or status == 'END':
                                 r.close()
                                 break
                             status_3 += 1
@@ -325,7 +325,7 @@ class SmileList(Resource):
 
 class Smiles(Resource):
     def post(self, file_type=None):
-        parser.add_argument('smiles-in', location='files', type=FileStorage, required=True)
+        parser.add_argument('smiles-in', location='files', type=FileStorage)
         parser.add_argument('adist', type=int)
         parser.add_argument('dist', type=int)
         args = parser.parse_args()

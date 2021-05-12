@@ -1,0 +1,17 @@
+stages:
+  - build
+  - deploy
+
+build job:
+    stage: build
+    tags:
+        - cartblanche2
+    script:
+        - docker build -t cartblanche22:latest .
+
+deploy job:
+    stage: deploy
+    tags:
+        - cartblanche2
+    script:
+        - docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
