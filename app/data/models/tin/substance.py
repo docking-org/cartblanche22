@@ -1,6 +1,6 @@
 from app import db
 from sqlalchemy.ext.associationproxy import association_proxy
-from app.helpers.validation import base62, get_smiles_letters
+from app.helpers.validation import base62, get_basic_tranche
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
@@ -70,7 +70,7 @@ class SubstanceModel(db.Model):
 
     @hybrid_property
     def tranche(self):
-        return get_smiles_letters(self.smiles)
+        return get_basic_tranche(self.smiles)
 
     def json_ids(self):
         return {

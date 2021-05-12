@@ -7,7 +7,9 @@ from sqlalchemy import func
 from rdkit.Chem import MolFromSmiles
 from rdkit.Chem.Descriptors import MolLogP
 from rdkit.Chem.SaltRemover import SaltRemover
-
+# from rdkit.Chem.rdMolDescriptors import CalcMolFormula
+# from rdkit.Chem.inchi import MolToInchi
+# from rdkit.Chem.inchi import MolToInchiKey
 
 def get_all_unique_tin_servers():
     urls = []
@@ -97,7 +99,7 @@ logp_mapping = {
     'P240': 'u', 'P250': 'v', 'P260': 'w', 'P270': 'x', 'P280': 'y', 'P290': 'z', 'P300': 'A', 'P310': 'B',
     'P320': 'C', 'P330': 'D', 'P340': 'E', 'P350': 'F', 'P360': 'G', 'P370': 'H', 'P380': 'I', 'P390': 'J',
     'P400': 'K', 'P410': 'L', 'P420': 'M', 'P430': 'N', 'P440': 'O', 'P450': 'P', 'P460': 'Q', 'P470': 'R',
-    'P480': 'S', 'P490': 'T', 'P500': 'U', 'P600': 'V', 'P700': 'W', 'P700': 'X', 'P900': 'Y', '': 'Z'
+    'P480': 'S', 'P490': 'T', 'P500': 'U', 'P600': 'V', 'P700': 'W', 'P800': 'X', 'P900': 'Y', '': 'Z'
 }
 
 def get_mwt(h_num):
@@ -120,7 +122,7 @@ def scale_logp_value(logp):
     return logp
 
 
-def get_smiles_letters(smiles):
+def get_basic_tranche(smiles):
     mol = MolFromSmiles(smiles)
     if mol:
         if '.' in smiles:

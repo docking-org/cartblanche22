@@ -15,6 +15,7 @@ import itertools
 import logging
 import requests
 import random
+import re
 
 # from app.formatters import (
 #     CsvFormatter,
@@ -70,9 +71,7 @@ class SubstanceList(Resource):
             show_missing = args.get('show_missing')
         dict_ids = defaultdict(list)
         dict_subid_zinc_id = defaultdict(list)
-        debug = {}
-        prev_url = ""
-        prev_vals = ""
+
         overlimit_count = 0
         chunk = 1000
         if args.get('chunk'):
@@ -86,8 +85,9 @@ class SubstanceList(Resource):
         for zinc_id in zinc_ids:
             if zinc_id:
                 url = urls.get(zinc_id[4:6])
-                if not url:
-                    print("url not found", zinc_id[4:6])
+                pattern = "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
+                if not url or not re.match(pattern, zinc_id):
+                    print("url or zinc_id not found", zinc_id)
                     continue
                     # return {'message': 'No server is mapped to {}. Please contact with Irwin Lab.'.format(zinc_id)}, 404
 
@@ -106,7 +106,6 @@ class SubstanceList(Resource):
             # print(k, v)
         print("len(dict_ids)", len(dict_ids))
 
-        debug["tin_db"] = {k: len(v) for k, v in dict_ids.items()}
         print("before response")
         resp = (grequests.post(url,
                                data={
@@ -138,7 +137,6 @@ class SubstanceList(Resource):
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
-            print("data************************", data)
             keys = list(data['items'][0].keys())
             return send_csv(data['items'], "zinc_id_search_{}.csv".format(str_time), keys)
         elif file_type == 'txt':
@@ -190,6 +188,7 @@ class Substance(Resource):
 
         data = []
         for sub in substances:
+            print("sub", sub)
             data_dict = sub.json()
             sub_id_list.remove(str(data_dict['sub_id']))
 
@@ -323,15 +322,14 @@ class SubstanceRandom(Resource):
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
-            print("data************************", data)
             keys = list(data['items'][0].keys())
-            return send_csv(data['items'][:requested_count - 1], "substance_search_{}.csv".format(str_time), keys)
+            return send_csv(data['items'][:requested_count], "substance_search_{}.csv".format(str_time), keys)
         elif file_type == 'txt':
             Formatter = OBJECT_MIMETYPE_TO_FORMATTER["text/plain"]
             keys = list(data['items'][0].keys())
             formatter = Formatter(fields=keys)
             ret_list = ""
-            for line in formatter(data['items'][:requested_count - 1]):
+            for line in formatter(data['items'][:requested_count]):
                 ret_list += line
 
             download_filename = "search_{}.txt".format(str_time)
