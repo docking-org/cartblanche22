@@ -8,11 +8,13 @@ build job:
         - cartblanche2
     script:
         - sudo docker image prune -f
-        - docker build -t cartblanche22:latest .
+        #- docker build -t cartblanche22:latest .
+        - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
 
 deploy job:
     stage: deploy
     tags:
         - cartblanche2
     script:
-        - docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
+        #- docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
+        - docker run -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
