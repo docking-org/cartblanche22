@@ -60,12 +60,15 @@ def searchZinc(identifier):
         for s in supplier_codes:
             if 'mcule' in s.lower():
                 prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-            elif 'w' in s.lower():
+            elif 'wuxi' in s.lower():
                 prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
-            elif 's' in s.lower():
+            elif 's_' in s.lower():
                 prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
-            elif 'm' in s.lower():
+            elif 'm_' in s.lower():
                 prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
+            else:
+                prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+
         smile = data['items'][0]['smiles']
         return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices,
                                smile=urllib.parse.quote(smile))

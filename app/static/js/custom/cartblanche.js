@@ -36,3 +36,18 @@ function loadCartFromDb() {
         }
     });
 }
+
+function loadApplicaiton() {
+    let isLoaded = localStorage.getItem('pageLoaded')
+    if (isLoaded === null || isLoaded == 'False') {
+        $.ajax({
+            type: "GET",
+            url: "/loadApplication",
+            success: function (data) {
+                console.log(data)
+                shoppingCart.saveDefaultPrices(data)
+                localStorage.setItem('pageLoaded', 'True')
+            }
+        });
+    }
+}

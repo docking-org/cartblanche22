@@ -1,6 +1,7 @@
 let shoppingCart = (function () {
     // Private methods and properties
     let cart = [];
+    let default_prices = [];
 
     function Item(identifier, db, smile, supplier) {
         this.identifier = identifier;
@@ -10,7 +11,7 @@ let shoppingCart = (function () {
         this.supplier = supplier;
     }
 
-    function Supplier(cat_name, supplier_code, price, purchase, quantity, unit, shipping) {
+    function Supplier(cat_name, supplier_code, price, purchase, quantity, unit, shipping, assigned) {
         this.cat_name = cat_name;
         this.supplier_code = supplier_code;
         this.price = price;
@@ -18,10 +19,12 @@ let shoppingCart = (function () {
         this.quantity = quantity;
         this.unit = unit;
         this.shipping = shipping;
+        this.assigned = assigned;
     }
 
     function saveCart() {
         localStorage.setItem("shoppingCart", JSON.stringify(cart));
+        updateCartNums();
     }
 
     function loadCart() {
@@ -37,6 +40,10 @@ let shoppingCart = (function () {
     // Public methods and properties
     var obj = {};
 
+    obj.saveDefaultPrices = function (data) {
+        default_prices = data;
+    };
+
     obj.getCart = function () {
         console.log('getting cart');
         return cart;
@@ -47,13 +54,45 @@ let shoppingCart = (function () {
         saveCart();
     };
 
-    obj.addItemToCart = function (identifier, db, smile) {
+    obj.addItemToCart = function (identifier, db, smile, supplier = null, catalog = null) {
         let item_index = obj.getItemIndexFromCart(identifier);
         if (item_index !== -1) {
             return;
         }
-        console.log("about to addItemToCart:", identifier, db, smile);
-        var item = new Item(identifier, db, smile, []);
+        let vendors = [];
+        if (db === 'zinc22' && supplier !== null) {
+            for (let s = 0; s < supplier.length; s++) {
+                let sup = supplier[s];
+                let def_price = null;
+                if (sup.toLowerCase().includes('mcule')) {
+                    def_price = default_prices['mcule'];
+                } else if (sup.toLowerCase().includes('wuxi')) {
+                    def_price = default_prices['wuxi'];
+
+                } else if (sup.toLowerCase().includes('m_')) {
+                    def_price = default_prices['Enamine_M'];
+
+                } else if (sup.toLowerCase().includes('s_')) {
+                    def_price = default_prices['Enamine_S'];
+                }
+                else{
+                    def_price = default_prices['mcule'];
+                }
+                if (def_price !== null) {
+                    let assigned = false
+                    let purchase = 0
+                    if (s === 0) {
+                        assigned = true
+                        purchase = 1
+                    }
+                    let vendor = new Supplier(def_price.cat_name, supplier[s], def_price.price, purchase, def_price.quantity, def_price.unit, def_price.shipping, assigned)
+                    console.log('supplier created', vendor)
+                    vendors.push(vendor)
+                }
+            }
+        }
+        console.log("about to addItemToCart:", identifier, db, smile, vendors);
+        var item = new Item(identifier, db, smile, vendors);
         cart.push(item);
         obj.writeToDb('/addItem', 'POST', item);
         saveCart();
@@ -168,7 +207,7 @@ let shoppingCart = (function () {
 
     obj.listCart = function () { // -> array of Items
         var cartCopy = [];
-        console.log("Listing cart");
+        console.log("Listing cart", cart);
         let num = 1;
         for (let i = 0; i < cart.length; i++) {
             let it = cart[i];
@@ -194,29 +233,32 @@ let shoppingCart = (function () {
                 cartCopy.push(temp)
             } else {
                 for (let j = 0; j < it.supplier.length; j++) {
-                    let vendor = it['supplier'][j]
-                    let temp = {}
-                    temp['img'] = it['img']
-                    temp['smile'] = it['smile']
-                    temp['identifier'] = it['identifier']
-                    temp['cat_name'] = vendor['cat_name']
-                    temp['supplier_code'] = vendor['supplier_code']
-                    temp['quantity'] = vendor['quantity']
-                    temp['unit'] = vendor['unit']
-                    temp['price'] = vendor['price']
-                    temp['shipping'] = vendor['shipping']
-                    temp['db'] = it['db']
-                    temp['purchase'] = vendor['purchase']
-                    temp['total'] = (vendor['price'] * vendor['purchase']).toFixed(2);
-                    temp['num'] = num
-                    temp['stereochemistry'] = false
-                    temp['analogs'] = false
-                    temp['salt'] = false
-                    num += 1
-                    cartCopy.push(temp)
+                    if (it.supplier[j].assigned === true) {
+                        let vendor = it['supplier'][j]
+                        let temp = {}
+                        temp['img'] = it['img']
+                        temp['smile'] = it['smile']
+                        temp['identifier'] = it['identifier']
+                        temp['cat_name'] = vendor['cat_name']
+                        temp['supplier_code'] = vendor['supplier_code']
+                        temp['quantity'] = vendor['quantity']
+                        temp['unit'] = vendor['unit']
+                        temp['price'] = vendor['price']
+                        temp['shipping'] = vendor['shipping']
+                        temp['db'] = it['db']
+                        temp['purchase'] = vendor['purchase']
+                        temp['total'] = (parseInt(vendor['price']) * parseInt(vendor['purchase'])).toFixed(2);
+                        temp['num'] = num
+                        temp['stereochemistry'] = false
+                        temp['analogs'] = false
+                        temp['salt'] = false
+                        num += 1
+                        cartCopy.push(temp)
+                    }
                 }
             }
         }
+        console.log(cartCopy)
         return cartCopy;
     };
     obj.getItemIndexFromCart = function (identifier) {
@@ -262,7 +304,7 @@ let shoppingCart = (function () {
             let new_sups = []
             for (let j = 0; j < item.supplier.length; j++) {
                 s = item.supplier[j]
-                new_sups.push(new Supplier(s.cat_name, s.supplier_code, s.price, s.purchase, s.quantity, s.unit, s.shipping))
+                new_sups.push(new Supplier(s.cat_name, s.supplier_code, s.price, s.purchase, s.quantity, s.unit, s.shipping, s.assigned))
             }
             cart.push(new Item(item.identifier, item.db, item.smile, new_sups))
         }

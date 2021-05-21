@@ -24,7 +24,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <style>
-
         .ui-tooltip {
             padding: 10px 20px;
             color: black;
@@ -36,7 +35,6 @@
             position: absolute;
             margin-left: 10px;
         }
-
     </style>
 {% endblock %}
 
@@ -46,6 +44,7 @@
     <script src="{{ url_for('static', filename = 'js/datatables.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/jquery-ui.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/custom/cart.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/custom/cartblanche.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/custom/hg.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/base.js') }}"></script>
     <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
@@ -73,8 +72,10 @@
         })
 
         $(document).ready(() => {
+            localStorage.setItem('pageLoaded', 'False')
             $('#cartCount').html(shoppingCart.countCart())
             localStorage.setItem('is_authenticated', '{{current_user.is_authenticated}}')
+            loadApplicaiton();
         })
         $('#logoutTab').on('click', () => {
             shoppingCart.clearCart();
@@ -90,6 +91,7 @@
         if (localStorage.getItem('punchout') == 'False' && localStorage.getItem('is_authenticated') == 'False') {
             $('#loginTab').show()
         }
+
 
     </script>
 {% endblock %}

@@ -83,7 +83,7 @@
                 },
                 {
                     "mData": function (data) {
-                        return data.cat_name + "<br/>" + data.supplier_code;
+                        return data.cat_name + "<br/><small>" + data.supplier_code + "</small>";
                     }
                 },
                 {
@@ -222,6 +222,18 @@ function setMolIndexLink(){
 
     <div class="col-md-6 float-right text-right">
         <h5 class="card-title" id='checkoutTitle'>Total : $<span id='total'>-</span></h5>
+        <button type="button" class="btn btn-info"
+                id="refresh"
+                title="Throw away all assigned vendors then assign new vendors"
+                data-toggle="tooltip" data-placement="up">
+            Refresh Vendors
+        </button>
+        <button type="button" class="btn btn-info"
+                id="reassign"
+                title="Assign vendors for unassigned molecules"
+                data-toggle="tooltip" data-placement="up">
+            Assign Vendors
+        </button>
         <button type="button" class="btn btn-info" id="checkout">Checkout</button>
     </div>
 </div>

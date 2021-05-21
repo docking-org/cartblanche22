@@ -137,7 +137,8 @@
                     id: item.zinc_id,
                     class: "mol",
                     'data-smiles': item.smiles,
-                    'data-db': 'zinc22'
+                    'data-db': 'zinc22',
+                     'data-supplier' : item.supplier_code
                 });
                 let a = $("<a>", {href: "/searchZinc/" + item.zinc_id, text: item.zinc_id})
                 let img = $("<img>", {src: "https://sw.docking.org/depict/svg?w=50&h=30h&smi=" + encodeURIComponent(item.smiles) + "&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow"})
@@ -154,7 +155,7 @@
                         cur.removeClass('added')
                     } else {
                         cur.addClass('added')
-                        shoppingCart.addItemToCart(cur.attr('id'), cur.data('db'), cur.data('smiles'))
+                        shoppingCart.addItemToCart(cur.attr('id'), cur.data('db'), cur.data('smiles'), cur.data('supplier'))
                     }
                     $('#cartCount').html(shoppingCart.countCart())
                 })
