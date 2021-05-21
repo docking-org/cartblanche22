@@ -8,7 +8,7 @@ if __name__ == '__main__':
     #
     # monkey.patch_all(subprocess=True, ssl=False)
     # patch_psycopg()
-    application.debug = True
+    # application.debug = True
     print("before application run")
     application.run()
-
+    # application.run(debug=True, host='0.0.0.0', port=5077)

@@ -5,11 +5,13 @@ from app.data.models.port_number import PortNumberModel
 import re
 from sqlalchemy import func
 from rdkit.Chem import MolFromSmiles
+from rdkit.Chem.Descriptors import MolWt
 from rdkit.Chem.Descriptors import MolLogP
 from rdkit.Chem.SaltRemover import SaltRemover
+from rdkit.Chem.inchi import MolToInchi
+from rdkit.Chem.inchi import MolToInchiKey
 # from rdkit.Chem.rdMolDescriptors import CalcMolFormula
-# from rdkit.Chem.inchi import MolToInchi
-# from rdkit.Chem.inchi import MolToInchiKey
+
 
 def get_all_unique_tin_servers():
     urls = []
@@ -120,6 +122,23 @@ def scale_logp_value(logp):
     else:
         logp = 10 * int(10 * logp)
     return logp
+
+
+def get_compound_details(smiles):
+    m = MolFromSmiles(smiles)
+    heavyAtoms = round(m.GetNumHeavyAtoms(), 3)
+    mwt = round(MolWt(m), 3)
+    logp = round(MolLogP(m), 3)
+    inchi = MolToInchi(m)
+    inchi_key = MolToInchiKey(m)
+    details = {
+        'heavyAtoms': heavyAtoms,
+        'mwt': mwt,
+        'logp': logp,
+        'inchi': inchi,
+        'inchi_key': inchi_key
+    }
+    return details
 
 
 def get_basic_tranche(smiles):

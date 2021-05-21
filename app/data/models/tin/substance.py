@@ -1,11 +1,11 @@
 from app import db
-from sqlalchemy.ext.associationproxy import association_proxy
-from app.helpers.validation import base62, get_basic_tranche
+from app.helpers.validation import base62, get_basic_tranche, get_compound_details
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
 import random
 import sqlalchemy as sa
+
 
 TABLE_ROW_COUNT_SQL = \
     """ SELECT CAST(reltuples AS BIGINT) AS num_rows
@@ -85,7 +85,8 @@ class SubstanceModel(db.Model):
             'sub_id': self.sub_id,
             'smiles': self.smiles,
             'supplier_code': [c.supplier_code for c in self.catalog_contents],
-            'catalogs': [c.catalog.json() for c in self.catalog_contents]
+            'catalogs': [c.catalog.json() for c in self.catalog_contents],
+            'tranche_details': get_compound_details(self.smiles)
         }
 
     def json_all(self, tin_url):
@@ -98,6 +99,7 @@ class SubstanceModel(db.Model):
             'supplier_code': [c.supplier_code for c in self.catalog_contents],
             'catalogs': [c.catalog.json() for c in self.catalog_contents],
             'server': tin_url
+            # 'logp': self.logp
         }
 
         return {**res, **self.tranche}
