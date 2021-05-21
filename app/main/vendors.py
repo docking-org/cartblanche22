@@ -15,7 +15,42 @@ from collections import OrderedDict
 from operator import getitem
 import asyncio
 from app.main.items import addToCartWithVendor
+from app.data.models.default_prices import DefaultPrices
 
+
+@application.route('/getVendor', methods=['POST'])
+def getVendor():
+    supplier = request.get_json()['data']
+    print(supplier.split(','))
+    if current_user.is_authenticated and current_user.has_roles('ucsf'):
+        role = 'ucsf'
+    else:
+        role = 'public'
+    vendor = {}
+    vendor['catalog_name'] = None
+    vendor['quantity'] = None
+    vendor['unit'] = None
+    vendor['price'] = float('inf')
+    vendor['shipping'] = None
+    vendor['supplier_code'] = None
+    for s in supplier:
+        price = None
+        if 'mcule' in s.lower():
+            price = DefaultPrices.query.filter_by(category_name='mcule', organization=role).first()
+        elif 'w' in s.lower():
+            price = DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first()
+        elif 's' in s.lower():
+            price = DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first()
+        else:
+            price = DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first()
+        if price.price < vendor['price']:
+            vendor['catalog_name'] = price.category_name
+            vendor['quantity'] = price.quantity
+            vendor['unit'] = price.unit
+            vendor['price'] = price.price
+            vendor['shipping'] = price.shipping
+            vendor['supplier_code'] = s
+    return jsonify(vendor)
 
 @application.route('/vendorsFromZinc', methods=['GET'])
 def vendorsFromZinc():

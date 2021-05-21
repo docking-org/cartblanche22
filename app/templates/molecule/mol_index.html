@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <style>
+    .input-sm{
+        padding: 0 !important;
+    }
+    </style>
+{% endblock %}
 {% block scripts %}
     {{ super() }}
     <script>
@@ -51,7 +59,7 @@
                         <th><abbr title="Molecular Weight">Mwt</abbr></th>
                         <th><abbr title="Partition Coefficient">logP</abbr></th>
                         <th>Tranche</th>
-                        <th></th>
+                        <th>Heavy Atoms</th>
 
                         {#                        <th>Download</th>#}
                     </tr>
@@ -59,10 +67,10 @@
                     <tbody>
                     <tr>
                         {% if data.tranche %}
-                            <td>{{ data.tranche.mwt }}</td>
-                            <td>{{ data.tranche.logp }}</td>
+                            <td>{{ data.tranche.mwt }} || {{data.tranche_details.mwt }}</td>
+                            <td>{{ data.tranche.logp }} || {{data.tranche_details.logp }}</td>
                             <td>{{ data.tranche.h_num }}{{ data.tranche.p_num }}</td>
-                            <td></td>
+                            <td>{{data.tranche_details.heavyAtoms }}</td>
                         {% else %}
                             <td></td>
                             <td></td>
@@ -83,7 +91,7 @@
                     </thead>
                     <tbody>
                     <tr>
-                        {%if data.catalogs[0].catalog_name == 'mcule' %}
+                        {% if data.catalogs[0].catalog_name == 'mcule' %}
                             <td>mcule</td>
                         {% elif data.catalogs[0].catalog_name == 'm' %}
                             <td>Enamine_M</td>
@@ -101,19 +109,53 @@
                 </table>
 
             </div>
-
             <div class="row collapse-inputgroups">
                 <div class="input-group input-sm">
                     <label for="substance-smiles-field" id="substance-smiles-field-label" class="input-group-addon"
                            title="Click to copy to clipboard">SMILES</label>
                     <input type="text" class="form-control" id="substance-smiles-field" readonly=""
                            value={{ data.smiles }}>
-                    <span class="input-group-btn">
-        <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-smiles-field"
-                title="Copy SMILES to clipboard">
-            <span class="glyphicon glyphicon-copy"></span> <span class="sr-only">Copy</span>
-        </button>
+{#                    <span class="input-group-btn">#}
+{#                        <button class="btn btn-default" type="button" data-role="trigger-copy" data-target="#substance-smiles-field"#}
+{#                            title="Copy SMILES to clipboard">#}
+{#                    <span class="glyphicon glyphicon-copy"></span> <span class="sr-only">Copy</span>#}
+{#                    </button>#}
       </span>
+                </div>
+
+                <div class="input-group input-sm">
+                    <label for="scaffold-inchi-field"
+                           id="scaffold-inchi-field-label"
+                           class="input-group-addon"
+                           title="Click to copy to clipboard">InChI</label>
+                    <input type="text" class="form-control" id="scaffold-inchi-field" readonly
+                           value="{{ data.tranche_details.inchi }}">
+{#                    <span class="input-group-btn">#}
+{#                        <button class="btn btn-default"#}
+{#                                type="button"#}
+{#                                data-role="trigger-copy"#}
+{#                                data-target="#scaffold-inchi-field"#}
+{#                                title="Copy InChI to clipboard">#}
+{#                            <span class="glyphicon glyphicon-copy"></span> <span class="sr-only">Copy</span>#}
+{#                        </button>#}
+{#                      </span>#}
+                </div>
+                <div class="input-group input-sm">
+                    <label for="scaffold-inchikey-field"
+                           id="scaffold-inchikey-field-label"
+                           class="input-group-addon"
+                           title="Click to copy to clipboard">InChI Key</label>
+                    <input class="form-control" id="scaffold-inchikey-field"
+                           value="{{ data.tranche_details.inchi_key }}" readonly>
+{#                    <span class="input-group-btn">#}
+{#                        <button class="btn btn-default"#}
+{#                                type="button"#}
+{#                                data-role="trigger-copy"#}
+{#                                data-target="#scaffold-inchikey-field"#}
+{#                                title="Copy InChI Key to clipboard">#}
+{#                            <span class="glyphicon glyphicon-copy"></span>#}
+{#                        <span class="sr-only">Copy</span></button>#}
+{#                      </span>#}
                 </div>
             </div>
 
@@ -124,9 +166,9 @@
                      src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ smile }}&qry=%q&cols=%c&cmap=%m"
                      alt="ZINCgs0000000OA0">
 
-                <div class="caption text-center">
-                    <a href="">Draw</a>
-                </div>
+{#                <div class="caption text-center">#}
+{#                    <a href="">Draw</a>#}
+{#                </div>#}
             </div>
 
             <table class="table table-striped table-condensed table-hover table-numeric">
@@ -169,19 +211,19 @@
 
                     <td>
 
-{#                        <button class="btn btn-info vendorBtn"#}
-{#                                data-catalog="{{ p.category_name }}"#}
-{#                                data-price="{{ p.price }}"#}
-{#                                data-quantity="{{ p.quantity }}"#}
-{#                                data-unit="{{ p.unit }}"#}
-{#                                data-shipping="{{ p.shipping }}"#}
-{#                                data-id="{{ data.zinc_id }}"#}
-{#                                data-db = "zinc22"#}
-{#                                data-smile =" {{ data.smiles }}"#}
-{#                                onclick="toggleVendor(this)">#}
-{#                            <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>#}
-{#                            Add to cart#}
-{#                        </button>#}
+                        {#                        <button class="btn btn-info vendorBtn"#}
+                        {#                                data-catalog="{{ p.category_name }}"#}
+                        {#                                data-price="{{ p.price }}"#}
+                        {#                                data-quantity="{{ p.quantity }}"#}
+                        {#                                data-unit="{{ p.unit }}"#}
+                        {#                                data-shipping="{{ p.shipping }}"#}
+                        {#                                data-id="{{ data.zinc_id }}"#}
+                        {#                                data-db = "zinc22"#}
+                        {#                                data-smile =" {{ data.smiles }}"#}
+                        {#                                onclick="toggleVendor(this)">#}
+                        {#                            <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>#}
+                        {#                            Add to cart#}
+                        {#                        </button>#}
                     </td>
                 </tr>
             {% endfor %}

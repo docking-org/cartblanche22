@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block scripts %}
     {{ super() }}
-    <script src="../static/js/custom/cartblanche.js"></script>
+{#    <script src="../static/js/custom/cartblanche.js"></script>#}
     <script>
         $(document).ready(function () {
             localStorage.setItem('punchout', '{{punchout}}')
@@ -9,6 +9,7 @@
             timeoutCheck('{{is_authenticated}}');
             if ('{{loadCartFromDb}}' === 'True') {
                 loadCartFromDb();
+                loadApplicaiton();
             }
         });
     </script>

@@ -1,3 +1,4 @@
+
 function getVendors(bool, identifier, db) {
     let data = [];
     $.ajax({
@@ -112,6 +113,7 @@ function updatePurchaseAmount(data, new_purchase) {
     }
     return data;
 }
+
 function addVendorToCart(identifier, db, img, vendor) {
     console.log
     data = {
@@ -135,6 +137,7 @@ function addVendorToCart(identifier, db, img, vendor) {
     });
 
 }
+
 function deleteVendorFromCart(identifier, cat_name, supplier_code, quantity, unit, price) {
     console.log('calling deleteVendorFromCart')
     let cart = JSON.parse(localStorage.getItem('cart'))
@@ -142,8 +145,7 @@ function deleteVendorFromCart(identifier, cat_name, supplier_code, quantity, uni
     let supplier = cart[i].supplier
     if (supplier.length <= 1) {
         cart.splice(i, 1)
-    }
-    else {
+    } else {
         let s = supplier.findIndex(obj => obj.cat_name == cat_name && obj.supplier_code == supplier_code &&
             obj.unit == unit && obj.quantity == quantity && obj.price == price)
         cart[i]['supplier'].splice(s, 1)
@@ -197,8 +199,7 @@ function deleteVendor(data) {
                         alert(res)
                     }
                 });
-            }
-            else {
+            } else {
                 for (let j = 0; j < cart[i]['supplier'].length; j++) {
                     let vendor = cart[i]['supplier'][j]
                     // console.log(vendor)

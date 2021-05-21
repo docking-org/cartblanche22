@@ -49,7 +49,6 @@
                   {#oMyBlob.text().then((e) =>{#}
                   {#  console.log(e)})#}
             } else {
-                console.log($('#zincfile'))
                 formData.append('zinc_id-in', file);
             }
             {#$.ajax({#}
@@ -121,7 +120,7 @@
                     $('.zinc-results').addClass('addZinc')
                     console.log('added all to cart')
                     for (let item of response.items) {
-                        shoppingCart.addItemToCart(item.zinc_id, 'zinc22', item.smiles)
+                        shoppingCart.addItemToCart(item.zinc_id, 'zinc22', item.smiles, item.supplier_code, item.catalogs)
                         $('#' + item.zinc_id).addClass('added')
                     }
                 }
@@ -136,11 +135,15 @@
                 let div = $("<div>", {
                     class: "col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2"
                 });
+                var catalogs = encodeURIComponent(JSON.stringify(item.catalogs));
+                var suppliers = encodeURIComponent(JSON.stringify(item.supplier_code));
                 let div2 = $("<div>", {
                     id: item.zinc_id,
                     class: "mol",
                     'data-smiles': item.smiles,
-                    'data-db': 'zinc22'
+                    'data-db': 'zinc22',
+                    'data-supplier' : suppliers,
+                    'data-catalogs' : catalogs
                 });
                 let a = $("<a>", {href: "/searchZinc/" + item.zinc_id, text: item.zinc_id})
                 let img = $("<img>", {src: "https://sw.docking.org/depict/svg?w=50&h=30h&smi=" + encodeURIComponent(item.smiles) + "&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow"})
@@ -153,11 +156,11 @@
                     let cur = $(e.currentTarget);
                     console.log(e.currentTarget.id)
                     if (cur.hasClass('added')) {
-                        shoppingCart.removeItemFromCart(cur.attr('id'))
                         cur.removeClass('added')
+                        shoppingCart.removeItemFromCart(cur.attr('id'))
                     } else {
                         cur.addClass('added')
-                        shoppingCart.addItemToCart(cur.attr('id'), cur.data('db'), cur.data('smiles'))
+                        shoppingCart.addItemToCart(cur.attr('id'), cur.data('db'), cur.data('smiles'), JSON.parse(decodeURIComponent(cur.data('supplier'))), JSON.parse(decodeURIComponent(cur.data('catalogs'))));
                     }
                     $('#cartCount').html(shoppingCart.countCart())
                 })
@@ -222,24 +225,99 @@
     <div class="row" id="molResults" style="display: none">
     </div>
     <div class="row" id="desc">
-    <p>You can get result with different formats. Below curl command returns a file with all possible fields.
-            If you want to specify output fields, you can add output_fields.
-            For the first example it will return only smiles, sub_id.
-            Please note that there are always tranche and zinc_id fields by default.
+    <p>You can get result with different formats.
+            If you want to specify output fields, you can add output_fields. Below example it will return only smiles, sub_id. If output_fields not specified
+            it returns with all possible fields. Please note that there are always tranche and zinc_id fields by default.
             </p>
         <h4>CURL commands for searching single ZincID</h4>
-        <p>to get .txt file: <code>https://cartblanche22.docking.org/search.txt?zinc_id=ZINCms000002NiP3 -F output_fields='smiles,sub_id'</code></p>
-        <p>to get .json file: <code>https://cartblanche22.docking.org/search.json?zinc_id=ZINCms000002NiP3</code></p>
-        <p>to get .csv file:  <code>https://cartblanche22.docking.org/search.csv?zinc_id=ZINCms000002NiP3</code></p>
+        <p>Example:
+                <code>curl https://cartblanche22.docking.org/search.txt -F zinc_id=ZINCms000002NiP3 -F output_fields='smiles,sub_id'</code>
+
+    </p>
+        <table class="table table-bordered">
+            <tr>
+                <th>Description</th>
+                <th>Attributes</th>
+                <th>Possible fields</th>
+            </tr>
+            <tr>
+                <td>To specify return format</td>
+                <td><code>curl https://cartblanche22.docking.org/search[<i>.txt</i>]</code></td>
+                <td><ul>
+                    <li>.txt</li>
+                    <li>.csv</li>
+                    <li>.json</li>
+                </ul></td>
+            </tr>
+            <tr>
+                <td>To add search value</td>
+                <td> <code>-F zinc_id=[<i>ZINCms000002NiP3</i>]</code></td>
+                <td>Any single zinc identifier</td>
+            </tr>
+            <tr>
+                <td>To specify output field
+                                        <br>
+
+                  <small>If it doesn't defined, search will return all possible fields</small></td>
+                <td>
+                    <code>-F output_fields=[<i>'smiles,sub_id'</i>]</code>
+              </td>
+                <td><ul>
+                    <li>catalogs</li>
+                    <li>smiles</li>
+                    <li>sub_id</li>
+                    <li>supplier_code</li>
+                    <li>tranche</li>
+                    <li>tranche_details</li>
+                    <li>zinc_id</li>
+                </ul></td>
+            </tr>
+
+        </table>
         <h4>CURL commands for searching multiple ZincIDs</h4>
-        <p>to get .txt file: <code>curl https://cartblanche22.docking.org/substances.txt -F
+        <p>Example: <code>curl https://cartblanche22.docking.org/substances.txt -F
             zinc_id-in=@test.txt -F output_fields='smiles,sub_id'
 </code></p>
-        <p>to get .json file: <code>curl https://cartblanche22.docking.org/substances.json -F
-            zinc_id-in=@test.txt</code></p>
-        <p>to get .csv file: <code>curl https://cartblanche22.docking.org/substances.csv -F
-            zinc_id-in=@test.txt</code></p>
+                <table class="table table-bordered">
+            <tr>
+                <th>Description</th>
+                <th>Attributes</th>
+                <th>Possible fields</th>
+            </tr>
+            <tr>
+                <td>To specify return format</td>
+                <td><code>curl https://cartblanche22.docking.org/substances[<i>.txt</i>]</code></td>
+                <td><ul>
+                    <li>.txt</li>
+                    <li>.csv</li>
+                    <li>.json</li>
+                </ul></td>
+            </tr>
+            <tr>
+                <td>To add search value</td>
+                <td> <code>-F zinc_id-in=[<i>@test.txt</i>]</code></td>
+                <td>.txt file with list of zinc identifers</td>
+            </tr>
+            <tr>
+                <td>To specify output fields
+                                        <br>
 
+                  <small>If it doesn't defined, search will return all possible fields</small></td>
+                <td>
+                    <code>-F output_fields=[<i>'smiles,sub_id'</i>]</code>
+              </td>
+                <td><ul>
+                    <li>catalogs</li>
+                    <li>smiles</li>
+                    <li>sub_id</li>
+                    <li>supplier_code</li>
+                    <li>tranche</li>
+                    <li>tranche_details</li>
+                    <li>zinc_id</li>
+                </ul></td>
+            </tr>
+
+        </table>
         <p>If you want to learn more about search, please go to <a
                 href="http://wiki.docking.org/index.php/Zinc22:Searching" target="_blank"> Zinc22 documentation on wiki
             page</a></p>

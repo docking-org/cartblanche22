@@ -18,13 +18,14 @@ def addItem():
     db.session.add(new_item)
     db.session.commit()
     for s in item['supplier']:
-        vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
-                         purchase_quantity=s['quantity'],
-                         supplier_code=s['supplier_code'], price=float(s['price']),
-                         pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
-        db.session.add(vendor)
-        db.session.commit()
-        print('add vendor for new item')
+        if s['assigned']:
+            vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
+                             purchase_quantity=s['purchase'],
+                             supplier_code=s['supplier_code'], price=float(s['price']),
+                             pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
+            db.session.add(vendor)
+            db.session.commit()
+            print('add vendor for new item')
     return jsonify('successfully added item to cart db')
 
 
@@ -79,11 +80,12 @@ def updateVendorTest():
         data = request.get_json()['data']
         identifier = data['identifier']
         item = Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first()
-        print(data)
         vendor = Vendors.query.filter_by(item_fk=item.item_id, cat_name=data['cat_name'],
                                          supplier_code=data['supplier_code'], price=float(data['price']),
                                          pack_quantity=float(data['quantity']), unit=data['unit']).first()
+        print('before',vendor)
         vendor.updatePurchaseQuantity(data['purchase'])
+        print('after',vendor)
     return jsonify('successfully updated vendor purchase to db')
 
 
@@ -96,21 +98,16 @@ def saveCartToDbTest():
         item = Items.query.filter_by(identifier=d['identifier'], cart_fk=current_user.activeCart).first()
         if item:
             suppliers = d['supplier']
-            if len(suppliers) > 0:
-                for s in suppliers:
-                    vendor = Vendors.query.filter_by(cat_name=s['cat_name'], supplier_code=s['supplier_code'],price=s[
-                            'price'], pack_quantity=s['quantity'], unit=s['unit'], shipping_str=s[
-                            'shipping']).first()
-                    if vendor:
-                        vendor.updatePurchaseQuantity(max(s['purchase'], vendor.purchase_quantity))
-                    else:
-                        vendor = Vendors(item_fk=item.item_id, cat_name=s['cat_name'],
+            for s in suppliers:
+                if s['assigned']:
+                    vendor = Vendors.query.filter_by(item_fk=item.item_id).first()
+                    vendor.deleteVendor()
+                    vendor = Vendors(item_fk=item.item_id, cat_name=s['cat_name'],
                                          purchase_quantity=s['purchase'],
                                          supplier_code=s['supplier_code'], price=float(s['price']),
                                          pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
-                        db.session.add(vendor)
-                        db.session.commit()
-                        print('added vendor in found item')
+                    db.session.add(vendor)
+                    db.session.commit()
         else:
             new_item = Items(cart_fk=current_user.activeCart, identifier=d['identifier'], compound_img=d['smile'],
                              database=d['db'])
@@ -120,13 +117,14 @@ def saveCartToDbTest():
             print('new_item: ',new_item)
             suppliers = d['supplier']
             for s in suppliers:
-                vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
+                if s['assigned']:
+                    vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
                                  purchase_quantity=s['purchase'],
                                  supplier_code=s['supplier_code'], price=float(s['price']),
                                  pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
-                db.session.add(vendor)
-                db.session.commit()
-                print('add vendor for new item')
+                    db.session.add(vendor)
+                    db.session.commit()
+                    print('add vendor for new item', vendor.purchase_quantity)
     response = populateCart()
     return jsonify(response)
 
@@ -201,6 +199,7 @@ def populateCart():
             item['smile'] = c.compound_img
             supplier = []
             for v in c.vendors:
+                print('from populate caart', v)
                 vendor = {}
                 vendor['cat_name'] = v.cat_name
                 vendor['supplier_code'] = v.supplier_code
@@ -209,6 +208,7 @@ def populateCart():
                 vendor['price'] = v.price
                 vendor['purchase'] = v.purchase_quantity
                 vendor['shipping'] = v.shipping_str
+                vendor['assigned'] = True
                 supplier.append(vendor)
             item['supplier'] = supplier
             response.append(item)
