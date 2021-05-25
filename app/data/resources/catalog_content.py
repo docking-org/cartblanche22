@@ -30,6 +30,7 @@ class CatalogContentList(Resource):
         supplier_codes = args.get('supplier_code-in')
 
         tin_urls = get_all_unique_tin_servers()
+        print(tin_urls)
         # tin_list = []
         # server_mappings = ServerMappingModel.query.distinct(
         #     ServerMappingModel.ip_fk,
@@ -40,7 +41,7 @@ class CatalogContentList(Resource):
         #         url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
         #         # tin_list.append(url)
         #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
-
+        tin_urls = ['10.20.1.16:5434']
         s_codes = ','.join(supplier_codes)
         url = 'https://{}/catalog'.format(request.host)
         resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=50) for t in tin_urls)
@@ -106,17 +107,28 @@ class CatalogContent(Resource):
         except Exception as e:
             print("Exception!!!!!!!!!!: ", tin_url, " error:", e)
             error_msg = "{}, error:{}".format(tin_url, e)
-            return [{
-                    'tranche': tin_url,
-                    'zinc_id': tin_url,
-                    'sub_id': tin_url,
-                    'smiles': tin_url,
-                    'tin_url': tin_url,
-                    'error': error_msg,
-                    'elapsed_time': elapsed_time
-                }]
 
-        return {'message': 'Not found'}, 404
+        if not error_msg:
+            error_msg = 'Not Found'
+            
+        if not elapsed_time:
+            elapsed_time = '{:s} started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
+                                                                                            strtime1,
+                                                                                            strtime2,
+                                                                                            (time2 - time1) % 60)
+        return [{
+            'tranche': tin_url,
+            'zinc_id': tin_url,
+            'sub_id': tin_url,
+            'smiles': tin_url,
+            'supplier_code': lines,
+            'catalogs': tin_url,
+            'tranche_details': tin_url,
+            'tin_url': tin_url,
+            'error': error_msg,
+            'elapsed_time': elapsed_time
+        }]
+
 
     # def get(self, tin_url, lines):
     #     current_app.config['TIN_URL'] = tin_url
