@@ -89,6 +89,14 @@ class SubstanceModel(db.Model):
             'tranche_details': get_compound_details(self.smiles)
         }
 
+    def json2(self):
+        return {
+            'tranche': self.tranche,
+            'zinc_id': self.zinc_id,
+            'sub_id': self.sub_id,
+            'smiles': self.smiles
+        }
+
     def json_all(self, tin_url):
         res = {
             'sub_id': self.sub_id,
