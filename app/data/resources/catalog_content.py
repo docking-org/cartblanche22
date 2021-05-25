@@ -128,7 +128,7 @@ class CatalogContent(Resource):
 
 class CatalogContents(Resource):
     def post(self, file_type=None):
-        parser.add_argument('supplier_code-in', location='files', type=FileStorage, required=True)
+        parser.add_argument('supplier_code-in', location='files', type=FileStorage)
         args = parser.parse_args()
         uploaded_file = args.get('supplier_code-in').stream.read().decode("latin-1")
         lines = [x for x in uploaded_file.split('\n') if x]
