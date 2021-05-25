@@ -112,13 +112,13 @@ class CatalogContent(Resource):
             error_msg = "{}, error:{}".format(tin_url, e)
 
         return [{
-                'tranche': 'Not found',
-                'zinc_id': 'Not found',
-                'sub_id': 'Not found',
-                'smiles': 'Not found',
+                'tranche': tin_url,
+                'zinc_id': tin_url,
+                'sub_id': tin_url,
+                'smiles': tin_url,
                 'supplier_code': lines,
-                'catalogs': 'Not found',
-                'tranche_details': 'Not found',
+                'catalogs': tin_url,
+                'tranche_details': tin_url,
                 'tin_url': tin_url,
                 'error': error_msg,
                 'elapsed_time': elapsed_time
