@@ -86,11 +86,11 @@ class CatalogContent(Resource):
         elapsed_time = ""
         try:
             time1 = time.time()
+            strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             catContents = CatalogContentModel.query.filter(
                 func.lower(CatalogContentModel.supplier_code).in_(lines)).all()
 
             time2 = time.time()
-            strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
             elapsed_time = '{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
                                                                                               strtime1, strtime2,
@@ -110,8 +110,10 @@ class CatalogContent(Resource):
 
         if not error_msg:
             error_msg = 'Not Found'
-            
+
         if not elapsed_time:
+            time2 = time.time()
+            strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
             elapsed_time = '{:s} started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
                                                                                             strtime1,
                                                                                             strtime2,
