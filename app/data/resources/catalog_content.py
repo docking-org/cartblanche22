@@ -98,7 +98,7 @@ class CatalogContent(Resource):
 
             data = []
             for cc in catContents:
-                data.extend([sub.json() for sub in cc.substances])
+                data.extend([sub.json2() for sub in cc.substances])
 
             if data:
                 return jsonify(data)
@@ -111,9 +111,6 @@ class CatalogContent(Resource):
                     'zinc_id': tin_url,
                     'sub_id': tin_url,
                     'smiles': tin_url,
-                    'supplier_code': lines,
-                    'catalogs': tin_url,
-                    'tranche_details': tin_url,
                     'tin_url': tin_url,
                     'error': error_msg,
                     'elapsed_time': elapsed_time
