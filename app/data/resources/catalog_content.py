@@ -41,7 +41,6 @@ class CatalogContentList(Resource):
         #         url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
         #         # tin_list.append(url)
         #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
-        tin_urls = ['10.20.1.16:5434']
         s_codes = ','.join(supplier_codes)
         url = 'https://{}/catalog'.format(request.host)
         resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=50) for t in tin_urls)
@@ -121,8 +120,8 @@ class CatalogContent(Resource):
         return [{
             'tranche': tin_url,
             'zinc_id': tin_url,
-            'sub_id': self.sub_id,
-            'smiles': self.smiles,
+            'sub_id': tin_url,
+            'smiles': tin_url,
             'tin_url': tin_url,
             'error': error_msg,
             'elapsed_time': elapsed_time
