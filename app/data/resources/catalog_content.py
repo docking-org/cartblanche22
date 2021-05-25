@@ -119,11 +119,8 @@ class CatalogContent(Resource):
         return [{
             'tranche': tin_url,
             'zinc_id': tin_url,
-            'sub_id': tin_url,
-            'smiles': tin_url,
-            'supplier_code': lines,
-            'catalogs': tin_url,
-            'tranche_details': tin_url,
+            'sub_id': self.sub_id,
+            'smiles': self.smiles,
             'tin_url': tin_url,
             'error': error_msg,
             'elapsed_time': elapsed_time
