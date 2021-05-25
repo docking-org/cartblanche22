@@ -45,12 +45,8 @@ class CatalogContentList(Resource):
         url = 'https://{}/catalog'.format(request.host)
         resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=50) for t in tin_urls)
 
-        # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
-        results = [json.loads(res.text) for res in grequests.map(resp) if res]
-        print("file_type ", file_type)
-        print("result!!!", results)
+        results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
         flat_list = itertools.chain.from_iterable(results)
-        print("flat_list!!!", flat_list)
         data = defaultdict(list)
         data['items'] = list(flat_list)
 
@@ -110,19 +106,20 @@ class CatalogContent(Resource):
         except Exception as e:
             print("Exception!!!!!!!!!!: ", tin_url, " error:", e)
             error_msg = "{}, error:{}".format(tin_url, e)
+            return [{
+                    'tranche': tin_url,
+                    'zinc_id': tin_url,
+                    'sub_id': tin_url,
+                    'smiles': tin_url,
+                    'supplier_code': lines,
+                    'catalogs': tin_url,
+                    'tranche_details': tin_url,
+                    'tin_url': tin_url,
+                    'error': error_msg,
+                    'elapsed_time': elapsed_time
+                }]
 
-        return [{
-                'tranche': tin_url,
-                'zinc_id': tin_url,
-                'sub_id': tin_url,
-                'smiles': tin_url,
-                'supplier_code': lines,
-                'catalogs': tin_url,
-                'tranche_details': tin_url,
-                'tin_url': tin_url,
-                'error': error_msg,
-                'elapsed_time': elapsed_time
-            }]
+        return {'message': 'Not found'}, 404
 
     # def get(self, tin_url, lines):
     #     current_app.config['TIN_URL'] = tin_url
