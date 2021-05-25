@@ -3,6 +3,7 @@ from app.data.models.tin.catalog import CatalogContentModel
 from app.data.models.server_mapping import ServerMappingModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
+from app.helpers.validation import get_all_unique_tin_servers
 from flask import jsonify, current_app, request, make_response
 from collections import defaultdict
 import grequests
@@ -28,30 +29,34 @@ class CatalogContentList(Resource):
     def getList(cls, args, file_type=None):
         supplier_codes = args.get('supplier_code-in')
 
-        tin_urls = {}
-        tin_list = []
-        server_mappings = ServerMappingModel.query.distinct(
-            ServerMappingModel.ip_fk,
-            ServerMappingModel.port_fk).all()
-
-        for sm in server_mappings:
-            if sm.tranches:
-                url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
-                tin_list.append(url)
-                tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
+        tin_urls = get_all_unique_tin_servers()
+        # tin_list = []
+        # server_mappings = ServerMappingModel.query.distinct(
+        #     ServerMappingModel.ip_fk,
+        #     ServerMappingModel.port_fk).all()
+        #
+        # for sm in server_mappings:
+        #     if sm.tranches:
+        #         url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
+        #         # tin_list.append(url)
+        #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
 
         s_codes = ','.join(supplier_codes)
-        url = 'https://{}/catalog'.format(request.host)
-        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k}, timeout=15) for k in tin_urls.keys())
+        url = 'http://{}/catalog'.format(request.host)
+        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=50) for t in tin_urls)
 
-        results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
+        # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
+        results = [json.loads(res.text) for res in grequests.map(resp) if res]
+        print("file_type ", file_type)
+        print("result!!!", results)
         flat_list = itertools.chain.from_iterable(results)
+        print("flat_list!!!", flat_list)
         data = defaultdict(list)
         data['items'] = list(flat_list)
 
         if not data['items']:
             return {'message': 'Not found'}, 404
-
+        print("data['items']", data['items'])
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
             keys = list(data['items'][0].keys())
@@ -79,6 +84,9 @@ class CatalogContent(Resource):
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
         lines = args.get('supplier_codes').lower().split(',')
+        tin_url = args.get('tin_url')
+        error_msg = ""
+        elapsed_time = ""
         try:
             time1 = time.time()
             catContents = CatalogContentModel.query.filter(
@@ -87,9 +95,10 @@ class CatalogContent(Resource):
             time2 = time.time()
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
-            print('{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(args.get('tin_url'),
+            elapsed_time = '{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
                                                                                               strtime1, strtime2,
-                                                                                              (time2 - time1) % 60))
+                                                                                              (time2 - time1) % 60)
+            print(elapsed_time)
 
             data = []
             for cc in catContents:
@@ -99,8 +108,21 @@ class CatalogContent(Resource):
                 return jsonify(data)
 
         except Exception as e:
-            print("Exception!!!!!!!!!!: ", args.get('tin_url'), " error:", e)
-        return {'message': 'Not found'}, 404
+            print("Exception!!!!!!!!!!: ", tin_url, " error:", e)
+            error_msg = "{}, error:{}".format(tin_url, e)
+
+        return [{
+                'tranche': 'Not found',
+                'zinc_id': 'Not found',
+                'sub_id': 'Not found',
+                'smiles': 'Not found',
+                'supplier_code': lines,
+                'catalogs': 'Not found',
+                'tranche_details': 'Not found',
+                'tin_url': tin_url,
+                'error': error_msg,
+                'elapsed_time': elapsed_time
+            }]
 
     # def get(self, tin_url, lines):
     #     current_app.config['TIN_URL'] = tin_url
