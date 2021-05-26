@@ -88,7 +88,7 @@ class CatalogContent(Resource):
             print("tin_url=========================", tin_url)
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             catContents = CatalogContentModel.query.filter(
-                func.lower(CatalogContentModel.supplier_code).in_(lines)).all()
+                func.lower(CatalogContentModel.supplier_code).in_(lines), not CatalogContentModel.depleted).all()
 
             time2 = time.time()
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
