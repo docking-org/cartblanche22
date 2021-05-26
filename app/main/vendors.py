@@ -84,9 +84,9 @@ def autoChooseVendor(item_id):
     print('autoChoosing Vendor for {}'.format(item_id))
     item = Items.query.get(item_id)
     payload = {'molecule_id': ''.join(item.identifier.split()), 'source_database': item.database}
-    response = requests.get('http://ec2-52-53-226-228.us-west-1.compute.amazonaws.com/api/_new_get_data',
-                            params=payload)
-    # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
+    # response = requests.get('http://ec2-52-53-226-228.us-west-1.compute.amazonaws.com/api/_new_get_data',
+    #                         params=payload)
+    response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
     if response and len(response.json()) > 0:
         res = response.json()
         print(res)
@@ -105,9 +105,9 @@ def autoChooseVendor(item_id):
 @application.route('/getVendors/<identifier>/<db>', methods=['GET'])
 def getVendors(identifier, db):
     payload = {'molecule_id': identifier, 'source_database': db}
-    response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data',
-                            params=payload)
-    # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
+    # response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data',
+    #                         params=payload)
+    response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
     vendors = []
     if response and len(response.json()) > 0:
         res = response.json()
@@ -142,9 +142,9 @@ def chooseVendor():
                   'shipping': 0}
     else:
         payload = {'molecule_id': data['identifier'], 'source_database': data['db']}
-        # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
-        response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data',
-                                params=payload)
+        response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
+        # response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data',
+        #                         params=payload)
 
         if response and len(response.json()) > 0:
             res = response.json()
@@ -168,9 +168,9 @@ def chooseVendor():
 def vendorModal(item_id):
     item = Items.query.get(item_id)
     payload = {'molecule_id': ''.join(item.identifier.split()), 'source_database': item.database}
-    # response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
-    response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data',
-                            params=payload)
+    response = requests.get('http://prices.docking.org/api/_new_get_data', params=payload)
+    # response = requests.get('http://ec2-54-177-191-93.us-west-1.compute.amazonaws.com/api/_new_get_data',
+    #                         params=payload)
 
     if response:
         data = response.json()

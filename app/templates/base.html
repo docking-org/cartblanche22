@@ -12,9 +12,9 @@
     {{ super() }}
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/base.css') }}">
-{#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/datatables.min.css') }}">#}
-{#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery-ui.min.css') }}">#}
-{#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/fontawesome-all.min.css') }}">#}
+    {#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/datatables.min.css') }}">#}
+    {#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery-ui.min.css') }}">#}
+    {#    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/fontawesome-all.min.css') }}">#}
     {#    <link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css"/>#}
     {#    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css"/>#}
     {#    <link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">#}
@@ -115,22 +115,43 @@
             </div>
             <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav">
-                    <li>
-                        <a href="{{ url_for('main.sw') }}" class="test"
-                           data-toggle="tooltip" data-placement="bottom"
-                           title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
-                        Similarity
-                        </a>
-                    </li>
+                    {% if current_user.is_anonymous %}
+                        <li>
+                            <a href="{{ url_for('main.sw') }}" class="test"
+                               data-toggle="tooltip" data-placement="bottom"
+                               title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
+                                Similarity
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="dropdown" >
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle">
+                                Similarity
+                                <span
+                                        class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('main.sw') }}">Public</a></li>
+                                <li><a href="{{ url_for('main.swp') }}">Private</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
                     <li>
                         <a href="{{ url_for('main.arthor') }}" data-toggle="tooltip" data-placement="bottom"
                            title="Arthor : Search by substructure or pattern (SMARTS)">Substructure
                         </a>
                     </li>
-                    {% if not current_user.is_anonymous %}
-                        <li><a href="{{ url_for('main.swp') }}">SWP</a></li>
-                        <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
-                    {% endif %}
+                    <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle"> Lookup <span
+                            class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('main.search_zincid') }}">By ZincID</a></li>
+                            <li><a href="{{ url_for('main.search_suppliercode') }}">By Supplier Code</a></li>
+                            <li><a href="{{ url_for('main.search_smiles') }}">By Smiles in ZINC-22</a></li>
+                            {#                            <li><a href="{{ url_for('main.search_smiles_vendor') }}">By Smiles in Vendor catalogs</a>#}
+                            </li>
+                            <li><a href="{{ url_for('main.search_random') }}">Download random molecules</a></li>
+                        </ul>
+                    </li>
+
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Tranches <span
                             class="caret"></span></a>
                         <ul class="dropdown-menu">
@@ -138,17 +159,10 @@
                             <li><a href="{{ url_for('main.tranches3d') }}">3D</a></li>
                         </ul>
                     </li>
-                    <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Lookup <span
-                            class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="{{ url_for('main.search_zincid') }}">By ZincID</a></li>
-                            <li><a href="{{ url_for('main.search_suppliercode') }}">By Supplier Code</a></li>
-                            <li><a href="{{ url_for('main.search_smiles') }}">By Smiles in ZINC-22</a></li>
-{#                            <li><a href="{{ url_for('main.search_smiles_vendor') }}">By Smiles in Vendor catalogs</a>#}
-                            </li>
-                            <li><a href="{{ url_for('main.search_random') }}">Download random molecules</a></li>
-                        </ul>
-                    </li>
+                    {% if not current_user.is_anonymous %}
+                        <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
+                    {% endif %}
+
                 </ul>
 
                 <ul class="nav navbar-nav navbar-right">
@@ -168,8 +182,8 @@
                         <li><a id="logoutTab"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
                     {% endif %}
                     <li><a href="{{ url_for('main.cart') }}"><span class="glyphicon glyphicon-shopping-cart"
-                                                                      style="font-size:18px"></span><span class="badge"
-                                                                                                          id="cartCount">{{ cart_count }}</span>
+                                                                   style="font-size:18px"></span><span class="badge"
+                                                                                                       id="cartCount">{{ cart_count }}</span>
                     </a>
                     </li>
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">About <span

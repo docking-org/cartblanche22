@@ -67,7 +67,7 @@ function toggleCart(btn) {
         shoppingCart.addItemToCart(identifier, db, smile);
         if(hg) {
             setTimeout(function(){
-                shoppingCart.addVendorToCart(identifier, db, smile,'HG', 'HG', 10, 'mg', 0, '0', 1); },
+                shoppingCart.addVendorToCart(identifier, db, smile,'HG', 'HG', 10, 'mg', 0, '0', 1, true); },
                 1000);
         }
         // vendorRequest(identifier, db, img, btn, $(btn).data('hg'))
