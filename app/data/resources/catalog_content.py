@@ -3,6 +3,7 @@ from app.data.models.tin.catalog import CatalogContentModel
 from app.data.models.server_mapping import ServerMappingModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
+from app.helpers.validation import get_all_unique_tin_servers
 from flask import jsonify, current_app, request, make_response
 from collections import defaultdict
 import grequests
@@ -28,21 +29,21 @@ class CatalogContentList(Resource):
     def getList(cls, args, file_type=None):
         supplier_codes = args.get('supplier_code-in')
 
-        tin_urls = {}
-        tin_list = []
-        server_mappings = ServerMappingModel.query.distinct(
-            ServerMappingModel.ip_fk,
-            ServerMappingModel.port_fk).all()
-
-        for sm in server_mappings:
-            if sm.tranches:
-                url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
-                tin_list.append(url)
-                tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
-
+        tin_urls = get_all_unique_tin_servers()
+        print(tin_urls)
+        # tin_list = []
+        # server_mappings = ServerMappingModel.query.distinct(
+        #     ServerMappingModel.ip_fk,
+        #     ServerMappingModel.port_fk).all()
+        #
+        # for sm in server_mappings:
+        #     if sm.tranches:
+        #         url = "{}:{}".format(sm.ip_address.ip, sm.port_number.port)
+        #         # tin_list.append(url)
+        #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
         s_codes = ','.join(supplier_codes)
         url = 'https://{}/catalog'.format(request.host)
-        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': k}, timeout=15) for k in tin_urls.keys())
+        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=1000) for t in tin_urls)
 
         results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
         flat_list = itertools.chain.from_iterable(results)
@@ -51,7 +52,7 @@ class CatalogContentList(Resource):
 
         if not data['items']:
             return {'message': 'Not found'}, 404
-
+        print("data['items']", data['items'])
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
             keys = list(data['items'][0].keys())
@@ -79,28 +80,54 @@ class CatalogContent(Resource):
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
         lines = args.get('supplier_codes').lower().split(',')
+        tin_url = args.get('tin_url')
+        error_msg = ""
+        elapsed_time = ""
         try:
             time1 = time.time()
+            print("tin_url=========================", tin_url)
+            strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             catContents = CatalogContentModel.query.filter(
-                func.lower(CatalogContentModel.supplier_code).in_(lines)).all()
+                func.lower(CatalogContentModel.supplier_code).in_(lines), not CatalogContentModel.depleted).all()
 
             time2 = time.time()
-            strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
-            print('{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(args.get('tin_url'),
+            elapsed_time = '{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
                                                                                               strtime1, strtime2,
-                                                                                              (time2 - time1) % 60))
+                                                                                              (time2 - time1) % 60)
+            print(elapsed_time)
 
             data = []
             for cc in catContents:
-                data.extend([sub.json() for sub in cc.substances])
+                data.extend([sub.json2() for sub in cc.substances])
 
             if data:
                 return jsonify(data)
 
         except Exception as e:
-            print("Exception!!!!!!!!!!: ", args.get('tin_url'), " error:", e)
-        return {'message': 'Not found'}, 404
+            print("Exception!!!!!!!!!!: ", tin_url, " error:", e)
+            error_msg = "{}, error:{}".format(tin_url, e)
+
+        if not error_msg:
+            error_msg = 'Not Found'
+
+        if not elapsed_time:
+            time2 = time.time()
+            strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
+            elapsed_time = '{:s} started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
+                                                                                            strtime1,
+                                                                                            strtime2,
+                                                                                            (time2 - time1) % 60)
+        return [{
+            'tranche': tin_url,
+            'zinc_id': tin_url,
+            'sub_id': tin_url,
+            'smiles': tin_url,
+            'tin_url': tin_url,
+            'error': error_msg,
+            'elapsed_time': elapsed_time
+        }]
+
 
     # def get(self, tin_url, lines):
     #     current_app.config['TIN_URL'] = tin_url
@@ -112,7 +139,7 @@ class CatalogContent(Resource):
 
 class CatalogContents(Resource):
     def post(self, file_type=None):
-        parser.add_argument('supplier_code-in', location='files', type=FileStorage, required=True)
+        parser.add_argument('supplier_code-in', location='files', type=FileStorage)
         args = parser.parse_args()
         uploaded_file = args.get('supplier_code-in').stream.read().decode("latin-1")
         lines = [x for x in uploaded_file.split('\n') if x]
