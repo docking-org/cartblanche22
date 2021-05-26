@@ -101,11 +101,9 @@
             type: "GET",
             url: "/createCart",
             success: function (route) {
-                console.log('aa')
-                let cart = []
-                localStorage.setItem('cart', JSON.stringify(cart))
-                $('#cartCount').html(0)
-                window.location.href = route;
+                console.log('aa', route)
+                shoppingCart.clearCart();
+                setTimeout(function(){window.location.href = route; }, 500);
             }
         });
 
@@ -128,6 +126,16 @@
     <h4>You have: <span id="carts">{{carts|length}}</span> carts <button class="btn btn-info" role="button"
             id="createCart">+</button></h4>
     <table id="cartList" class="table">
+             <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Number of total item</th>
+                            <th>Total price (USD)</th>
+                            <th></th>
+                            <th>Delete / Activate</th>
+                        </tr>
+                        </thead>
     </table>
 
 </div>

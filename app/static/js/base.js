@@ -23,6 +23,7 @@ let shoppingCart = (function () {
     }
 
     function saveCart() {
+        console.log('save');
         localStorage.setItem("shoppingCart", JSON.stringify(cart));
         updateCartNums();
     }
@@ -98,8 +99,8 @@ let shoppingCart = (function () {
         saveCart();
     };
 
-    obj.addVendorToCart = function (identifier, db, smile, cat_name, supplier_code, quantity, unit, price, shipping, purchase) {
-        let sup = new Supplier(cat_name, supplier_code, price, purchase, quantity, unit, shipping);
+    obj.addVendorToCart = function (identifier, db, smile, cat_name, supplier_code, quantity, unit, price, shipping, purchase, assigned=false) {
+        let sup = new Supplier(cat_name, supplier_code, price, purchase, quantity, unit, shipping, assigned);
         let item_index = obj.getItemIndexFromCart(identifier);
         if (item_index !== -1) {
             let supplier_index = obj.getVendorIndexFromCart(identifier, cat_name, supplier_code, quantity, unit, price);

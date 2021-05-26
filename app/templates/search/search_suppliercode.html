@@ -69,13 +69,13 @@
                 data: formData,
                 type: 'POST',
                 success: function (response) {
+                    console.log(response)
                     if (Object.keys(response).length === 0) {
                         $('#exampleModalLabel').html("Nothing found")
                         $('#spinnerbody').html("Your search value doesn't match with any molecules")
                     } else {
                         buildMol(response)
                     }
-                    console.log(response)
                 },
                 statusCode: {
                     404: function (responseObject, textStatus, jqXHR) {
@@ -88,8 +88,9 @@
                     }
                 },
                 error: function (error) {
+                    console.log(error)
                     $('#exampleModalLabel').html("Error occured during search. Error code: " + error.status)
-                    $('#spinnerbody').html("Search failed")
+                    $('#spinnerbody').html("Search failed" + error)
                 }
             });
         });
@@ -125,11 +126,12 @@
                 $('#cartCount').html(shoppingCart.countCart())
             })
             for (let item of response.items) {
-
                 $('#exampleModal').modal('hide');
                 $('#supplierSearchInput').hide();
                 $('#zincResults').show();
                 $('#molResults').show();
+                if (item.error == null || item.error ==''){
+
                 let div = $("<div>", {
                     class: "col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2"
                 });
@@ -161,6 +163,19 @@
                 })
                 div.append(div2)
                 $('#molResults').append(div)
+                }
+                else{
+                    let div = $("<div>", {
+
+                });
+                    let p = $("<p>")
+                let p1 = $("<code>", {text: item.elapsed_time})
+                let p2 = $("<code>", {text: item.error})
+                    p.append(p1)
+                    p.append(p2)
+                div.append(p)
+                $('#errorRes').append(div)
+                }
             }
             $('#downloadBtn').click((e) => {
                 e.preventDefault();
@@ -204,12 +219,12 @@ s_22__9598818__14482412 <br>
     <div class="row" id="zincResults" style="display: none">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
             <button class="btn btn-info"><a href="{{ url_for('main.search_suppliercode') }}">Back</a></button>
-            <h5>We found <span id="foundNum"></span> matches</h5>
+            <h5>Returned <span id="foundNum"></span> values</h5>
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 pull-right">
-            <button class="btn btn-info pull-right" onclick="" id="addAllBtn">
-                Add all to cart
-            </button>
+{#            <button class="btn btn-info pull-right" onclick="" id="addAllBtn">#}
+{#                Add all to cart#}
+{#            </button>#}
             <button class="btn btn-info pull-right" id="downloadBtn">
                 Download <i class="fa fa-download fa-x" aria-hidden="true"></i>
             </button>
@@ -218,6 +233,7 @@ s_22__9598818__14482412 <br>
     <br>
     <div class="row" id="molResults" style="display: none">
     </div>
+    <div id ="errorRes"></div>
     <div class="row" id="desc">
         <h4>CURL commands for searching Supplier Code</h4>
         <p>Below curl command returns a file with all possible fields. </p>
