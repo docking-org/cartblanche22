@@ -162,9 +162,35 @@
                         cur.removeClass('added')
                     } else {
                         cur.addClass('added')
-                        shoppingCart.addItemToCart(cur.attr('id'), cur.data('db'), cur.data('smiles'))
+                        $.ajax({
+                            url: 'https://cartblanche22.docking.org/search.json?zinc_id=' + cur.attr('id'),
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            type: 'POST',
+                            success: function (response) {
+                                console.log(response)
+                                console.log(response.supplier_code)
+                                console.log(response.items[0].supplier_code)
+                            },
+
+                            error: function (error) {
+                                {#console.log('calling zinc api from smile search', error)#}
+                            },
+                            complete: function (data) {
+                                if (data.status != 404) {
+                                    let suppliers = data.responseJSON.items[0].supplier_code
+
+                                    shoppingCart.addItemToCart(cur.attr('id'), cur.data('db'), cur.data('smiles'), suppliers)
+
+                                } else {
+                                    shoppingCart.addItemToCart(cur.attr('id'), cur.data('db'), cur.data('smiles'))
+
+                                }
+                            },
+                        });
+
                     }
-                    $('#cartCount').html(shoppingCart.countCart())
                 })
                 div.append(div2)
                 $('#molResults').append(div)
@@ -190,7 +216,7 @@
                         <label for="textareasmiles">One smile per Line</label>
                         <p>Test Data:
                             <br> C1CCC(-C2NNCNN2)CC1
-                        <br>C1CCC(C2CNNC2)C1 <br> C1=CC=CC=C1C2=CC=CC=C2</p>
+                            <br>C1CCC(C2CNNC2)C1 <br> C1=CC=CC=C1C2=CC=CC=C2</p>
 
                         <textarea id="textareasmiles" class="form-control" name="list_of_smiles" rows="6" cols="20"
                                   placeholder="Smiles"></textarea>
@@ -224,7 +250,7 @@
                     </select>
                     <label for="adistformat">anon dist:</label>
                     <select name="adist" class="btn btn-info" id="adistformat">
-                        <option value="0" id="adist-0" >
+                        <option value="0" id="adist-0">
                             0
                         </option>
                         <option value="1" id="adist-1">
@@ -272,15 +298,15 @@
     <div class="row" id="desc">
         <h4>CURL commands for searching Smiles</h4>
         <p>Below curl command returns a file with all possible fields. </p>
-        <p>to get .txt file:   <code>
+        <p>to get .txt file: <code>
             curl https://cartblanche22.docking.org/smiles.txt -F smiles-in=@smiles.txt -F dist=4 -F adist=4
         </code>
         </p>
 
-        <p>to get .json file:   <code>
+        <p>to get .json file: <code>
             curl https://cartblanche22.docking.org/smiles.json -F smiles-in=@smiles.txt -F dist=4 -F adist=4
         </code></p>
-        <p>to get .csv file:   <code>
+        <p>to get .csv file: <code>
             curl https://cartblanche22.docking.org/smiles.csv -F smiles-in=@smiles.txt -F dist=4 -F adist=4
         </code></p>
         <p>If you want to learn more about search, please go to <a

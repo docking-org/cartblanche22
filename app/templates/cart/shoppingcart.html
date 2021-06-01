@@ -12,6 +12,10 @@
         padding: 50px;
         font-size: 18px;
     }
+.mol-img{
+    width:100%;
+    height: 10vh
+}
 </style>
 {% endblock %}
 {% block scripts %}
@@ -68,7 +72,7 @@
                 },
                 {
                     "mData": (data) => {
-                        return '<img src="' + data.img + '"/>';
+                        return '<img src="' + data.img + '" class="mol-img"/>';
                     },
                 },
                 {
@@ -204,6 +208,75 @@
             }
         });
     })
+    $('#reassign').on('click', () => {
+        $('#loadingModal').modal('show');
+        let cart = shoppingCart.getCart()
+        for(let c = 0; c < cart.length; c++){
+            if(cart[c].supplier.length == 0){
+                            $.ajax({
+                            url: 'https://cartblanche22.docking.org/search.json?zinc_id=' + cart[c].identifier,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            type: 'POST',
+                            success: function (response) {
+                                console.log('from assigb')
+                                console.log(response.items[0].supplier_code)
+                            },
+
+                            error: function (error) {
+                                {#console.log('calling zinc api from smile search', error)#}
+                            },
+                            complete: function (data) {
+                                if (data.status != 404) {
+                                    console.log('from complete')
+                                    let suppliers = data.responseJSON.items[0].supplier_code
+                                                                    console.log(suppliers)
+
+                                    shoppingCart.assignvendors(cart[c].identifier, suppliers)
+                                }
+                            },
+                        });
+            }
+        }
+        $(document).ajaxStop(function () {
+            $('#loadingModal').modal('hide');
+                                                        location.reload();
+
+});
+
+    });
+    $('#refresh').on('click', () => {
+        $('#loadingModal').modal('show');
+        let cart = shoppingCart.getCart()
+        for(let c = 0; c < cart.length; c++){
+
+                            $.ajax({
+                            url: 'https://cartblanche22.docking.org/search.json?zinc_id=' + cart[c].identifier,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            type: 'POST',
+                            error: function (error) {
+                                {#console.log('calling zinc api from smile search', error)#}
+                            },
+                            complete: function (data) {
+                                if (data.status != 404) {
+                                    let suppliers = data.responseJSON.items[0].supplier_code
+                                    shoppingCart.assignvendors(cart[c].identifier, suppliers)
+                                }
+                            },
+                        });
+
+        }
+                                             $(document).ajaxStop(function () {
+                                                 $('#loadingModal').modal('hide');
+                                                        location.reload();
+
+});
+
+
+    });
 function setMolIndexLink(){
 {#        console.log(            let data = table.row($(this).parents('tr')).data()#}
 {#)#}
@@ -217,7 +290,7 @@ function setMolIndexLink(){
 <div class="row">
     <div class="col-md-6">
         <h1>Shopping Cart</h1>
-        <p>(Click on the identifier to assign vendor)</p>
+{#        <p>(Click on the identifier to assign vendor)</p>#}
     </div>
 
     <div class="col-md-6 float-right text-right">
@@ -262,4 +335,20 @@ function setMolIndexLink(){
         </tr>
     </thead>
 </table>
+    <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h3 id="spinnerbody"><i class="fa fa-spinner fa-pulse fa-x fa-fw"></i> We are working on it ... </h3>
+                </div>
+            </div>
+        </div>
+    </div>
 {%  endblock %}

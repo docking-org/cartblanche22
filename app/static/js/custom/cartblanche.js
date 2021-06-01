@@ -28,6 +28,7 @@ function loadCartFromDb() {
         dataType: "json",
         success: function (result) {
             shoppingCart.loadFromDbCartData(result);
+
             updateCartNums();
             console.log('loaded dbcart to local cart succesfully');
         },
@@ -37,16 +38,16 @@ function loadCartFromDb() {
     });
 }
 
-function loadApplicaiton() {
+function loadApplication() {
     let isLoaded = localStorage.getItem('pageLoaded')
-    if (isLoaded === null || isLoaded == 'False') {
+    if (isLoaded === null || isLoaded == 'False' || isLoaded === 'false') {
+        console.log('loading');
         $.ajax({
             type: "GET",
             url: "/loadApplication",
             success: function (data) {
-                console.log(data)
-                shoppingCart.saveDefaultPrices(data)
-                localStorage.setItem('pageLoaded', 'True')
+                localStorage.setItem('pageLoaded', true)
+                localStorage.setItem('default_prices', JSON.stringify(data));
             }
         });
     }

@@ -6,6 +6,7 @@ from app.data.models.items import Items
 from app.data.models.vendors import Vendors
 from app.main.punchout import punchoutOrder
 from app.main.items import addToCartWithVendor
+from app.data.models.default_prices import DefaultPrices
 from app import db
 
 
@@ -126,7 +127,28 @@ def saveCartToDbTest():
                     db.session.commit()
                     print('add vendor for new item', vendor.purchase_quantity)
     response = populateCart()
-    return jsonify(response)
+    vendor_prices = {}
+    org = 'public'
+    if current_user.is_authenticated:
+        org = 'ucsf'
+    default_prices = DefaultPrices.query.filter_by(organization=org).all()
+    for d in default_prices:
+        vendor = {}
+        vendor['cat_name'] = d.category_name
+        vendor['supplier_code'] = d.category_name
+        vendor['quantity'] = d.quantity
+        vendor['unit'] = d.unit
+        vendor['price'] = d.price
+        vendor['shipping'] = d.shipping
+        vendor['organization'] = d.organization
+        vendor['assigned'] = False
+        vendor['purchase'] = 1
+        vendor_prices[d.category_name] = vendor
+    data = {}
+    data['default_prices'] = vendor_prices
+    data['cart'] = response
+    print(vendor_prices)
+    return jsonify(data)
 
 
 @application.route('/cart', methods=['GET',  'POST'])
@@ -186,7 +208,29 @@ def activateCart(cart_id):
     print(cart_id)
     current_user.setCart(cart_id)
     response = populateCart()
-    return jsonify({'data':response})
+    vendor_prices = {}
+    org = 'public'
+    if current_user.is_authenticated:
+        org = 'ucsf'
+    default_prices = DefaultPrices.query.filter_by(organization=org).all()
+    for d in default_prices:
+        vendor = {}
+        vendor['cat_name'] = d.category_name
+        vendor['supplier_code'] = d.category_name
+        vendor['quantity'] = d.quantity
+        vendor['unit'] = d.unit
+        vendor['price'] = d.price
+        vendor['shipping'] = d.shipping
+        vendor['organization'] = d.organization
+        vendor['assigned'] = False
+        vendor['purchase'] = 1
+        vendor_prices[d.category_name] = vendor
+    data = {}
+    data['default_prices'] = vendor_prices
+    data['cart'] = response
+    print(vendor_prices)
+    print(data)
+    return jsonify(data)
 
 def populateCart():
     response = []
