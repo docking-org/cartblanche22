@@ -41,7 +41,9 @@ let shoppingCart = (function () {
             saveCart();
         }
         default_prices = JSON.parse(localStorage.getItem("default_prices"));
-                console.log(default_prices)
+        if(default_prices === null){
+            localStorage.setItem('pageLoaded', false);
+        }
 
 
     }
