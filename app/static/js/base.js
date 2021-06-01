@@ -28,12 +28,22 @@ let shoppingCart = (function () {
         updateCartNums();
     }
 
+    function savePrices() {
+        console.log('saving prices', default_prices)
+        localStorage.setItem("default_prices", JSON.stringify(default_prices));
+
+    }
+
     function loadCart() {
         cart = JSON.parse(localStorage.getItem("shoppingCart"));
         if (cart === null) {
             cart = [];
             saveCart();
         }
+        default_prices = JSON.parse(localStorage.getItem("default_prices"));
+                console.log(default_prices)
+
+
     }
 
     loadCart();
@@ -41,9 +51,6 @@ let shoppingCart = (function () {
     // Public methods and properties
     var obj = {};
 
-    obj.saveDefaultPrices = function (data) {
-        default_prices = data;
-    };
 
     obj.getCart = function () {
         console.log('getting cart');
@@ -61,6 +68,7 @@ let shoppingCart = (function () {
             return;
         }
         let vendors = [];
+        console.log(default_prices)
         if (db === 'zinc22' && supplier !== null) {
             for (let s = 0; s < supplier.length; s++) {
                 let sup = supplier[s];
@@ -72,13 +80,12 @@ let shoppingCart = (function () {
 
                 } else if (sup.toLowerCase().includes('m_')) {
                     def_price = default_prices['Enamine_M'];
-
                 } else if (sup.toLowerCase().includes('s_')) {
                     def_price = default_prices['Enamine_S'];
-                }
-                else{
+                } else {
                     def_price = default_prices['mcule'];
                 }
+                console.log(def_price)
                 if (def_price !== null) {
                     let assigned = false
                     let purchase = 0
@@ -99,7 +106,7 @@ let shoppingCart = (function () {
         saveCart();
     };
 
-    obj.addVendorToCart = function (identifier, db, smile, cat_name, supplier_code, quantity, unit, price, shipping, purchase, assigned=false) {
+    obj.addVendorToCart = function (identifier, db, smile, cat_name, supplier_code, quantity, unit, price, shipping, purchase, assigned = false) {
         let sup = new Supplier(cat_name, supplier_code, price, purchase, quantity, unit, shipping, assigned);
         let item_index = obj.getItemIndexFromCart(identifier);
         if (item_index !== -1) {
@@ -122,6 +129,46 @@ let shoppingCart = (function () {
         }
 
     };
+
+    obj.assignvendors = function (identifier, supplier) {
+        let item_index = obj.getItemIndexFromCart(identifier);
+        let vendors = [];
+        console.log(default_prices)
+        if(default_prices.length === 0){
+            default_prices = JSON.parse(localStorage.getItem("default_prices"))
+        }
+        for (let s = 0; s < supplier.length; s++) {
+            let sup = supplier[s];
+            let def_price = null;
+            if (sup.toLowerCase().includes('mcule')) {
+                def_price = default_prices['mcule'];
+            } else if (sup.toLowerCase().includes('wuxi')) {
+                def_price = default_prices['wuxi'];
+
+            } else if (sup.toLowerCase().includes('m_')) {
+                def_price = default_prices['Enamine_M'];
+            } else if (sup.toLowerCase().includes('s_')) {
+                def_price = default_prices['Enamine_S'];
+            } else {
+                def_price = default_prices['mcule'];
+            }
+            console.log(def_price)
+            if (def_price !== null) {
+                let assigned = false
+                let purchase = 0
+                if (s === 0) {
+                    assigned = true
+                    purchase = 1
+                }
+                let vendor = new Supplier(def_price.cat_name, supplier[s], def_price.price, purchase, def_price.quantity, def_price.unit, def_price.shipping, assigned)
+                console.log('supplier created', vendor)
+                vendors.push(vendor)
+            }
+
+        }
+        cart[item_index].supplier = vendors
+        saveCart();
+    }
 
     obj.removeItemFromCart = function (identifier) { // Removes one item
         let item_index = obj.getItemIndexFromCart(identifier);
@@ -298,7 +345,11 @@ let shoppingCart = (function () {
         }
         return false;
     }
-    obj.loadFromDbCartData = function (dbcart) {
+    obj.loadFromDbCartData = function (data) {
+        let dbcart = data.cart
+        default_prices = data.default_prices
+        console.log('dbcart', dbcart)
+        savePrices()
         cart = []
         for (let i = 0; i < dbcart.length; i++) {
             item = dbcart[i]

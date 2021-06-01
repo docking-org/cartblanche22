@@ -56,6 +56,7 @@ def updateVendorPriority():
 
 @application.route('/loadApplication')
 def loadApplication():
+    print('load app')
     vendor_prices = {}
     org = 'public'
     if current_user.is_authenticated:

@@ -6,6 +6,7 @@ function getVendors(bool, identifier, db) {
         url: "/getVendors/" + identifier + "/" + db,
         async: bool,
         success: function (res) {
+            console.log('res', res);
             data = res.vendors;
         },
         error: function (err) {
