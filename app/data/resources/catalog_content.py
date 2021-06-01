@@ -9,7 +9,7 @@ from collections import defaultdict
 import grequests
 import json
 import time
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from flask_csv import send_csv
 from datetime import datetime
 import itertools
@@ -79,7 +79,7 @@ class CatalogContent(Resource):
         parser.add_argument('supplier_codes', type=str)
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
-        lines = args.get('supplier_codes').lower().split(',')
+        lines = args.get('supplier_codes').split(',')
         tin_url = args.get('tin_url')
         error_msg = ""
         elapsed_time = ""
@@ -88,7 +88,7 @@ class CatalogContent(Resource):
             print("tin_url=========================", tin_url)
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             catContents = CatalogContentModel.query.filter(
-                func.lower(CatalogContentModel.supplier_code).in_(lines), not CatalogContentModel.depleted).all()
+                and_(CatalogContentModel.supplier_code.in_(lines), CatalogContentModel.depleted == False)).all()
 
             time2 = time.time()
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
