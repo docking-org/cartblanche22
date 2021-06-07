@@ -20,7 +20,9 @@
 
             db_maps($('#dbsel'));
             toggle_scoring();
-
+            $('#ucsfbutton').click(() =>{
+                $('#exampleModalLong').modal('show');
+            })
         });
     </script>
     <script type="text/javascript">
@@ -52,14 +54,20 @@
 {% block app_content %}
 
     <div id="content">
+
         <div id="nav">
 
             <div class="panel panel-info" id="section-head">
-                {#                <div class="panel-heading">#}
-                {#                    Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated#}
-                {#                    Tanimoto#}
-                {#                    coefficient#}
-                {#                </div>#}
+
+
+{#                                <div class="panel-heading">#}
+
+{#                                    Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated#}
+{#                                    Tanimoto#}
+{#                                    coefficient#}
+{#                                </div>#}
+
+
             </div>
             <div id="sketch-holder" style="width: 100%; text-align: middle;">
                 <div id="sketcher"></div>
@@ -281,6 +289,7 @@
         <div id="res-panel">
             <div id="res-head">
                 Results
+                <button id="ucsfbutton" class="btn-info">UCSF</button>
                 <button title="Download Results" id="export-button" onclick="export_results();">
                     <i class="fa fa-download fa-x" aria-hidden="true"></i>
                 </button>
@@ -308,9 +317,10 @@
     <div id="imgpop" class="popbox">
     </div>
 
+
     <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
          aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-xl modal-lg modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title" id="exampleModalLongTitle">Similar molecules in UCSF <span
