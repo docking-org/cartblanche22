@@ -43,7 +43,7 @@ class CatalogContentList(Resource):
         #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
         s_codes = ','.join(supplier_codes)
         url = 'https://{}/catalog'.format(request.host)
-        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=1000) for t in tin_urls)
+        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=4) for t in tin_urls)
 
         results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
         flat_list = itertools.chain.from_iterable(results)
