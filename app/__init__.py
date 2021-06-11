@@ -46,6 +46,9 @@ def create_app(config_class=Config):
         'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
         # 'tin': 'postgresql+psycopg2://tinuser:usertin@localhost:5434/tin',
         # 'tin2': 'postgresql+psycopg2://tinuser:usertin@localhost:5447/tin'
+        # '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5434/tin',
+        # '10.20.9.19:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5435/tin',
+        # '10.20.1.19:5436': 'postgresql+psycopg2://tinuser:usertin@localhost:5436/tin',
         '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5434/tin',
         '10.20.1.16:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5435/tin',
         '10.20.1.16:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5436/tin',
@@ -271,10 +274,12 @@ def create_app(config_class=Config):
 
     @app.before_request
     def before_request_callback():
+        # print('beforrreeeee')
         parser = reqparse.RequestParser()
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
         tin_url = args.get('tin_url')
+        # print('tin_url', tin_url)
         if tin_url:
             db.choose_tenant(tin_url)
         else:

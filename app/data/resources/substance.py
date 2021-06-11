@@ -81,6 +81,7 @@ class SubstanceList(Resource):
             timeout = args.get('timeout')
 
         urls = get_all_tin_url()
+        # print('tin  urls:', urls)
 
         for zinc_id in zinc_ids:
             if zinc_id:
@@ -101,13 +102,16 @@ class SubstanceList(Resource):
                 dict_subid_zinc_id[int(base10(zinc_id))].append(zinc_id)
 
         url = 'https://{}/substance'.format(request.host)
+
         for k, v in dict_ids.items():
             print("TIN URLS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
             print(k, len(v))
+            # print('sub_ids', ','.join([str(i) for i in v]))
+            # print( 'tin_url', k.split('-')[0])
             # print(k, v)
-        print("len(dict_ids)", len(dict_ids))
-
-        print("before response")
+        # print("len(dict_ids)", len(dict_ids))
+        # print(url)
+        # print("before response")
         resp = (grequests.post(url,
                                data={
                                    'sub_ids': ','.join([str(i) for i in v]),
@@ -115,22 +119,33 @@ class SubstanceList(Resource):
                                    'output_fields': output_fields,
                                    'show_missing': show_missing
                                }, timeout=timeout) for k, v in dict_ids.items())
-        print("after response")
+        # print("after response")
         data = defaultdict(list)
+        results = []
+        for res in grequests.map(resp):
+            print(res)
+            if res and 'Not found' not in res.text:
+                results.append(json.loads(res.text))
+            else:
+                results.append({res.status_code : res})
 
-        results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
 
+        # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
+
+        print('results', results)
         if show_missing.lower() == 'on':
 
             def get_zinc_ids(vals):
                 return ["{} {}".format(dict_subid_zinc_id.get(int(v))[0], v) for v in vals]
 
             res = [{k: get_zinc_ids(vals) for k, vals in res.items()} for res in results]
+            print('returning res', res)
             return res
 
         flat_list = itertools.chain.from_iterable(results)
 
         data['items'] = list(flat_list)
+        print( data['items'])
         print("received count. data['items']:", len(data['items']))
 
         if not data['items']:
@@ -159,10 +174,14 @@ class SubstanceList(Resource):
 
 class Substance(Resource):
     def post(self, file_type=None):
+        print('substance post called')
+        print(request.get_json())
         parser.add_argument('sub_ids', type=str)
         parser.add_argument('tin_url', type=str)
         parser.add_argument('output_fields', type=str)
         parser.add_argument('show_missing', type=str)
+        for p in parser.args:
+            print(p)
         args = parser.parse_args()
 
         sub_id_list = args.get('sub_ids').split(',')
