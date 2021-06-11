@@ -85,7 +85,8 @@ class SubstanceList(Resource):
         for zinc_id in zinc_ids:
             if zinc_id:
                 url = urls.get(zinc_id[4:6])
-                pattern = "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
+                # pattern = "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
+                pattern = "^ZINC[1-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z]+"
                 if not url or not re.match(pattern, zinc_id):
                     print("url or zinc_id not found", zinc_id)
                     continue
