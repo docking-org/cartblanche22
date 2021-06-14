@@ -41,14 +41,23 @@ def create_app(config_class=Config):
     app.config.from_object(Config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_BINDS'] = {
-        'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
+        # Local Database
         # 'zinc22': 'postgresql+psycopg2://test:@localhost:6532/zinc22',
-        'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
         # 'tin': 'postgresql+psycopg2://tinuser:usertin@localhost:5434/tin',
-        # 'tin2': 'postgresql+psycopg2://tinuser:usertin@localhost:5447/tin'
         # '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5434/tin',
         # '10.20.9.19:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5435/tin',
         # '10.20.1.19:5436': 'postgresql+psycopg2://tinuser:usertin@localhost:5436/tin',
+        # '10.20.1.16:5435': 'postgresql+psycopg2://tinuser:usertin@localhost:5437/tin',
+        # '10.20.5.35:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5438/tin',
+        # '10.20.1.17:5439': 'postgresql+psycopg2://tinuser:usertin@localhost:5439/tin',
+        # '10.20.1.20:5438': 'postgresql+psycopg2://tinuser:usertin@localhost:5440/tin',
+        # '10.20.1.20:5437': 'postgresql+psycopg2://tinuser:usertin@localhost:5441/tin',
+        # '10.20.5.35:5435': 'postgresql+psycopg2://tinuser:usertin@localhost:5442/tin',
+        # '10.20.5.34:5435': 'postgresql+psycopg2://tinuser:usertin@localhost:5443/tin',
+
+        # Server Database
+        'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
+        'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
         '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5434/tin',
         '10.20.1.16:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5435/tin',
         '10.20.1.16:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5436/tin',
@@ -274,12 +283,12 @@ def create_app(config_class=Config):
 
     @app.before_request
     def before_request_callback():
-        # print('beforrreeeee')
+        print('beforrreeeee')
         parser = reqparse.RequestParser()
         parser.add_argument('tin_url', type=str)
         args = parser.parse_args()
         tin_url = args.get('tin_url')
-        # print('tin_url', tin_url)
+        print('tin_url', tin_url)
         if tin_url:
             db.choose_tenant(tin_url)
         else:

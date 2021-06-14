@@ -47,7 +47,8 @@ def searchZinc(identifier):
     files = {
         'zinc_id': identifier
     }
-    response = requests.get(base_url + 'search.json', params=files)
+    url = 'http://{}/search.json'.format(request.host)
+    response = requests.get(url, params=files)
     if response:
         role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
@@ -55,6 +56,7 @@ def searchZinc(identifier):
         else:
             role = 'public'
         data = response.json()
+        print(data)
         supplier_codes = data['items'][0]['supplier_code']
         prices = []
         for s in supplier_codes:

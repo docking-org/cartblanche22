@@ -4,6 +4,7 @@ from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
+from app import db
 from flask import jsonify, current_app, request, make_response
 from collections import defaultdict
 import grequests
@@ -123,11 +124,12 @@ class SubstanceList(Resource):
         data = defaultdict(list)
         results = []
         for res in grequests.map(resp):
-            print(res)
+            print('printing grequests.map', res)
             if res and 'Not found' not in res.text:
                 results.append(json.loads(res.text))
-            else:
+            elif res:
                 results.append({res.status_code : res})
+
 
 
         # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
@@ -149,6 +151,7 @@ class SubstanceList(Resource):
         print("received count. data['items']:", len(data['items']))
 
         if not data['items']:
+            print('return 404')
             return {'message': 'Not found'}, 404
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
@@ -175,21 +178,22 @@ class SubstanceList(Resource):
 class Substance(Resource):
     def post(self, file_type=None):
         print('substance post called')
-        print(request.get_json())
         parser.add_argument('sub_ids', type=str)
         parser.add_argument('tin_url', type=str)
         parser.add_argument('output_fields', type=str)
         parser.add_argument('show_missing', type=str)
-        for p in parser.args:
-            print(p)
-        args = parser.parse_args()
-
-        sub_id_list = args.get('sub_ids').split(',')
+        # args = parser.parse_args()
+        # sub_id_list = args.get('sub_ids').split(',')
+        # sub_ids = (int(id) for id in sub_id_list)
+        # sub_ids_len = len(args.get('sub_ids').split(','))
+        sub_id_list = request.values.get('sub_ids').split(',')
         sub_ids = (int(id) for id in sub_id_list)
-        sub_ids_len = len(args.get('sub_ids').split(','))
-        print("REQUESTED TIN_URL from Substance POST", args.get('tin_url'))
+        sub_ids_len = len(sub_id_list)
+        args = request.values
+        print("REQUESTED TIN_URL from Substance POST", request.values.get('tin_url'))
         time1 = time.time()
         substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
+        # substances = db.session.query(SubstanceModel).filter(SubstanceModel.sub_id.in_(sub_ids)).all()
 
         time2 = time.time()
         strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
@@ -202,7 +206,7 @@ class Substance(Resource):
 
         # if len(substances) != sub_ids_len:
         #     logger.info(args.get('sub_ids'))
-
+        print('substances', substances)
         if substances is None:
             return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list)}, 404
 
