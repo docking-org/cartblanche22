@@ -1,0 +1,10 @@
+Dear administrator,
+
+Those servers not responding.
+{% for d in data %}
+{{d}}
+{% endfor %}
+
+Sincerely,
+
+The Cartblanche Team

@@ -17,6 +17,7 @@ import logging
 import requests
 import random
 import re
+from app.email_send import sendSearchLog
 
 # from app.formatters import (
 #     CsvFormatter,
@@ -123,18 +124,22 @@ class SubstanceList(Resource):
         # print("after response")
         data = defaultdict(list)
         results = []
+        error = []
         for res in grequests.map(resp):
             print('printing grequests.map', res)
             if res and 'Not found' not in res.text:
                 results.append(json.loads(res.text))
-            elif res:
-                results.append({res.status_code : res})
+            else:
+                error.append(json.loads(res.text))
 
 
 
         # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
 
         print('results', results)
+        print(error)
+        if len(error) > 0:
+            sendSearchLog(error)
         if show_missing.lower() == 'on':
 
             def get_zinc_ids(vals):
@@ -208,7 +213,12 @@ class Substance(Resource):
         #     logger.info(args.get('sub_ids'))
         print('substances', substances)
         if substances is None:
-            return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list)}, 404
+            return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list),
+                    'tin_url': args.get('tin_url'),
+                    'returned': len(substances),
+                    'expecting': sub_ids_len,
+                    'time': (time2 - time1) % 60
+                    }, 404
 
         data = []
         for sub in substances:
@@ -231,7 +241,12 @@ class Substance(Resource):
 
         if data:
             return jsonify(data)
-        return {'message': 'Not found'}, 404
+        return {'message': 'Not found',
+                'tin_url' : args.get('tin_url'),
+                'returned' : len(substances),
+                'expecting': sub_ids_len,
+                'time' : (time2 - time1) % 60
+                }, 404
 
 
 class Substances(Resource):
