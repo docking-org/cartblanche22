@@ -17,10 +17,10 @@ class Config(object):
         # ZINC_SMALL_WORLD_SERVER = "http://swp.docking.org"
 
         SQLALCHEMY_TRACK_MODIFICATIONS = False
-        MAIL_SERVER = os.getenv('MAIL_SERVER') or 'smtp.googlemail.com'
-        MAIL_PORT = int(os.getenv('MAIL_PORT') or 587)
-        MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') is not None or 1
-        MAIL_USERNAME = os.getenv('MAIL_USERNAME') or 'cartblanche20@gmail.com'
-        MAIL_PASSWORD = os.getenv('MAIL_PASSWORD') or 'molecule20'
+        MAIL_SERVER = 'smtp.googlemail.com' or os.getenv('MAIL_SERVER')
+        MAIL_PORT = 587 or int(os.getenv('MAIL_PORT'))
+        MAIL_USE_TLS = 1 or os.getenv('MAIL_USE_TLS') is not None
+        MAIL_USERNAME = 'cartblanche20@gmail.com' or os.getenv('MAIL_USERNAME')
+        MAIL_PASSWORD = 'molecule20' or os.getenv('MAIL_PASSWORD')
         MAIL_DEFAULT_SENDER = os.getenv('MAIL_USERNAME')
         ADMINS = [os.getenv('MAIL_USERNAME')]
