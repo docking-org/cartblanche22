@@ -126,10 +126,10 @@ class SubstanceList(Resource):
         results = []
         error = []
         for res in grequests.map(resp):
-            print('printing grequests.map', res)
+            print('printing grequests.map', res, type(res))
             if res and 'Not found' not in res.text:
                 results.append(json.loads(res.text))
-            else:
+            elif res.status_code == 404 and 'tin_url' in res.text:
                 error.append(json.loads(res.text))
 
 
@@ -137,7 +137,7 @@ class SubstanceList(Resource):
         # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
 
         print('results', results)
-        print(error)
+        print('error', error)
         if len(error) > 0:
             sendSearchLog(error)
         if show_missing.lower() == 'on':
@@ -212,7 +212,8 @@ class Substance(Resource):
         # if len(substances) != sub_ids_len:
         #     logger.info(args.get('sub_ids'))
         print('substances', substances)
-        if substances is None:
+        if substances is None or len(substances) == 0:
+            print('return 404 because None')
             return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list),
                     'tin_url': args.get('tin_url'),
                     'returned': len(substances),
