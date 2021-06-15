@@ -23,4 +23,4 @@ class Config(object):
         MAIL_USERNAME = 'cartblanche20@gmail.com' or os.getenv('MAIL_USERNAME')
         MAIL_PASSWORD = 'molecule20' or os.getenv('MAIL_PASSWORD')
         MAIL_DEFAULT_SENDER = os.getenv('MAIL_USERNAME')
-        ADMINS = [os.getenv('MAIL_USERNAME')]
+        ADMINS = ['cartblanche20@gmail.com'] or [os.getenv('MAIL_USERNAME')]

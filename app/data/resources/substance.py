@@ -126,10 +126,10 @@ class SubstanceList(Resource):
         results = []
         error = []
         for res in grequests.map(resp):
-            print('printing grequests.map', res, type(res))
+            print('printing grequests.map', res)
             if res and 'Not found' not in res.text:
                 results.append(json.loads(res.text))
-            elif res.status_code == 404 and 'tin_url' in res.text:
+            if not res == None and res.status_code == 404:
                 error.append(json.loads(res.text))
 
 
