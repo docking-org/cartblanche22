@@ -47,7 +47,8 @@ def searchZinc(identifier):
     files = {
         'zinc_id': identifier
     }
-    url = 'http://{}/search.json'.format(request.host)
+    # url = 'http://{}/search.json'.format(request.host)
+    url = base_url + 'search.json'
     response = requests.get(url, params=files)
     if response:
         role = ''

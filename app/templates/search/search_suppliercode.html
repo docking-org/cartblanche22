@@ -170,7 +170,10 @@
                 $('#molResults').append(div)
                 }
                 else{
-                    let div = $("<div>", {
+                    let temparr = item.elapsed_time.split(' ')
+                    let time = parseFloat(temparr[temparr.length-2])
+                    if(time >= 1){
+                        let div = $("<div>", {
 
                 });
                     let p = $("<p>")
@@ -180,6 +183,8 @@
                     p.append(p2)
                 div.append(p)
                 $('#errorRes').append(div)
+                    }
+
                 }
             }
             $('#downloadBtn').click((e) => {
@@ -224,7 +229,7 @@ s_22__9598818__14482412 <br>
     <div class="row" id="zincResults" style="display: none">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
             <button class="btn btn-info"><a href="{{ url_for('main.search_suppliercode') }}">Back</a></button>
-            <h5>Returned <span id="foundNum"></span> values</h5>
+{#            <h5>Returned <span id="foundNum"></span> values</h5>#}
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 pull-right">
 {#            <button class="btn btn-info pull-right" onclick="" id="addAllBtn">#}
