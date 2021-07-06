@@ -10,9 +10,11 @@
             var formData = new FormData();
             let amountformat = $('#amountformat').val()
             let format = $('#format').val()
+            console.log(format,amountformat)
             formData.append('count', amountformat);
             $.ajax({
-                url: 'https://cartblanche22.docking.org/substance/random.' + format,
+                {#url: 'https://cartblanche22.docking.org/substance/random.' + format,#}
+                url: '/substance/random.' + format,
                 cache: false,
                 contentType: false,
                 processData: false,

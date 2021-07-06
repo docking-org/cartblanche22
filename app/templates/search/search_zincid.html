@@ -64,6 +64,7 @@
             {#    }});#}
 
             $.ajax({
+                {#url: 'https://cartblanche22.docking.org/substances.json',#}
                 url: '/substances.json',
                 cache: false,
                 contentType: false,
@@ -75,6 +76,7 @@
                         $('#exampleModalLabel').html("Nothing found")
                         $('#spinnerbody').html("Your search value doesn't match with any molecules")
                     } else {
+                        console.log(response)
                         buildMol(response)
                     }
                     console.log(response)

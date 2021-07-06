@@ -10,14 +10,13 @@ import tablib
 @application.route('/order_chemspace', methods=['GET', 'POST'])
 def order_chemspace():
     try:
-        data = request.get_json()
+        data = request.get_json()['data']
         headers = ('No', 'identifier', 'db', 'catalog name', 'supplier_code',  'shipping', 'Request salt if possible?',
                    'Require exact stereochemistry?', 'Quote close analogs?','pack size', 'unit', 'price',
                    'purchase qty ', 'total')
         data_ = tablib.Dataset(headers=headers)
         total = 0
         for i in data:
-            print(i)
             row = (i['num'], i['identifier'], i['db'], i['cat_name'], i['supplier_code'], i['shipping'], i['salt'],
                    i['stereochemistry'], i['analogs'], i['quantity'], i['unit'],
                    i['price'], i['purchase'], i['total'])
@@ -28,7 +27,7 @@ def order_chemspace():
         file = data_.export('xls')
         body = 'Have a nice day!'
         prepare_email_chemspace(current_user, body, file)
-        return jsonify('success')
+        return jsonify('successfully sent order information')
     except Exception as e:
         print(e)
         return jsonify("failed")

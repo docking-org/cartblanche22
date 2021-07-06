@@ -81,8 +81,7 @@
                             return "<a href='/searchZinc/" + data.identifier +"'><p id=''>" + data.identifier + "<br/>" + data.db + "</p></a>";
                         }
                         else{
-                            return "<a><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
-                        }
+                            return "<a><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";}
                     }
                 },
                 {
@@ -174,23 +173,21 @@
             let data = table.row($(this).parents('tr')).data()
         })
 
-        $('#table').on("click", "#identifier", function () {
-            let data = table.row($(this).parents('tr')).data()
-            console.log(data)
-                     $.ajax({
-                type: "POST",
-                url: "/processItem",
-                data: JSON.stringify(data),
-                contentType: "application/json",
-                dataType: 'json',
-                success: function (data) {
-                    var route = data.result;
-                    console.log(route);
-                    window.location.href = route;
-                }
-            });
-
-        });
+        {#$('#table').on("click", "#identifier", function () {#}
+        {#    let data = table.row($(this).parents('tr')).data()#}
+        {#    console.log(data)#}
+        {#             $.ajax({#}
+        {#        type: "POST",#}
+        {#        url: "/processItem",#}
+        {#        data: JSON.stringify(data),#}
+        {#        contentType: "application/json",#}
+        {#        dataType: 'json',#}
+        {#        success: function (data) {#}
+        {#            var route = data.result;#}
+        {#            console.log(route);#}
+        {#            window.location.href = route;#}
+        {#        }#}
+        {#    }); });#}
     });
     $('#checkout').on('click', () => {
         console.log('checkout button clicked')
