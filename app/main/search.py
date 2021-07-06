@@ -47,8 +47,9 @@ def searchZinc(identifier):
     files = {
         'zinc_id': identifier
     }
-    # url = 'http://{}/search.json'.format(request.host)
-    url = base_url + 'search.json'
+    url = 'https://{}/search.json'.format(request.host)
+    # url = base_url + 'search.json'
+    print(identifier)
     response = requests.get(url, params=files)
     if response:
         role = ''
@@ -56,6 +57,7 @@ def searchZinc(identifier):
             role = 'ucsf'
         else:
             role = 'public'
+        print(response)
         data = response.json()
         print(data)
         supplier_codes = data['items'][0]['supplier_code']
@@ -73,8 +75,9 @@ def searchZinc(identifier):
                 prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
 
         smile = data['items'][0]['smiles']
+        print(smile)
         return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices,
-                               smile=urllib.parse.quote(smile))
+                               smile=urllib.parse.quote(smile), response=response, identifier=identifier)
     else:
         return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404

@@ -27,7 +27,11 @@
                 { data: 'status' },
                 {
                     "mData": function (data) {
-                        return "<div class='btn-group' role='group' aria-label='hidden'><button class='delete_btn btn btn-info' type='button' ><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></button><button type='button' class='btn btn-info activate_btn' >Activate</button></div>"
+                        return "<div class='' role='group' aria-label='hidden'>" +
+                            "<button class='delete_btn btn btn-info' type='button' ><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></button>" +
+                            "<button type='button' class='btn btn-info activate_btn' >Activate</button>" +
+                            "<button type='button' class='btn btn-info cart_btn' ><a href='/cart'>Go to Cart</a></button>" +
+                            "</div>"
                     }
                 }
             ],
@@ -36,6 +40,12 @@
                     $(row).addClass("info")
                     $('.delete_btn', row).attr('disabled', true);
                     $('.activate_btn', row).attr('disabled', true);
+                    $('.delete_btn', row).hide();
+                    $('.activate_btn', row).hide();
+                     $('.cart_btn', row).show();
+                }
+                else{
+                    $('.cart_btn', row).hide();
                 }
             }
         });
@@ -64,9 +74,15 @@
             let data = cartList.row($(this).parents('tr')).data()
             cartList.$('tr.info, .delete_btn').attr('disabled', false)
             cartList.$('tr.info, .activate_btn').attr('disabled', false)
+            cartList.$('tr.info, .cart_btn').hide()
+            cartList.$('tr.info, .delete_btn').show()
+            cartList.$('tr.info, .activate_btn').show()
             cartList.$('tr.info').removeClass('info');
             $('.delete_btn', row).attr('disabled', true);
             $('.activate_btn', row).attr('disabled', true);
+            $('.delete_btn', row).hide();
+            $('.activate_btn', row).hide();
+            $('.cart_btn', row).show();
             row.addClass('info')
             activateCart(data)
         });
