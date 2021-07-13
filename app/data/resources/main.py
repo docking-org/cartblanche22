@@ -69,13 +69,17 @@ class SmileList(Resource):
             dist = args.get('dist')
 
         uri = "{}/search/submit".format(current_app.config['ZINC_SMALL_WORLD_SERVER'])
+        print(uri)
         hlids = self.get_hlids(smiles, repeat(uri), repeat(adist))
+        print('hlids', hlids)
         result = self.get_result_from_smallworld(file_type, hlids, dist)
+        print('result', result)
 
         flat_list = itertools.chain.from_iterable(result)
         filtered_result = [r for r in flat_list if r]
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+        print(filtered_result)
         if file_type == 'csv':
             keys = list(filtered_result[0].keys())
             return send_csv(filtered_result, "smiles_search_{}.csv".format(str_time), keys)
@@ -104,7 +108,7 @@ class SmileList(Resource):
     def get_hlid(cls, smile, uri, adist):
         params = {
             'smi': smile,
-            'db': 'zinc_2d_All.smi.anon',
+            'db': 'zinc_21Q2_22B',
             'dist': adist,
             'tdn': 4,
             'tup': 4,
@@ -296,6 +300,7 @@ class SmileList(Resource):
         result = []
         try:
             params['hlid'] = hlid
+            print(uri, params)
             resp = requests.get(uri, params=params, auth=('gpcr', 'xtal'), stream=False)
             print("statuscode:", resp.status_code)
             print("resp.text:", resp.text)
@@ -314,6 +319,7 @@ class SmileList(Resource):
             print("Exception:", e)
             print(resp.text)
         except requests.ConnectionError:
+            print(requests)
             print("Connection Error")
             return None
         except ValueError:
