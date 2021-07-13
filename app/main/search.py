@@ -7,6 +7,7 @@ import urllib.parse
 
 base_url = "https://cartblanche22.docking.org/"
 swp_server = 'https://swp.docking.org'
+swc_server = 'https://swc.docking.org'
 
 
 # getting swp view, a section of a hit list, returning JSON for that range.
@@ -99,6 +100,19 @@ def swp():
     except:
         return render_template('errors/500.html')
     return render_template('search/swp.html', config=json.dumps(config), maps=json.dumps(maps))
+
+
+@application.route('/swc')
+def swc():
+    try:
+        config = requests.get(swc_server + '/search/config', auth=('big', 'fat secret')).json()
+    except:
+        return render_template('errors/403.html')
+    try:
+        maps = requests.get(swc_server + '/search/maps', auth=('big', 'fat secret')).json()
+    except:
+        return render_template('errors/403.html')
+    return render_template('search/swc.html', config=json.dumps(config), maps=json.dumps(maps))
 
 
 @application.route('/arthor')
