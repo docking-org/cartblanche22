@@ -141,13 +141,8 @@
                                         class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="{{ url_for('main.sw') }}">Public</a></li>
-                                {%  if request.remote_addr in ['0.0.0.0', '127.0.0.1', 'localhost']
-                                        or request.remote_addr[0:3] == '10.' or  request.remote_addr[0:8] == '169.230.' or request.remote_addr[0:8] == '128.218.' %}
+                                {%  if request.access_route[-1][0:3] == '10.' or  request.access_route[-1][0:8] == '169.230.' or request.access_route[-1][0:8] == '128.218.' %}
                                 <li><a href="{{ url_for('main.swc') }}">Super Private</a></li>
-                                    <li>{{ request.remote_addr }}</li>
-                                    <li>{{ request.access_route[-1] }}</li>
-                                    <li>{{ request.environ['REMOTE_ADDR'] }}</li>
-
                                     {%  endif %}
                                 <li><a href="{{ url_for('main.swp') }}">Private</a></li>
                             </ul>
