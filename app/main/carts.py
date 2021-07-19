@@ -129,7 +129,7 @@ def saveCartToDbTest():
     response = populateCart()
     vendor_prices = {}
     org = 'public'
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.has_roles('ucsf'):
         org = 'ucsf'
     default_prices = DefaultPrices.query.filter_by(organization=org).all()
     for d in default_prices:
@@ -210,7 +210,7 @@ def activateCart(cart_id):
     response = populateCart()
     vendor_prices = {}
     org = 'public'
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.has_roles('ucsf'):
         org = 'ucsf'
     default_prices = DefaultPrices.query.filter_by(organization=org).all()
     for d in default_prices:

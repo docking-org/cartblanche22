@@ -160,3 +160,15 @@ def get_basic_tranche(smiles):
         }
         return tranche_args
     return {}
+
+def get_new_tranche(tranche):
+    h_num = tranche[0:3]
+    p_num = tranche[3::]
+    hac = int(h_num[1::])
+    tranche_args = {
+        'h_num': h_num,
+        'p_num': p_num,
+        'mwt': base62(hac),
+        'logp': logp_mapping[p_num]
+    }
+    return tranche_args

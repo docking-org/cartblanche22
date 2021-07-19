@@ -59,7 +59,7 @@ def loadApplication():
     print('load app')
     vendor_prices = {}
     org = 'public'
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.has_roles('ucsf'):
         org = 'ucsf'
     default_prices = DefaultPrices.query.filter_by(organization=org).all()
     for d in default_prices:
