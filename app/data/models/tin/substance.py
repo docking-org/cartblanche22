@@ -1,10 +1,11 @@
 from app import db
-from app.helpers.validation import base62, get_basic_tranche, get_compound_details
+from app.helpers.validation import base62, get_basic_tranche, get_compound_details, get_new_tranche
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
 import random
 import sqlalchemy as sa
+from app.data.models.tin.tranches_mapping import Tranches
 
 
 TABLE_ROW_COUNT_SQL = \
@@ -35,6 +36,7 @@ class SubstanceModel(db.Model):
                                        secondary="catalog_substance",
                                        backref="substances",
                                        lazy='joined')
+    tranche_id = db.Column('tranche_id', db.Integer)
 
     @classmethod
     def get_random(cls, limit):
@@ -70,6 +72,9 @@ class SubstanceModel(db.Model):
 
     @hybrid_property
     def tranche(self):
+        if self.tranche_id:
+            tranchee = Tranches.query.filter_by(tranche_id=self.tranche_id).first()
+            return get_new_tranche(tranchee.tranche_name)
         return get_basic_tranche(self.smiles)
 
     def json_ids(self):
@@ -86,7 +91,8 @@ class SubstanceModel(db.Model):
             'smiles': self.smiles,
             'supplier_code': [c.supplier_code for c in self.catalog_contents],
             'catalogs': [c.catalog.json() for c in self.catalog_contents],
-            'tranche_details': get_compound_details(self.smiles)
+            'tranche_details': get_compound_details(self.smiles),
+            'tranche_id': self.tranche_id
         }
 
     def json2(self):

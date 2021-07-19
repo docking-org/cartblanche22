@@ -224,6 +224,7 @@ def create_app(config_class=Config):
         # '10.20.1.18:5444': 'postgresql+psycopg2://tinuser:usertin@localhost:5457/tin',
         # '10.20.1.21:5437': 'postgresql+psycopg2://tinuser:usertin@localhost:5458/tin',
         # '10.20.1.21:5438': 'postgresql+psycopg2://tinuser:usertin@localhost:5459/tin',
+        # '10.20.9.20:5435': 'postgresql+psycopg2://tinuser:usertin@localhost:5460/tin',
     }
 
     login.init_app(app)

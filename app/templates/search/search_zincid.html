@@ -229,12 +229,12 @@
     </div>
     <div class="row" id="desc">
     <p>You can get result with different formats.
-            If you want to specify output fields, you can add output_fields. Below example it will return only smiles, sub_id. If output_fields not specified
+            If you want to specify output fields, you can add output_fields. Below example it will return only smiles, zinc_id. If output_fields not specified
             it returns with all possible fields. Please note that there are always tranche and zinc_id fields by default.
             </p>
         <h4>CURL commands for searching single ZincID</h4>
         <p>Example:
-                <code>curl https://cartblanche22.docking.org/search.txt -F zinc_id=ZINCms000002NiP3 -F output_fields='smiles,sub_id'</code>
+                <code>curl https://cartblanche22.docking.org/search.txt -F zinc_id=ZINCms000002NiP3 -F output_fields='smiles,zinc_id'</code>
 
     </p>
         <table class="table table-bordered">
@@ -263,7 +263,7 @@
 
                   <small>If it doesn't defined, search will return all possible fields</small></td>
                 <td>
-                    <code>-F output_fields=<i>'smiles,sub_id'</i></code>
+                    <code>-F output_fields=<i>'smiles,zinc_id'</i></code>
               </td>
                 <td><ul>
                     <li>catalogs</li>
@@ -279,7 +279,7 @@
         </table>
         <h4>CURL commands for searching multiple ZincIDs</h4>
         <p>Example: <code>curl https://cartblanche22.docking.org/substances.txt -F
-            zinc_id-in=@test.txt -F output_fields='smiles,sub_id'
+            zinc_id-in=@test.txt -F output_fields='smiles,zinc_id'
 </code></p>
                 <table class="table table-bordered">
             <tr>
@@ -307,7 +307,7 @@
 
                   <small>If it doesn't defined, search will return all possible fields</small></td>
                 <td>
-                    <code>-F output_fields=<i>'smiles,sub_id'</i></code>
+                    <code>-F output_fields=<i>'smiles,zinc_id'</i></code>
               </td>
                 <td><ul>
                     <li>catalogs</li>
