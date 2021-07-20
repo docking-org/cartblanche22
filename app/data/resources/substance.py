@@ -72,6 +72,7 @@ class SubstanceList(Resource):
         if args.get('show_missing'):
             show_missing = args.get('show_missing')
         dict_ids = defaultdict(list)
+        dict_zinc_ids = defaultdict(list)
         dict_subid_zinc_id = defaultdict(list)
 
         overlimit_count = 0
@@ -98,9 +99,11 @@ class SubstanceList(Resource):
                 if len(dict_ids[url]) > chunk:
                     dict_ids["{}-{}".format(url, overlimit_count)] = dict_ids[url]
                     dict_ids[url] = [base10(zinc_id)]
+                    dict_zinc_ids[url] = [zinc_id]
                     overlimit_count += 1
                 else:
                     dict_ids[url].append(base10(zinc_id))
+                    dict_zinc_ids[url].append(zinc_id)
                 dict_subid_zinc_id[int(base10(zinc_id))].append(zinc_id)
 
         url = 'https://{}/substance'.format(request.host)
@@ -117,6 +120,7 @@ class SubstanceList(Resource):
         resp = (grequests.post(url,
                                data={
                                    'sub_ids': ','.join([str(i) for i in v]),
+                                   'zinc_ids': ','.join([str(i) for i in dict_zinc_ids[k]]),
                                    'tin_url': k.split('-')[0],
                                    'output_fields': output_fields,
                                    'show_missing': show_missing
@@ -182,7 +186,6 @@ class SubstanceList(Resource):
 
 class Substance(Resource):
     def post(self, file_type=None):
-        print('substance post called')
         parser.add_argument('sub_ids', type=str)
         parser.add_argument('tin_url', type=str)
         parser.add_argument('output_fields', type=str)
@@ -192,6 +195,7 @@ class Substance(Resource):
         # sub_ids = (int(id) for id in sub_id_list)
         # sub_ids_len = len(args.get('sub_ids').split(','))
         sub_id_list = request.values.get('sub_ids').split(',')
+        zinc_id_list = set(request.values.get('zinc_ids').split(','))
         sub_ids = (int(id) for id in sub_id_list)
         sub_ids_len = len(sub_id_list)
         args = request.values
@@ -223,7 +227,6 @@ class Substance(Resource):
 
         data = []
         for sub in substances:
-            print("sub", sub)
             data_dict = sub.json()
             sub_id_list.remove(str(data_dict['sub_id']))
 
@@ -234,7 +237,8 @@ class Substance(Resource):
 
                 new_dict = {output_field: data_dict[output_field] for output_field in output_fields}
                 data_dict = new_dict
-            data.append(data_dict)
+            if data_dict['zinc_id'] in zinc_id_list:
+                data.append(data_dict)
 
         if args.get('show_missing') and args.get('show_missing').lower() == 'on':
             print("missing sub_ids:", sub_id_list)
