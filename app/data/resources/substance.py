@@ -156,7 +156,6 @@ class SubstanceList(Resource):
         flat_list = itertools.chain.from_iterable(results)
 
         data['items'] = list(flat_list)
-        print( data['items'])
         print("received count. data['items']:", len(data['items']))
 
         if not data['items']:
