@@ -48,7 +48,7 @@ def searchZinc(identifier):
     files = {
         'zinc_id': identifier
     }
-    url = 'https://{}/search.json'.format(request.host)
+    url = 'https//{}/search.json'.format(request.host)
     # url = base_url + 'search.json'
     print(identifier)
     response = requests.get(url, params=files)
@@ -61,19 +61,21 @@ def searchZinc(identifier):
         print(response)
         data = response.json()
         print(data)
-        supplier_codes = data['items'][0]['supplier_code']
+        catalogs = data['items'][0]['catalogs']
         prices = []
-        for s in supplier_codes:
-            if 'mcule' in s.lower():
+        for c in catalogs:
+            s = c['catalog_name'].lower()
+            if 'mcule' in s:
                 prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-            elif 'wuxi' in s.lower():
+            elif 'wuxi' in s or 'w' in s:
                 prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
-            elif 's_' in s.lower():
+            elif 's' in s:
                 prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
-            elif 'm_' in s.lower():
+            elif 'm' in s:
                 prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
             else:
-                prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+                pass
+                # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
 
         smile = data['items'][0]['smiles']
         print(smile)

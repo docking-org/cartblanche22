@@ -1,11 +1,21 @@
 <p>Dear, administrator</p>
 <p>
 Those servers not responding.
+<p>
+  User Information :
+     {%  if current_user.is_authenticated %}
+    {{ current_user.username }}
+    {% else %}
+    Anonymous
+    {%  endif %}
+</p>
 </p>
 {% for d in data %}
 <p>
   {{d}}
 </p>
 {% endfor %}
+
+
 <p>Sincerely,</p>
 <p>The Cartblanche Team</p>
