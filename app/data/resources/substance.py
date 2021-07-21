@@ -143,6 +143,7 @@ class SubstanceList(Resource):
         print('results', results)
         print('error', error)
         if len(error) > 0:
+
             sendSearchLog(error)
         if show_missing.lower() == 'on':
 
@@ -217,6 +218,8 @@ class Substance(Resource):
         print('substances', substances)
         if substances is None or len(substances) == 0:
             print('return 404 because None')
+            if len(sub_id_list) > 100:
+                sub_id_list = sub_id_list[0:100]
             return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list),
                     'tin_url': args.get('tin_url'),
                     'returned': len(substances),
@@ -245,6 +248,14 @@ class Substance(Resource):
 
         if data:
             return jsonify(data)
+        if len(substances) == sub_ids_len:
+            return {
+                'message': 'Found but zinc id unmatched',
+                'tin_url': args.get('tin_url'),
+                'returned': len(substances),
+                'expecting': sub_ids_len,
+                'time': (time2 - time1) % 60
+            }, 403
         return {'message': 'Not found',
                 'tin_url' : args.get('tin_url'),
                 'returned' : len(substances),
