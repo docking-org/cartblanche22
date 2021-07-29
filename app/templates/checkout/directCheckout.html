@@ -149,6 +149,7 @@
             columns: [
                 {data: "num"},
                 {data: "identifier"},
+                {data: "smile"},
                 {data: "cat_name"},
                 {data: "supplier_code"},
                 {data: "shipping"},
@@ -183,14 +184,14 @@
 
                 // Total over this page
                 pageTotal = api
-                    .column(8)
+                    .column(9)
                     .data()
                     .reduce(function (a, b) {
                         return intVal(a) + intVal(b);
                     }, 0);
 
                 // Update footer
-                $(api.column(8).footer()).html(
+                $(api.column(9).footer()).html(
                     '$' + pageTotal.toFixed(2)
                 );
             }
@@ -309,11 +310,11 @@
                 console.log(response.result);
                 let spreadsheetId = response.result['spreadsheetId']
                 let spreadsheetUrl = response.result['spreadsheetUrl']
-                var values = [['No', 'identifier', 'db', 'catalog name', 'supplier_code', 'pack size', 'unit', 'price',
+                var values = [['No', 'identifier', 'smiles', 'db', 'catalog name', 'supplier_code', 'pack size', 'unit', 'price',
                     'shipping', 'purchase qty ', 'total']]
                 let data = shoppingCart.listCart()
                 for (let i = 0; i < data.length; i++) {
-                    row = [data[i]['num'], data[i]['identifier'], data[i]['db'], data[i]['cat_name'],
+                    row = [data[i]['num'], data[i]['identifier'],data[i]['smile'], data[i]['db'], data[i]['cat_name'],
                         data[i]['supplier_code'], data[i]['quantity'], data[i]['unit'], data[i]['price'],
                         data[i]['shipping'], data[i]['purchase'], data[i]['total']]
                     values.push(row)
@@ -357,7 +358,7 @@
 {% endblock %}
 {% block app_content %}
 
-    <div class="panel panel-info w-100">
+    <div class="panel panel-info w-100" style ='width: 100%'>
         <div class="panel-heading">
             <h3>Checkout</h3>
         </div>
@@ -423,11 +424,12 @@
                 </div>
             </div>
 
-            <table id="exportTable" class="table table-striped table-bordered">
+            <table id="exportTable" class="table table-striped table-bordered" style="width: 100%">
                 <thead>
                 <tr>
                     <th>No</th>
                     <th>Identifier</th>
+                    <th>Smiles</th>
                     <th>Catalog Name</th>
                     <th>Supplier Code</th>
                     <th>Delivery time</th>

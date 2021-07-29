@@ -71,18 +71,21 @@ let shoppingCart = (function () {
         }
         let vendors = [];
         console.log(default_prices)
-        if (db === 'zinc22' && supplier !== null) {
-            for (let s = 0; s < supplier.length; s++) {
-                let sup = supplier[s];
+        if (db === 'zinc22' && catalog !== null) {
+            console.log('catalog', catalog);
+            console.log('supplier', supplier);
+            for (let s = 0; s < catalog.length; s++) {
+                let sup = catalog[s].catalog_name;
+                console.log('sup', sup)
                 let def_price = null;
                 if (sup.toLowerCase().includes('mcule')) {
                     def_price = default_prices['mcule'];
                 } else if (sup.toLowerCase().includes('wuxi')) {
                     def_price = default_prices['wuxi'];
 
-                } else if (sup.toLowerCase().includes('m_')) {
+                } else if (sup.toLowerCase().includes('m')) {
                     def_price = default_prices['Enamine_M'];
-                } else if (sup.toLowerCase().includes('s_')) {
+                } else if (sup.toLowerCase().includes('s')) {
                     def_price = default_prices['Enamine_S'];
                 } else {
                     def_price = default_prices['mcule'];
