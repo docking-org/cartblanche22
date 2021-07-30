@@ -8,6 +8,7 @@ class DefaultPrices(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     category_name = db.Column(db.String(120), index=True)
+    short_name = db.Column(db.String(120), index=True)
     quantity = db.Column(db.Float, default=10)
     unit = db.Column(db.String(10), default='mg')
     price = db.Column(db.Float)

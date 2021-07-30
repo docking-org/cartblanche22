@@ -63,6 +63,7 @@ def loadApplication():
         org = 'ucsf'
     default_prices = DefaultPrices.query.filter_by(organization=org).all()
     for d in default_prices:
+        print(d)
         vendor = {}
         vendor['cat_name'] = d.category_name
         vendor['supplier_code'] = d.category_name
