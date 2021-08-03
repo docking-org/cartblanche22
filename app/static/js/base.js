@@ -75,21 +75,36 @@ let shoppingCart = (function () {
             console.log('catalog', catalog);
             console.log('supplier', supplier);
             for (let s = 0; s < catalog.length; s++) {
-                let sup = catalog[s].catalog_name;
-                console.log('sup', sup)
-                let def_price = null;
-                if (sup.toLowerCase().includes('mcule')) {
-                    def_price = default_prices['mcule'];
-                } else if (sup.toLowerCase().includes('wuxi')) {
-                    def_price = default_prices['wuxi'];
+                let sup = catalog[s].catalog_name.toLowerCase();
+                let short_name = catalog[s].short_name.toLowerCase();
 
-                } else if (sup.toLowerCase().includes('m')) {
-                    def_price = default_prices['Enamine_M'];
-                } else if (sup.toLowerCase().includes('s')) {
-                    def_price = default_prices['Enamine_S'];
-                } else {
-                    def_price = default_prices['mcule'];
+                let def_price = null;
+                if (!short_name.includes('zinc')){
+                    if (short_name == 'wuxi'){
+                        let supplier_code = supplier[s].substring(0,4);
+                        if (['WXCD', 'WXDL'].includes(supplier_code)){
+                            def_price=default_prices[supplier_code];
+                        }
+                        else{
+                            def_price = default_prices[short_name];
+                        }
+                    }
+                    else{
+                        def_price = default_prices[short_name];
+                    }
                 }
+                // if (sup.toLowerCase().includes('mcule')) {
+                //     def_price = default_prices['mcule'];
+                // } else if (sup.toLowerCase().includes('wuxi')) {
+                //     def_price = default_prices['wuxi'];
+                //
+                // } else if (sup.toLowerCase().includes('m')) {
+                //     def_price = default_prices['Enamine_M'];
+                // } else if (sup.toLowerCase().includes('s')) {
+                //     def_price = default_prices['Enamine_S'];
+                // } else {
+                //     def_price = default_prices['mcule'];
+                // }
                 console.log(def_price)
                 if (def_price !== null) {
                     let assigned = false

@@ -63,24 +63,29 @@ def searchZinc(identifier):
         print(data)
         catalogs = data['items'][0]['catalogs']
         prices = []
-        for c in catalogs:
+        zinc20_stock = None
+        for i in range(len(catalogs)):
+            c = catalogs[i]
             s = c['catalog_name'].lower()
-            if 'mcule' in s:
-                prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-            elif 'wuxi' in s or 'w' in s:
-                prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
-            elif 's' in s:
-                prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
-            elif 'm' in s:
-                prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
+            if s == 'zinc20-stock':
+                zinc20_stock = data['items'][0]['supplier_code'][i]
             else:
-                pass
-                # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-
+                prices.append(DefaultPrices.query.filter_by(short_name=s, organization=role).first())
+            # if 'mcule' in s:
+            #     prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+            # elif 'wuxi' in s or 'w' in s:
+            #     prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
+            # elif 's' in s:
+            #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
+            # elif 'm' in s:
+            #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
+            # else:
+            #     pass
+            #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+        print(zinc20_stock)
         smile = data['items'][0]['smiles']
-        print(smile)
         return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices,
-                               smile=urllib.parse.quote(smile), response=response, identifier=identifier)
+                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock=zinc20_stock)
     else:
         return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404

@@ -28,7 +28,6 @@ function loadCartFromDb() {
         dataType: "json",
         success: function (result) {
             shoppingCart.loadFromDbCartData(result);
-
             updateCartNums();
             console.log('loaded dbcart to local cart succesfully');
         },

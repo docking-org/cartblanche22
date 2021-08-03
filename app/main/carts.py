@@ -143,7 +143,7 @@ def saveCartToDbTest():
         vendor['organization'] = d.organization
         vendor['assigned'] = False
         vendor['purchase'] = 1
-        vendor_prices[d.category_name] = vendor
+        vendor_prices[d.short_name] = vendor
     data = {}
     data['default_prices'] = vendor_prices
     data['cart'] = response

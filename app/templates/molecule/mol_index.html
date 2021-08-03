@@ -157,6 +157,25 @@
                     {#                        <span class="sr-only">Copy</span></button>#}
                     {#                      </span>#}
                 </div>
+                {% if zinc20_stock %}
+                                   <div class="input-group input-sm">
+                    <label for="scaffold-zinc20-field"
+                           id="scaffold-zinc20-field-label"
+                           class="input-group-addon"
+                           title="Click to copy to clipboard">Alternative zinc20 identifier</label>
+                    <input class="form-control" id="scaffold-zinc20-field"
+                           value="{{ zinc20_stock }}" readonly>
+                    {#                    <span class="input-group-btn">#}
+                    {#                        <button class="btn btn-default"#}
+                    {#                                type="button"#}
+                    {#                                data-role="trigger-copy"#}
+                    {#                                data-target="#scaffold-inchikey-field"#}
+                    {#                                title="Copy InChI Key to clipboard">#}
+                    {#                            <span class="glyphicon glyphicon-copy"></span>#}
+                    {#                        <span class="sr-only">Copy</span></button>#}
+                    {#                      </span>#}
+                </div>
+                {%  endif %}
             </div>
 
         </div>
