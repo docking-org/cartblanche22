@@ -25,8 +25,11 @@ def search_byzincid():
     elif request.method == "POST":
         data = request.form['myTextarea']
         file = request.files['zincfile'].read().decode("utf-8")
+
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
+        # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
+        fileDataList = file.split('\n')
+        print(fileDataList)
         zinc22 = []
         zinc20 = []
         discarded = []
@@ -42,13 +45,15 @@ def search_byzincid():
         files = {
             'zinc_id-in': ','.join(zinc22)
         }
-        print('zinc22', zinc22)
-        print('zinc20', zinc20)
-        print('discarded', discarded)
         url = 'https://{}/sublist'.format(request.host)
         response = requests.post(url, params=files)
         zinc22_result = response.json()
-        return render_template('search/result_zincsearch.html', data_json=json.dumps(zinc22_result['items']), data=zinc22_result['items'] )
+        if 'items' in zinc22_result:
+            return render_template('search/result_zincsearch.html', data_json=json.dumps(zinc22_result['items']), data=zinc22_result['items'] )
+        else:
+            return render_template('errors/search404.html', lines=files, href='/search/search_byzincid',
+                               header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
+
 
 @application.route('/search/zincid')
 def search_zincid():
