@@ -1,9 +1,10 @@
-from flask import render_template, request, json
+from flask import render_template, request, json, jsonify
 from app.main import application
 import requests
 from app.data.models.default_prices import DefaultPrices
 from flask_login import current_user
 import urllib.parse
+import re
 
 base_url = "https://cartblanche22.docking.org/"
 swp_server = 'https://swp.docking.org'
@@ -17,10 +18,41 @@ def search_view():
     response = requests.get(swp_server + '/search/view', params=params, auth=('gpcr', 'xtal'))
     return response.json()
 
+@application.route('/search/search_byzincid', methods=["GET", "POST"])
+def search_byzincid():
+    if request.method == "GET":
+        return render_template('search/search_byzincid.html')
+    elif request.method == "POST":
+        data = request.form['myTextarea']
+        file = request.files['zincfile'].read().decode("utf-8")
+        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
+        fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
+        zinc22 = []
+        zinc20 = []
+        discarded = []
+        for identifier in textDataList + fileDataList:
+            if identifier.isnumeric() or identifier[4:6] == '00':
+                zinc20.append(identifier)
+                continue
+            elif identifier[0:4].upper() == 'ZINC':
+                zinc22.append(identifier)
+                continue
+            else:
+                discarded.append(identifier)
+        files = {
+            'zinc_id-in': ','.join(zinc22)
+        }
+        print('zinc22', zinc22)
+        print('zinc20', zinc20)
+        print('discarded', discarded)
+        url = 'https://{}/sublist'.format(request.host)
+        response = requests.post(url, params=files)
+        zinc22_result = response.json()
+        return render_template('search/result_zincsearch.html', data_json=json.dumps(zinc22_result['items']), data=zinc22_result['items'] )
 
 @application.route('/search/zincid')
 def search_zincid():
-    return render_template('search/search_zincid.html')
+    return render_template('search/search_byzincid.html')
 
 
 @application.route('/search/random')
@@ -48,7 +80,7 @@ def searchZinc(identifier):
     files = {
         'zinc_id': identifier
     }
-    url = 'https://{}/search.json'.format(request.host)
+    url = 'http://{}/search.json'.format(request.host)
     # url = base_url + 'search.json'
     print(identifier)
     response = requests.get(url, params=files)
@@ -67,10 +99,7 @@ def searchZinc(identifier):
         for i in range(len(catalogs)):
             c = catalogs[i]
             s = c['catalog_name'].lower()
-            if s == 'zinc20-stock':
-                zinc20_stock = data['items'][0]['supplier_code'][i]
-            else:
-                prices.append(DefaultPrices.query.filter_by(short_name=s, organization=role).first())
+            prices.append(DefaultPrices.query.filter_by(short_name=s, organization=role).first())
             # if 'mcule' in s:
             #     prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
             # elif 'wuxi' in s or 'w' in s:
@@ -84,8 +113,12 @@ def searchZinc(identifier):
             #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
         print(zinc20_stock)
         smile = data['items'][0]['smiles']
+        print('data', data['items'][0])
+        print('prices', prices)
+        print('response', response)
+        print('identifer', identifier)
         return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices,
-                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock=zinc20_stock)
+                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
         return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404

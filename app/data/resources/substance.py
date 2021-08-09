@@ -55,10 +55,11 @@ mimetypes = {
 
 class SubstanceList(Resource):
     def post(self, file_type=None):
-        parser.add_argument('zinc_id-in', type=str)
-        parser.add_argument('output_fields', type=str)
+        # parser.add_argument('zinc_id-in', type=str)
+        # parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
-        zinc_ids = args.get('zinc_id-in').split(',')
+        # zinc_ids = args.get('zinc_id-in').split(',')
+        zinc_ids = request.values.get('zinc_id-in').split(',')
         args['zinc_id-in'] = zinc_ids
         return self.getList(args, file_type)
 
@@ -292,7 +293,6 @@ class SubstanceRandomList(Resource):
             print("tin:", args.get('tin_url'))
             time1 = time.time()
             random_substances = SubstanceModel.get_random3(random)
-
             time2 = time.time()
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
