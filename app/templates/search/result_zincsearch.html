@@ -71,7 +71,7 @@
                     </div>
                     <div class="mol-bottom" id="{{ data.zinc_id }}" data-smiles="{{ data.smiles }}" data-db="zinc22"
                          data-supplier_code="{{ data.supplier_code }}" data-catalogs="{{ data.catalogs }}">
-                        <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles }}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow">
+                        <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles | urlencode }}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow">
                     </div>
                 </div>
             </div>
