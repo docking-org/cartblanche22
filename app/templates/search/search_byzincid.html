@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <style>
+        {#.mol {#}
+        {#    opacity: 1;#}
+        {#    border: 1px solid #ccc;#}
+        {#    border-radius: 4px;#}
+        {#    margin-bottom: 20px;#}
+        {#    text-align: center;#}
+        {#    padding: 10px;#}
+        {#}#}
+        {##}
+        {#.mol img {#}
+        {#    width: 100%;#}
+        {#    height: 15vh#}
+        {#}#}
+        {##}
+        {#.added {#}
+        {#    border: 1px solid #5bc0de;#}
+        {#    background-color: #9bd8eb;#}
+        {#}#}
+    </style>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+    </script>
+{% endblock %}
+{% block app_content %}
+
+    <div class="row" id="zincSearchInput2">
+        <div class="panel panel-info">
+            <div class="panel-heading">Search by ZINC identifier</div>
+            <div class="panel-body">
+
+                <form id="data" method="post" enctype="multipart/form-data" action="/search/search_byzincid">
+                    <div class="form-group">
+                        <label for="myTextarea">One Identifier per Line</label>
+                        <p>Test Data:<br>
+                            ZINCar0000000p57<br>
+                            ZINCde000000YNim<br>
+                            ZINCms000002NiP3<br>
+                            ZINCqq000005JJSl<br>
+                            ZINCjB000003FXzy
+                        </p>
+                        <textarea id="myTextarea" class="form-control" rows="6" cols="20"
+                                  placeholder="ZINC IDs" name="myTextarea"></textarea>
+                    </div>
+                    <h5>OR Upload a File</h5>
+                    <div class="form-group">
+                        <label for="zincfile">Select a file (.txt only):</label>
+                        <input type="file" id="zincfile" name = "zincfile"
+                                class="form-control" accept=".txt">
+                    </div>
+                    <button id="searchZincBtn2" type="submit" class="btn btn-info">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="desc">
+    <p>You can get result with different formats.
+            If you want to specify output fields, you can add output_fields. Below example it will return only smiles, zinc_id. If output_fields not specified
+            it returns with all possible fields. Please note that there are always tranche and zinc_id fields by default.
+            </p>
+        <h4>CURL commands for searching single ZincID</h4>
+        <p>Example:
+                <code>curl https://cartblanche22.docking.org/search.txt -F zinc_id=ZINCms000002NiP3 -F output_fields='smiles,zinc_id'</code>
+
+    </p>
+        <table class="table table-bordered">
+            <tr>
+                <th class="col-md-4">Description</th>
+                <th class="col-md-5">Attributes</th>
+                <th class="col-md-3">Possible fields</th>
+            </tr>
+            <tr>
+                <td>To specify return format</td>
+                <td><code>curl https://cartblanche22.docking.org/search<i>.txt</i></code></td>
+                <td><ul>
+                    <li>.txt</li>
+                    <li>.csv</li>
+                    <li>.json</li>
+                </ul></td>
+            </tr>
+            <tr>
+                <td>To add search value</td>
+                <td> <code>-F zinc_id=<i>ZINCms000002NiP3</i></code></td>
+                <td>Any single zinc identifier</td>
+            </tr>
+            <tr>
+                <td>To specify output field
+                                        <br>
+
+                  <small>If it doesn't defined, search will return all possible fields</small></td>
+                <td>
+                    <code>-F output_fields=<i>'smiles,zinc_id'</i></code>
+              </td>
+                <td><ul>
+                    <li>catalogs</li>
+                    <li>smiles</li>
+                    <li>sub_id</li>
+                    <li>supplier_code</li>
+                    <li>tranche</li>
+                    <li>tranche_details</li>
+                    <li>zinc_id</li>
+                </ul></td>
+            </tr>
+
+        </table>
+        <h4>CURL commands for searching multiple ZincIDs</h4>
+        <p>Example: <code>curl https://cartblanche22.docking.org/substances.txt -F
+            zinc_id-in=@test.txt -F output_fields='smiles,zinc_id'
+</code></p>
+                <table class="table table-bordered">
+            <tr>
+                <th class="col-md-4">Description</th>
+                <th class="col-md-5">Attributes</th>
+                <th class="col-md-3">Possible fields</th>
+            </tr>
+            <tr>
+                <td>To specify return format</td>
+                <td><code>curl https://cartblanche22.docking.org/substances<i>.txt</i></code></td>
+                <td><ul>
+                    <li>.txt</li>
+                    <li>.csv</li>
+                    <li>.json</li>
+                </ul></td>
+            </tr>
+            <tr>
+                <td>To add search value</td>
+                <td> <code>-F zinc_id-in=<i>@test.txt</i></code></td>
+                <td>.txt file with list of zinc identifers</td>
+            </tr>
+            <tr>
+                <td>To specify output fields
+                                        <br>
+
+                  <small>If it doesn't defined, search will return all possible fields</small></td>
+                <td>
+                    <code>-F output_fields=<i>'smiles,zinc_id'</i></code>
+              </td>
+                <td><ul>
+                    <li>catalogs</li>
+                    <li>smiles</li>
+                    <li>sub_id</li>
+                    <li>supplier_code</li>
+                    <li>tranche</li>
+                    <li>tranche_details</li>
+                    <li>zinc_id</li>
+                </ul></td>
+            </tr>
+
+        </table>
+        <p>If you want to learn more about search, please go to <a
+                href="http://wiki.docking.org/index.php/Zinc22:Searching" target="_blank"> Zinc22 documentation on wiki
+            page</a></p>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h3 id="spinnerbody"><i class="fa fa-spinner fa-pulse fa-x fa-fw"></i> Searching...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

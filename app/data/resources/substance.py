@@ -55,10 +55,11 @@ mimetypes = {
 
 class SubstanceList(Resource):
     def post(self, file_type=None):
-        parser.add_argument('zinc_id-in', type=str)
-        parser.add_argument('output_fields', type=str)
+        # parser.add_argument('zinc_id-in', type=str)
+        # parser.add_argument('output_fields', type=str)
         args = parser.parse_args()
-        zinc_ids = args.get('zinc_id-in').split(',')
+        # zinc_ids = args.get('zinc_id-in').split(',')
+        zinc_ids = request.values.get('zinc_id-in').split(',')
         args['zinc_id-in'] = zinc_ids
         return self.getList(args, file_type)
 
@@ -221,6 +222,7 @@ class Substance(Resource):
             if len(sub_id_list) > 100:
                 sub_id_list = sub_id_list[0:100]
             return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list),
+                    'identifiers': 'Substance not found with zinc_id(s): {}'.format(zinc_id_list),
                     'tin_url': args.get('tin_url'),
                     'returned': len(substances),
                     'expecting': sub_ids_len,
@@ -292,7 +294,6 @@ class SubstanceRandomList(Resource):
             print("tin:", args.get('tin_url'))
             time1 = time.time()
             random_substances = SubstanceModel.get_random3(random)
-
             time2 = time.time()
             strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))

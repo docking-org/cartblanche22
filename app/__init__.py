@@ -197,7 +197,6 @@ def create_app(config_class=Config):
         
         # Local Database
         # 'zinc22': 'postgresql+psycopg2://test:@localhost:6532/zinc22',
-        # 'tin': 'postgresql+psycopg2://tinuser:usertin@localhost:5434/tin',
         # '10.20.1.17:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5434/tin',
         # '10.20.9.19:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5435/tin',
         # '10.20.1.19:5436': 'postgresql+psycopg2://tinuser:usertin@localhost:5436/tin',
@@ -226,6 +225,8 @@ def create_app(config_class=Config):
         # '10.20.1.21:5438': 'postgresql+psycopg2://tinuser:usertin@localhost:5459/tin',
         # '10.20.9.20:5435': 'postgresql+psycopg2://tinuser:usertin@localhost:5460/tin',
         # '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5461/tin',
+        # '10.20.1.20:5435': 'postgresql+psycopg2://tinuser:usertin@localhost:5462/tin',
+        # '10.20.1.17:5436': 'postgresql+psycopg2://tinuser:usertin@localhost:5463/tin',
     }
 
     login.init_app(app)
@@ -262,8 +263,8 @@ def create_app(config_class=Config):
     admin = Admin(app, name='shoppingcart', template_mode='bootstrap3')
     admin.add_view(MyModelView(Users, db.session))
     admin.add_view(MyModelView(Roles, db.session))
-    admin.add_view(MyModelView(Vendors, db.session))
-    admin.add_view(MyModelView(AvailableVendors, db.session))
+    # admin.add_view(MyModelView(Vendors, db.session))
+    # admin.add_view(MyModelView(AvailableVendors, db.session))
     admin.add_view(MyModelView(DefaultPrices, db.session))
 
     api.add_resource(Search, '/search.<file_type>')

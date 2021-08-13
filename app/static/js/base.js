@@ -44,21 +44,15 @@ let shoppingCart = (function () {
         if(default_prices === null){
             localStorage.setItem('pageLoaded', false);
         }
-
-
     }
 
     loadCart();
-
     // Public methods and properties
     var obj = {};
-
-
     obj.getCart = function () {
         console.log('getting cart');
         return cart;
     };
-
     obj.saveShoppingCart = function (cart_) {
         cart = cart_;
         saveCart();
@@ -72,12 +66,13 @@ let shoppingCart = (function () {
         let vendors = [];
         console.log(default_prices)
         if (db === 'zinc22' && catalog !== null) {
-            console.log('catalog', catalog);
-            console.log('supplier', supplier);
-            for (let s = 0; s < catalog.length; s++) {
+            console.log('catalog', catalog, typeof(catalog));
+            console.log('supplier', supplier, typeof(supplier));
+
+            for (let s = 0; s < catalog.length; s++){
+                console.log(catalog[s].catalog_name, catalog[s].short_name);
                 let sup = catalog[s].catalog_name.toLowerCase();
                 let short_name = catalog[s].short_name.toLowerCase();
-
                 let def_price = null;
                 if (!short_name.includes('zinc')){
                     if (short_name == 'wuxi'){
