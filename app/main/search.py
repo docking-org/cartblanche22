@@ -30,6 +30,7 @@ def search_byzincid():
         # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
         fileDataList = file.split('\n')
         print(fileDataList)
+        print(len(fileDataList))
         zinc22 = []
         zinc20 = []
         discarded = []
@@ -46,10 +47,14 @@ def search_byzincid():
             'zinc_id-in': ','.join(zinc22)
         }
         url = 'https://{}/sublist'.format(request.host)
-        response = requests.post(url, params=files)
-        zinc22_result = response.json()
-        if 'items' in zinc22_result:
-            return render_template('search/result_zincsearch.html', data_json=json.dumps(zinc22_result['items']), data=zinc22_result['items'] )
+        # url = "https://cartblanche22.docking.org/sublist"
+        response = requests.post(url, data=files)
+        print(response)
+        if response:
+            print(response.json())
+            zinc22_result = response.json()
+            if 'items' in zinc22_result:
+                return render_template('search/result_zincsearch.html', data_json=json.dumps(zinc22_result['items']), data=zinc22_result['items'] )
         else:
             return render_template('errors/search404.html', lines=files, href='/search/search_byzincid',
                                header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
@@ -85,8 +90,8 @@ def searchZinc(identifier):
     files = {
         'zinc_id': identifier
     }
-    url = 'http://{}/search.json'.format(request.host)
-    # url = base_url + 'search.json'
+    # url = 'http://{}/search.json'.format(request.host)
+    url = base_url + 'search.json'
     print(identifier)
     response = requests.get(url, params=files)
     if response:

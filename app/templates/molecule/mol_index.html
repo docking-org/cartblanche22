@@ -11,6 +11,8 @@
     {{ super() }}
     <script>
         $(document).ready(() => {
+            $('#deleteItem').hide()
+                $('#addItem').hide()
             let inCart = shoppingCart.inCart('{{ data.zinc_id }}')
             console.log('inCart', inCart)
             if (inCart) {
@@ -168,8 +170,8 @@
                 {#                <div class="caption text-center">#}
                 {#                    <a href="">Draw</a>#}
                 {#                </div>#}
-                <button id='addItem' class="btn btn-info" hidden="true">Add to Cart</button>
-                <button id='deleteItem' class="btn btn-danger" hidden="true">Remove from Cart</button>
+                <button id='addItem' class="btn btn-info" style="display:none;">Add to Cart</button>
+                <button id='deleteItem' class="btn btn-danger" style="display:none;">Remove from Cart</button>
             </div>
 
             {#            <table class="table table-striped table-condensed table-hover table-numeric">#}

@@ -263,8 +263,8 @@ def create_app(config_class=Config):
     admin = Admin(app, name='shoppingcart', template_mode='bootstrap3')
     admin.add_view(MyModelView(Users, db.session))
     admin.add_view(MyModelView(Roles, db.session))
-    admin.add_view(MyModelView(Vendors, db.session))
-    admin.add_view(MyModelView(AvailableVendors, db.session))
+    # admin.add_view(MyModelView(Vendors, db.session))
+    # admin.add_view(MyModelView(AvailableVendors, db.session))
     admin.add_view(MyModelView(DefaultPrices, db.session))
 
     api.add_resource(Search, '/search.<file_type>')

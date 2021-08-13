@@ -222,6 +222,7 @@ class Substance(Resource):
             if len(sub_id_list) > 100:
                 sub_id_list = sub_id_list[0:100]
             return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list),
+                    'identifiers': 'Substance not found with zinc_id(s): {}'.format(zinc_id_list),
                     'tin_url': args.get('tin_url'),
                     'returned': len(substances),
                     'expecting': sub_ids_len,
