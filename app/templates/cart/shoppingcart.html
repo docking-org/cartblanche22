@@ -51,6 +51,14 @@
 
 
     $(document).ready(() => {
+                        $.ajax({
+                type: "GET",
+                url: "/getDefaultPrices",
+                success: function (data) {
+                    console.log(data)
+                    localStorage.setItem('default_prices', JSON.stringify(data));
+                }
+            });
 
         $('#total').html(shoppingCart.totalAmountCart())
         if (localStorage.getItem('checkCart') == "True"){
@@ -208,8 +216,10 @@
     $('#reassign').on('click', () => {
         $('#loadingModal').modal('show');
         let cart = shoppingCart.getCart()
+        let apiCalled = false;
         for(let c = 0; c < cart.length; c++){
             if(cart[c].supplier.length == 0){
+                apiCalled = true;
                             $.ajax({
                             url: 'https://cartblanche22.docking.org/search.json?zinc_id=' + cart[c].identifier,
                             cache: false,
@@ -217,8 +227,8 @@
                             processData: false,
                             type: 'POST',
                             success: function (response) {
-                                console.log('from assigb')
-                                console.log(response.items[0].supplier_code)
+                                console.log('got response for ', cart[c].identifier)
+                                console.log(response.items[0])
                             },
 
                             error: function (error) {
@@ -226,28 +236,31 @@
                             },
                             complete: function (data) {
                                 if (data.status != 404) {
-                                    console.log('from complete')
                                     let suppliers = data.responseJSON.items[0].supplier_code
-                                                                    console.log(suppliers)
-
-                                    shoppingCart.assignvendors(cart[c].identifier, suppliers)
+                                    let catalogs = data.responseJSON.items[0].catalogs
+                                    shoppingCart.assignvendors(cart[c].identifier, suppliers, catalogs)
                                 }
                             },
                         });
             }
         }
-        $(document).ajaxStop(function () {
-            $('#loadingModal').modal('hide');
+        if (apiCalled){
+            $(document).ajaxStop(function () {
+
                                                         location.reload();
 
 });
+        }
+        else{
+             $('#loadingModal').modal('hide');
+        }
+
 
     });
     $('#refresh').on('click', () => {
         $('#loadingModal').modal('show');
         let cart = shoppingCart.getCart()
         for(let c = 0; c < cart.length; c++){
-
                             $.ajax({
                             url: 'https://cartblanche22.docking.org/search.json?zinc_id=' + cart[c].identifier,
                             cache: false,
@@ -255,12 +268,14 @@
                             processData: false,
                             type: 'POST',
                             error: function (error) {
-                                {#console.log('calling zinc api from smile search', error)#}
                             },
                             complete: function (data) {
                                 if (data.status != 404) {
+                                    console.log('xulakjfdhsakjhf printing')
+                                    console.log(data.responseJSON.items[0])
                                     let suppliers = data.responseJSON.items[0].supplier_code
-                                    shoppingCart.assignvendors(cart[c].identifier, suppliers)
+                                    let catalogs = data.responseJSON.items[0].catalogs
+                                    shoppingCart.assignvendors(cart[c].identifier, suppliers, catalogs)
                                 }
                             },
                         });

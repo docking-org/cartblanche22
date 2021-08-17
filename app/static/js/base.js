@@ -145,28 +145,31 @@ let shoppingCart = (function () {
 
     };
 
-    obj.assignvendors = function (identifier, supplier) {
+    obj.assignvendors = function (identifier, supplier, catalog) {
         let item_index = obj.getItemIndexFromCart(identifier);
         let vendors = [];
         console.log(default_prices)
         if(default_prices.length === 0){
             default_prices = JSON.parse(localStorage.getItem("default_prices"))
         }
-        for (let s = 0; s < supplier.length; s++) {
-            let sup = supplier[s];
-            let def_price = null;
-            if (sup.toLowerCase().includes('mcule')) {
-                def_price = default_prices['mcule'];
-            } else if (sup.toLowerCase().includes('wuxi')) {
-                def_price = default_prices['wuxi'];
-
-            } else if (sup.toLowerCase().includes('m_')) {
-                def_price = default_prices['Enamine_M'];
-            } else if (sup.toLowerCase().includes('s_')) {
-                def_price = default_prices['Enamine_S'];
-            } else {
-                def_price = default_prices['mcule'];
-            }
+        for (let s = 0; s < catalog.length; s++) {
+            let sup = catalog[s].catalog_name.toLowerCase();
+                let short_name = catalog[s].short_name.toLowerCase();
+                let def_price = null;
+                if (!short_name.includes('zinc')){
+                    if (short_name == 'wuxi'){
+                        let supplier_code = supplier[s].substring(0,4);
+                        if (['WXCD', 'WXDL'].includes(supplier_code)){
+                            def_price=default_prices[supplier_code];
+                        }
+                        else{
+                            def_price = default_prices[short_name];
+                        }
+                    }
+                    else{
+                        def_price = default_prices[short_name];
+                    }
+                }
             console.log(def_price)
             if (def_price !== null) {
                 let assigned = false
@@ -253,7 +256,6 @@ let shoppingCart = (function () {
             }
 
         }
-        console.log('from countCart function:', totalCount)
         return totalCount;
     };
 
@@ -270,7 +272,6 @@ let shoppingCart = (function () {
 
     obj.listCart = function () { // -> array of Items
         var cartCopy = [];
-        console.log("Listing cart", cart);
         let num = 1;
         for (let i = 0; i < cart.length; i++) {
             let it = cart[i];
@@ -321,7 +322,7 @@ let shoppingCart = (function () {
                 }
             }
         }
-        console.log(cartCopy)
+        console.log('cart', cartCopy)
         return cartCopy;
     };
     obj.getItemIndexFromCart = function (identifier) {

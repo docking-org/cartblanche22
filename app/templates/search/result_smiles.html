@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <style>
+        .mol {
+            opacity: 1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+             background-color: white;
+        }
+
+        .link {
+            padding: 10px;
+        }
+
+        .mol img {
+            width: 100%;
+            height: 15vh
+        }
+
+        .added {
+            {#border: 1px solid #5bc0de;#}
+            background-color: #9bd8eb;
+        }
+    </style>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(() => {
+
+            let datas =
+            {{ data_json|safe }}
+            const map = new Map()
+            datas.forEach(e => {
+                map.set(e.zinc_id, e)
+                let inCart = shoppingCart.inCart(e.zinc_id)
+                if (inCart) {
+                    $('#' + e.zinc_id).addClass('added')
+                }
+            });
+            $('.mol-bottom').click((e) => {
+                let cur = $(e.currentTarget);
+                let id = e.currentTarget.id;
+                let cur_data = map.get(id)
+                                console.log('current molecule', cur_data)
+
+                let db = 'zinc22'
+                let smiles = cur_data.hitMappedSmiles
+                {#let supplier_code = cur_data.supplier_code#}
+                {#let catalogs = cur_data.catalogs#}
+                if (cur.hasClass('added')) {
+                    cur.removeClass('added')
+                    shoppingCart.removeItemFromCart(id)
+                } else {
+                    cur.addClass('added')
+                    shoppingCart.addItemToCart(id,db, smiles);
+                }
+            })
+        });
+    </script>
+{% endblock %}
+{% block app_content %}
+    <div class="row">
+        <h3>{{ data|length }} results</h3>
+        {% for data in data %}
+            <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
+                <div class="mol">
+                    <div class="link">
+                        <a href='/searchZinc/{{ data.zinc_id }}'>{{ data.zinc_id }}</a>
+                    </div>
+                    <div class="mol-bottom" id="{{ data.zinc_id }}" data-smiles="{{ data.hitMappedSmiles }}" data-db="zinc22"
+                         data-supplier_code="{{ data.supplier_code }}" data-catalogs="{{ data.catalogs }}">
+                        <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.hitMappedSmiles | urlencode }}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+{% endblock %}

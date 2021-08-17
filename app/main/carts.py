@@ -243,7 +243,6 @@ def populateCart():
             item['smile'] = c.compound_img
             supplier = []
             for v in c.vendors:
-                print('from populate caart', v)
                 vendor = {}
                 vendor['cat_name'] = v.cat_name
                 vendor['supplier_code'] = v.supplier_code

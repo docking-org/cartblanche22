@@ -25,6 +25,16 @@
 {% block scripts %}
     {{ super() }}
     <script>
+     $(document).ready(() => {
+                        $.ajax({
+                type: "GET",
+                url: "/getDefaultPrices",
+                success: function (data) {
+                    console.log(data)
+                    localStorage.setItem('default_prices', JSON.stringify(data));
+                }
+            });
+        })
     </script>
 {% endblock %}
 {% block app_content %}
