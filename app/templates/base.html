@@ -157,8 +157,10 @@
                             class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ url_for('main.search_byzincid') }}">By ZincID</a></li>
-                            <li><a href="{{ url_for('main.search_suppliercode') }}">By Supplier Code</a></li>
-                            <li><a href="{{ url_for('main.search_smiles') }}">By Smiles in ZINC-22</a></li>
+{#                            <li><a href="{{ url_for('main.search_suppliercode') }}">By Supplier Code</a></li>#}
+                            <li><a href="{{ url_for('main.search_bysupplier') }}">By Supplier Code</a></li>
+{#                            <li><a href="{{ url_for('main.search_smiles') }}">By Smiles in ZINC-22</a></li>#}
+                            <li><a href="{{ url_for('main.search_bysmiles') }}">By Smiles</a></li>
                             {#                            <li><a href="{{ url_for('main.search_smiles_vendor') }}">By Smiles in Vendor catalogs</a>#}
                             </li>
                             <li><a href="{{ url_for('main.search_random') }}">Download random molecules</a></li>

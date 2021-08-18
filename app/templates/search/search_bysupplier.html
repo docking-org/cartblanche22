@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <style>
+        {#.mol {#}
+        {#    opacity: 1;#}
+        {#    border: 1px solid #ccc;#}
+        {#    border-radius: 4px;#}
+        {#    margin-bottom: 20px;#}
+        {#    text-align: center;#}
+        {#    padding: 10px;#}
+        {#}#}
+        {##}
+        {#.mol img {#}
+        {#    width: 100%;#}
+        {#    height: 15vh#}
+        {#}#}
+        {##}
+        {#.added {#}
+        {#    border: 1px solid #5bc0de;#}
+        {#    background-color: #9bd8eb;#}
+        {#}#}
+    </style>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+         $(document).ready(() => {
+                        $.ajax({
+                type: "GET",
+                url: "/getDefaultPrices",
+                success: function (data) {
+                    console.log(data)
+                    localStorage.setItem('default_prices', JSON.stringify(data));
+                }
+            });
+        })
+    </script>
+{% endblock %}
+{% block app_content %}
+
+    <div class="row" id="supplierSearchInput">
+        <div class="panel panel-info">
+            <div class="panel-heading">Search by Supplier Codes</div>
+            <div class="panel-body">
+
+                <form id="data" method="post" enctype="multipart/form-data" action="/search/search_bysupplier">
+                    <div class="form-group">
+                        <label for="supplierTextarea">One code per Line</label>
+                        <p>Test Data:<br>
+                            s_240690__16499450__15795350 <br>
+                            s_240690__16499450__17311340 <br>
+                            s_22__9598818__14482412 <br>
+                        </p>
+                        <textarea id="supplierTextarea" class="form-control" rows="6" cols="20"
+                                  placeholder="Supplier Codes" name="supplierTextarea"></textarea>
+                    </div>
+                    <h5>OR Upload a File</h5>
+                    <div class="form-group">
+                        <label for="supplierfile">Select a file (.txt only):</label>
+                        <input type="file" id="supplierfile" name = "supplierfile"
+                                class="form-control" accept=".txt">
+                    </div>
+                    <button id="searchSupplierBtn" type="submit" class="btn btn-info">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="desc">
+    <p>You can get result with different formats.
+            It returns with all possible fields.
+            </p>
+        <h4>CURL commands for searching by supplier codes</h4>
+        <p>Example:
+                <code>curl https://cartblanche22.docking.org/catalogs.txt -F supplier_code-in=@sup.txt</code>
+
+    </p>
+        <table class="table table-bordered">
+            <tr>
+                <th class="col-md-4">Description</th>
+                <th class="col-md-5">Attributes</th>
+                <th class="col-md-3">Parameters</th>
+            </tr>
+            <tr>
+                <td>To specify return format</td>
+                <td><code>curl https://cartblanche22.docking.org/catalogs<i>.txt</i></code></td>
+                <td><ul>
+                    <li>.txt</li>
+                    <li>.csv</li>
+                    <li>.json</li>
+                </ul></td>
+            </tr>
+            <tr>
+                <td>To add search value</td>
+                <td> <code>-F supplier_code-in=<i>@sup.txt</i></code></td>
+                <td>.txt file with list of supplier codes</td>
+            </tr>
+
+
+        </table>
+
+        <p>If you want to learn more about search, please go to <a
+                href="http://wiki.docking.org/index.php/Zinc22:Searching" target="_blank"> Zinc22 documentation on wiki
+            page</a></p>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h3 id="spinnerbody"><i class="fa fa-spinner fa-pulse fa-x fa-fw"></i> Searching...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

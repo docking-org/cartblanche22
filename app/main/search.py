@@ -25,7 +25,6 @@ def search_byzincid():
     elif request.method == "POST":
         data = request.form['myTextarea']
         file = request.files['zincfile'].read().decode("utf-8")
-
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
         fileDataList = file.split('\n')
@@ -46,8 +45,8 @@ def search_byzincid():
         files = {
             'zinc_id-in': ','.join(zinc22)
         }
-        url = 'https://{}/sublist'.format(request.host)
-        # url = "https://cartblanche22.docking.org/sublist"
+        # url = 'https://{}/sublist'.format(request.host)
+        url = "https://cartblanche22.docking.org/sublist"
         response = requests.post(url, data=files)
         print(response)
         if response:
@@ -57,6 +56,79 @@ def search_byzincid():
                 return render_template('search/result_zincsearch.html', data_json=json.dumps(zinc22_result['items']), data=zinc22_result['items'] )
         else:
             return render_template('errors/search404.html', lines=files, href='/search/search_byzincid',
+                               header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
+
+
+@application.route('/search/search_bysmiles', methods=["GET", "POST"])
+def search_bysmiles():
+    if request.method == "GET":
+        return render_template('search/search_bysmiles.html')
+    elif request.method == "POST":
+        data = request.form['smilesTextarea']
+        file = request.files['smilesfile'].read().decode("utf-8")
+        dist = request.form['dist']
+        adist = request.form['adist']
+        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
+        # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
+        fileDataList = file.split('\n')
+        print('fileDataList', fileDataList)
+        print('textDataList', textDataList)
+        print('dist', dist)
+        print('adist', adist)
+        files = {
+            'smiles-in': ','.join(textDataList + fileDataList),
+            'dist': dist,
+            'adist': adist,
+
+        }
+        url = "https://cartblanche22.docking.org/smilelist"
+        response = requests.post(url, data=files)
+        print(response)
+        if response:
+            print(response.json())
+            smiles_result = response.json()
+            return render_template('search/result_smiles.html', data_json=json.dumps(smiles_result), data=smiles_result)
+        else:
+            return render_template('errors/search404.html', lines=files, href='/search/search_bysmiles',
+                               header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
+
+
+@application.route('/search/search_bysupplier', methods=["GET", "POST"])
+def search_bysupplier():
+    if request.method == "GET":
+        return render_template('search/search_bysupplier.html')
+    elif request.method == "POST":
+        data = request.form['supplierTextarea']
+        file = request.files['supplierfile'].read().decode("utf-8")
+        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
+        # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
+        fileDataList = file.split('\n')
+        print('fileDataList', fileDataList)
+        print('textDataList', textDataList)
+        files = {
+            'supplier_code-in': ','.join(textDataList + fileDataList),
+        }
+        url = "https://cartblanche22.docking.org/catlist"
+        # url = 'https://{}/catlist'.format(request.host)
+        response = requests.post(url, data=files)
+        print(response)
+        if response:
+            print(response.json())
+            supplier_result = response.json()
+            found_molecules = []
+            waited_servers =[]
+            for s in supplier_result['items']:
+                if 'error' not in s:
+                    found_molecules.append(s)
+                else:
+                    temparr = s['elapsed_time'].split(' ')
+                    time = float(temparr[-2])
+                    if time >= 1:
+                        waited_servers.append(s)
+            return render_template('search/result_supplier.html', data_json=json.dumps(found_molecules),
+                                   data=found_molecules, servers=waited_servers)
+        else:
+            return render_template('errors/search404.html', lines=files, href='/search/search_bysupplier',
                                header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
 
 
@@ -92,6 +164,7 @@ def searchZinc(identifier):
     }
     # url = 'http://{}/search.json'.format(request.host)
     url = base_url + 'search.json'
+    print(url)
     print(identifier)
     response = requests.get(url, params=files)
     if response:
