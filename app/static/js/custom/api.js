@@ -1,3 +1,13 @@
+function setDefaultPrices() {
+    $.ajax({
+        type: "GET",
+        url: "/getDefaultPrices",
+        success: function (data) {
+            console.log(data);
+            localStorage.setItem('default_prices', JSON.stringify(data));
+        }
+    });
+}
 
 function getVendors(bool, identifier, db) {
     let data = [];
