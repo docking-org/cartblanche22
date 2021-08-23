@@ -230,6 +230,8 @@ class Substance(Resource):
                     }, 404
 
         data = []
+        unmatched = set()
+        matched = set()
         for sub in substances:
             data_dict = sub.json()
             sub_id_list.remove(str(data_dict['sub_id']))
@@ -243,10 +245,14 @@ class Substance(Resource):
                 data_dict = new_dict
             if data_dict['zinc_id'] in zinc_id_list:
                 data.append(data_dict)
+                matched.add(data_dict['zinc_id'])
+            else:
+                unmatched.add(data_dict['zinc_id'])
 
         if args.get('show_missing') and args.get('show_missing').lower() == 'on':
             print("missing sub_ids:", sub_id_list)
             return jsonify({args.get('tin_url'): sub_id_list})
+        temp = zinc_id_list.difference(matched)
 
         if data:
             return jsonify(data)
@@ -254,14 +260,20 @@ class Substance(Resource):
             return {
                 'message': 'Found but zinc id unmatched',
                 'tin_url': args.get('tin_url'),
+                'expecting': sub_ids_len,
                 'returned': len(substances),
-                'expecting': sub_ids_len,
+                'Expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
+                'Returned ids': 'Wrong returned zinc ids: {}'.format(unmatched),
+                'not found ids': ''.format(temp),
                 'time': (time2 - time1) % 60
-            }, 403
-        return {'message': 'Not found',
-                'tin_url' : args.get('tin_url'),
-                'returned' : len(substances),
+            }, 404
+        return {'message': 'Found but zinc id unmatched',
+                'tin_url': args.get('tin_url'),
                 'expecting': sub_ids_len,
+                'returned': len(substances),
+                'Expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
+                'Returned ids': 'Wrong returned zinc ids: {}'.format(unmatched),
+                'not found ids': ''.format(temp),
                 'time' : (time2 - time1) % 60
                 }, 404
 

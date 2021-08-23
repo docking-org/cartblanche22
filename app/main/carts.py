@@ -9,25 +9,59 @@ from app.main.items import addToCartWithVendor
 from app.data.models.default_prices import DefaultPrices
 from app import db
 
+@application.route('/clearCart', methods=['POST'])
+def clearCart():
+    if current_user.is_authenticated:
+        for item in Items.query.filter_by(cart_fk=current_user.activeCart):
+            item.deleteItem()
+        return jsonify('successfully deleted an all items from db')
+    return jsonify("user not logged in")
+
+
+@application.route('/addAllItem', methods=['POST'])
+def addAllItem():
+    data = request.get_json()['data']
+    for item in data:
+        found = Items.query.filter_by(identifier=item['identifier'], cart_fk=current_user.activeCart).first()
+        if not found:
+            print('adding item:  ', item)
+            new_item = Items(cart_fk=current_user.activeCart, identifier=item['identifier'], compound_img=item['smile'],
+                             database=item['db'])
+            db.session.add(new_item)
+            db.session.commit()
+            for s in item['supplier']:
+                if s['assigned']:
+                    vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
+                                     purchase_quantity=s['purchase'],
+                                     supplier_code=s['supplier_code'], price=float(s['price']),
+                                     pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
+                    db.session.add(vendor)
+                    db.session.commit()
+                    print('add vendor for new item')
+    return jsonify('successfully added item to cart db')
+
 
 @application.route('/addItem', methods=['POST'])
 def addItem():
     item = request.get_json()['data']
-    print('adding item:  ', item)
-    new_item = Items(cart_fk=current_user.activeCart, identifier=item['identifier'], compound_img=item['smile'],
-                     database=item['db'])
-    db.session.add(new_item)
-    db.session.commit()
-    for s in item['supplier']:
-        if s['assigned']:
-            vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
-                             purchase_quantity=s['purchase'],
-                             supplier_code=s['supplier_code'], price=float(s['price']),
-                             pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
-            db.session.add(vendor)
-            db.session.commit()
-            print('add vendor for new item')
-    return jsonify('successfully added item to cart db')
+    found = Items.query.filter_by(identifier=item['identifier'], cart_fk=current_user.activeCart).first()
+    if not found:
+        print('adding item:  ', item)
+        new_item = Items(cart_fk=current_user.activeCart, identifier=item['identifier'], compound_img=item['smile'],
+                         database=item['db'])
+        db.session.add(new_item)
+        db.session.commit()
+        for s in item['supplier']:
+            if s['assigned']:
+                vendor = Vendors(item_fk=new_item.item_id, cat_name=s['cat_name'],
+                                 purchase_quantity=s['purchase'],
+                                 supplier_code=s['supplier_code'], price=float(s['price']),
+                                 pack_quantity=float(s['quantity']), unit=s['unit'], shipping_str=s['shipping'])
+                db.session.add(vendor)
+                db.session.commit()
+                print('add vendor for new item')
+        return jsonify('successfully added item to cart db')
+    return jsonify('existing')
 
 
 @application.route('/addVendorTest', methods=['POST'])
@@ -54,6 +88,16 @@ def deleteItemTest():
         data = request.get_json()['data']
         identifier = data['identifier']
         Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first().deleteItem()
+        return jsonify('successfully deleted an item from db')
+    return jsonify("user not logged in")
+
+
+@application.route('/deleteMultItem', methods=['DELETE'])
+def deleteMultItem():
+    if current_user.is_authenticated:
+        identifiers = request.get_json()['data']
+        for identifier in identifiers:
+            Items.query.filter_by(identifier=identifier, cart_fk=current_user.activeCart).first().deleteItem()
         return jsonify('successfully deleted an item from db')
     return jsonify("user not logged in")
 
@@ -147,7 +191,7 @@ def saveCartToDbTest():
     data = {}
     data['default_prices'] = vendor_prices
     data['cart'] = response
-    print(vendor_prices)
+    print('zulaa cart', response)
     return jsonify(data)
 
 

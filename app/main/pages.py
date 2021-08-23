@@ -56,14 +56,12 @@ def updateVendorPriority():
 
 @application.route('/loadApplication')
 def loadApplication():
-    print('load app')
     vendor_prices = {}
     org = 'public'
     if current_user.is_authenticated and current_user.has_roles('ucsf'):
         org = 'ucsf'
     default_prices = DefaultPrices.query.filter_by(organization=org).all()
     for d in default_prices:
-        print(d)
         vendor = {}
         vendor['cat_name'] = d.category_name
         vendor['supplier_code'] = d.category_name

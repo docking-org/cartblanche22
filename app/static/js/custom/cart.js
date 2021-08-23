@@ -157,7 +157,6 @@ function getCartSize(cart_) {
     return count;
 }
 function updateCartNums(){
-    console.log('updateCartNums')
     $("#cartCount").html(shoppingCart.countCart())
     $('#total').html(shoppingCart.totalAmountCart())
 }

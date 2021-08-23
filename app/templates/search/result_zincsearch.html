@@ -31,17 +31,10 @@
     <script>
         $(document).ready(() => {
 
-            let datas =
-            {{ data_json|safe }}
+            let datas = {{ data_json|safe }}
             const map = new Map()
-            datas.forEach(e => {
-                map.set(e.zinc_id, e)
-                let inCart = shoppingCart.inCart(e.zinc_id)
-                if (inCart) {
-                    $('#' + e.zinc_id).addClass('added')
-                }
-            });
-            $('.mol-bottom').click((e) => {
+            addAddedClass();
+            $('.mol-bottom').click((btn) => {
                 let cur = $(e.currentTarget);
                 let id = e.currentTarget.id;
                 let cur_data = map.get(id)
@@ -57,12 +50,45 @@
                     shoppingCart.addItemToCart(id,db, smiles, supplier_code, catalogs);
                 }
             })
+
+            $('#addAll').click((btn) => {
+                shoppingCart.addAllItem(datas);
+                addAddedClass();
+                $('#addAll').hide();
+                $('#deleteAll').show();
+            });
+
+            $('#deleteAll').click(() => {
+                shoppingCart.deleteAllItem(datas);
+                $('.added').removeClass('added');
+                $('#addAll').show();
+                $('#deleteAll').hide();
+            });
+
+            function addAddedClass(){
+                datas.forEach(e => {
+                    map.set(e.zinc_id, e)
+                    let inCart = shoppingCart.inCart(e.zinc_id)
+                    if (inCart) {
+                        $('#' + e.zinc_id).addClass('added')
+                    }
+                })
+            };
+
         });
     </script>
 {% endblock %}
 {% block app_content %}
     <div class="row">
+    <div class="col-md-6 col-xs-3 col-sm-3 col-lg-6">
         <h3>{{ data|length }} results</h3>
+    </div>
+        <div class="col-md-6 col-xs-9 col-sm-9 col-lg-6 float-right text-right">
+            <button type="button" class="btn btn-info" id="addAll">Add all to cart</button>
+            <button type="button" class="btn btn-warning" id="deleteAll">Remove all from cart</button>
+        </div>
+    </div>
+    <div class="row">
         {% for data in data %}
             <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
                 <div class="mol">

@@ -1,8 +1,9 @@
 Dear administrator,
 
-Those servers not responding.
+ZINC SEARCH FAILURE LOG
 {% for d in data %}
 {{d}}
+<br>
 {% endfor %}
 
 Sincerely,

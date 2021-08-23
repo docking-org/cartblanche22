@@ -24,17 +24,11 @@
 {% endblock %}
 {% block scripts %}
     {{ super() }}
+    <script src="../static/js/custom/api.js"></script>
     <script>
      $(document).ready(() => {
-                        $.ajax({
-                type: "GET",
-                url: "/getDefaultPrices",
-                success: function (data) {
-                    console.log(data)
-                    localStorage.setItem('default_prices', JSON.stringify(data));
-                }
-            });
-        })
+        setDefaultPrices();
+        });
     </script>
 {% endblock %}
 {% block app_content %}
