@@ -45,8 +45,8 @@ def search_byzincid():
         files = {
             'zinc_id-in': ','.join(zinc22)
         }
-        url = 'https://{}/sublist'.format(request.host)
-        # url = "https://cartblanche22.docking.org/sublist"
+        # url = 'https://{}/sublist'.format(request.host)
+        url = "https://cartblanche22.docking.org/sublist"
         response = requests.post(url, data=files)
         print(response)
         if response:

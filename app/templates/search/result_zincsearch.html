@@ -34,7 +34,7 @@
             let datas = {{ data_json|safe }}
             const map = new Map()
             addAddedClass();
-            $('.mol-bottom').click((btn) => {
+            $('.mol-bottom').click((e) => {
                 let cur = $(e.currentTarget);
                 let id = e.currentTarget.id;
                 let cur_data = map.get(id)
@@ -66,6 +66,7 @@
             });
 
             function addAddedClass(){
+                console.log('datas', datas)
                 datas.forEach(e => {
                     map.set(e.zinc_id, e)
                     let inCart = shoppingCart.inCart(e.zinc_id)
