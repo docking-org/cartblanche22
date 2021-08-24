@@ -4,7 +4,6 @@ from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
-from app import db
 from flask import jsonify, current_app, request, make_response
 from collections import defaultdict
 import grequests
@@ -55,10 +54,7 @@ mimetypes = {
 
 class SubstanceList(Resource):
     def post(self, file_type=None):
-        # parser.add_argument('zinc_id-in', type=str)
-        # parser.add_argument('output_fields', type=str)
-        args = parser.parse_args()
-        # zinc_ids = args.get('zinc_id-in').split(',')
+        args = request.values
         zinc_ids = request.values.get('zinc_id-in').split(',')
         args['zinc_id-in'] = zinc_ids
         return self.getList(args, file_type)
@@ -69,9 +65,9 @@ class SubstanceList(Resource):
         output_fields = ""
         if args.get('output_fields'):
             output_fields = args.get('output_fields')
-        show_missing = ""
-        if args.get('show_missing'):
-            show_missing = args.get('show_missing')
+        # show_missing = ""
+        # if args.get('show_missing'):
+        #     show_missing = args.get('show_missing')
         dict_ids = defaultdict(list)
         dict_zinc_ids = defaultdict(list)
         dict_subid_zinc_id = defaultdict(list)
@@ -97,14 +93,19 @@ class SubstanceList(Resource):
                     continue
                     # return {'message': 'No server is mapped to {}. Please contact with Irwin Lab.'.format(zinc_id)}, 404
 
-                if len(dict_ids[url]) > chunk:
-                    dict_ids["{}-{}".format(url, overlimit_count)] = dict_ids[url]
-                    dict_ids[url] = [base10(zinc_id)]
-                    dict_zinc_ids[url] = [zinc_id]
-                    overlimit_count += 1
-                else:
-                    dict_ids[url].append(base10(zinc_id))
-                    dict_zinc_ids[url].append(zinc_id)
+                # Commented splitting by chunk size for now
+                # Need to fix it
+                # if len(dict_ids[url]) > chunk:
+                #     dict_ids["{}-{}".format(url, overlimit_count)] = dict_ids[url]
+                #     dict_ids[url] = [base10(zinc_id)]
+                #     dict_zinc_ids[url] = [zinc_id]
+                #     overlimit_count += 1
+                # else:
+                #     dict_ids[url].append(base10(zinc_id))
+                #     dict_zinc_ids[url].append(zinc_id)
+
+                dict_ids[url].append(base10(zinc_id))
+                dict_zinc_ids[url].append(zinc_id)
                 dict_subid_zinc_id[int(base10(zinc_id))].append(zinc_id)
 
         url = 'https://{}/substance'.format(request.host)
@@ -123,8 +124,8 @@ class SubstanceList(Resource):
                                    'sub_ids': ','.join([str(i) for i in v]),
                                    'zinc_ids': ','.join([str(i) for i in dict_zinc_ids[k]]),
                                    'tin_url': k.split('-')[0],
-                                   'output_fields': output_fields,
-                                   'show_missing': show_missing
+                                   'output_fields': output_fields
+                                   # 'show_missing': show_missing
                                }, timeout=timeout) for k, v in dict_ids.items())
         # print("after response")
         data = defaultdict(list)
@@ -134,26 +135,27 @@ class SubstanceList(Resource):
             print('printing grequests.map', res)
             if res and 'Not found' not in res.text:
                 results.append(json.loads(res.text))
-            if not res == None and res.status_code == 404:
+            if res and res.status_code == 404:
                 error.append(json.loads(res.text))
-
-
 
         # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
 
         print('results', results)
         print('error', error)
         if len(error) > 0:
-
             sendSearchLog(error)
-        if show_missing.lower() == 'on':
 
-            def get_zinc_ids(vals):
-                return ["{} {}".format(dict_subid_zinc_id.get(int(v))[0], v) for v in vals]
+        if len(results['search_info']) > 0:
+            sendSearchLog(results['search_info'])
 
-            res = [{k: get_zinc_ids(vals) for k, vals in res.items()} for res in results]
-            print('returning res', res)
-            return res
+        # if show_missing.lower() == 'on':
+        #
+        #     def get_zinc_ids(vals):
+        #         return ["{} {}".format(dict_subid_zinc_id.get(int(v))[0], v) for v in vals]
+        #
+        #     res = [{k: get_zinc_ids(vals) for k, vals in res.items()} for res in results]
+        #     print('returning res', res)
+        #     return res
 
         flat_list = itertools.chain.from_iterable(results)
 
@@ -161,7 +163,6 @@ class SubstanceList(Resource):
         print("received count. data['items']:", len(data['items']))
 
         if not data['items']:
-            print('return 404')
             return {'message': 'Not found'}, 404
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
@@ -187,23 +188,19 @@ class SubstanceList(Resource):
 
 class Substance(Resource):
     def post(self, file_type=None):
-        parser.add_argument('sub_ids', type=str)
-        parser.add_argument('tin_url', type=str)
-        parser.add_argument('output_fields', type=str)
-        parser.add_argument('show_missing', type=str)
-        # args = parser.parse_args()
-        # sub_id_list = args.get('sub_ids').split(',')
-        # sub_ids = (int(id) for id in sub_id_list)
-        # sub_ids_len = len(args.get('sub_ids').split(','))
-        sub_id_list = request.values.get('sub_ids').split(',')
-        zinc_id_list = set(request.values.get('zinc_ids').split(','))
-        sub_ids = (int(id) for id in sub_id_list)
-        sub_ids_len = len(sub_id_list)
+        # parser.add_argument('sub_ids', type=str)
+        # parser.add_argument('tin_url', type=str)
+        # parser.add_argument('output_fields', type=str)
+        # parser.add_argument('show_missing', type=str)
         args = request.values
-        print("REQUESTED TIN_URL from Substance POST", request.values.get('tin_url'))
+        sub_id_list = args.get('sub_ids').split(',')
+        zinc_id_list = args.get('zinc_ids').split(',')
+        sub_ids = (int(id) for id in sub_id_list)
+        sub_ids_len = len(args.get('sub_ids').split(','))
+
+        print("REQUESTED TIN_URL from Substance POST", args.get('tin_url'))
         time1 = time.time()
         substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
-        # substances = db.session.query(SubstanceModel).filter(SubstanceModel.sub_id.in_(sub_ids)).all()
 
         time2 = time.time()
         strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
@@ -216,18 +213,18 @@ class Substance(Resource):
 
         # if len(substances) != sub_ids_len:
         #     logger.info(args.get('sub_ids'))
-        print('substances', substances)
-        if substances is None or len(substances) == 0:
-            print('return 404 because None')
-            if len(sub_id_list) > 100:
-                sub_id_list = sub_id_list[0:100]
-            return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list),
-                    'identifiers': 'Substance not found with zinc_id(s): {}'.format(zinc_id_list),
-                    'tin_url': args.get('tin_url'),
-                    'returned': len(substances),
-                    'expecting': sub_ids_len,
-                    'time': (time2 - time1) % 60
-                    }, 404
+        # print('substances', substances)
+        # if substances is None or len(substances) == 0:
+        #     print('return 404 because None')
+        #     if len(sub_id_list) > 100:
+        #         sub_id_list = sub_id_list[0:100]
+        #     return {'message': 'Substance not found with sub_id(s): {}'.format(sub_id_list),
+        #             'identifiers': 'Substance not found with zinc_id(s): {}'.format(zinc_id_list),
+        #             'tin_url': args.get('tin_url'),
+        #             'returned': len(substances),
+        #             'expecting': sub_ids_len,
+        #             'time': (time2 - time1) % 60
+        #             }, 404
 
         data = []
         unmatched = set()
@@ -249,33 +246,26 @@ class Substance(Resource):
             else:
                 unmatched.add(data_dict['zinc_id'])
 
-        if args.get('show_missing') and args.get('show_missing').lower() == 'on':
-            print("missing sub_ids:", sub_id_list)
-            return jsonify({args.get('tin_url'): sub_id_list})
-        temp = zinc_id_list.difference(matched)
+        # if args.get('show_missing') and args.get('show_missing').lower() == 'on':
+        #     print("missing sub_ids:", sub_id_list)
+        #     return jsonify({args.get('tin_url'): sub_id_list})
+        # temp = zinc_id_list.difference(matched)
+
+        search_info = {
+            'tin_url': args.get('tin_url'),
+            'expecting': sub_ids_len,
+            'returned': len(substances),
+            'Expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
+            'Returned ids': 'Wrong returned zinc ids: {}'.format(unmatched),
+            # 'not found ids': ''.format(temp),
+            'time': (time2 - time1) % 60
+        }
 
         if data:
+            data['search_info'] = search_info
             return jsonify(data)
-        if len(substances) == sub_ids_len:
-            return {
-                'message': 'Found but zinc id unmatched',
-                'tin_url': args.get('tin_url'),
-                'expecting': sub_ids_len,
-                'returned': len(substances),
-                'Expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-                'Returned ids': 'Wrong returned zinc ids: {}'.format(unmatched),
-                'not found ids': ''.format(temp),
-                'time': (time2 - time1) % 60
-            }, 404
-        return {'message': 'Found but zinc id unmatched',
-                'tin_url': args.get('tin_url'),
-                'expecting': sub_ids_len,
-                'returned': len(substances),
-                'Expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-                'Returned ids': 'Wrong returned zinc ids: {}'.format(unmatched),
-                'not found ids': ''.format(temp),
-                'time' : (time2 - time1) % 60
-                }, 404
+
+        return {'message': 'Not found', 'search_info': search_info}, 404
 
 
 class Substances(Resource):
@@ -284,7 +274,7 @@ class Substances(Resource):
         parser.add_argument('chunk', type=int)
         parser.add_argument('timeout', type=int)
         parser.add_argument('output_fields', type=str)
-        parser.add_argument('show_missing', type=str)
+        # parser.add_argument('show_missing', type=str)
         args = parser.parse_args()
 
         uploaded_file = args.get('zinc_id-in').stream.read().decode("latin-1")
