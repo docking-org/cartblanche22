@@ -270,9 +270,9 @@ class Substance(Resource):
             'expected result count': sub_ids_len,
             'returned result count': len(substances),
             'expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-            'returned ids': 'Wrong returned zinc ids: {}'.format(unmatched) if unmatched else "All matched",
-            'not found ids': ''.format(notfound_ids) if notfound_ids else "All found",
-            'time': (time2 - time1) % 60
+            'returned ids': 'Wrong zinc ids returned: {}'.format(unmatched) if unmatched else "All matched",
+            'not found ids': notfound_ids if notfound_ids else "All found",
+            'time': 'It took {:.3f} s'.format((time2 - time1) % 60)
         }
 
         if data:
