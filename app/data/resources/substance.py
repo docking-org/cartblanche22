@@ -159,12 +159,7 @@ class SubstanceList(Resource):
         bad_search_info = [d['search_info'] for d in data['items'] if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
         print('bad_search_info', bad_search_info)
         if len(bad_search_info) > 0:
-            email_formatted_text = ""
-            for dict_item in bad_search_info:
-                for k, v in dict_item.items():
-                    email_formatted_text += '<b>{}</b>: {}<br>'.format(k, v)
-                email_formatted_text += "----------------------------------<br><br>"
-            sendSearchLog(email_formatted_text)
+            sendSearchLog(bad_search_info)
 
         # gets only results from flat list
         data['items'] = [d for d in data['items'] if 'search_info' not in d]

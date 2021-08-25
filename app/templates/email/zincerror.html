@@ -3,14 +3,19 @@
 ZINC SEARCH FAILURE LOG
 <p>
   User Information :
-     {%  if current_user.is_authenticated %}
-    {{ current_user.username }}
+    {%  if current_user.is_authenticated %}
+        {{ current_user.username }}
     {% else %}
-    Anonymous
+        Anonymous
     {%  endif %}
 </p>
 </p>
-{% for d in data %}
+{% for dict_item in data %}
+    {% for k, v in dict_item.items() %}
+        <b>{{ k }}</b>: {{ v }}<br>
+    {% endfor %}
+    ----------------------------------<br><br>
+{% endfor %}
 <p>
   {{d}}
 </p>
