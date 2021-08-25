@@ -159,13 +159,7 @@ class SubstanceList(Resource):
         bad_search_info = [d for d in data['items'] if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
         # print('bad_search_info', bad_search_info)
         if len(bad_search_info) > 0:
-            Formatter = OBJECT_MIMETYPE_TO_FORMATTER["text/plain"]
-            keys = list(bad_search_info[0].keys())
-            formatter = Formatter(fields=keys)
-            formatted_data = ""
-            for line in formatter(bad_search_info):
-                formatted_data += line
-            sendSearchLog(formatted_data)
+            sendSearchLog(bad_search_info)
 
         # gets only results from flat list
         data['items'] = [d for d in data['items'] if 'search_info' not in d]
