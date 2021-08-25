@@ -156,10 +156,15 @@ class SubstanceList(Resource):
         flat_list = itertools.chain.from_iterable(results)
         data['items'] = list(flat_list)
         # gets search info with 'not found ids' from flat list
-        bad_search_info = [d for d in data['items'] if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
-        # print('bad_search_info', bad_search_info)
+        bad_search_info = [d['search_info'] for d in data['items'] if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
+        print('bad_search_info', bad_search_info)
         if len(bad_search_info) > 0:
-            sendSearchLog(bad_search_info)
+            email_formatted_text = ""
+            for dict_item in bad_search_info:
+                for k, v in dict_item.items():
+                    email_formatted_text += '<b>{}</b>: {}<br>'.format(k, v)
+                email_formatted_text += "----------------------------------<br><br>"
+            sendSearchLog(email_formatted_text)
 
         # gets only results from flat list
         data['items'] = [d for d in data['items'] if 'search_info' not in d]
@@ -212,7 +217,6 @@ class Substance(Resource):
                 'expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
                 'returned ids': '================SQL SERVER CONNECTION ERROR==============',
                 'not found ids': 'Please check {} server connection'.format(args.get('tin_url')),
-                'Error': 'Server connection error!!!!',
                 'time': 'It took {:.3f} s'.format((time.time() - time1) % 60)
             }
             return jsonify([{'search_info': search_info}])
