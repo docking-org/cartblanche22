@@ -54,7 +54,7 @@ mimetypes = {
 
 class SubstanceList(Resource):
     def post(self, file_type=None):
-        args = request.values
+        args = request.values.to_dict()
         zinc_ids = request.values.get('zinc_id-in').split(',')
         args['zinc_id-in'] = zinc_ids
         return self.getList(args, file_type)
@@ -154,17 +154,18 @@ class SubstanceList(Resource):
         #     return res
 
         flat_list = itertools.chain.from_iterable(results)
-
+        data['items'] = list(flat_list)
         # gets search info with 'not found ids' from flat list
-        bad_search_info = [d for d in list(flat_list) if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
+        bad_search_info = [d for d in data['items'] if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
+        # print('bad_search_info', bad_search_info)
         if len(bad_search_info) > 0:
             sendSearchLog(bad_search_info)
 
         # gets only results from flat list
-        data['items'] = [d for d in list(flat_list) if 'search_info' not in d]
-
+        data['items'] = [d for d in data['items'] if 'search_info' not in d]
+        # print("data['items']", data['items'])
         if not data['items']:
-            return {'message': 'Not found1'}, 404
+            return {'message': 'Not found'}, 404
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
@@ -201,7 +202,20 @@ class Substance(Resource):
 
         print("REQUESTED TIN_URL from Substance POST", args.get('tin_url'))
         time1 = time.time()
-        substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
+        try:
+            substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
+        except Exception as e:
+            search_info = {
+                'tin_url': args.get('tin_url'),
+                'expected result count': sub_ids_len,
+                'returned result count': 0,
+                'expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
+                'returned ids': '================SQL SERVER CONNECTION ERROR==============',
+                'not found ids': 'Please check {} server connection'.format(args.get('tin_url')),
+                'Error': 'Server connection error!!!!',
+                'time': ' It took {:.3f} s'.format((time.time() - time1) % 60)
+            }
+            return jsonify([{'search_info': search_info}])
 
         time2 = time.time()
         strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
@@ -263,7 +277,7 @@ class Substance(Resource):
         }
 
         if data:
-            data.append({'search_info':search_info})
+            data.append({'search_info': search_info})
             return jsonify(data)
 
         return {'message': 'Not found', 'search_info': search_info}, 404
