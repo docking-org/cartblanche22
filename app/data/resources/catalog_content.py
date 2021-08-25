@@ -118,7 +118,6 @@ class CatalogContent(Resource):
             'error': 'No error on this server. Returned {} result(s) from this server'.format(len(catContents)),
             'elapsed_time': elapsed_time
         }
-        return jsonify([{'search_info': search_info}])
 
         data = []
         for cc in catContents:
