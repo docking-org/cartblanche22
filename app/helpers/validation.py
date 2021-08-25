@@ -161,6 +161,7 @@ def get_basic_tranche(smiles):
         return tranche_args
     return {}
 
+
 def get_new_tranche(tranche):
     h_num = tranche[0:3]
     p_num = tranche[3::]

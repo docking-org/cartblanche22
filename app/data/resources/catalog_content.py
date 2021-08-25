@@ -13,6 +13,7 @@ from sqlalchemy import func, and_
 from flask_csv import send_csv
 from datetime import datetime
 import itertools
+from app.email_send import send_search_log
 
 parser = reqparse.RequestParser()
 
@@ -30,7 +31,6 @@ class CatalogContentList(Resource):
         supplier_codes = args.get('supplier_code-in')
 
         tin_urls = get_all_unique_tin_servers()
-        print(tin_urls)
         # tin_list = []
         # server_mappings = ServerMappingModel.query.distinct(
         #     ServerMappingModel.ip_fk,
@@ -42,17 +42,30 @@ class CatalogContentList(Resource):
         #         # tin_list.append(url)
         #         tin_urls[url] = "ZINC{}{}".format(sm.tranches[0].mwt, sm.tranches[0].logp)
         s_codes = ','.join(supplier_codes)
+        expected_result_count = len(supplier_codes)
         url = 'https://{}/catalog'.format(request.host)
-        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=1000) for t in tin_urls)
+        time1 = time.time()
+        resp = (grequests.post(url, data={'supplier_codes': s_codes, 'tin_url': t}, timeout=15) for t in tin_urls)
 
         results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
+
         flat_list = itertools.chain.from_iterable(results)
         data = defaultdict(list)
         data['items'] = list(flat_list)
 
-        if not data['items']:
-            return {'message': 'Not found'}, 404
-        print("data['items']", data['items'])
+        data['search_info'] = [d['search_info'] for d in data['items'] if 'search_info' in d]
+        # gets only results from flat list
+        data['items'] = [d for d in data['items'] if 'search_info' not in d]
+
+        if len(data['items']) < expected_result_count:
+            search_info = {
+                'tin_url': 'all tin urls',
+                'error': "expected result count was {}. But only returned {}".format(expected_result_count, len(data['items'])),
+                'elapsed_time': 'Whole search from all TIN servers took {:.3f} s'.format((time.time() - time1) % 60)
+            }
+            data['search_info'].append(search_info)
+            send_search_log(data['search_info'])
+
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
             keys = list(data['items'][0].keys())
@@ -81,53 +94,41 @@ class CatalogContent(Resource):
         args = parser.parse_args()
         lines = args.get('supplier_codes').split(',')
         tin_url = args.get('tin_url')
-        error_msg = ""
-        elapsed_time = ""
+        time1 = time.time()
+        print("tin_url=========================", tin_url)
+        strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
         try:
-            time1 = time.time()
-            print("tin_url=========================", tin_url)
-            strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
             catContents = CatalogContentModel.query.filter(
                 and_(CatalogContentModel.supplier_code.in_(lines), CatalogContentModel.depleted == False)).all()
-
-            time2 = time.time()
-            strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
-            elapsed_time = '{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
-                                                                                              strtime1, strtime2,
-                                                                                              (time2 - time1) % 60)
-            print(elapsed_time)
-
-            data = []
-            for cc in catContents:
-                data.extend([sub.json2() for sub in cc.substances])
-
-            if data:
-                return jsonify(data)
-
         except Exception as e:
-            print("Exception!!!!!!!!!!: ", tin_url, " error:", e)
-            error_msg = "{}, error:{}".format(tin_url, e)
+            search_info = {
+                'tin_url': args.get('tin_url'),
+                'error': 'SQL SERVER CONNECTION ERROR',
+                'elapsed_time': 'It took {:.3f} s'.format((time.time() - time1) % 60)
+            }
+            return jsonify([{'search_info': search_info}])
 
-        if not error_msg:
-            error_msg = 'Not Found'
-
-        if not elapsed_time:
-            time2 = time.time()
-            strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
-            elapsed_time = '{:s} started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
-                                                                                            strtime1,
-                                                                                            strtime2,
-                                                                                            (time2 - time1) % 60)
-        return [{
-            'tranche': tin_url,
-            'zinc_id': tin_url,
-            'sub_id': tin_url,
-            'smiles': tin_url,
-            'tin_url': tin_url,
-            'error': error_msg,
+        time2 = time.time()
+        strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
+        elapsed_time = '{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(tin_url,
+                                                                                          strtime1, strtime2,
+                                                                                          (time2 - time1) % 60)
+        search_info = {
+            'tin_url': args.get('tin_url'),
+            'error': 'No error on this server. Returned {} result(s) from this server'.format(len(catContents)),
             'elapsed_time': elapsed_time
-        }]
+        }
+        return jsonify([{'search_info': search_info}])
 
+        data = []
+        for cc in catContents:
+            data.extend([sub.json2() for sub in cc.substances])
+
+        if data:
+            data.append({'search_info': search_info})
+            return jsonify(data)
+
+        return {'message': 'Not found'}, 404
 
     # def get(self, tin_url, lines):
     #     current_app.config['TIN_URL'] = tin_url

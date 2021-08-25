@@ -40,7 +40,8 @@ def prepare_email_chemspace(user, data, file):
                          cc=[''],
                          file=file)
 
-def sendSearchLog(data):
+
+def send_search_log(data):
     send_email('[CartBlanche] zincsearch error',
                sender=current_app.config['ADMINS'][0],
                # recipients=['munkhzulk@gmail.com', 'munkhzulk1@gmail.com'],

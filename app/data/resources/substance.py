@@ -16,7 +16,7 @@ import logging
 import requests
 import random
 import re
-from app.email_send import sendSearchLog
+from app.email_send import send_search_log
 
 # from app.formatters import (
 #     CsvFormatter,
@@ -44,14 +44,6 @@ mimetypes = {
 }
 
 
-# formatters = {
-#     'text/csv': IteratedOutput.construct_wrapped(CsvFormatter),
-#     'application/javascript': IteratedOutput.construct_wrapped(JsonFormatter),
-#     'application/javascript;stream': IteratedOutput.construct_wrapped(JsonStreamFormatter),
-#     'application/xml': IteratedOutput.construct_wrapped(XmlFormatter),
-#     'text/plain': IteratedOutput.construct_wrapped(TxtFormatter),
-# }
-
 class SubstanceList(Resource):
     def post(self, file_type=None):
         args = request.values.to_dict()
@@ -65,15 +57,12 @@ class SubstanceList(Resource):
         output_fields = ""
         if args.get('output_fields'):
             output_fields = args.get('output_fields')
-        # show_missing = ""
-        # if args.get('show_missing'):
-        #     show_missing = args.get('show_missing')
         dict_ids = defaultdict(list)
         dict_zinc_ids = defaultdict(list)
         dict_subid_zinc_id = defaultdict(list)
 
-        overlimit_count = 0
-        chunk = 1000
+        # overlimit_count = 0
+        # chunk = 1000
         if args.get('chunk'):
             chunk = args.get('chunk')
         timeout = 15
@@ -81,7 +70,7 @@ class SubstanceList(Resource):
             timeout = args.get('timeout')
 
         urls = get_all_tin_url()
-        # print('tin  urls:', urls)
+
 
         for zinc_id in zinc_ids:
             if zinc_id:
@@ -116,56 +105,29 @@ class SubstanceList(Resource):
             # print('sub_ids', ','.join([str(i) for i in v]))
             # print( 'tin_url', k.split('-')[0])
             # print(k, v)
-        # print("len(dict_ids)", len(dict_ids))
-        # print(url)
-        # print("before response")
+
         resp = (grequests.post(url,
                                data={
                                    'sub_ids': ','.join([str(i) for i in v]),
                                    'zinc_ids': ','.join([str(i) for i in dict_zinc_ids[k]]),
                                    'tin_url': k.split('-')[0],
                                    'output_fields': output_fields
-                                   # 'show_missing': show_missing
                                }, timeout=timeout) for k, v in dict_ids.items())
-        # print("after response")
+
         data = defaultdict(list)
-        results = []
-        error = []
-        for res in grequests.map(resp):
-            if res and res.status_code != 404:
-                print('printing grequests.map', res.text)
-                results.append(json.loads(res.text))
-            # if res and res.status_code == 404:
-            #     error.append(json.loads(res.text))
-
-        # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
-
-        print('results', results)
-        # if len(results['search_info']) > 0:
-        #     sendSearchLog(results['search_info'])
-
-        # if show_missing.lower() == 'on':
-        #
-        #     def get_zinc_ids(vals):
-        #         return ["{} {}".format(dict_subid_zinc_id.get(int(v))[0], v) for v in vals]
-        #
-        #     res = [{k: get_zinc_ids(vals) for k, vals in res.items()} for res in results]
-        #     print('returning res', res)
-        #     return res
+        results = [json.loads(res.text) for res in grequests.map(resp) if res and res.status_code != 404]
 
         flat_list = itertools.chain.from_iterable(results)
         data['items'] = list(flat_list)
+
         # gets search info with 'not found ids' from flat list
-        bad_search_info = [d['search_info'] for d in data['items'] if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
-        print('bad_search_info', bad_search_info)
-        if len(bad_search_info) > 0:
-            sendSearchLog(bad_search_info)
+        data['search_info'] = [d['search_info'] for d in data['items'] if 'search_info' in d and d['search_info']['not_found_ids'] != 'All found']
+
+        if len(data['search_info']) > 0:
+            send_search_log(data['search_info'])
 
         # gets only results from flat list
         data['items'] = [d for d in data['items'] if 'search_info' not in d]
-        # print("data['items']", data['items'])
-        if not data['items']:
-            return {'message': 'Not found'}, 404
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
@@ -190,10 +152,6 @@ class SubstanceList(Resource):
 
 class Substance(Resource):
     def post(self, file_type=None):
-        # parser.add_argument('sub_ids', type=str)
-        # parser.add_argument('tin_url', type=str)
-        # parser.add_argument('output_fields', type=str)
-        # parser.add_argument('show_missing', type=str)
         args = request.values
         sub_id_list = args.get('sub_ids').split(',')
         zinc_id_list = args.get('zinc_ids').split(',')
@@ -207,12 +165,12 @@ class Substance(Resource):
         except Exception as e:
             search_info = {
                 'tin_url': args.get('tin_url'),
-                'expected result count': sub_ids_len,
-                'returned result count': 0,
-                'expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-                'returned ids': '================SQL SERVER CONNECTION ERROR==============',
-                'not found ids': 'Please check {} server connection'.format(args.get('tin_url')),
-                'time': 'It took {:.3f} s'.format((time.time() - time1) % 60)
+                'expected_result_count': sub_ids_len,
+                'returned_result_count': 0,
+                'expected_ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
+                'returned_ids': '================SQL SERVER CONNECTION ERROR==============',
+                'not_found_ids': 'Please check {} server connection'.format(args.get('tin_url')),
+                'elapsed_time': 'It took {:.3f} s'.format((time.time() - time1) % 60)
             }
             return jsonify([{'search_info': search_info}])
 
@@ -267,12 +225,12 @@ class Substance(Resource):
 
         search_info = {
             'tin_url': args.get('tin_url'),
-            'expected result count': sub_ids_len,
-            'returned result count': len(substances),
-            'expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-            'returned ids': 'Wrong zinc ids returned: {}'.format(unmatched) if unmatched else "All matched",
-            'not found ids': notfound_ids if notfound_ids else "All found",
-            'time': 'It took {:.3f} s'.format((time2 - time1) % 60)
+            'expected_result_count': sub_ids_len,
+            'returned_result_count': len(substances),
+            'expected_ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
+            'returned_ids': 'Wrong zinc ids returned: {}'.format(unmatched) if unmatched else "All matched",
+            'not_found_ids': notfound_ids if notfound_ids else "All found",
+            'elapsed_time': 'It took {:.3f} s'.format((time2 - time1) % 60)
         }
 
         if data:
