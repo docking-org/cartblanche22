@@ -132,21 +132,17 @@ class SubstanceList(Resource):
         results = []
         error = []
         for res in grequests.map(resp):
-            print('printing grequests.map', res)
-            if res and 'Not found' not in res.text:
+            if res and res.status_code != 404:
+                print('printing grequests.map', res.text)
                 results.append(json.loads(res.text))
-            if res and res.status_code == 404:
-                error.append(json.loads(res.text))
+            # if res and res.status_code == 404:
+            #     error.append(json.loads(res.text))
 
         # results = [json.loads(res.text) for res in grequests.map(resp) if res and 'Not found' not in res.text]
 
         print('results', results)
-        print('error', error)
-        if len(error) > 0:
-            sendSearchLog(error)
-
-        if len(results['search_info']) > 0:
-            sendSearchLog(results['search_info'])
+        # if len(results['search_info']) > 0:
+        #     sendSearchLog(results['search_info'])
 
         # if show_missing.lower() == 'on':
         #
@@ -159,11 +155,16 @@ class SubstanceList(Resource):
 
         flat_list = itertools.chain.from_iterable(results)
 
-        data['items'] = list(flat_list)
-        print("received count. data['items']:", len(data['items']))
+        # gets search info with 'not found ids' from flat list
+        bad_search_info = [d for d in list(flat_list) if 'search_info' in d and d['search_info']['not found ids'] != 'All found']
+        if len(bad_search_info) > 0:
+            sendSearchLog(bad_search_info)
+
+        # gets only results from flat list
+        data['items'] = [d for d in list(flat_list) if 'search_info' not in d]
 
         if not data['items']:
-            return {'message': 'Not found'}, 404
+            return {'message': 'Not found1'}, 404
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
         if file_type == 'csv':
@@ -249,20 +250,20 @@ class Substance(Resource):
         # if args.get('show_missing') and args.get('show_missing').lower() == 'on':
         #     print("missing sub_ids:", sub_id_list)
         #     return jsonify({args.get('tin_url'): sub_id_list})
-        # temp = zinc_id_list.difference(matched)
+        notfound_ids = [id for id in zinc_id_list if id not in matched]
 
         search_info = {
             'tin_url': args.get('tin_url'),
-            'expecting': sub_ids_len,
-            'returned': len(substances),
-            'Expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-            'Returned ids': 'Wrong returned zinc ids: {}'.format(unmatched),
-            # 'not found ids': ''.format(temp),
+            'expected result count': sub_ids_len,
+            'returned result count': len(substances),
+            'expected ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
+            'returned ids': 'Wrong returned zinc ids: {}'.format(unmatched) if unmatched else "All matched",
+            'not found ids': ''.format(notfound_ids) if notfound_ids else "All found",
             'time': (time2 - time1) % 60
         }
 
         if data:
-            data['search_info'] = search_info
+            data.append({'search_info':search_info})
             return jsonify(data)
 
         return {'message': 'Not found', 'search_info': search_info}, 404
