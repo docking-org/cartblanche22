@@ -46,7 +46,5 @@ def send_search_log(data):
                sender=current_app.config['ADMINS'][0],
                # recipients=['munkhzulk@gmail.com', 'munkhzulk1@gmail.com'],
                recipients=['munkhzulk@gmail.com', 'jir322@gmail.com', 'khtang015@gmail.com', 'chinzo.dandar@gmail.com'],
-               text_body=render_template('email/zincerror.txt',
-                                         data=data),
-               html_body=render_template('email/zincerror.html',
-                                         data=data))
+               text_body=render_template('email/zincerror.txt', data=data),
+               html_body=render_template('email/zincerror.html', data=data))

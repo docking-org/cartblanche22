@@ -59,11 +59,12 @@ class CatalogContentList(Resource):
 
         if len(data['items']) < expected_result_count:
             search_info = {
-                'tin_url': 'all tin urls',
-                'error': "expected result count was {}. But only returned {}".format(expected_result_count, len(data['items'])),
+                'tin_url': 'Supplier code search from all tin servers',
+                'error': "Supplier code search expected result count was {}. But only returned {}".format(
+                    expected_result_count, len(data['items'])),
                 'elapsed_time': 'Whole search from all TIN servers took {:.3f} s'.format((time.time() - time1) % 60)
             }
-            data['search_info'].append(search_info)
+            data['search_info'].insert(0, search_info)
             send_search_log(data['search_info'])
 
         str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
