@@ -53,16 +53,20 @@ class CatalogContentList(Resource):
         data = defaultdict(list)
         data['items'] = list(flat_list)
 
-        data['search_info'] = [d['search_info'] for d in data['items'] if 'search_info' in d]
+        data['found'] = [d['found_by_key'] for d in data['items'] if 'found_by_key' in d]
+        data['found'] = list(itertools.chain.from_iterable(data['found']))
+        data['not_found'] = [s for s in supplier_codes if s not in data['found']]
+        data['search_info'] = [d['search_info'] for d in data['items'] if 'search_info' in d and 'found_by_key' not in d]
         # gets only results from flat list
-        data['items'] = [d for d in data['items'] if 'search_info' not in d]
+        data['items'] = [d for d in data['items'] if 'search_info' not in d and 'found_by_key' not in d]
 
         if len(data['items']) < expected_result_count:
             search_info = {
                 'tin_url': 'Supplier code search from all tin servers',
                 'error': "Supplier code search expected result count was {}. But only returned {}".format(
                     expected_result_count, len(data['items'])),
-                'elapsed_time': 'Whole search from all TIN servers took {:.3f} s'.format((time.time() - time1) % 60)
+                'not_found_codes': data['not_found'],
+                'elapsed_time': 'All searches from all TIN servers took {:.3f} s'.format((time.time() - time1) % 60)
             }
             data['search_info'].insert(0, search_info)
             send_search_log(data['search_info'])
@@ -99,8 +103,7 @@ class CatalogContent(Resource):
         print("tin_url=========================", tin_url)
         strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
         try:
-            catContents = CatalogContentModel.query.filter(
-                and_(CatalogContentModel.supplier_code.in_(lines), CatalogContentModel.depleted == False)).all()
+            catContents = CatalogContentModel.query.filter(CatalogContentModel.supplier_code.in_(lines)).all()
         except Exception as e:
             search_info = {
                 'tin_url': args.get('tin_url'),
@@ -121,11 +124,14 @@ class CatalogContent(Resource):
         }
 
         data = []
+        result_supplier_codes = []
         for cc in catContents:
             data.extend([sub.json2() for sub in cc.substances])
+            result_supplier_codes.append(cc.supplier_code)
 
         if data:
             data.append({'search_info': search_info})
+            data.append({'found_by_key': result_supplier_codes})
             return jsonify(data)
 
         return {'message': 'Not found'}, 404
