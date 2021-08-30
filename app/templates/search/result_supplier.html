@@ -8,7 +8,7 @@
             border-radius: 4px;
             margin-bottom: 20px;
             text-align: center;
-             background-color: white;
+            background-color: white;
         }
 
         .link {
@@ -21,8 +21,7 @@
         }
 
         .added {
-            {#border: 1px solid #5bc0de;#}
-            background-color: #9bd8eb;
+        {#border: 1px solid #5bc0de;#} background-color: #9bd8eb;
         }
     </style>
 {% endblock %}
@@ -34,18 +33,12 @@
             let datas =
             {{ data_json|safe }}
             const map = new Map()
-            datas.forEach(e => {
-                map.set(e.zinc_id, e)
-                let inCart = shoppingCart.inCart(e.zinc_id)
-                if (inCart) {
-                    $('#' + e.zinc_id).addClass('added')
-                }
-            });
+            addAddedClass();
             $('.mol-bottom').click((e) => {
                 let cur = $(e.currentTarget);
                 let id = e.currentTarget.id;
                 let cur_data = map.get(id)
-                                console.log('current molecule', cur_data)
+                console.log('current molecule', cur_data)
 
                 let db = 'zinc22'
                 let smiles = cur_data.smiles
@@ -56,15 +49,56 @@
                     shoppingCart.removeItemFromCart(id)
                 } else {
                     cur.addClass('added')
-                    shoppingCart.addItemToCart(id,db, smiles);
+                    shoppingCart.addItemToCart(id, db, smiles);
                 }
             })
+            $('#addAll').click(() => {
+                shoppingCart.addAllItem(datas);
+                addAddedClass();
+                $('#addAll').hide();
+                $('#deleteAll').show();
+            });
+
+            $('#deleteAll').click(() => {
+                shoppingCart.deleteAllItem(datas);
+                $('.added').removeClass('added');
+                $('#addAll').show();
+                $('#deleteAll').hide();
+            });
+
+            function addAddedClass() {
+                let count = 0;
+                datas.forEach(e => {
+                    map.set(e.zinc_id, e)
+                    let inCart = shoppingCart.inCart(e.zinc_id)
+                    if (inCart) {
+                        $('#' + e.zinc_id).addClass('added')
+                        count++;
+                    }
+
+                });
+                if (count > datas.length / 2) {
+                    $('#deleteAll').show();
+                    $('#addAll').hide();
+                } else {
+                    $('#addAll').show();
+                    $('#deleteAll').hide();
+                }
+            };
         });
     </script>
 {% endblock %}
 {% block app_content %}
     <div class="row">
-        <h3>{{ data|length }} results</h3>
+        <div class="col-md-6 col-xs-3 col-sm-3 col-lg-6">
+            <h3>{{ data|length }} results</h3>
+        </div>
+        <div class="col-md-6 col-xs-9 col-sm-9 col-lg-6 float-right text-right">
+            <button type="button" class="btn btn-info" id="addAll">Add all to cart</button>
+            <button type="button" class="btn btn-warning" id="deleteAll">Remove all from cart</button>
+        </div>
+    </div>
+    <div class="row">
         {% for data in data %}
             <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
                 <div class="mol">
@@ -72,7 +106,7 @@
                         <a href='/searchZinc/{{ data.zinc_id }}'>{{ data.zinc_id }}</a>
                     </div>
                     <div class="mol-bottom" id="{{ data.zinc_id }}" data-smiles="{{ data.smiles }}" data-db="zinc22"
-                         >
+                    >
                         <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles | urlencode }}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow">
                     </div>
                 </div>
@@ -81,12 +115,12 @@
 
 
     </div>
-     <div class="row">
-            {% for err in servers %}
+    <div class="row">
+        {% for err in servers %}
             <p>
-            <code>{{ err.elapsed_time }}</code>
-            <code>{{ err.error }}</code>
+                <code>{{ err.elapsed_time }}</code>
+                <code>{{ err.error }}</code>
             </p>
-            {% endfor %}
-        </div>
+        {% endfor %}
+    </div>
 {% endblock %}
