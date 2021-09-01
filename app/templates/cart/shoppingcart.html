@@ -146,22 +146,6 @@
                 let data = table.row($(this).parents('tr')).data()
             })
 
-            {#$('#table').on("click", "#identifier", function () {#}
-            {#    let data = table.row($(this).parents('tr')).data()#}
-            {#    console.log(data)#}
-            {#             $.ajax({#}
-            {#        type: "POST",#}
-            {#        url: "/processItem",#}
-            {#        data: JSON.stringify(data),#}
-            {#        contentType: "application/json",#}
-            {#        dataType: 'json',#}
-            {#        success: function (data) {#}
-            {#            var route = data.result;#}
-            {#            console.log(route);#}
-            {#            window.location.href = route;#}
-            {#        }#}
-            {#    }); });#}
-
             $('#deleteAll').on('click', () => {
                 shoppingCart.deleteAllFromCart();
                 table.clear().draw();
@@ -260,6 +244,25 @@
 
 
 {% block app_content %}
+    <div class="modal" tabindex="-1" role="dialog" id="myModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Are you sure? </h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>You'll lose all cart data...</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" id='deleteAll' data-dismiss="modal">Yes, delete</button>
+        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
     <div class="row">
         <div class="col-md-6">
             <h1>Shopping Cart</h1>
@@ -281,7 +284,8 @@
                 Assign Vendors
             </button>
             <button type="button" class="btn btn-info" id="checkout">Checkout</button>
-            <button type="button" class="btn btn-warning" id="deleteAll">Clear cart</button>
+{#            <button type="button" class="btn btn-warning" id="deleteAll">Clear cart</button>#}
+            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#myModal">Clear cart</button>
         </div>
     </div>
     <hr>
