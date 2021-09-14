@@ -28,14 +28,13 @@ def search_byzincid():
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
         fileDataList = file.split('\n')
-        print(fileDataList)
-        print(len(fileDataList))
         zinc22 = []
         zinc20 = []
         discarded = []
         for identifier in textDataList + fileDataList:
             if identifier.isnumeric() or identifier[4:6] == '00':
                 zinc20.append(identifier)
+
                 continue
             elif identifier[0:4].upper() == 'ZINC':
                 zinc22.append(identifier)
@@ -45,12 +44,37 @@ def search_byzincid():
         files = {
             'zinc_id-in': ','.join(zinc22)
         }
-        url = 'https://{}/sublist'.format(request.host)
-        # url = "https://cartblanche22.docking.org/sublist"
+        # url = 'https://{}/sublist'.format(request.host)
+        url = "https://cartblanche22.docking.org/sublist"
         response = requests.post(url, data=files)
-        print(response)
+        # if len(zinc20) > 0:
+        #     zinc20_files = {
+        #         'zinc_id-in': zinc20,
+        #         'output_fields': "zinc_id supplier_code smiles substance_purchasable"
+        #     }
+        #     zinc20_res = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)
+        #     zinc20_data = {}
+        #     for line in zinc20_res.text.split('\n'):
+        #         temp = line.split('\t')
+        #         if len(temp) == 4:
+        #             identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
+        #             if identifier not in zinc20_data:
+        #                 zinc20_data[identifier] = {
+        #                     'identifier': identifier,
+        #                     'smiles': smiles,
+        #                     'catalogs': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}]
+        #                 }
+        #             else:
+        #                 catalogs = zinc20_data[identifier]['catalogs']
+        #                 cat_found = False
+        #                 for c in catalogs:
+        #                     if c['supplier_code'] == supplier_code:
+        #                         cat_found = True
+        #                 if not cat_found:
+        #                     zinc20_data[identifier]['catalogs'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
+        #
+        #     print('zinc20_data', zinc20_data)
         if response:
-            print(response.json())
             zinc22_result = response.json()
             if 'items' in zinc22_result:
                 return render_template('search/result_zincsearch.html', data_json=json.dumps(zinc22_result['items']), data=zinc22_result['items'] )
@@ -69,12 +93,7 @@ def search_bysmiles():
         dist = request.form['dist']
         adist = request.form['adist']
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
         fileDataList = file.split('\n')
-        print('fileDataList', fileDataList)
-        print('textDataList', textDataList)
-        print('dist', dist)
-        print('adist', adist)
         files = {
             'smiles-in': ','.join(textDataList + fileDataList),
             'dist': dist,
