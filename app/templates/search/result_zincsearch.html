@@ -31,14 +31,28 @@
     <script>
         $(document).ready(() => {
 
-            let datas = {{ data_json|safe }}
-            const map = new Map()
+            let datas22 = {{ data22_json|safe }};
+            let datas20 = {{ data20_json|safe }};
+            if (datas22 == null){
+                datas22 = []
+            }
+            if (datas20 == null){
+                datas20 = []
+            }
+            let map22 = new Map();
+            let map20 = new Map();
             addAddedClass();
             $('.mol-bottom').click((e) => {
                 let cur = $(e.currentTarget);
                 let id = e.currentTarget.id;
-                let cur_data = map.get(id)
-                let db = 'zinc22'
+                let cur_data;
+                if (map22.has(id)){
+                    cur_data = map22.get(id)
+                }
+                else{
+                    cur_data = map20.get(id)
+                }
+                let db = cur.data('db')
                 let smiles = cur_data.smiles
                 let supplier_code = cur_data.supplier_code
                 let catalogs = cur_data.catalogs
@@ -47,40 +61,81 @@
                     shoppingCart.removeItemFromCart(id)
                 } else {
                     cur.addClass('added')
-                    shoppingCart.addItemToCart(id,db, smiles, supplier_code, catalogs);
+                    shoppingCart.addItemToCart(id, db, smiles, supplier_code, catalogs);
                 }
             })
 
-            $('#addAll').click(() => {
-                shoppingCart.addAllItem(datas);
-                addAddedClass();
-                $('#addAll').hide();
-                $('#deleteAll').show();
+            $('#addAll22').click(() => {
+                shoppingCart.addAllItem(datas22);
+                {#addAddedClass();#}
+                 datas22.forEach(e => {
+                     $('#' + e.zinc_id).addClass('added')
+                })
+                $('#addAll22').hide();
+                $('#deleteAll22').show();
             });
 
-            $('#deleteAll').click(() => {
-                shoppingCart.deleteAllItem(datas);
-                $('.added').removeClass('added');
-                $('#addAll').show();
-                $('#deleteAll').hide();
+            $('#deleteAll22').click(() => {
+                shoppingCart.deleteAllItem(datas22);
+                $('.added.zinc22').removeClass('added');
+                $('#addAll22').show();
+                $('#deleteAll22').hide();
+            });
+             $('#addAll20').click(() => {
+                shoppingCart.addAllItem(datas20);
+                {#addAddedClass();#}
+                  datas20.forEach(e => {
+                     $('#' + e.zinc_id).addClass('added')
+                })
+                $('#addAll20').hide();
+                $('#deleteAll20').show();
+            });
+
+            $('#deleteAll20').click(() => {
+                shoppingCart.deleteAllItem(datas20);
+                $('.added.zinc20').removeClass('added');
+                $('#addAll20').show();
+                $('#deleteAll20').hide();
             });
 
             function addAddedClass(){
                 let count = 0;
-                datas.forEach(e => {
-                    map.set(e.zinc_id, e)
+                datas22.forEach(e => {
+                    map22.set(e.zinc_id, e)
                     let inCart = shoppingCart.inCart(e.zinc_id)
                     if (inCart) {
                         count++;
                         $('#' + e.zinc_id).addClass('added')
                     }
                 })
-                if (count > datas.length / 2) {
-                    $('#deleteAll').show();
-                    $('#addAll').hide();
+                datas20.forEach(e => {
+                    map20.set(e.zinc_id, e)
+                    let inCart = shoppingCart.inCart(e.zinc_id)
+                    if (inCart) {
+                        count++;
+                        $('#' + e.zinc_id).addClass('added')
+                    }
+                })
+                if (datas22.length > 0){
+                   $('#zinc22-tab').click();
+                }
+                if (datas20.length > 0){
+                   $('#zinc20-tab').click();
+                }
+                if (count > datas22.length / 2) {
+                    $('#deleteAll22').show();
+                    $('#addAll22').hide();
                 } else {
-                    $('#addAll').show();
-                    $('#deleteAll').hide();
+                    $('#addAll22').show();
+                    $('#deleteAll22').hide();
+                }
+                if (count > datas20.length / 2) {
+                    $('#deleteAll20').show();
+                    $('#addAll20').hide();
+                    {#$('#zinc20').tab('show');#}
+                } else {
+                    $('#addAll20').show();
+                    $('#deleteAll20').hide();
                 }
 
             };
@@ -89,23 +144,38 @@
     </script>
 {% endblock %}
 {% block app_content %}
-    <div class="row">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+    {% if data22 %}
+  <li class="nav-item">
+    <a class="nav-link" id="zinc22-tab" data-toggle="tab" href="#zinc22" role="tab" aria-controls="zinc22" aria-selected="true">ZINC22 results</a>
+  </li>
+        {%  endif %}
+    {%  if data20 %}
+  <li class="nav-item">
+    <a class="nav-link" id="zinc20-tab" data-toggle="tab" href="#zinc20" role="tab" aria-controls="zinc20" aria-selected="false">ZINC20 results</a>
+  </li>
+    {%  endif %}
+</ul>
+<div class="tab-content" id="myTabContent">
+{% if data22 %}
+  <div class="tab-pane fade active" id="zinc22" role="tabpanel" aria-labelledby="zinc22-tab">
+      <div class="row">
     <div class="col-md-6 col-xs-3 col-sm-3 col-lg-6">
-        <h3>{{ data|length }} results</h3>
+        <h3>{{ data22|length }} results</h3>
     </div>
         <div class="col-md-6 col-xs-9 col-sm-9 col-lg-6 float-right text-right">
-            <button type="button" class="btn btn-info" id="addAll">Add all to cart</button>
-            <button type="button" class="btn btn-warning" id="deleteAll">Remove all from cart</button>
+            <button type="button" class="btn btn-info" id="addAll22">Add all to cart</button>
+            <button type="button" class="btn btn-warning" id="deleteAll22">Remove all from cart</button>
         </div>
     </div>
-    <div class="row">
-        {% for data in data %}
+      <div class="row">
+        {% for data in data22 %}
             <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
-                <div class="mol">
+                <div class="mol ">
                     <div class="link">
                         <a href='/searchZinc/{{ data.zinc_id }}'>{{ data.zinc_id }}</a>
                     </div>
-                    <div class="mol-bottom" id="{{ data.zinc_id }}" data-smiles="{{ data.smiles }}" data-db="zinc22"
+                    <div class="mol-bottom zinc22" id="{{ data.zinc_id }}" data-smiles="{{ data.smiles }}" data-db="zinc22"
                          data-supplier_code="{{ data.supplier_code }}" data-catalogs="{{ data.catalogs }}">
                         <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles | urlencode }}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow">
                     </div>
@@ -114,4 +184,39 @@
         {% endfor %}
 
     </div>
+  </div>
+{% endif %}
+{% if data20 %}
+  <div class="tab-pane fade" id="zinc20" role="tabpanel" aria-labelledby="zinc20-tab">
+      <div class="row">
+    <div class="col-md-6 col-xs-3 col-sm-3 col-lg-6">
+        <h3> {{ data20|length }} results</h3>
+    </div>
+        <div class="col-md-6 col-xs-9 col-sm-9 col-lg-6 float-right text-right">
+            <button type="button" class="btn btn-info" id="addAll20">Add all to cart</button>
+            <button type="button" class="btn btn-warning" id="deleteAll20">Remove all from cart</button>
+        </div>
+    </div>
+      <div class="row">
+        {% for data in data20 %}
+            <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
+                <div class="mol ">
+                    <div class="link">
+                        <a href='/searchZinc/{{ data.zinc_id }}'>{{ data.zinc_id }}</a>
+                    </div>
+                    <div class="mol-bottom zinc20" id="{{ data.zinc_id }}" data-smiles="{{ data.smiles }}" data-db="zinc20"
+                         data-supplier_code="{{ data.supplier_code }}" data-catalogs="{{ data.catalogs }}">
+                        <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles | urlencode }}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+  </div>
+{%  endif %}
+</div>
+
+
+
 {% endblock %}
