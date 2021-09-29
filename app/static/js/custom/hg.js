@@ -1,5 +1,4 @@
 function checkHg(smiles, modal, table, db) {
-
     $.ajax({
         url: "https://zinc21.docking.org/substances.txt",
         dataType: 'text',
