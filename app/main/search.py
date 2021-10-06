@@ -34,6 +34,16 @@ def search_byzincid():
         data22_json, data22 = None, None
         data20_json, data20 = None, None
         for identifier in textDataList + fileDataList:
+            if '-' in identifier:
+                def checkHasZinc(identifier):
+                    if identifier[0:4].upper() != 'ZINC':
+                        identifier_ = 'ZINC' + identifier
+                        return identifier_.replace('-', (16 - len(identifier_) + 1) * '0')
+                    return identifier.replace('-', (16 - len(identifier) + 1) * '0')
+                new_identifier = checkHasZinc(identifier)
+                print(new_identifier, identifier, len(new_identifier))
+                zinc22.append(new_identifier)
+                continue
             if identifier.isnumeric() or identifier[4:6] == '00':
                 zinc20.append(identifier)
                 continue
@@ -46,8 +56,9 @@ def search_byzincid():
             files = {
                 'zinc_id-in': ','.join(zinc22)
             }
-            # url = 'https://{}/sublist'.format(request.host)
+            # url = 'http://{}/sublist'.format(request.host)
             url = "https://cartblanche22.docking.org/sublist"
+            print(zinc22)
             zinc22_response = requests.post(url, data=files)
         if len(zinc20) > 0:
             zinc20_files = {
@@ -184,6 +195,11 @@ def search_smiles():
 @application.route('/search/smiles/vendor')
 def search_smiles_vendor():
     return render_template('search/search_smiles_vendor.html')
+
+
+@application.route('/searchZinc20/<identifier>')
+def searchZinc20(identifier):
+    pass
 
 
 @application.route('/searchZinc/<identifier>')

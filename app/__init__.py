@@ -42,7 +42,8 @@ def create_app(config_class=Config):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_BINDS'] = {
         # Server Database
-        'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
+        # 'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
+        'zinc22': 'postgresql+psycopg2://test:@10.20.0.38:5432/zinc22',
         'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
         '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5434/tin',
         '10.20.1.16:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5435/tin',
@@ -227,6 +228,7 @@ def create_app(config_class=Config):
         # '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@localhost:5461/tin',
         # '10.20.1.20:5435': 'postgresql+psycopg2://tinuser:usertin@localhost:5462/tin',
         # '10.20.1.17:5436': 'postgresql+psycopg2://tinuser:usertin@localhost:5463/tin',
+        # '10.20.1.20:5436': 'postgresql+psycopg2://tinuser:usertin@localhost:5464/tin'
     }
 
     login.init_app(app)

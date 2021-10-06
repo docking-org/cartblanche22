@@ -170,7 +170,8 @@ class Substance(Resource):
                 'expected_ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
                 'returned_ids': '================SQL SERVER CONNECTION ERROR==============',
                 'not_found_ids': 'Please check {} server connection'.format(args.get('tin_url')),
-                'elapsed_time': 'It took {:.3f} s'.format((time.time() - time1) % 60)
+                'elapsed_time': 'It took {:.3f} s'.format((time.time() - time1) % 60),
+                'exception error': str(e)
             }
             return jsonify([{'search_info': search_info}])
 
