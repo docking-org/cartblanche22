@@ -1,4 +1,4 @@
-from flask import render_template, request, json, jsonify
+from flask import render_template, request, json, jsonify, flash
 from app.main import application
 import requests
 from app.data.models.default_prices import DefaultPrices
@@ -21,6 +21,9 @@ def search_view():
 @application.route('/search/search_byzincid', methods=["GET", "POST"])
 def search_byzincid():
     if request.method == "GET":
+        flash("Warning: Some databases are under maintenance, supplier codes and smiles may not show up when searching.\
+            Contact ben@tingle.org or khtang015@gmail.com and we will retrieve anything that is missing for you.\
+            Additionally, if your molecules have HAC > 26, verify with us that the supplier codes returned by carteblanche are valid.")
         return render_template('search/search_byzincid.html')
     elif request.method == "POST":
         data = request.form['myTextarea']
@@ -107,6 +110,9 @@ def search_byzincid():
 @application.route('/search/search_bysmiles', methods=["GET", "POST"])
 def search_bysmiles():
     if request.method == "GET":
+        flash("Warning: Some databases are under maintenance, supplier codes and smiles may not show up when searching.\
+            Contact ben@tingle.org or khtang015@gmail.com and we will retrieve anything that is missing for you.\
+            Additionally, if your molecules have HAC > 26, verify with us that the supplier codes returned by carteblanche are valid.")
         return render_template('search/search_bysmiles.html')
     elif request.method == "POST":
         data = request.form['smilesTextarea']
