@@ -110,9 +110,6 @@ def search_byzincid():
 @application.route('/search/search_bysmiles', methods=["GET", "POST"])
 def search_bysmiles():
     if request.method == "GET":
-        flash("Warning: Some databases are under maintenance, supplier codes and smiles may not show up when searching.\
-            Contact ben@tingle.org or khtang015@gmail.com and we will retrieve anything that is missing for you.\
-            Additionally, if your molecules have HAC > 26, verify with us that the supplier codes returned by carteblanche are valid.")
         return render_template('search/search_bysmiles.html')
     elif request.method == "POST":
         data = request.form['smilesTextarea']
@@ -142,6 +139,9 @@ def search_bysmiles():
 @application.route('/search/search_bysupplier', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
+        flash("Warning: Some databases are under maintenance, supplier codes and smiles may not show up when searching.\
+            Contact ben@tingle.org or khtang015@gmail.com and we will retrieve anything that is missing for you.\
+            Additionally, if your molecules have HAC > 26, verify with us that the supplier codes returned by carteblanche are valid.")
         return render_template('search/search_bysupplier.html')
     elif request.method == "POST":
         data = request.form['supplierTextarea']
