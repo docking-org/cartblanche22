@@ -127,7 +127,7 @@ class SmileList(Resource):
             time1 = time.time()
             from contextlib import closing
             with closing(requests.get(uri, params=params, auth=('gpcr', 'xtal'), stream=True,
-                                      headers={'Connection': 'close'}, timeout=5)) as r:
+                                      headers={'Connection': 'close'}, timeout=100)) as r:
                 print(r.url)
                 iterator = r.iter_lines()
                 status_more_count = 0
@@ -153,7 +153,7 @@ class SmileList(Resource):
                             status_3 += 1
             print(first_line)
             data = json.loads(first_line)
-            print(data)
+            #print(data)
         except requests.ConnectionError:
             print("Connection Error")
             return None
@@ -305,7 +305,7 @@ class SmileList(Resource):
             print("statuscode:", resp.status_code)
             print("resp.text:", resp.text)
             data = json.loads(resp.text.split('\n\n')[0])
-            print("data:", data)
+            #print("data:", data)
             for dt in data['data']:
                 res = {}
                 res['qrySmiles'] = dt[0]['qrySmiles']

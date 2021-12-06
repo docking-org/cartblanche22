@@ -30,9 +30,11 @@
     {{ super() }}
     <script>
         $(document).ready(() => {
+            let datas22 = {{ data22 | tojson }};
+            let datas20 = {{ data20 | tojson}};
+           
+            console.log(datas22);
 
-            let datas22 = {{ data22_json|safe }};
-            let datas20 = {{ data20_json|safe }};
             if (datas22 == null){
                 datas22 = []
             }
@@ -119,7 +121,7 @@
                 if (datas22.length > 0){
                    $('#zinc22-tab').click();
                 }
-                if (datas20.length > 0){
+                else if (datas20.length > 0){
                    $('#zinc20-tab').click();
                 }
                 if (count > datas22.length / 2) {
@@ -137,8 +139,23 @@
                     $('#addAll20').show();
                     $('#deleteAll20').hide();
                 }
-
             };
+
+            /* function update_progress() {
+                // send GET request to status URL
+
+                $.ajax({
+                    url: "/searchJob?task=bfcdd260-5056-4b3a-960f-9f9cd81ca8d8",
+                    type: "get",
+                
+                    success: function(response) {
+                        datas22 = response;
+                    },
+                    error: function(xhr) {
+                        //Do Something to handle error
+                    }
+                 });
+            } */
 
         });
     </script>
