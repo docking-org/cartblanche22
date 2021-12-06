@@ -2,6 +2,7 @@ from flask import render_template, request, json, jsonify, flash
 from app.main import application
 import requests
 from app.data.models.default_prices import DefaultPrices
+from app.data.resources.substance import SubstanceList
 from flask_login import current_user
 import urllib.parse
 import re
@@ -17,6 +18,7 @@ def search_view():
     params = request.query_string.decode("utf-8")
     response = requests.get(swp_server + '/search/view', params=params, auth=('gpcr', 'xtal'))
     return response.json()
+
 
 @application.route('/search/search_byzincid', methods=["GET", "POST"])
 def search_byzincid():
@@ -60,8 +62,11 @@ def search_byzincid():
                 'zinc_id-in': ','.join(zinc22)
             }
             # url = 'http://{}/sublist'.format(request.host)
-            url = "https://cartblanche22.docking.org/sublist"
+
+            #SEARCH STEP 1
+            url = 'http://{}/sublist'.format(request.host)
             print(zinc22)
+            #SUBMIT JOB, RETURN JOB ID, ADD API TO RETRIEVE; JOB STATUS, PROGRESS, RESULT
             zinc22_response = requests.post(url, data=files)
         if len(zinc20) > 0:
             zinc20_files = {

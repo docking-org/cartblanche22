@@ -1,5 +1,4 @@
 from app import db
-from app.data.models.tin.substance import SubstanceModel
 
 
 class CatalogModel(db.Model):
