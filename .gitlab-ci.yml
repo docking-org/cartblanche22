@@ -31,6 +31,7 @@ deploy job:
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop cartblanche22
         - docker rm cartblanche22
+        - redis-server
         - docker run --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
     services:
         - redis:latest
