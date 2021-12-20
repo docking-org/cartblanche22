@@ -8,7 +8,7 @@ Celery==5.2.0
 certifi==2020.6.20
 cffi==1.13.2
 chardet==3.0.4
-Click==7.0
+Click==8.0.3
 cryptography==2.8
 csvalidate==1.1.1
 dominate==2.4.0
