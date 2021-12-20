@@ -65,7 +65,7 @@ target
 
 
 
-
+/node_modules
 .env
 deployment/
 .flaskenv
