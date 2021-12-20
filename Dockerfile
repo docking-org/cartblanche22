@@ -3,7 +3,7 @@ FROM continuumio/anaconda3:latest
 WORKDIR /home/cartblanche22
 
 COPY app app
-COPY application.py config.py boot.sh requirements.txt supervisord.conf ./
+COPY application.py config.py boot.sh requirements.txt ./
 
 RUN chmod +x boot.sh
 
