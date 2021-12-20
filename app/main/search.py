@@ -127,7 +127,6 @@ def search_bysmiles():
             'smiles-in': ','.join(textDataList + fileDataList),
             'dist': dist,
             'adist': adist,
-
         }
         url = "https://cartblanche22.docking.org/smilelist"
         response = requests.post(url, data=files)
