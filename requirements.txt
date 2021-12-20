@@ -83,4 +83,3 @@ zope.interface==5.2.0
 flask_jsontools
 dicttoxml
 gunicorn
-supervisor==4.2.2
