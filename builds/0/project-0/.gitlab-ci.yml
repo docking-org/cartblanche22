@@ -5,9 +5,6 @@ stages:
 variables:
     CI_PROJECT_NAME: cartblanche22
 
-services:
-  - redis:latest
-
 build job:
     only:
         - master
@@ -23,14 +20,11 @@ deploy job:
     only:
         - master
     stage: deploy
-    image: redis
     tags:
         - cartblanche2
     script:
         #- docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
-        - docker stop cartblanche22
-        - docker rm cartblanche22
+        # - docker stop cartblanche22
+        # - docker rm cartblanche22
         - docker run --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
-    services:
-        - redis:latest
