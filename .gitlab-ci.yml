@@ -8,6 +8,8 @@ variables:
 services:
   - redis:latest
 
+  
+
 build job:
     only:
         - master
@@ -22,16 +24,20 @@ build job:
 deploy job:
     only:
         - master
+
     stage: deploy
-    image: redis
+    services:
+        - redis:latest
     tags:
         - cartblanche2
     script:
         #- docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
-        - docker stop cartblanche22
-        - docker rm cartblanche22
-        - redis-cli -h redis PING
-        - docker run --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+        - docker network prune -f
+        # - docker stop cartblanche22
+        # - docker rm cartblanche22
+        - docker network create my_app
+        - docker run --net my_app --name redis -d redis 
+        - docker run --net my_app --name ${CI_PROJECT_NAME} -d -p 127.0.0.1:5000:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
     services:
         - redis:latest
