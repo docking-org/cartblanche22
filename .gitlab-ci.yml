@@ -38,6 +38,6 @@ deploy job:
         # - docker rm cartblanche22
         - docker network create my_app
         - docker run --net my_app --name redis -d redis 
-        - docker run --net my_app --name ${CI_PROJECT_NAME} -d -p 127.0.0.1:50675000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+        - docker run --net my_app --name ${CI_PROJECT_NAME} -d -p 127.0.0.1:5067:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
     services:
         - redis:latest
