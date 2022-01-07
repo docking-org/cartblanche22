@@ -1,7 +1,8 @@
-from flask import render_template, request, json, jsonify, flash
+from flask import render_template, request, json, jsonify, flash, Markup
 from app.main import application
 import requests
 from app.data.models.default_prices import DefaultPrices
+from app.data.resources.substance import SubstanceList
 from flask_login import current_user
 import urllib.parse
 import re
@@ -18,12 +19,22 @@ def search_view():
     response = requests.get(swp_server + '/search/view', params=params, auth=('gpcr', 'xtal'))
     return response.json()
 
+
 @application.route('/search/search_byzincid', methods=["GET", "POST"])
 def search_byzincid():
     if request.method == "GET":
-        flash("Warning: Some databases are under maintenance, supplier codes and smiles may not show up when searching.\
-            Contact ben@tingle.org or khtang015@gmail.com and we will retrieve anything that is missing for you.\
-            Additionally, if your molecules have HAC > 26, verify with us that the supplier codes returned by carteblanche are valid.")
+        text = Markup('Warning: Certain ZINC IDs may give incorrect results when looked up. If your molecules fall into the following tranche ranges:<br>\
+            <b>H24P200 -> H24P230</b> <br>\
+            <b>H22P320 -> H22P390</b> <br>\
+            Please contact us to retrieve correct supplier codes/molecules.<br> <br>\
+            Additionally, if you are looking up compounds to order, double check that the structures returned by cartblanche match your docked structure before purchase.<br>\
+            To contact the cartblanche team, compose an email to one or all of the following recipients:<br>\
+            ben@tingle.org (in charge of database)<br>\
+            khtang015@gmail.com (in charge of database operations)<br>\
+            josecastanon4@gmail.com (in charge of website)<br>\
+            Please contact us with any questions or concerns!')
+        
+        flash(text)
         return render_template('search/search_byzincid.html')
     elif request.method == "POST":
         data = request.form['myTextarea']
@@ -60,8 +71,11 @@ def search_byzincid():
                 'zinc_id-in': ','.join(zinc22)
             }
             # url = 'http://{}/sublist'.format(request.host)
-            url = "https://cartblanche22.docking.org/sublist"
+
+            #SEARCH STEP 1
+            url = 'http://{}/sublist'.format(request.host)
             print(zinc22)
+            #SUBMIT JOB, RETURN JOB ID, ADD API TO RETRIEVE; JOB STATUS, PROGRESS, RESULT
             zinc22_response = requests.post(url, data=files)
         if len(zinc20) > 0:
             zinc20_files = {
@@ -122,7 +136,6 @@ def search_bysmiles():
             'smiles-in': ','.join(textDataList + fileDataList),
             'dist': dist,
             'adist': adist,
-
         }
         url = "https://cartblanche22.docking.org/smilelist"
         response = requests.post(url, data=files)
@@ -139,9 +152,16 @@ def search_bysmiles():
 @application.route('/search/search_bysupplier', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
-        flash("Warning: Some databases are under maintenance, supplier codes and smiles may not show up when searching.\
-            Contact ben@tingle.org or khtang015@gmail.com and we will retrieve anything that is missing for you.\
-            Additionally, if your molecules have HAC > 26, verify with us that the supplier codes returned by carteblanche are valid.")
+        text = Markup('Warning: the supplier code search is quite slow at the moment, and may not always give full results.<br>\
+            If you are unable to locate molecules from a given supplier code, please contact us. <br>\
+            <br>\
+            To contact the cartblanche team, compose an email to one or all of the following recipients:<br>\
+            ben@tingle.org (in charge of database)<br>\
+            khtang015@gmail.com (in charge of database operations)<br>\
+            josecastanon4@gmail.com (in charge of website)<br>\
+            Please contact us with any questions or concerns!')
+        
+        flash(text)
         return render_template('search/search_bysupplier.html')
     elif request.method == "POST":
         data = request.form['supplierTextarea']
