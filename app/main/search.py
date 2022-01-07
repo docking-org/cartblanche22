@@ -70,9 +70,8 @@ def search_byzincid():
             files = {
                 'zinc_id-in': ','.join(zinc22)
             }
-             url = "https://cartblanche22.docking.org/sublist"
-
-            
+            url = "https://cartblanche22.docking.org/sublist"
+        
             print(zinc22)
             
             zinc22_response = requests.post(url, data=files)
