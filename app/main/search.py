@@ -70,12 +70,11 @@ def search_byzincid():
             files = {
                 'zinc_id-in': ','.join(zinc22)
             }
-            # url = 'http://{}/sublist'.format(request.host)
+             url = "https://cartblanche22.docking.org/sublist"
 
-            #SEARCH STEP 1
-            url = 'http://{}/sublist'.format(request.host)
+            
             print(zinc22)
-            #SUBMIT JOB, RETURN JOB ID, ADD API TO RETRIEVE; JOB STATUS, PROGRESS, RESULT
+            
             zinc22_response = requests.post(url, data=files)
         if len(zinc20) > 0:
             zinc20_files = {
