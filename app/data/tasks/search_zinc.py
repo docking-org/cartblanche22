@@ -99,7 +99,6 @@ def searchByZincId(args, file_type=None):
         with flask_app.app_context():
             db.choose_tenant("tin")
             zinc22_response = getList(args=files, file_type=None)
-            print(zinc22_response)
 
     if len(zinc20) > 0:
         zinc20_files = {

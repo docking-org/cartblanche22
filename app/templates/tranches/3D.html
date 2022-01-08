@@ -172,6 +172,13 @@
             border-radius: 50%;
         }
 
+      
+        .dropdown-menu{
+            max-height:300px;
+            overflow-y:auto;
+            }
+        }
+
     </style>
 
 {% endblock %}
@@ -179,6 +186,34 @@
     {{ super() }}
     <script>
         let numberToggle = true;
+        let generation = {
+            "a" : true,
+            "b" : true,
+            "c" : true,
+            "d" : true,
+            "e" : true,
+            "f" : true,
+            "g" : true,
+            "h" : true,
+            "i" : true,
+            "j" : true,
+            "k" : true,
+            "l" : true,
+            "m" : true,
+            "n" : true,
+            "o" : true,
+            "p" : true,
+            "q" : true,
+            "r" : true,
+            "s" : true,
+            "t" : true,
+            "u" : true,
+            "v" : true,
+            "w" : true,
+            "x" : true,
+            "y" : true,
+            "z" : true,
+        }
         let predefined = {
             'all': [[0, 61], [0, 62]],
             'none': [[0, 0], [0, 0]],
@@ -209,9 +244,24 @@
             localStorage.setItem('cols3d', JSON.stringify(cols));
             localStorage.setItem('rows3d', JSON.stringify(rows));
             renderTrancheTable();
+
+            var ul = document.getElementById("generation");
+            
+            Object.keys(generation).forEach(element => {
+                var li = document.createElement("li");
+                li.setAttribute('id',element.toLowerCase()); 
+                li.setAttribute('onclick', `setGeneration(${element.toLowerCase()})`);
+                li.setAttribute('data-val', element.toLowerCase()); 
+                $(li).toggleClass('active');
+                var a = document.createElement("a");
+                a.appendChild(document.createTextNode(element));
+                li.appendChild(a);
+                ul.appendChild(li);   
+            });
         });
 
         function renderTrancheTable() {
+           
             arr = JSON.parse(localStorage.getItem('3d'))
             let rowSize = new Array(61).fill(0);
             let colSize = new Array(62).fill(0);
@@ -224,13 +274,14 @@
                     let trancheSizeTotal = 0
                     let trancheChosenTotal = false;
                     tranches.tranches.forEach(x =>{
-                        if(x.chosen){
+                        if(x.chosen && generation[x.generation]){
                             trancheSizeTotal += x.size;
                         }
                         trancheChosenTotal = trancheChosenTotal || x.chosen
                     })
                     let cell = $('#' + i + '-' + j)
                     cell.html(numberToggle ? bigNumber(trancheSizeTotal) : trancheSizeTotal)
+                 
                     let td = $('#cell-' + i + '-' + j)
                     let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(trancheSizeTotal)) / log_total));
 
@@ -342,12 +393,59 @@
             let arr = JSON.parse(localStorage.getItem('3d'))
             let p = predefined[s]
             for (let i = 0; i < 61; i++) {
-                for (let j = 0; j < 30; j++) {
+                for (let j = 0; j < 35; j++) {
                     if (p[0][0] <= i && i < p[0][1] && p[1][0] <= j && j < p[1][1] && arr[i][j].size != 0) {
                         arr[i][j].chosen = true
                     } else {
                         arr[i][j].chosen = false
                     }
+                }
+            }
+            localStorage.setItem('3d', JSON.stringify(arr));
+            renderTrancheTable();
+        }
+
+        function setGeneration(li){
+            if(li === 'all'){
+                for(let e in generation){
+                    var li = document.getElementById(e)
+                    if(!li.classList.contains('active')){
+                        $(li).toggleClass('active');
+                    }
+                    generation[e] = true;
+                }
+            }
+            else if(li === 'none'){
+                for(let e in generation){
+                    var li = document.getElementById(e)
+                    if(li.classList.contains('active')){
+                        $(li).toggleClass('active');
+                    }
+                    generation[e] = false;
+                }
+            }
+            else{
+                let bool = $(li).hasClass('active')
+                $(li).toggleClass('active');
+                
+                let gen = li.dataset.val;
+                generation[gen] = !generation[gen];
+            }
+            renderTrancheTable();
+        }
+        function chargeSelect(li){
+            let bool = $(li).hasClass('active')
+            $(li).toggleClass('active');
+            let charge = li.dataset.val;
+            let arr = JSON.parse(localStorage.getItem('3d'))
+            for (let i = 0; i < 61; i++) {
+                for (let j = 0; j < 62; j++) {
+                    tranches = arr[i][j]
+                    tranches.tranches.forEach(x => {
+                       if (x.charge==charge && x.size!=0){
+                           x.chosen = !bool;
+                       }
+                    })
                 }
             }
             localStorage.setItem('3d', JSON.stringify(arr));
@@ -370,7 +468,7 @@
           'P700', 'P800', 'P900']
             let st = ''
               for (let i = 0; i < 61; i++) {
-                for (let j = 0; j < 30; j++) {
+                for (let j = 0; j < 35; j++) {
                     tranches = arr[i][j]
                     if (arr[i][j].chosen == true){
                           tranches.tranches.forEach(x =>{
@@ -385,90 +483,12 @@
               $('#selected-tranches').html(st)
 
         }
-        function chargeSelect(li){
-            let bool = $(li).hasClass('active')
-            $(li).toggleClass('active');
-            let charge = li.dataset.val;
-            let arr = JSON.parse(localStorage.getItem('3d'))
-            for (let i = 0; i < 61; i++) {
-                for (let j = 0; j < 62; j++) {
-                    tranches = arr[i][j]
-                    tranches.tranches.forEach(x => {
-                       if (x.charge==charge && x.size!=0){
-                           x.chosen = !bool;
-                       }
-                    })
-                }
-            }
-            localStorage.setItem('3d', JSON.stringify(arr));
-            renderTrancheTable();
-        }
+       
     </script>
 {% endblock %}
 {% block app_content %}
     <div class="row">
-{#        <div class="pull-right">#}
-{#            <div class="dropdown">#}
-{#                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets#}
-{#                    <span class="caret"></span></button>#}
-{#                <ul class="dropdown-menu">#}
-{#                    <li><a href="#" onclick="setPredefined('all')">All</a></li>#}
-{#                    <li><a href="#" onclick="setPredefined('none')">None</a></li>#}
-{#                    <li class="divider"></li>#}
-{#                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>#}
-{#                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>#}
-{#                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>#}
-{#                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>#}
-{#                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>#}
-{#                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>#}
-{#                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>#}
-{#                </ul>#}
-{#            </div>#}
-{#        </div>  #}
-                <div class="pull-right">
-            <div class="dropdown">
-                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                    <li><a href="#" onclick="setPredefined('all')">All</a></li>
-                    <li><a href="#" onclick="setPredefined('none')">None</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
-                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
-                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
-                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
-                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="pull-right">
-            <div class="dropdown">
-                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Charge
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                    <li class="active" onclick="chargeSelect(this)" data-val="J"><a href="#"> -4 (J)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="K"><a href="#"> -3 (K)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="L"><a href="#"> -2 (L)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="M"><a href="#"> -1 (M)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="N"><a href="#"> 0 (N)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="O"><a href="#"> 1 (O)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="P"><a href="#"> 2 (P)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="Q"><a href="#"> 3 (Q)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="R"><a href="#"> 4 (R)</a></li>
-                </ul>
-            </div>
-        </div>
-    <div class="pull-right">
-        <label class="switch">
-                <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
-                <span class="slider round"></span>
-        </label>
-    </div>
-    <div class="pull-right">
-        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal" onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download</button>
-    </div>
+       
 
             <!-- Modal -->
 <div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog" aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
@@ -560,6 +580,61 @@
     </div>
     <div class="container">
         <div class="row">
+             <div class="pull-left">
+            <div class="dropdown">
+                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Generation
+                    <span class="caret"></span></button>
+                <ul class="dropdown-menu" id='generation'>
+                    <li><a href="#" onclick="setGeneration('all')">All</a></li>
+                    <li><a href="#" onclick="setGeneration('none')">None</a></li>
+                    <li class="divider"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="pull-right">
+            <div class="dropdown">
+                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
+                    <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="setPredefined('all')">All</a></li>
+                    <li><a href="#" onclick="setPredefined('none')">None</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
+                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
+                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
+                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>
+                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
+                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
+                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="pull-right">
+            <div class="dropdown">
+                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Charge
+                    <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li class="active" onclick="chargeSelect(this)" data-val="J"><a href="#"> -4 (J)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="K"><a href="#"> -3 (K)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="L"><a href="#"> -2 (L)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="M"><a href="#"> -1 (M)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="N"><a href="#"> 0 (N)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="O"><a href="#"> 1 (O)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="P"><a href="#"> 2 (P)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="Q"><a href="#"> 3 (Q)</a></li>
+                    <li class="active" onclick="chargeSelect(this)" data-val="R"><a href="#"> 4 (R)</a></li>
+                </ul>
+            </div>
+        </div>
+    <div class="pull-right">
+        <label class="switch">
+                <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
+                <span class="slider round"></span>
+        </label>
+    </div>
+    <div class="pull-right">
+        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal" onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download</button>
+    </div>
             <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12"
                  style="background-color: white; border: 1px solid #ccc; text-align: center;
                  text-justify: auto; color: black;font-weight: bold;
@@ -582,7 +657,7 @@
                             <th>
                                 <div></div>
                             </th>
-                            {% for cell in ticks[0][4:30] %}
+                            {% for cell in ticks[0][4:35] %}
                                 <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)">
                                     <div>
                                         {{ axes[2][cell] }}<br>{{ axes[0][cell] }}
@@ -597,10 +672,11 @@
                         <tbody>
                         {% for row in ticks[1] %}
                             <tr>
-                                <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)">
-                                    <div>{{ axes[2][row] }}<br>{{ axes[1][row] }}</div>
+                                <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)" data-toggle="tooltip" title="{{ axes[2][row] }}" data-delay='{"show": 100, "hide": 1000}'>
+                                    <div>{{ axes[1][row] }}</div>
+                                    
                                 </th>
-                                {% for col in ticks[0][4:30] %}
+                                {% for col in ticks[0][4:35] %}
                                     <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
                                         onclick="cellToggle(this)">
                                         <div>
@@ -635,16 +711,16 @@
                             <th>
                                 <div>Totals, by HAC</div>
                             </th>
-                            {% for col in ticks[0][4:30] %}
+                            {% for col in ticks[0][4:35] %}
                                 <th>
                                     <div>
-                        <span>
-                            {{ axes[2][col] }}<br>{{ axes[0][col] }}
-                        </span>
-                                        <br/>
+                                        <!-- <span>
+                                            {{ axes[2][col] }}<br>{{ axes[0][col] }}
+                                        </span>
+                                        <br/> -->
                                         <span id="col-sum-{{ col }}">
-                            sum {{ axes[0][col] }}
-                        </span>
+                                            sum {{ axes[0][col] }}
+                                        </span>
                                     </div>
                                 </th>
                             {% endfor %}

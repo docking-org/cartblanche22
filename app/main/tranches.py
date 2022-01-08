@@ -94,16 +94,16 @@ def tranches2d():
 
 @application.route('/tranches/3d', methods=['GET'])
 def tranches3d():
-    tranches = TrancheModel.query.filter(TrancheModel.charge != '-').all()
+    tranches = TrancheModel.query.filter(TrancheModel.charge != '-').filter(TrancheModel.generation != '-').all()
     cell3DNew = [[{'tranches': [], 'size': 0, 'chosen': False} for x in range(62)] for y in range(61)]
     unfilteredSize = 0
     for i in tranches:
         row_idx = axes[0].index(str(i.h_num))
         col_idx = axes[1].index(str(i.p_num))
         if i.sum == 0:
-            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': False, 'charge': i.charge})
+            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': False, 'charge': i.charge, 'generation': i.generation})
         else:
-            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': True, 'charge': i.charge})
+            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': True, 'charge': i.charge, 'generation': i.generation})
         cell3DNew[col_idx][row_idx]['size'] += i.sum
         unfilteredSize += i.sum
     for i in cell3DNew:
