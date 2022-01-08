@@ -109,7 +109,13 @@
                         count++;
                         $('#' + e.zinc_id).addClass('added')
                     }
-                })
+                });
+                if (datas22.length > 0){
+                   $('#zinc22-tab').click();
+                }
+                else if (datas20.length > 0){
+                   $('#zinc20-tab').click();
+                }
                 datas20.forEach(e => {
                     map20.set(e.zinc_id, e)
                     let inCart = shoppingCart.inCart(e.zinc_id)
@@ -118,12 +124,7 @@
                         $('#' + e.zinc_id).addClass('added')
                     }
                 })
-                if (datas22.length > 0){
-                   $('#zinc22-tab').click();
-                }
-                else if (datas20.length > 0){
-                   $('#zinc20-tab').click();
-                }
+               
                 if (count > datas22.length / 2) {
                     $('#deleteAll22').show();
                     $('#addAll22').hide();
