@@ -45,7 +45,6 @@ def search_result():
                 list22.append(i[0])
         
         if(len(list22) == 0 and len(result20) == 0):
-            print('here')
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
         return render_template('search/result_zincsearch.html', data22=list22, data20=result20)
 
@@ -272,8 +271,6 @@ def getList(args, file_type=None):
 
 @celery.task
 def getSubstance(args, file_type=None):
-        db.choose_tenant(args.get("tin_url"))
-
         sub_id_list = args.get('sub_ids').split(',')
         zinc_id_list = args.get('zinc_ids').split(',')
         sub_ids = (int(id) for id in sub_id_list)
@@ -282,6 +279,7 @@ def getSubstance(args, file_type=None):
         print("REQUESTED TIN_URL from Substance POST", args.get('tin_url'))
         time1 = time.time()
         try:
+            db.choose_tenant(args.get("tin_url"))
             substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
         except Exception as e:
             search_info = {
