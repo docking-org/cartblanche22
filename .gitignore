@@ -4,7 +4,8 @@ __pycache__/
 .DS_Store
 .idea/
 .nfs*
-
+sshhosts.csv
+sshtunnel.sh
 # C extensions
 *.so
 
