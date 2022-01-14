@@ -43,7 +43,10 @@ def search_result():
         for i in result22:
             if 'message' not in i[0]:
                 list22.append(i[0])
-           
+        
+        if(len(list22) == 0 and len(result20) == 0):
+            print('here')
+            return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
         return render_template('search/result_zincsearch.html', data22=list22, data20=result20)
 
 class SearchJob(Resource):
@@ -53,41 +56,63 @@ class SearchJob(Resource):
         file = file.split("\n")
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         args = file + textDataList
-       
-        task = searchByZincId.delay(args=args) 
+
+        zinc22 = []
+        zinc20 = []
+        discarded = []
         
+        for identifier in args:
+            if '-' in identifier:
+                def checkHasZinc(identifier):
+                    if identifier[0:4].upper() != 'ZINC':
+                        identifier_ = 'ZINC' + identifier
+                        return identifier_.replace('-', (16 - len(identifier_) + 1) * '0')
+                    
+                    return identifier.replace('-', (16 - len(identifier) + 1) * '0')
+                new_identifier = checkHasZinc(identifier)
+                print(new_identifier, identifier, len(new_identifier))
+                zinc22.append(new_identifier)
+                continue
+            
+            if identifier[0:1].upper() == 'C':
+                identifier = identifier.replace('C', 'ZINC')
+                print(identifier)
+                
+            if identifier.isnumeric() or identifier[4:6] == '00':
+                zinc20.append(identifier)
+                continue
+            elif identifier[0:4].upper() == 'ZINC':
+                if(identifier[4:5].isalpha()):
+                    zinc22.append(identifier)
+                else:
+                    id = 'ZINC' + identifier.replace(identifier, (16 - len(identifier) + 1) * '0') + identifier[4:]
+                    print(id)
+                    zinc20.append(id)
+                continue
+            else:
+                discarded.append(identifier)
+
+        zinc20_response = None
+        if len(zinc20) > 0:
+            zinc20_files = {
+                'zinc_id-in': zinc20,
+                'output_fields': "zinc_id supplier_code smiles substance_purchasable"
+            }
+            zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)             
+            task = searchByZincId.delay(args=args, zinc22=zinc22, zinc20=zinc20, zinc20_response=zinc20_response.text)
+        else:
+            task = searchByZincId.delay(args=args, zinc22=zinc22, zinc20=zinc20, zinc20_response=None)
+   
         return redirect(('search/result_zincsearch?task={task}'.format(task = task)))
 
 
 @celery.task
-def searchByZincId(args, file_type=None):
+def searchByZincId(args, zinc22, zinc20, zinc20_response, file_type=None):
     textDataList = args
-    
-    zinc22 = []
-    zinc20 = []
-    discarded = []
-    zinc22_response, zinc20_response = None, None
-    data22_json, data22 = None, None
+    zinc22_response = None
+    data22_json, data22 = None, []
     data20 = {}
-    for identifier in textDataList:
-        if '-' in identifier:
-            def checkHasZinc(identifier):
-                if identifier[0:4].upper() != 'ZINC':
-                    identifier_ = 'ZINC' + identifier
-                    return identifier_.replace('-', (16 - len(identifier_) + 1) * '0')
-                return identifier.replace('-', (16 - len(identifier) + 1) * '0')
-            new_identifier = checkHasZinc(identifier)
-            print(new_identifier, identifier, len(new_identifier))
-            zinc22.append(new_identifier)
-            continue
-        if identifier.isnumeric() or identifier[4:6] == '00':
-            zinc20.append(identifier)
-            continue
-        elif identifier[0:4].upper() == 'ZINC':
-            zinc22.append(identifier)
-            continue
-        else:
-            discarded.append(identifier)
+    
     if len(zinc22) > 0:
         files = {
             'zinc_id-in': ','.join(zinc22)
@@ -98,19 +123,12 @@ def searchByZincId(args, file_type=None):
         print(files)
         with flask_app.app_context():
             db.choose_tenant("tin")
-            zinc22_response = getList(args=files, file_type=None)
-
-    if len(zinc20) > 0:
-        zinc20_files = {
-            'zinc_id-in': zinc20,
-            'output_fields': "zinc_id supplier_code smiles substance_purchasable"
-        }
-        zinc20_response = requests.post("http://zinc15.docking.org/catitems.txt", data=zinc20_files)
-   
+            zinc22_response = getList(args=files, file_type=None)   
+            data22= zinc22_response['items']
   
     if zinc20_response:
         zinc20_data = {}
-        for line in zinc20_response.text.split('\n'):
+        for line in zinc20_response.split('\n'):
             temp = line.split('\t')
             if len(temp) == 4:
                 identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
@@ -133,8 +151,6 @@ def searchByZincId(args, file_type=None):
                     if not cat_found:
                         zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
         data20 = list(zinc20_data.values())
-
-    data22= zinc22_response['items']
     
     return {'data22' : data22, 'data20': data20}
 
@@ -201,6 +217,7 @@ def getList(args, file_type=None):
     #SEARCH STEP 4, DO REQUEST FOR ALL URLS
     results = []
     taskList = []
+    data = {}
     for k,v in dict_ids.items():
         data= {
             'sub_ids': ','.join([str(i) for i in v]),

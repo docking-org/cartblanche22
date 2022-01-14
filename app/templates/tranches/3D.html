@@ -4,10 +4,10 @@
     <style>
 
         .div-tranche {
-        {#max-width: 80em;#} max-height: 35em;
+            max-height: 74vh;
             overflow: scroll;
             position: relative;
-            border-right: 1px solid #ccc;
+            
         }
 
         table {
@@ -31,6 +31,7 @@
         td {
             border: 1px solid #ccc;
             {#padding: 0.5em;#}
+            width: 100px;
             text-align: center;
         }
 
@@ -53,7 +54,7 @@
             background: white;
             color: black;
             border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
+            
             margin-top: 0;
             z-index: 1;
         }
@@ -80,7 +81,7 @@
             background-color: white;
             color: black;
             text-align: center;
-            border-right: none;
+          
             font-weight: bold;
 
         }
@@ -92,15 +93,15 @@
             bottom: 0;
             background: white;
             color: black;
-            border-right: 1px solid #ccc;
-            border-left: 1px solid #ccc;
-
+            
+            
+            box-shadow: 0 0 0 .25px black inset;
         }
 
         tfoot th:first-child {
             left: 0;
             z-index: 2;
-            border: none;
+          
         }
 
         tfoot th:last-child {
@@ -274,7 +275,10 @@
                     let trancheSizeTotal = 0
                     let trancheChosenTotal = false;
                     tranches.tranches.forEach(x =>{
-                        if(x.chosen && generation[x.generation]){
+                        if(!generation[x.generation]){
+                            x.chosen = false;
+                        }
+                        if(x.chosen){
                             trancheSizeTotal += x.size;
                         }
                         trancheChosenTotal = trancheChosenTotal || x.chosen
@@ -486,13 +490,13 @@
        
     </script>
 {% endblock %}
-{% block app_content %}
+{% block tranchebrowser %}
     <div class="row">
        
 
             <!-- Modal -->
-<div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog" aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+    <div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog" aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
     <div class="modal-content">
       <form action="{{ url_for('main.tranches3dDownload') }}" method="post">
                         <div class="modal-header">
@@ -578,7 +582,7 @@
 </div>
 
     </div>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
              <div class="pull-left">
             <div class="dropdown">
@@ -640,12 +644,13 @@
                  text-justify: auto; color: black;font-weight: bold;
                 ">
                 Heavy Atom Count
+                
             </div>
         </div>
 
         <div class="row">
             <div class="col-sm-1 col-xs-1"
-                 style="background-color: white; height:35em;  color:black; border-left: 1px solid #ccc;
+                 style="background-color: white; height:74vh;  color:black; border-left: 1px solid #ccc;
                  border-right:1px solid #ccc;width: 2em; font-weight: bold;">
                 <p style="transform: rotate(-90deg); top: 25em; position: sticky;">LogP</p>
             </div>
@@ -658,9 +663,9 @@
                                 <div></div>
                             </th>
                             {% for cell in ticks[0][4:35] %}
-                                <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)">
+                                <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)" data-toggle="tooltip" title="{{ axes[2][cell] }}" data-delay='{"show": 100, "hide": 1000}'>
                                     <div>
-                                        {{ axes[2][cell] }}<br>{{ axes[0][cell] }}
+                                        {{ axes[0][cell] }}
                                     </div>
                                 </th>
                             {% endfor %}
@@ -673,8 +678,7 @@
                         {% for row in ticks[1] %}
                             <tr>
                                 <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)" data-toggle="tooltip" title="{{ axes[2][row] }}" data-delay='{"show": 100, "hide": 1000}'>
-                                    <div>{{ axes[1][row] }}</div>
-                                    
+                                    <div>{{ axes[1][row] }}</div>    
                                 </th>
                                 {% for col in ticks[0][4:35] %}
                                     <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
