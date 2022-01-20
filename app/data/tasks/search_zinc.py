@@ -4,8 +4,9 @@ from app.main import application
 from app.main.search import search_byzincid
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, reqparse
+
 from app.data.resources.substance import SubstanceList
-from flask import render_template, request, json, jsonify, flash, Flask, redirect
+from flask import render_template, request, json, jsonify, flash, Flask, redirect,g 
 
 from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
@@ -56,13 +57,23 @@ class SearchJob(Resource):
         file = file.split("\n")
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         args = file + textDataList
-        zinc20 = []
-        zinc22 = []
-        data20 = {}
-        discarded = []
-        zinc20_response = None
        
-        for identifier in args:
+        task = searchByZincId.delay(args=args) 
+        
+        return redirect(('search/result_zincsearch?task={task}'.format(task = task)))
+
+
+@celery.task
+def searchByZincId(args, file_type=None):
+    textDataList = args
+    
+    zinc22 = []
+    zinc20 = []
+    discarded = []
+    zinc22_response, zinc20_response = None, None
+    data22_json, data22 = None, None
+    data20 = {}
+    for identifier in args:
             if '-' in identifier:
                 def checkHasZinc(identifier):
                     if identifier[0:4].upper() != 'ZINC':
@@ -92,63 +103,52 @@ class SearchJob(Resource):
                 continue
             else:
                 discarded.append(identifier)
-
-     
-        if len(zinc20) > 0:
-            zinc20_files = {
-                'zinc_id-in': zinc20,
-                'output_fields': "zinc_id supplier_code smiles substance_purchasable"
-            }
-            zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)
-        if zinc20_response:
-            zinc20_data = {}
-            for line in zinc20_response.text.split('\n'):
-                temp = line.split('\t')
-                if len(temp) == 4:
-                    identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
-                    if identifier not in zinc20_data:
-                        zinc20_data[identifier] = {
-                            'identifier': identifier,
-                            'zinc_id': identifier,
-                            'smiles': smiles,
-                            'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
-                            'catalogs': supplier_code,
-                            'supplier_code': supplier_code,
-                            'db': 'zinc20'
-                        }
-                    else:
-                        catalogs = zinc20_data[identifier]['catalogs_new']
-                        cat_found = False
-                        for c in catalogs:
-                            if c['supplier_code'] == supplier_code:
-                                cat_found = True
-                        if not cat_found:
-                            zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
-            data20 = list(zinc20_data.values())
-        
-        task = searchByZincId.delay(args=args, zinc22=zinc22, data20 = data20) 
-        
-        return redirect(('search/result_zincsearch?task={task}'.format(task = task)))
-
-
-@celery.task
-def searchByZincId(args, data20, zinc22, file_type=None):
-    textDataList = args
-    print("hi!")
-    print(data20)
-    zinc22_response  = None
-    data22_json, data22 = None, None
-   
-    
     if len(zinc22) > 0:
         files = {
             'zinc_id-in': ','.join(zinc22)
         }
-        
+        #SEARCH STEP 1
+        print(zinc22)
+        #SUBMIT JOB, RETURN JOB ID
+        print(files)
         with flask_app.app_context():
             db.choose_tenant("tin")
             zinc22_response = getList(args=files, file_type=None)
-            print(zinc22_response)    
+            print(zinc22_response)
+
+    if len(zinc20) > 0:
+        zinc20_files = {
+            'zinc_id-in': zinc20,
+            'output_fields': "zinc_id supplier_code smiles substance_purchasable"
+        }
+        zinc20_response = requests.post("http://zinc15.docking.org/catitems.txt", data=zinc20_files)
+   
+  
+    if zinc20_response:
+        zinc20_data = {}
+        for line in zinc20_response.text.split('\n'):
+            temp = line.split('\t')
+            if len(temp) == 4:
+                identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
+                if identifier not in zinc20_data:
+                    zinc20_data[identifier] = {
+                        'identifier': identifier,
+                        'zinc_id': identifier,
+                        'smiles': smiles,
+                        'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
+                        'catalogs': supplier_code,
+                        'supplier_code': supplier_code,
+                        'db': 'zinc20'
+                    }
+                else:
+                    catalogs = zinc20_data[identifier]['catalogs_new']
+                    cat_found = False
+                    for c in catalogs:
+                        if c['supplier_code'] == supplier_code:
+                            cat_found = True
+                    if not cat_found:
+                        zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
+        data20 = list(zinc20_data.values())
 
     data22= zinc22_response['items']
     
