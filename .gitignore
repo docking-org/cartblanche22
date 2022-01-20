@@ -6,6 +6,7 @@ __pycache__/
 .nfs*
 sshhosts.csv
 sshtunnel.sh
+
 # C extensions
 *.so
 
@@ -65,7 +66,7 @@ docs/_build/
 target
 
 
-
+config.py
 /node_modules
 .env
 deployment/

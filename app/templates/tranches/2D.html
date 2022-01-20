@@ -4,10 +4,18 @@
     <style>
 
         .div-tranche {
-        {#max-width: 80em;#} max-height: 35em;
+            max-height: 74vh;
             overflow: scroll;
             position: relative;
-            border-right: 1px solid #ccc;
+            
+        }
+
+        .top-bar{
+            padding-top: 5px;
+        }
+
+        .top-button{
+            padding-right: 5px;
         }
 
         table {
@@ -16,11 +24,14 @@
         }
 
         table div {
-        {#width: 60px;#}
+            {#width: 60px;#}
         }
 
         .div-last {
-            width: 80px;
+            width: max-content;
+            display: table;
+            margin: 0 auto;
+            b
         }
 
         th {
@@ -30,7 +41,9 @@
 
         td {
             border: 1px solid #ccc;
-        {#padding: 0.5em;#} text-align: center;
+            {#padding: 0.5em;#}
+            width: 100px;
+            text-align: center;
         }
 
         thead th:first-child {
@@ -52,7 +65,7 @@
             background: white;
             color: black;
             border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
+            
             margin-top: 0;
             z-index: 1;
         }
@@ -79,7 +92,7 @@
             background-color: white;
             color: black;
             text-align: center;
-            border-right: none;
+          
             font-weight: bold;
 
         }
@@ -91,15 +104,15 @@
             bottom: 0;
             background: white;
             color: black;
-            border-right: 1px solid #ccc;
-            border-left: 1px solid #ccc;
-
+            
+            
+            box-shadow: 0 0 0 .25px black inset;
         }
 
         tfoot th:first-child {
             left: 0;
             z-index: 2;
-            border: none;
+          
         }
 
         tfoot th:last-child {
@@ -171,8 +184,14 @@
             border-radius: 50%;
         }
 
-    </style>
+      
+        .dropdown-menu{
+            max-height:300px;
+            overflow-y:auto;
+            }
+        }
 
+    </style>
 {% endblock %}
 {% block scripts %}
     {{ super() }}
@@ -181,13 +200,15 @@
         let predefined = {
             'all': [[0, 61], [0, 62]],
             'none': [[0, 0], [0, 0]],
-            'fragments': [[0, 32], [9, 17]],
-            'flagments': [[0, 42], [15, 21]],
-            'goldilocks': [[16, 27], [18, 22]],
-            'lead-like': [[0, 42], [17, 25]],
-            'lugs': [[0, 42], [23, 31]],
-            'drug-like': [[0, 57], [9, 31]],
-            'big-n-greasy': [[0, 3], [25, 31]]
+            'shards': [[0,41], [4,10]],
+            'fragments': [[0, 41], [10, 17]],
+            'flagments': [[0, 41], [15, 20]],
+            'small-leads': [[0, 41], [17, 20]],
+            'medium-leads': [[0, 41], [20, 23]],
+            'big-leads': [[0, 41], [23,26]],
+            'lugs': [[0, 46], [26, 30]],
+            'drug-like': [[0, 56], [0, 28]],
+            'big-n-greasy': [[41, 500], [25, 30]]
         };
         $(document).ready(function () {
             console.log("2D")
@@ -352,44 +373,15 @@
         }
     </script>
 {% endblock %}
-{% block app_content %}
+{% block tranchebrowser %}
     <div class="row">
-        <div class="pull-right">
-            <div class="dropdown">
-                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                    <li><a href="#" onclick="setPredefined('all')">All</a></li>
-                    <li><a href="#" onclick="setPredefined('none')">None</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
-                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
-                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
-                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
-                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="pull-right">
-            <label class="switch">
-                <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
-                <span class="slider round"></span>
-            </label>
-        </div>
-        <div class="pull-right">
-            <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal"
-                    onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download
-            </button>
-        </div>
+       
 
-        <!-- Modal -->
-        <div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog"
-             aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <form action="{{ url_for('main.tranches2dDownload') }}" method="post">
+            <!-- Modal -->
+    <div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog" aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{{ url_for('main.tranches2dDownload') }}" method="post">
                         <div class="modal-header">
                             <button class="close" data-dismiss="modal">&times;</button>
                             <h3>Download Tranches</h3>
@@ -424,7 +416,7 @@
 
                             </div>
                         </div>
-                        <div class="modal-footer">
+         <div class="modal-footer">
                             <div class="btn-toolbar">
                                 <div class="btn-group pull-right">
                                     <button class="btn btn-primary" type="submit">
@@ -437,7 +429,13 @@
                                         <option value="smi.gz" id="format-smi" selected>
                                            SMILES (*.smi)
                                         </option>
-                                        <option id="format-txt" value="txt" >Tab-Delimited (*.txt)
+                                        <option id="format-db2.gz" value="db2.gz" >DOCK37 (*.db2.gz)
+                                        </option>
+                                        <option id="format-pdbqt.gz" value="pdbqt.gz" >AutoDock (*.pdbqt.gz)
+                                        </option>
+                                        <option id="format-mol2.gz" value="mol2.gz" >Mol2 (*.mol2.gz)
+                                        </option>
+                                        <option id="format-sdf.gz" value="sdf.gz" >SDF (*.sdf.gz)
                                         </option>
                                     </select>
 
@@ -461,119 +459,155 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
+            </form>
                 </div>
+  </div>
+</div>
 
-            </div>
-
-        </div>
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12"
-                     style="background-color: white; border: 1px solid #ccc; text-align: center;
+    </div>
+     <div class="row">
+            <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12 top-bar"
+                 style="background-color: white; border: 1px solid #ccc; text-align: center;
                  text-justify: auto; color: black;font-weight: bold;
                 ">
-                    Heavy Atom Count
-                </div>
-            </div>
+            
+                    <div class="pull-right top-button">
+                        <div class="dropdown">
+                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
+                                <span class="caret"></span></button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" onclick="setPredefined('all')">All</a></li>
+                                <li><a href="#" onclick="setPredefined('none')">None</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#" onclick="setPredefined('shards')">Shards</a></li>
+                                <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
+                                <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
+                                <li><a href="#" onclick="setPredefined('small-leads')">Small Leads</a></li>
+                                <li><a href="#" onclick="setPredefined('medium-leads')">Medium Leads</a></li>
+                                <li><a href="#" onclick="setPredefined('big-leads')">Big Leads</a></li>
+                                <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
+                                <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
+                                <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                 
+                    <div class="pull-right top-button">
+                        <label class="switch">
+                            <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="pull-right top-button">
+                        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal"
+                            onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download</button>
+                    </div>
 
-            <div class="row">
-                <div class="col-sm-1 col-xs-1"
-                     style="background-color: white; height:35em;  color:black; border-left: 1px solid #ccc;
+                    <div class="col-sm-5 col-xs-3 col-md-5 col-lg-6 top-bar pull-right">
+                        Heavy Atom Count
+                    </div>
+                </div>
+              
+ 
+        </div>
+
+        <div class="row">
+            <div class="col-sm-1 col-xs-1"
+                 style="background-color: white; height:74vh;  color:black; border-left: 1px solid #ccc;
                  border-right:1px solid #ccc;width: 2em; font-weight: bold;">
-                    <p style="transform: rotate(-90deg); top: 25em; position: sticky;">LogP</p>
-                </div>
-                <div style="background-color: grey; border-bottom: 1px solid #ccc">
-                    <div class="div-tranche">
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>
-                                    <div></div>
-                                </th>
-                                {% for cell in ticks[0][4:30] %}
-                                    <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)">
-                                        <div>
-                                            {{ axes[2][cell] }}<br>{{ axes[0][cell] }}
-                                        </div>
-                                    </th>
-                                {% endfor %}
-                                <th>
-                                    <div class="div-last">Totals, by logp</div>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for row in ticks[1] %}
-                                <tr>
-                                    <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)">
-                                        <div>{{ axes[2][row] }}<br>{{ axes[1][row] }}</div>
-                                    </th>
-                                    {% for col in ticks[0][4:30] %}
-                                        <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
-                                            onclick="cellToggle(this)">
-                                            <div>
-                                                <p id='{{ row }}-{{ col }}'></p>
-                                                {#                                               <a  style="color: darkgrey;" href=""#}
-                                                {#                                   title="View substances in the {{ row }} -{{ col }} tranche"#}
-                                                {#                                   class="hover-link hover-link-se hover-link-slow">#}
-                                                {#                                    <i class="glyphicon glyphicon-info-sign"><span class="sr-only">View</span></i>#}
-                                                {#                                </a>#}
-                                            </div>
-                                        </td>
-                                    {% endfor %}
-                                    <td>
-                                        <div class="div-last">
-                              <span>
-                            {{ axes[2][row] }}<br>{{ axes[1][row] }}
-                        </span>
-                                            <br/>
-                                            <span id="row-sum-{{ row }}">
-                            Sum {{ row }}
-                        </span>
-                                        </div>
-                                    </td>
-
-
-                                </tr>
-                            {% endfor %}
-
-                            </tbody>
-                            <tfoot>
-                            <tr>
-                                <th>
-                                    <div>Totals, by HAC</div>
-                                </th>
-                                {% for col in ticks[0][4:30] %}
-                                    <th>
-                                        <div>
-                        <span>
-                            {{ axes[2][col] }}<br>{{ axes[0][col] }}
-                        </span>
-                                            <br/>
-                                            <span id="col-sum-{{ col }}">
-                            sum {{ axes[0][col] }}
-                        </span>
-                                        </div>
-                                    </th>
-                                {% endfor %}
-                                <th>
-                                    <div class="div-last">
-
-                                        Tranches: <span id="tranche-count"></span>
-                                        {#                                    <br/>#}
-                                        <hr>
-                                        Total: <span id="tranche-total"></span>
+                <p style="transform: rotate(-90deg); top: 25em; position: sticky;">LogP</p>
+            </div>
+            <div style="background-color: grey; border-bottom: 1px solid #ccc">
+                <div class="div-tranche">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>
+                                <div></div>
+                            </th>
+                            {% for cell in ticks[0][4:35] %}
+                                <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)" data-toggle="tooltip" title="{{ axes[2][cell] }}" data-delay='{"show": 100, "hide": 1000}'>
+                                    <div>
+                                        {{ axes[0][cell] }}
                                     </div>
                                 </th>
+                            {% endfor %}
+                            <th>
+                                <div class="div-last">Totals, by logp</div>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in ticks[1] %}
+                            <tr>
+                                <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)" data-toggle="tooltip" title="{{ axes[2][row] }}" data-delay='{"show": 100, "hide": 1000}'>
+                                    <div>{{ axes[1][row] }}</div>    
+                                </th>
+                                {% for col in ticks[0][4:35] %}
+                                    <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
+                                        onclick="cellToggle(this)">
+                                        <div>
+                                            <p id='{{ row }}-{{ col }}'></p>
+{#                                               <a  style="color: darkgrey;" href=""#}
+{#                                   title="View substances in the {{ row }} -{{ col }} tranche"#}
+{#                                   class="hover-link hover-link-se hover-link-slow">#}
+{#                                    <i class="glyphicon glyphicon-info-sign"><span class="sr-only">View</span></i>#}
+{#                                </a>#}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                                <td>
+                                    <div class="div-last">
+                              <span>
+                            {{ axes[2][row] }}/{{ axes[1][row] }}
+                        </span>
+                                        <br/>
+                                        <span id="row-sum-{{ row }}">
+                            Sum {{ row }}
+                        </span>
+                                    </div>
+                                </td>
+
 
                             </tr>
-                            </tfoot>
-                        </table>
-                    </div>
+                        {% endfor %}
+
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th>
+                                <div>Totals</div>
+                            </th>
+                            {% for col in ticks[0][4:35] %}
+                                <th>
+                                    <div>
+                                        <!-- <span>
+                                            {{ axes[2][col] }}<br>{{ axes[0][col] }}
+                                        </span>
+                                        <br/> -->
+                                        <span id="col-sum-{{ col }}">
+                                            sum {{ axes[0][col] }}
+                                        </span>
+                                    </div>
+                                </th>
+                            {% endfor %}
+                            <th>
+                                <div class="div-last">
+
+                                    Tranches: <span id="tranche-count"></span>
+
+                                    <hr>
+                                    Total: <span id="tranche-total"></span>
+                                </div>
+                            </th>
+
+                        </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
 
 
 {% endblock %}

@@ -48,6 +48,7 @@ def search_result():
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
         return render_template('search/result_zincsearch.html', data22=list22, data20=result20)
 
+
 class SearchJob(Resource):
     def post(self):
         data = request.form['myTextarea']
@@ -55,11 +56,12 @@ class SearchJob(Resource):
         file = file.split("\n")
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         args = file + textDataList
-
-        zinc22 = []
         zinc20 = []
+        zinc22 = []
+        data20 = {}
         discarded = []
-        
+        zinc20_response = None
+       
         for identifier in args:
             if '-' in identifier:
                 def checkHasZinc(identifier):
@@ -91,65 +93,64 @@ class SearchJob(Resource):
             else:
                 discarded.append(identifier)
 
-        zinc20_response = None
+     
         if len(zinc20) > 0:
             zinc20_files = {
                 'zinc_id-in': zinc20,
                 'output_fields': "zinc_id supplier_code smiles substance_purchasable"
             }
-            zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)             
-            task = searchByZincId.delay(args=args, zinc22=zinc22, zinc20=zinc20, zinc20_response=zinc20_response.text)
-        else:
-            task = searchByZincId.delay(args=args, zinc22=zinc22, zinc20=zinc20, zinc20_response=None)
-   
+            zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)
+        if zinc20_response:
+            zinc20_data = {}
+            for line in zinc20_response.text.split('\n'):
+                temp = line.split('\t')
+                if len(temp) == 4:
+                    identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
+                    if identifier not in zinc20_data:
+                        zinc20_data[identifier] = {
+                            'identifier': identifier,
+                            'zinc_id': identifier,
+                            'smiles': smiles,
+                            'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
+                            'catalogs': supplier_code,
+                            'supplier_code': supplier_code,
+                            'db': 'zinc20'
+                        }
+                    else:
+                        catalogs = zinc20_data[identifier]['catalogs_new']
+                        cat_found = False
+                        for c in catalogs:
+                            if c['supplier_code'] == supplier_code:
+                                cat_found = True
+                        if not cat_found:
+                            zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
+            data20 = list(zinc20_data.values())
+        
+        task = searchByZincId.delay(args=args, zinc22=zinc22, data20 = data20) 
+        
         return redirect(('search/result_zincsearch?task={task}'.format(task = task)))
 
 
 @celery.task
-def searchByZincId(args, zinc22, zinc20, zinc20_response, file_type=None):
+def searchByZincId(args, data20, zinc22, file_type=None):
     textDataList = args
-    zinc22_response = None
-    data22_json, data22 = None, []
-    data20 = {}
+    print("hi!")
+    print(data20)
+    zinc22_response  = None
+    data22_json, data22 = None, None
+   
     
     if len(zinc22) > 0:
         files = {
             'zinc_id-in': ','.join(zinc22)
         }
-        #SEARCH STEP 1
-        print(zinc22)
-        #SUBMIT JOB, RETURN JOB ID
-        print(files)
+        
         with flask_app.app_context():
             db.choose_tenant("tin")
-            zinc22_response = getList(args=files, file_type=None)   
-            data22= zinc22_response['items']
-  
-    if zinc20_response:
-        zinc20_data = {}
-        for line in zinc20_response.split('\n'):
-            temp = line.split('\t')
-            if len(temp) == 4:
-                identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
-                if identifier not in zinc20_data:
-                    zinc20_data[identifier] = {
-                        'identifier': identifier,
-                        'zinc_id': identifier,
-                        'smiles': smiles,
-                        'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
-                        'catalogs': supplier_code,
-                        'supplier_code': supplier_code,
-                        'db': 'zinc20'
-                    }
-                else:
-                    catalogs = zinc20_data[identifier]['catalogs_new']
-                    cat_found = False
-                    for c in catalogs:
-                        if c['supplier_code'] == supplier_code:
-                            cat_found = True
-                    if not cat_found:
-                        zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
-        data20 = list(zinc20_data.values())
+            zinc22_response = getList(args=files, file_type=None)
+            print(zinc22_response)    
+
+    data22= zinc22_response['items']
     
     return {'data22' : data22, 'data20': data20}
 
@@ -216,7 +217,6 @@ def getList(args, file_type=None):
     #SEARCH STEP 4, DO REQUEST FOR ALL URLS
     results = []
     taskList = []
-    data = {}
     for k,v in dict_ids.items():
         data= {
             'sub_ids': ','.join([str(i) for i in v]),
@@ -271,6 +271,8 @@ def getList(args, file_type=None):
 
 @celery.task
 def getSubstance(args, file_type=None):
+        db.choose_tenant(args.get("tin_url"))
+
         sub_id_list = args.get('sub_ids').split(',')
         zinc_id_list = args.get('zinc_ids').split(',')
         sub_ids = (int(id) for id in sub_id_list)
@@ -279,7 +281,6 @@ def getSubstance(args, file_type=None):
         print("REQUESTED TIN_URL from Substance POST", args.get('tin_url'))
         time1 = time.time()
         try:
-            db.choose_tenant(args.get("tin_url"))
             substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
         except Exception as e:
             search_info = {

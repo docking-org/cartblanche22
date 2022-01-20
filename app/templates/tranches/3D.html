@@ -10,6 +10,14 @@
             
         }
 
+        .top-bar{
+            padding-top: 5px;
+        }
+
+        .top-button{
+            padding-right: 5px;
+        }
+
         table {
             position: relative;
             border-collapse: collapse;
@@ -20,7 +28,10 @@
         }
 
         .div-last {
-            width: 80px;
+            width: max-content;
+            display: table;
+            margin: 0 auto;
+            b
         }
 
         th {
@@ -215,16 +226,28 @@
             "y" : true,
             "z" : true,
         }
+
+        // shards (H04-H09) to P340
+        // fragments (H10-H16) to P340
+        // flagments H15 H16 H17 H18 H19  to P340
+        // small leads H17 H18 H19 to P340
+        // medium leads H20 H21 H22 to P340
+        // big leads H23 H24 H25 to P340
+        // lugs H26 H27 H28 H29 to P390
+        // drug-like  H04 to H27  to P490
+        // big-n-greasy  H25 H26 H27 H28 H29  P350 to P900
         let predefined = {
             'all': [[0, 61], [0, 62]],
             'none': [[0, 0], [0, 0]],
-            'fragments': [[0, 32], [9, 17]],
-            'flagments': [[0, 42], [15, 21]],
-            'goldilocks': [[16, 27], [18, 22]],
-            'lead-like': [[0, 42], [17, 25]],
-            'lugs': [[0, 42], [23, 31]],
-            'drug-like': [[0, 57], [9, 31]],
-            'big-n-greasy': [[0, 3], [25, 31]]
+            'shards': [[0,41], [4,10]],
+            'fragments': [[0, 41], [10, 17]],
+            'flagments': [[0, 41], [15, 20]],
+            'small-leads': [[0, 41], [17, 20]],
+            'medium-leads': [[0, 41], [20, 23]],
+            'big-leads': [[0, 41], [23,26]],
+            'lugs': [[0, 46], [26, 30]],
+            'drug-like': [[0, 56], [0, 28]],
+            'big-n-greasy': [[41, 500], [25, 30]]
         };
         let charges = {
             "J" : true,
@@ -258,6 +281,20 @@
                 a.appendChild(document.createTextNode(element));
                 li.appendChild(a);
                 ul.appendChild(li);   
+                
+            });
+
+            var ul = document.getElementById("charges");
+            Object.keys(charges).forEach(element => {
+                var li = document.createElement("li");
+                li.setAttribute('id',element); 
+                li.setAttribute('onclick', `chargeSelect(${element})`);
+                li.setAttribute('data-val', element); 
+                $(li).toggleClass('active');
+                var a = document.createElement("a");
+                a.appendChild(document.createTextNode(element));
+                li.appendChild(a);
+                ul.appendChild(li);                   
             });
         });
 
@@ -275,7 +312,7 @@
                     let trancheSizeTotal = 0
                     let trancheChosenTotal = false;
                     tranches.tranches.forEach(x =>{
-                        if(!generation[x.generation]){
+                        if(!generation[x.generation] || !charges[x.charge]){
                             x.chosen = false;
                         }
                         if(x.chosen){
@@ -438,21 +475,32 @@
             renderTrancheTable();
         }
         function chargeSelect(li){
-            let bool = $(li).hasClass('active')
-            $(li).toggleClass('active');
-            let charge = li.dataset.val;
-            let arr = JSON.parse(localStorage.getItem('3d'))
-            for (let i = 0; i < 61; i++) {
-                for (let j = 0; j < 62; j++) {
-                    tranches = arr[i][j]
-                    tranches.tranches.forEach(x => {
-                       if (x.charge==charge && x.size!=0){
-                           x.chosen = !bool;
-                       }
-                    })
+            if(li === 'all'){
+                for(let e in charges){
+                    var li = document.getElementById(e)
+                    if(!li.classList.contains('active')){
+                        $(li).toggleClass('active');
+                    }
+                    charges[e] = true;
                 }
             }
-            localStorage.setItem('3d', JSON.stringify(arr));
+            else if(li === 'none'){
+                for(let e in charges){
+                    var li = document.getElementById(e)
+                    if(li.classList.contains('active')){
+                        $(li).toggleClass('active');
+                    }
+                    charges[e] = false;
+                }
+            }
+            else{
+                let bool = $(li).hasClass('active')
+                $(li).toggleClass('active');
+                
+                let gen = li.dataset.val;
+                charges[gen] = !charges[gen];
+            }
+          
             renderTrancheTable();
         }
         function trancheDownloadModalClicked() {
@@ -582,70 +630,76 @@
 </div>
 
     </div>
-    <div class="container-fluid">
-        <div class="row">
-             <div class="pull-left">
-            <div class="dropdown">
-                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Generation
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu" id='generation'>
-                    <li><a href="#" onclick="setGeneration('all')">All</a></li>
-                    <li><a href="#" onclick="setGeneration('none')">None</a></li>
-                    <li class="divider"></li>
-                </ul>
-            </div>
-        </div>
-        <div class="pull-right">
-            <div class="dropdown">
-                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                    <li><a href="#" onclick="setPredefined('all')">All</a></li>
-                    <li><a href="#" onclick="setPredefined('none')">None</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
-                    <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
-                    <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
-                    <li><a href="#" onclick="setPredefined('lead-like')">Lead-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
-                    <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
-                    <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="pull-right">
-            <div class="dropdown">
-                <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Charge
-                    <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                    <li class="active" onclick="chargeSelect(this)" data-val="J"><a href="#"> -4 (J)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="K"><a href="#"> -3 (K)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="L"><a href="#"> -2 (L)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="M"><a href="#"> -1 (M)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="N"><a href="#"> 0 (N)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="O"><a href="#"> 1 (O)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="P"><a href="#"> 2 (P)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="Q"><a href="#"> 3 (Q)</a></li>
-                    <li class="active" onclick="chargeSelect(this)" data-val="R"><a href="#"> 4 (R)</a></li>
-                </ul>
-            </div>
-        </div>
-    <div class="pull-right">
-        <label class="switch">
-                <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
-                <span class="slider round"></span>
-        </label>
-    </div>
-    <div class="pull-right">
-        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal" onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download</button>
-    </div>
-            <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12"
+     <div class="row">
+            <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12 top-bar"
                  style="background-color: white; border: 1px solid #ccc; text-align: center;
                  text-justify: auto; color: black;font-weight: bold;
                 ">
-                Heavy Atom Count
-                
-            </div>
+
+        
+                  <div class="row">
+                    <div class="col-sm-1 col-xs-1 col-md-1 col-lg-1">
+                        <div class="dropdown">
+                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Generation
+                                <span class="caret"></span></button>
+                            <ul class="dropdown-menu" id='generation'>
+                                <li><a href="#" onclick="setGeneration('all')">All</a></li>
+                                <li><a href="#" onclick="setGeneration('none')">None</a></li>
+                                <li class="divider"></li>
+                            </ul>
+                        </div>
+                    </div>
+               
+        
+            
+                    <div class="pull-right top-button">
+                        <div class="dropdown">
+                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
+                                <span class="caret"></span></button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" onclick="setPredefined('all')">All</a></li>
+                                <li><a href="#" onclick="setPredefined('none')">None</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#" onclick="setPredefined('shards')">Shards</a></li>
+                                <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
+                                <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
+                                <li><a href="#" onclick="setPredefined('small-leads')">Small Leads</a></li>
+                                <li><a href="#" onclick="setPredefined('medium-leads')">Medium Leads</a></li>
+                                <li><a href="#" onclick="setPredefined('big-leads')">Big Leads</a></li>
+                                <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
+                                <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
+                                <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pull-right top-button">
+                        <div class="dropdown">
+                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Charge
+                                <span class="caret"></span></button>
+                                <ul class="dropdown-menu" id='charges'>
+                                    <li><a href="#" onclick="chargeSelect('all')">All</a></li>
+                                    <li><a href="#" onclick="chargeSelect('none')">None</a></li>
+                                    <li class="divider"></li>
+                                </ul>
+                        </div>
+                    </div>
+                    <div class="pull-right top-button">
+                        <label class="switch">
+                            <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="pull-right top-button">
+                        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal"
+                            onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download</button>
+                    </div>
+
+                    <div class="col-sm-5 col-xs-3 col-md-5 col-lg-6 top-bar pull-right">
+                        Heavy Atom Count
+                    </div>
+                </div>
+                  </div>
+ 
         </div>
 
         <div class="row">
@@ -713,7 +767,7 @@
                         <tfoot>
                         <tr>
                             <th>
-                                <div>Totals, by HAC</div>
+                                <div>Totals</div>
                             </th>
                             {% for col in ticks[0][4:35] %}
                                 <th>
@@ -732,7 +786,7 @@
                                 <div class="div-last">
 
                                     Tranches: <span id="tranche-count"></span>
-{#                                    <br/>#}
+
                                     <hr>
                                     Total: <span id="tranche-total"></span>
                                 </div>
