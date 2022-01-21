@@ -27,7 +27,7 @@ class MultiTenantSQLAlchemy(SQLAlchemy):
         return super().get_engine(app=app, bind=bind)
 
     def apply_pool_defaults(self, app, options):
-        super().apply_pool_defaults(self, app, options)
+        super().apply_pool_defaults(app, options)
         options["pool_pre_ping"] = True
 
 
