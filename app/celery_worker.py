@@ -28,6 +28,7 @@ celery = make_celery(flask_app)
 class MultiTenantSQLAlchemy(SQLAlchemy):
     def choose_tenant(self, bind_key):
         if hasattr(g, 'tenant'):
+            print(g.tenant)
             raise RuntimeError('Switching tenant in the middle of the request.')
         g.tenant = bind_key
 

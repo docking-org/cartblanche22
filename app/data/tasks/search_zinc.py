@@ -23,34 +23,33 @@ import itertools
 import re
 
 from app.celery_worker import celery, flask_app, db
-from celery import group
+from celery import group, chord
 from celery.result import allow_join_result, AsyncResult
 from app.email_send import send_search_log
-
+import ast
 
 
 @application.route('/search/result_zincsearch', methods=['GET'])
 def search_result():
     if request.method == 'GET':
         data = request.args.get("task")
+        
+        task= AsyncResult(data)
+        data = task.get()[1]
         print(data)
-        task = AsyncResult(data)
         list22 = []
-        result22 = []
-        task_result = task.get()
-        result22 = task_result['data22']
-        result20 = task_result['data20']
+
+        result22 = data['data22']
+        result20 = data['data20']
+     
         
         if result22 != None:
-            taskResults = []
-            for i in result22:
-                task = AsyncResult(i)
-                task_result = task.get()
-                taskResults.append(task_result)
+            task = AsyncResult(result22)
+            task_result = task.get()
 
-            finalResult22 = formatResults(results=taskResults)
+            finalResult22 = formatResults(results=task_result)
 
-            
+            print(task_result)
             for i in finalResult22['items']:  
                 list22.append(i[0])
             
@@ -145,7 +144,6 @@ class SearchJob(Resource):
             }
             zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)
 
-        print(zinc20_response)
         if zinc20_response:
             zinc20_data = {}
             for line in zinc20_response.text.split('\n'):
@@ -172,9 +170,13 @@ class SearchJob(Resource):
                             zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
             data20 = list(zinc20_data.values())
 
-        task = searchByZincId.delay(data20=data20, zinc22=zinc22) 
-        return redirect(('search/result_zincsearch?task={task}'.format(task = task)))
+        task = chord([search20.s(data20=data20), searchByZincId.s(data20=data20, zinc22=zinc22)])(mergeResults.s())
+        return redirect(('search/result_zincsearch?task={task}'.format(task = task.id)))
 
+
+@celery.task
+def search20(data20):
+    return data20
 
 @celery.task
 def searchByZincId(data20, zinc22, file_type=None):   
@@ -189,15 +191,14 @@ def searchByZincId(data20, zinc22, file_type=None):
         print(zinc22)
         #SUBMIT JOB, RETURN JOB ID
         print(files)
-        with flask_app.app_context():
-            db.choose_tenant("tin")
-            zinc22_response = getList(args=files, file_type=None)
-            print(zinc22_response)
+       
+        zinc22_response = getList(args=files, file_type=None)
+        print(zinc22_response)
 
     data22= zinc22_response
     
     return {'data22' : data22, 'data20': data20}
-    
+
 def getList(args, file_type=None):
     #SEARCH STEP 3
 
@@ -217,7 +218,7 @@ def getList(args, file_type=None):
     timeout = 15
     if args.get('timeout'):
         timeout = args.get('timeout')
-
+    db.choose_tenant('tin')
     urls = get_all_tin_url()
     print(zinc_ids)
     for zinc_id in zinc_ids:
@@ -261,13 +262,19 @@ def getList(args, file_type=None):
             'output_fields': output_fields
         }        
         
-        task = getSubstance.delay(args=data)
-        taskList.append(task.id)
-    print(taskList)
-    return taskList
+        task = getSubstance.s(args=data)
+        taskList.append(task)
+
+    result = chord(taskList)(mergeResults.s())
+
+    return result.id
 
 
    
+@celery.task
+def mergeResults(args):
+    return args
+
 
 @celery.task
 def getSubstance(args, file_type=None):
