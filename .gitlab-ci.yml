@@ -30,11 +30,13 @@ deploy job:
         - cartblanche22-dev
     script:
         #- docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
+        # - docker stop cartblanche22-dev
+        # - docker rm cartblanche22-dev
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         # - docker stop cartblanche22-dev
         # - docker rm cartblanche22-dev
-        - docker network create my_app
-        - docker run --net my_app --name redis -d redis 
-        - docker run --net my_app --name ${CI_PROJECT_NAME} -d -p 127.0.0.1:5066:5001 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+        # - docker network create my_app
+        # - docker run --net my_app --name redis -d redis 
+        - docker run --net my_app --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
     services:
         - redis:latest
