@@ -36,7 +36,7 @@ def search_result():
         print(data)
         task = AsyncResult(data)
         list22 = []
-        
+        result22 = []
         task_result = task.get()
         result22 = task_result['data22']
         result20 = task_result['data20']
