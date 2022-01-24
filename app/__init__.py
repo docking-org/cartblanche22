@@ -24,6 +24,10 @@ class MultiTenantSQLAlchemy(SQLAlchemy):
                 raise RuntimeError('No tenant chosen.')
             bind = g.tenant
         return super().get_engine(app=app, bind=bind)
+        
+    def apply_pool_defaults(self, app, options):
+        super().apply_pool_defaults(app, options)
+        options["pool_pre_ping"] = True
 
 db = MultiTenantSQLAlchemy()
 migrate = Migrate(compare_type=True)
