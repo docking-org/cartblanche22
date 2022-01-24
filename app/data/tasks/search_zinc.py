@@ -103,7 +103,9 @@ class SearchJob(Resource):
 
         zinc22 = []
         zinc20 = []
+        data20 = []
         discarded = []
+        zinc20_response = None
             
         for identifier in ids:
             if '-' in identifier:
@@ -176,8 +178,8 @@ class SearchJob(Resource):
 
 @celery.task
 def searchByZincId(data20, zinc22, file_type=None):   
-    zinc22_response, zinc20_response = None, None
-    data22_json, data22 = None, None
+    zinc22_response = None
+    data22 =  None
     
     if len(zinc22) > 0:
         files = {
