@@ -1,4 +1,3 @@
-from typing import Tuple
 from app.main import application
 
 from app.main.search import search_byzincid
@@ -9,7 +8,7 @@ from app.data.resources.substance import SubstanceList
 from flask import render_template, request, json, jsonify, flash, Flask, redirect,g 
 
 from app.data.models.tranche import TrancheModel
-from werkzeug.datastructures import FileStorage
+
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers
 
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
@@ -29,25 +28,69 @@ from celery.result import allow_join_result, AsyncResult
 from app.email_send import send_search_log
 
 
+
 @application.route('/search/result_zincsearch', methods=['GET'])
 def search_result():
     if request.method == 'GET':
         data = request.args.get("task")
+        print(data)
         task = AsyncResult(data)
         list22 = []
-        list20 = []
+        
         task_result = task.get()
         result22 = task_result['data22']
         result20 = task_result['data20']
-        print(task_result)
-
-        for i in result22:
-            if 'message' not in i[0]:
-                list22.append(i[0])
         
+        if result22 != None:
+            taskResults = []
+            for i in result22:
+                task = AsyncResult(i)
+                task_result = task.get()
+                taskResults.append(task_result)
+
+            finalResult22 = formatResults(results=taskResults)
+
+            
+            for i in finalResult22['items']:  
+                list22.append(i[0])
+            
         if(len(list22) == 0 and len(result20) == 0):
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
         return render_template('search/result_zincsearch.html', data22=list22, data20=result20)
+
+
+def formatResults(results, file_type=None):
+    data={}
+    data['items'] = list(results)
+
+    # gets search info with 'not found ids' from flat list
+    data['search_info'] = [d['search_info'] for d in data['items'] if 'search_info' in d and d['search_info']['not_found_ids'] != 'All found']
+
+    #if len(data['search_info']) > 0:
+        #send_search_log(data['search_info'])
+
+    # gets only results from flat list
+    data['items'] = [d for d in data['items'] if 'search_info' not in d]
+
+    str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+    if file_type == 'csv':
+        keys = list(data['items'][0].keys())
+        return send_csv(data['items'], "zinc_id_search_{}.csv".format(str_time), keys)
+    elif file_type == 'txt':
+        Formatter = OBJECT_MIMETYPE_TO_FORMATTER["text/plain"]
+        keys = list(data['items'][0].keys())
+        formatter = Formatter(fields=keys)
+        ret_list = ""
+        for line in formatter(data['items']):
+            ret_list += line
+
+        download_filename = "search_{}.txt".format(str_time)
+        response = make_response(ret_list, 200)
+        response.mimetype = "text/plain"
+        response.headers['Contnt-Disposition'] = 'attachment; filename={}'.format(download_filename)
+        return response
+    else:
+        return data
 
 
 class SearchJob(Resource):
@@ -56,24 +99,13 @@ class SearchJob(Resource):
         file = request.files['zincfile'].read().decode("utf-8")
         file = file.split("\n")
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        args = file + textDataList
-       
-        task = searchByZincId.delay(args=args) 
-        
-        return redirect(('search/result_zincsearch?task={task}'.format(task = task)))
+        ids = file + textDataList
 
-
-@celery.task
-def searchByZincId(args, file_type=None):
-    textDataList = args
-    
-    zinc22 = []
-    zinc20 = []
-    discarded = []
-    zinc22_response, zinc20_response = None, None
-    data22_json, data22 = None, None
-    data20 = {}
-    for identifier in args:
+        zinc22 = []
+        zinc20 = []
+        discarded = []
+            
+        for identifier in ids:
             if '-' in identifier:
                 def checkHasZinc(identifier):
                     if identifier[0:4].upper() != 'ZINC':
@@ -103,6 +135,50 @@ def searchByZincId(args, file_type=None):
                 continue
             else:
                 discarded.append(identifier)
+
+        if len(zinc20) > 0:
+            zinc20_files = {
+                'zinc_id-in': zinc20,
+                'output_fields': "zinc_id supplier_code smiles substance_purchasable"
+            }
+            zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)
+
+        print(zinc20_response)
+        if zinc20_response:
+            zinc20_data = {}
+            for line in zinc20_response.text.split('\n'):
+                temp = line.split('\t')
+                if len(temp) == 4:
+                    identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
+                    if identifier not in zinc20_data:
+                        zinc20_data[identifier] = {
+                            'identifier': identifier,
+                            'zinc_id': identifier,
+                            'smiles': smiles,
+                            'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
+                            'catalogs': supplier_code,
+                            'supplier_code': supplier_code,
+                            'db': 'zinc20'
+                        }
+                    else:
+                        catalogs = zinc20_data[identifier]['catalogs_new']
+                        cat_found = False
+                        for c in catalogs:
+                            if c['supplier_code'] == supplier_code:
+                                cat_found = True
+                        if not cat_found:
+                            zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
+            data20 = list(zinc20_data.values())
+
+        task = searchByZincId.delay(data20=data20, zinc22=zinc22) 
+        return redirect(('search/result_zincsearch?task={task}'.format(task = task)))
+
+
+@celery.task
+def searchByZincId(data20, zinc22, file_type=None):   
+    zinc22_response, zinc20_response = None, None
+    data22_json, data22 = None, None
+    
     if len(zinc22) > 0:
         files = {
             'zinc_id-in': ','.join(zinc22)
@@ -116,51 +192,9 @@ def searchByZincId(args, file_type=None):
             zinc22_response = getList(args=files, file_type=None)
             print(zinc22_response)
 
-    if len(zinc20) > 0:
-        zinc20_files = {
-            'zinc_id-in': zinc20,
-            'output_fields': "zinc_id supplier_code smiles substance_purchasable"
-        }
-        zinc20_response = requests.post("http://zinc15.docking.org/catitems.txt", data=zinc20_files)
-   
-  
-    if zinc20_response:
-        zinc20_data = {}
-        for line in zinc20_response.text.split('\n'):
-            temp = line.split('\t')
-            if len(temp) == 4:
-                identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
-                if identifier not in zinc20_data:
-                    zinc20_data[identifier] = {
-                        'identifier': identifier,
-                        'zinc_id': identifier,
-                        'smiles': smiles,
-                        'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
-                        'catalogs': supplier_code,
-                        'supplier_code': supplier_code,
-                        'db': 'zinc20'
-                    }
-                else:
-                    catalogs = zinc20_data[identifier]['catalogs_new']
-                    cat_found = False
-                    for c in catalogs:
-                        if c['supplier_code'] == supplier_code:
-                            cat_found = True
-                    if not cat_found:
-                        zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
-        data20 = list(zinc20_data.values())
-
-    data22= zinc22_response['items']
+    data22= zinc22_response
     
     return {'data22' : data22, 'data20': data20}
-
-    # if data20 or data22:
-    #     print(data20)
-    #     return render_template('search/result_zincsearch.html', data22_json=json.dumps(data22), data22=data22,
-    #                             data20_json=json.dumps(data20), data20=data20)
-    # else:
-    #     return render_template('errors/search404.html', lines=files, href='/search/search_byzincid',
-    #                         header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
     
 def getList(args, file_type=None):
     #SEARCH STEP 3
@@ -225,47 +259,11 @@ def getList(args, file_type=None):
             'output_fields': output_fields
         }        
         
-        taskList.append(getSubstance.s(args=data))
+        task = getSubstance.delay(args=data)
+        taskList.append(task.id)
+    print(taskList)
+    return taskList
 
-
-    #create celery task group, will be executed asynchronously
-    tasks = group(taskList)
-    task_output = tasks.apply_async()
-
-    with allow_join_result():
-        results = task_output.get()
-    
-    #flat_list = itertools.chain.from_iterable(results)
-    data['items'] = list(results)
-
-    # gets search info with 'not found ids' from flat list
-    data['search_info'] = [d['search_info'] for d in data['items'] if 'search_info' in d and d['search_info']['not_found_ids'] != 'All found']
-
-    #if len(data['search_info']) > 0:
-        #send_search_log(data['search_info'])
-
-    # gets only results from flat list
-    data['items'] = [d for d in data['items'] if 'search_info' not in d]
-   
-    str_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
-    if file_type == 'csv':
-        keys = list(data['items'][0].keys())
-        return send_csv(data['items'], "zinc_id_search_{}.csv".format(str_time), keys)
-    elif file_type == 'txt':
-        Formatter = OBJECT_MIMETYPE_TO_FORMATTER["text/plain"]
-        keys = list(data['items'][0].keys())
-        formatter = Formatter(fields=keys)
-        ret_list = ""
-        for line in formatter(data['items']):
-            ret_list += line
-
-        download_filename = "search_{}.txt".format(str_time)
-        response = make_response(ret_list, 200)
-        response.mimetype = "text/plain"
-        response.headers['Contnt-Disposition'] = 'attachment; filename={}'.format(download_filename)
-        return response
-    else:
-        return data
 
    
 
@@ -338,7 +336,7 @@ def getSubstance(args, file_type=None):
             'not_found_ids': notfound_ids if notfound_ids else "All found",
             'elapsed_time': 'It took {:.3f} s'.format((time2 - time1) % 60)
         }
-
+     
         if(len(notfound_ids) == 0):
             data.append({'search_info': search_info})
             return data
