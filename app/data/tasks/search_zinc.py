@@ -22,9 +22,10 @@ from datetime import datetime
 import itertools
 import re
 
+from app import celery_worker
 from app.celery_worker import celery, flask_app, db
 from celery import group, chord
-from celery.result import allow_join_result, AsyncResult
+from celery.result import AsyncResult
 from app.email_send import send_search_log
 import ast
 

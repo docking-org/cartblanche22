@@ -40,7 +40,7 @@ class Tranche3DFileFactory():
         ('smi.gz', 'SMILES'),
         ('db.gz', 'DB'),
         ('db2.gz', 'DB2'),
-        ('mol2.gz', 'Mol2'),
+        ('mol2.tgz', 'Mol2'),
         ('pdbqt.gz', 'PDBQT'),
         ('sdf.gz', 'SDF'),
     ]
@@ -62,7 +62,7 @@ class Tranche3DFileFactory():
 
     @property
     def mol2(self):
-        return self.get_list('mol2.gz')
+        return self.get_list('mol2.tgz')
 
     @property
     def solvation(self):
