@@ -84,6 +84,7 @@
 
         }
 
+       
         tbody td:last-child {
             position: -webkit-sticky;
             /* for Safari */
@@ -191,11 +192,26 @@
             }
         }
 
+       
+
     </style>
 
 {% endblock %}
 {% block scripts %}
     {{ super() }}
+    <script>
+         $(".cell").hover(function() {
+            var attr = $(this).attr('data-col');
+            $('.v-guide[data-id='+attr+"]").css("background-color","gray");
+            $(this).siblings('th').css("background-color","gray");
+          
+         },function(){
+            var attr = $(this).attr('data-col');
+            $('.v-guide[data-id='+attr+"]").css("background-color","white");
+            $(this).siblings('th').css("background-color","white"); 
+         }
+         );
+    </script>
     <script>
         let numberToggle = true;
         let generation = {
@@ -260,6 +276,9 @@
             "Q" : true,
             "R" : true
         }
+
+
+    
         $(document).ready(function () {
             let data = {{ cell3D| safe }};
             let cols = new Array(62).fill(true);
@@ -433,8 +452,9 @@
         function setPredefined(s) {
             let arr = JSON.parse(localStorage.getItem('3d'))
             let p = predefined[s]
+            
             for (let i = 0; i < 61; i++) {
-                for (let j = 0; j < 35; j++) {
+                for (let j = 0; j < 62; j++) {
                     if (p[0][0] <= i && i < p[0][1] && p[1][0] <= j && j < p[1][1] && arr[i][j].size != 0) {
                         arr[i][j].chosen = true
                     } else {
@@ -505,9 +525,6 @@
         }
         function trancheDownloadModalClicked() {
             let arr = JSON.parse(localStorage.getItem('3d'))
-            let temp = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-             'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
-             'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
             let col = ['H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
      'H16', 'H17',
           'H18','H19', 'H20', 'H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28', 'H29', 'H30', 'H31', 'H32', 'H33',
@@ -518,24 +535,26 @@
           'P230', 'P240', 'P250', 'P260', 'P270', 'P280', 'P290', 'P300', 'P310', 'P320', 'P330', 'P340', 'P350', 'P360',
           'P370','P380','P390','P400','P410','P420', 'P430','P440', 'P450','P460', 'P470','P480','P490','P500','P600',
           'P700', 'P800', 'P900']
-            let st = ''
-              for (let i = 0; i < 61; i++) {
-                for (let j = 0; j < 35; j++) {
+            let st = '';
+            for (let i = 0; i < 61; i++) {
+                for (let j = 0; j < 62; j++) {
                     tranches = arr[i][j]
-                    if (arr[i][j].chosen == true){
-                          tranches.tranches.forEach(x =>{
-                        if(x.chosen){
-                            st = st + col[j] + row[i] + x.charge + ' '
-                        }
-                    })
-                    }
+                    if(tranches.chosen){
+                        tranches.tranches.forEach(x =>{
+                            
+                            if(x.chosen && generation[x.generation] && charges[x.charge]){
+                                st = st + col[j] + row[i] + x.generation + x.charge + ' ';
+                            }
+                        });
 
-                }
+                    }
+                }  
             }
               $('#selected-tranches').html(st)
 
         }
        
+        
     </script>
 {% endblock %}
 {% block tranchebrowser %}
@@ -598,7 +617,7 @@
                                         </option>
                                         <option id="format-pdbqt.gz" value="pdbqt.gz" >AutoDock (*.pdbqt.gz)
                                         </option>
-                                        <option id="format-mol2.gz" value="mol2.gz" >Mol2 (*.mol2.gz)
+                                        <option id="format-mol2.gz" value="mol2.tgz" >Mol2 (*.mol2.tgz)
                                         </option>
                                         <option id="format-sdf.gz" value="sdf.gz" >SDF (*.sdf.gz)
                                         </option>
@@ -711,31 +730,33 @@
             <div style="background-color: grey; border-bottom: 1px solid #ccc">
                 <div class="div-tranche">
                     <table>
+
                         <thead>
-                        <tr>
-                            <th>
-                                <div></div>
-                            </th>
-                            {% for cell in ticks[0][4:35] %}
-                                <th class="cell-th" data-id="{{ cell }}" onclick="colToggle(this)" data-toggle="tooltip" title="{{ axes[2][cell] }}" data-delay='{"show": 100, "hide": 1000}'>
-                                    <div>
-                                        {{ axes[0][cell] }}
-                                    </div>
+                            <tr>
+                                <th>
+                                    <div></div>
                                 </th>
-                            {% endfor %}
-                            <th>
-                                <div class="div-last">Totals, by logp</div>
-                            </th>
-                        </tr>
+                                {% for cell in ticks[0][4:35] %}
+                                    <th class="cell-th v-guide" data-id="{{ cell }}" onclick="colToggle(this)" data-toggle="tooltip" title="{{ axes[2][cell] }}" data-delay='{"show": 100, "hide": 1000}'>
+                                        <div>
+                                            {{ axes[0][cell] }}
+                                        </div>
+                                    </th>
+                                {% endfor %}
+                                <th>
+                                    <div class="div-last">Totals, by logp</div>
+                                </th>
+                            </tr>
                         </thead>
                         <tbody>
+                          
                         {% for row in ticks[1] %}
                             <tr>
-                                <th class="cell-th" data-id="{{ row }}" onclick="rowToggle(this)" data-toggle="tooltip" title="{{ axes[2][row] }}" data-delay='{"show": 100, "hide": 1000}'>
+                                <th class="cell-th" id="h-guide" data-id="{{ row }}" onclick="rowToggle(this)" data-toggle="tooltip" title="{{ axes[2][row] }}" data-delay='{"show": 100, "hide": 1000}'>
                                     <div>{{ axes[1][row] }}</div>    
                                 </th>
                                 {% for col in ticks[0][4:35] %}
-                                    <td id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
+                                    <td class="cell" id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
                                         onclick="cellToggle(this)">
                                         <div>
                                             <p id='{{ row }}-{{ col }}'></p>

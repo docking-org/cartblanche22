@@ -1,3 +1,4 @@
+from inspect import trace
 from flask import render_template, request, Response
 from app.main import application
 import json
@@ -18,9 +19,11 @@ def CurlDownloader(hac, logp, format, add_url, charge):
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge)
 
 
-def WgetDownloader(hac, logp, format, add_url, charge):
-    return "mkdir -pv {hac} && wget {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} -O {hac}/{hac}{logp}{charge}.{format}". \
-        format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge)
+def WgetDownloader(hac, logp, format, add_url, charge, generation):
+    return "wget -nH -r -l7 -np -A '*-{charge}-*{format}' '{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/'". \
+    format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, generation=generation)
+    # return "mkdir -pv {hac} && wget {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} -O {hac}/{hac}{logp}{charge}.{format}". \
+    #     format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge)
 
 
 def PowerShellDownloader(hac, logp, format, add_url, charge):
@@ -147,10 +150,12 @@ def tranches3dDownload():
     add_url_3D = 'zinc22/3d/'
 
     def gen_tranches(tranche):
+        print(tranche)
         hac = tranche[0:3]
         logp = tranche[3:7]
+        generation = tranche[7:8]
         charge = tranche[-1]
-        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge)
+        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
 
     arr = map(gen_tranches, data_)
     data = '\n'.join(list(arr))
