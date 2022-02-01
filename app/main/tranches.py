@@ -91,7 +91,7 @@ URI_EXTENSION_TO_MIMETYPE = {
     'bkslab': 'text/bkslab',
     'aws': 'text/aws',
     'oci': 'text/oci',
-    'wynton': 'wynton',
+    'wynton': 'text/wynton',
     'database_index': 'text/x-ucsf-dock-database_index',
     'curl': 'application/x-ucsf-zinc-uri-downloadscript-curl',
     'wget': 'application/x-ucsf-zinc-uri-downloadscript-wget',
