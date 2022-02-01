@@ -37,12 +37,12 @@ class Tranche2DFileFactory():
 
 class Tranche3DFileFactory():
     AVAILABLE_FORMATS = [
-        ('smi.gz', 'SMILES'),
-        ('db.gz', 'DB'),
-        ('db2.gz', 'DB2'),
+        ('smi.tgz', 'SMILES'),
+        ('db.tgz', 'DB'),
+        ('db2.tgz', 'DB2'),
         ('mol2.tgz', 'Mol2'),
-        ('pdbqt.gz', 'PDBQT'),
-        ('sdf.gz', 'SDF'),
+        ('pdbqt.tgz', 'PDBQT'),
+        ('sdf.tgz', 'SDF'),
     ]
 
     def get_list(self, format):
