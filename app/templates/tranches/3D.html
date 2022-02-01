@@ -543,7 +543,7 @@
                         tranches.tranches.forEach(x =>{
                             
                             if(x.chosen && generation[x.generation] && charges[x.charge]){
-                                st = st + col[j] + row[i] + x.generation + x.charge + ' ';
+                                st = st + x.generation +  col[j] + row[i] + x.charge + ' ';
                             }
                         });
 
@@ -601,6 +601,11 @@
                             </div>
                         </div>
          <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-sm-4">
+                            <h4 class="pull-left">Method</h4>
+                            </div>
+                        </div>
                             <div class="btn-toolbar">
                                 <div class="btn-group pull-right">
                                     <button class="btn btn-primary" type="submit">
@@ -609,17 +614,18 @@
                                     </button>
                                 </div>
                                 <div class="form-group">
+                                    
                                     <select name="format" class="btn btn-info" id="downloadFormat">
-                                        <option value="smi.gz" id="format-smi" selected>
+                                        <option value="smi.tgz" id="format-smi" selected>
                                            SMILES (*.smi)
                                         </option>
-                                        <option id="format-db2.gz" value="db2.gz" >DOCK37 (*.db2.gz)
+                                        <option id="format-db2.tgz" value="db2.tgz" >DOCK37 (*.db2.tgz)
                                         </option>
-                                        <option id="format-pdbqt.gz" value="pdbqt.gz" >AutoDock (*.pdbqt.gz)
+                                        <option id="format-pdbqt.tgz" value="pdbqt.tgz" >AutoDock (*.pdbqt.tgz)
                                         </option>
-                                        <option id="format-mol2.gz" value="mol2.tgz" >Mol2 (*.mol2.tgz)
+                                        <option id="format-mol2.tgz" value="mol2.tgz" >Mol2 (*.mol2.tgz)
                                         </option>
-                                        <option id="format-sdf.gz" value="sdf.gz" >SDF (*.sdf.gz)
+                                        <option id="format-sdf.tgz" value="sdf.tgz" >SDF (*.sdf.tgz)
                                         </option>
                                     </select>
 
@@ -629,12 +635,24 @@
                                         </option>
                                         <option id="using-database_index" value="database_index" >DOCK Database Index
                                         </option>
-                                        <option value="curl" id="using-curl">
-                                          cURL
+                                        <option value="wynton" id="using-wynton">
+                                          Wynton
+                                        </option>
+                                        <option value="bkslab" id="using-bks">
+                                          BKS Lab
+                                          </option>
+                                        <option value="aws" id="using-aws">
+                                          AWS S3
+                                        </option>
+                                        <option value="oracle" id="using-oracle">
+                                          Oracle OCI
                                         </option>
                                         <option value="wget" id="using-wget">
                                            WGET
                                         </option>
+                                        <option value="rsync" id="using-rsync">
+                                            RSYNC
+                                         </option>
                                         <option value="powershell" id="using-powershell">
                                            PowerShell
                                         </option>
@@ -659,7 +677,7 @@
                   <div class="row">
                     <div class="col-sm-1 col-xs-1 col-md-1 col-lg-1">
                         <div class="dropdown">
-                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Generation
+                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Layers
                                 <span class="caret"></span></button>
                             <ul class="dropdown-menu" id='generation'>
                                 <li><a href="#" onclick="setGeneration('all')">All</a></li>
