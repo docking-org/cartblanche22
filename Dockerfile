@@ -15,9 +15,10 @@ RUN pip install -r requirements.txt
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends software-properties-common
 RUN add-apt-repository -y ppa:openjdk-r/ppa
+RUN apt-get update
 RUN apt-get install -y openjdk-8-jdk
 RUN apt-get install -y openjdk-8-jre
-RUN apt-get vim
+RUN apt-get install -y vim
 
 RUN update-alternatives --config java
 RUN update-alternatives --config javac
