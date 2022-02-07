@@ -13,7 +13,7 @@ ENV PATH /opt/conda/envs/cartblanche-rdkit-env/bin:$PATH
 RUN pip install -r requirements.txt
 
 RUN apt-get update
-RUN apt install gpg
+RUN apt install -y gpg
 RUN apt-get install -y --no-install-recommends software-properties-common
 RUN add-apt-repository -y ppa:openjdk-r/ppa
 RUN apt-get update
