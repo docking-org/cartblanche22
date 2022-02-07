@@ -93,7 +93,7 @@ def formatResults(results, file_type=None):
         return data
 
 
-class SearchJob(Resource):
+class SearchZinc(Resource):
     def post(self):
         data = request.form['myTextarea']
         file = request.files['zincfile'].read().decode("utf-8")

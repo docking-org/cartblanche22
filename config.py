@@ -14,7 +14,8 @@ class Config(object):
         # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
         # SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI_LOCAL_ZINC22")
 
-        #ZINC_SMALL_WORLD_SERVER = "http://localhost:5050"
+        
+        # ZINC_SMALL_WORLD_SERVER = "http://localhost:5584"
         ZINC_SMALL_WORLD_SERVER = "http://10.20.0.5:8080"
         # ZINC_SMALL_WORLD_SERVER = "http://swp.docking.org"
         TEMPLATES_AUTO_RELOAD = True
@@ -28,7 +29,7 @@ class Config(object):
         MAIL_DEFAULT_SENDER = os.getenv('MAIL_USERNAME')
         ADMINS = ['cartblanche20@gmail.com'] or [os.getenv('MAIL_USERNAME')]
 
-        CELERY_IMPORTS = ("app.data.tasks.search_zinc",)
+        CELERY_IMPORTS = ("app.data.tasks.search_zinc", "app.data.tasks.search_smiles")
         CELERY_BROKER_URL = 'redis://redis:6379/0'
         CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
