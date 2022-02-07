@@ -30,7 +30,7 @@ deploy job:
         - cartblanche22-dev
     script:
         #- docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
-        # - docker build -t "${CI_PROJECT_NAME}" .
+        - docker build -t "${CI_PROJECT_NAME}" .
         # - docker stop cartblanche22-dev
         # - docker rm cartblanche22-dev
         # - docker network create my_app
