@@ -73,7 +73,7 @@ def create_app(config_class=Config):
     from app.data.resources.catalog_content import CatalogContents, CatalogContent, CatalogContentList
     from app.data.resources.tranche import Tranches
 
-    from app.data.tasks.search_zinc import SearchJob
+    from app.data.tasks.search_zinc import SearchJobSubstance, SearchJobSupplier
 
     class MyModelView(ModelView):
         def is_accessible(self):
@@ -87,7 +87,8 @@ def create_app(config_class=Config):
     admin.add_view(MyModelView(DefaultPrices, db.session))
 
     api.add_resource(Search, '/search.<file_type>')
-    api.add_resource(SearchJob, '/searchJob')
+    api.add_resource(SearchJobSubstance, '/searchJobSubstance')
+    api.add_resource(SearchJobSupplier, '/searchJobSupplier')
     api.add_resource(Substance, '/substance')
     api.add_resource(Substances, '/substances.<file_type>')
     sublist_routes = [
