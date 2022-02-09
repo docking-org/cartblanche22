@@ -10,6 +10,8 @@ from rdkit.Chem.Descriptors import MolLogP
 from rdkit.Chem.SaltRemover import SaltRemover
 from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.inchi import MolToInchiKey
+from flask import current_app
+import psycopg2
 # from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 
 
@@ -28,6 +30,36 @@ def get_all_unique_tin_servers():
 
     return urls
 
+def get_tin_urls_from_ids(ids):
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
+    zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
+    conn = psycopg2.connect(zinc22_common_url, timeout=3)
+    tin_id_to_url_map = {}
+    with conn.cursor() as curs:
+        unique_ids = set(ids)
+        curs.execute("select tm.host, tm.port, tm.machine_id from (values {}) AS tq(machine_id) left join tin_machines AS tm on tq.machine_id = tm.machine_id".format(','.join(["({})".format(mid) for mid in unique_ids])))
+        for res in curs.fetchall():
+            host, port, machine_id = res
+            tin_id_to_url_map[machine_id] = current_app.config["SQLALCHEMY_BINDS"][host + ':' + port]
+    return tin_id_to_url_map
+
+def antimony_hashes_to_urls(hashes):
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
+    zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
+    conn = psycopg2.connect(zinc22_common_url, timeout=3)
+    hash_to_url_map = {}
+    with conn.cursor() as curs:
+        unique_hashes = set(hashes)
+        curs.execute(
+            "select am.host, am.port, t.hashseq from (\
+                select hashseq, partition from (values {}) AS tq(hash) left join antimony_hash_partitions AS ahp on tq.hash = ahp.hashseq\
+            ) AS t left join antimony_machines as am on t.partition = am.partition".format(','.join(["(\'{}\')".format(hseq) for hseq in unique_hashes])))
+        for res in curs.fetchall():
+            hashseq = res[2]
+            url = res[0] + ':' + res[1]
+            url_fmtd = "postgresql+psycopg2://antimonyuser:{}/antimony".format(url)
+            hash_to_url_map[hashseq] = url_fmtd
+    return hash_to_url_map
 
 def get_all_tin_url():
     urls = {}
