@@ -37,7 +37,8 @@ deploy job:
         # - docker rm cartblanche22-dev
         # - docker network create my_app
         - docker run --net my_app --name redis -d redis 
-        - docker run --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+        - mkdir /tmp/logs_${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}
+        - docker run -v /tmp/logs_${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}:/tmp/logs --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5066:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
         
     services:
         - redis:latest
