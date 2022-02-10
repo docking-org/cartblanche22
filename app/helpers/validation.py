@@ -75,12 +75,10 @@ def get_tin_urls_from_tranches(tranches):
         unique_tranches = set(tranches)
         curs.execute(
             "select tm.tranche, tm.host, tm.port from (values {}) as tq(tranche) left join tranche_mappings as tm on tq.tranche = tm.tranche\
-            ".format(','.join(["(\'{}\')".format(tranche for tranche in unique_tranches)]))
+            ".format(','.join(["(\'{}\')".format(tranche) for tranche in unique_tranches]))
         )
         for res in curs.fetchall():
             tranche, host, port = res
-            if not host:
-                continue
             host = socket.gethostbyname(host)
             tranche_to_url_map[tranche] = "postgresql+psycopg2://tinuser:usertin@{}:{}/tin".format(host, port)
     return tranche_to_url_map
