@@ -498,7 +498,7 @@ def getTinSupplier(dsn, codes, timeout=3):
         ".format(','.join(["({},\'{}\')".format(code[1], code[0]) for code in codes])))
 
     results = curs.fetchall()
-    results = [(r[0], r[1], tranchenamemap[r[2]], r[3]) for r in results]
+    results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
     conn.rollback()
     conn.close()
 
