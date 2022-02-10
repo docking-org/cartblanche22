@@ -59,6 +59,8 @@ def antimony_hashes_to_urls(hashes):
             ) AS t left join antimony_machines as am on t.partition = am.partition".format(','.join(["(\'{}\')".format(hseq) for hseq in unique_hashes])))
         for res in curs.fetchall():
             host, port, hashseq = res
+            if not host:
+                continue
             host = socket.gethostbyname(host)
             url_fmtd = "postgresql+psycopg2://antimonyuser@{}:{}/antimony".format(host, port)
             hash_to_url_map[hashseq] = url_fmtd
@@ -77,6 +79,8 @@ def get_tin_urls_from_tranches(tranches):
         )
         for res in curs.fetchall():
             tranche, host, port = res
+            if not host:
+                continue
             host = socket.gethostbyname(host)
             tranche_to_url_map[tranche] = "postgresql+psycopg2://tinuser:usertin@{}:{}/tin".format(host, port)
     return tranche_to_url_map

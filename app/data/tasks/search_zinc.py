@@ -157,6 +157,7 @@ def mergeResults(args):
 @celery.task
 def search20(zinc20):
     zinc20_response = None
+    data20 = None
     if len(zinc20) > 0:
         zinc20_files = {
             'zinc_id-in': zinc20,
