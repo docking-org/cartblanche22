@@ -2,7 +2,7 @@ FROM continuumio/anaconda3:latest
 
 WORKDIR /home/cartblanche22
 
-RUN chmod +x boot.sh
+COPY requirements.txt .
 
 RUN conda create -c rdkit -n cartblanche-rdkit-env rdkit -y
 RUN echo "conda activate cartblanche-rdkit-env" > ~/.bashrc
@@ -11,6 +11,7 @@ RUN pip install -r requirements.txt
 
 COPY app app
 COPY application.py config.py boot.sh requirements.txt ./
+RUN chmod +x boot.sh
 
 EXPOSE 5000
 
