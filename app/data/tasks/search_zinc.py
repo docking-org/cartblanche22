@@ -499,6 +499,7 @@ def getTinSupplier(dsn, codes, timeout=3):
 
     results = curs.fetchall()
     results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
+    print(results)
     conn.rollback()
     conn.close()
 
