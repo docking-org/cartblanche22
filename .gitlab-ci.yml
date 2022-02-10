@@ -34,10 +34,10 @@ deploy job:
         # - docker stop cartblanche22-dev
         # - docker rm cartblanche22-dev
         # - docker network create my_app
-        # - docker run --net my_app --name redis -d redis
+        - docker run --net my_app --name redis -d redis
         - docker run --net my_app -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
                      -v /home/s_jcastanon/smallworld-java:/home/s_jcastanon/smallworld-java
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
-                     --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+                     --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}
         
