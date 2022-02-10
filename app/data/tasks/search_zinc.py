@@ -198,26 +198,34 @@ logp_range_map_rev={e:b62_digits[i] for i, e in enumerate(logp_range)}
 def getSubstanceList(zinc_ids):
     #SEARCH STEP 3
 
-    urls = get_all_tin_url()
+    zinc_ids = [(base10(zinc_id), "H{:02d}{}".format(b62_digits.index(zinc_id[4]), logp_range[zinc_id[5]])) for zinc_id in zinc_ids]
+    tranche_to_url_map = get_tin_urls_from_tranches([zinc_id[1] for zinc_id in zinc_ids])
+    #urls = get_all_tin_url()
     url_to_ids_map = {}
 
     for zinc_id in zinc_ids:
-        if zinc_id:
 
-            url = urls.get(zinc_id[4:6])
-            if not url:
-                print("url not found", zinc_id)
-                continue
-            hac = b62_digits.index(zinc_id[4])
-            logp = logp_range[zinc_id[5]]
-            tranche = "H{:02d}{}".format(hac, logp)
+        url = tranche_to_url_map.get(zinc_id[1])
+        if not url:
+            print("tranche url not found!", zinc_id)
+	    continue
+        if not url_to_ids_map.get(url):
+	    url_to_ids_map[url] = [zinc_id]
+        else:
+            url_to_ids_map[url].append(zinc_id)
+    #if not url:
+            #    print("url not found", zinc_id)
+            #    continue
+            #hac = b62_digits.index(zinc_id[4])
+            #logp = logp_range[zinc_id[5]]
+            #tranche = "H{:02d}{}".format(hac, logp)
 
-            zinc_id = (base10(zinc_id), tranche)
+            #zinc_id = (base10(zinc_id), tranche)
 
-            if not url_to_ids_map.get(url):
-                url_to_ids_map = [zinc_id]
-            else:
-                url_to_ids_map.append(zinc_id)
+            #if not url_to_ids_map.get(url):
+            #    url_to_ids_map = [zinc_id]
+            #else:
+            #    url_to_ids_map.append(zinc_id)
 
             # pattern = "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
             #pattern = "^ZINC[1-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z]+"

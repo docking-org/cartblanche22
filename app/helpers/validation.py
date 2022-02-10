@@ -57,11 +57,28 @@ def antimony_hashes_to_urls(hashes):
         for res in curs.fetchall():
             hashseq = res[2]
             url = res[0] + ':' + res[1]
-            url_fmtd = "postgresql+psycopg2://antimonyuser:{}/antimony".format(url)
+            url_fmtd = "postgresql+psycopg2://antimonyuser@{}/antimony".format(url)
             hash_to_url_map[hashseq] = url_fmtd
     return hash_to_url_map
 
+def get_tin_urls_from_tranches(tranches):
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
+    zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
+    conn = psycopg2.connect(zinc22_common_url, timeout=3)
+    tranche_to_url_map = {}
+    with conn.cursor() as curs:
+        unique_tranches = set(tranches)
+        curs.execute(
+            "select tm.tranche, tm.host, tm.port from (values {}) as tq(tranche) left join tranche_mappings as tm on tq.tranche = tm.tranche\
+            ".format(','.join(["(\'{}\')".format(tranche for tranche in unique_tranches)]))
+        )
+        for res in curs.fetchall():
+            tranche, host, port = res
+            tranche_to_url_map[tranche] = "postgresql+psycopg2://tinuser:usertin@{}:{}/tin".format(host, port)
+    return tranche_to_url_map
+
 def get_all_tin_url():
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
     urls = {}
 
     tranches = TrancheModel.query.with_entities(
