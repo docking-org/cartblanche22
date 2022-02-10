@@ -12,6 +12,7 @@ from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.inchi import MolToInchiKey
 from flask import current_app
 import psycopg2
+import socket
 # from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 
 
@@ -40,7 +41,9 @@ def get_tin_urls_from_ids(ids):
         curs.execute("select tm.host, tm.port, tm.machine_id from (values {}) AS tq(machine_id) left join tin_machines AS tm on tq.machine_id = tm.machine_id".format(','.join(["({})".format(mid) for mid in unique_ids])))
         for res in curs.fetchall():
             host, port, machine_id = res
-            tin_id_to_url_map[machine_id] = current_app.config["SQLALCHEMY_BINDS"][host + ':' + port]
+            host = socket.gethostbyname(host)
+            url = "postgresql+psycopg2://tinuser:usertin@{}:{}/tin".format(host, port)
+            tin_id_to_url_map[machine_id] = url
     return tin_id_to_url_map
 
 def antimony_hashes_to_urls(hashes):
@@ -55,9 +58,9 @@ def antimony_hashes_to_urls(hashes):
                 select hashseq, partition from (values {}) AS tq(hash) left join antimony_hash_partitions AS ahp on tq.hash = ahp.hashseq\
             ) AS t left join antimony_machines as am on t.partition = am.partition".format(','.join(["(\'{}\')".format(hseq) for hseq in unique_hashes])))
         for res in curs.fetchall():
-            hashseq = res[2]
-            url = res[0] + ':' + res[1]
-            url_fmtd = "postgresql+psycopg2://antimonyuser@{}/antimony".format(url)
+            host, port, hashseq = res
+            host = socket.gethostbyname(host)
+            url_fmtd = "postgresql+psycopg2://antimonyuser@{}:{}/antimony".format(host, port)
             hash_to_url_map[hashseq] = url_fmtd
     return hash_to_url_map
 
@@ -74,6 +77,7 @@ def get_tin_urls_from_tranches(tranches):
         )
         for res in curs.fetchall():
             tranche, host, port = res
+            host = socket.gethostbyname(host)
             tranche_to_url_map[tranche] = "postgresql+psycopg2://tinuser:usertin@{}:{}/tin".format(host, port)
     return tranche_to_url_map
 
