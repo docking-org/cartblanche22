@@ -150,6 +150,7 @@ class SearchJobSubstance(Resource):
                 discarded.append(identifier)
         return zinc22, zinc20, discarded
 
+@celery.task
 def mergeResults(args):
     return args
 
