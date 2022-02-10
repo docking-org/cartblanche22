@@ -1,23 +1,15 @@
 import subprocess
+import re
+import os
+import tempfile
+
 from app.main import application
 
 from app.main.search import search_byzincid
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, reqparse
-
-from app.data.resources.substance import SubstanceList
 from flask import render_template, request, json, jsonify, flash, Flask, redirect,g 
-
-from app.data.models.tranche import TrancheModel
-
-from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
 from flask import jsonify, current_app, request, make_response
-from collections import defaultdict
-from app.data.resources.substance import SubstanceModel
-from flask_csv import send_csv
-from datetime import datetime
-import re
-
 from app import celery_worker
 from app.celery_worker import celery, flask_app, db
 from celery.result import AsyncResult
@@ -46,7 +38,7 @@ class SearchSmiles(Resource):
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         fileDataList = file.split('\n')
         files = {
-            'smiles-in': ','.join(textDataList + fileDataList),
+            'smiles-in': '\n'.join(textDataList + fileDataList),
             'dist': dist,
             'adist': adist,
         }
@@ -61,11 +53,20 @@ def search(args, file_type=None):
     smilelist = args['smiles-in']
     dist = args['dist']
     adist = args['adist']
+
+
     print(smilelist)
 
-    res = subprocess.Popen("SWDIR=/nfs/db3/private_smallworld_4th_gen/ java -jar /home/s_jcastanon/smallworld-java/sw.jar " \
-                           "sim -db /nfs/db3/private_smallworld_4th_gen/maps/zinc22-All.smi.anon.map -v -n0 -d {dist} -lup 0 -ldn 0 " \
-                           "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles}".format(smiles=smilelist, dist=dist), shell=True, stdout=subprocess.PIPE)
+    with tempfile.NamedTemporaryFile() as tmp:
+        print(tmp.name)
+        tmp.write(smilelist)
+
+        res = subprocess.Popen("SWDIR=/nfs/db3/private_smallworld_4th_gen/ java -jar /home/s_jcastanon/smallworld-java/sw.jar " \
+                            "sim -db /nfs/db3/private_smallworld_4th_gen/maps/zinc22-All.smi.anon.map -v -n0 -d {dist} -lup 0 -ldn 0 " \
+                            "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles}".format(smiles=tmp.name, dist=dist), shell=True, stdout=subprocess.PIPE)
+        
+        tmp.close()
+        os.unlink(tmp.name)
     result = res.stdout.read()
     print(result)
     result = result.decode().split('\n')

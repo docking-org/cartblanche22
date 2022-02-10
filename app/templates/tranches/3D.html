@@ -2,7 +2,7 @@
 {% block styles %}
     {{ super() }}
     <style>
-
+        
         .div-tranche {
             max-height: 74vh;
             overflow: scroll;
@@ -188,8 +188,7 @@
       
         .dropdown-menu{
             max-height:300px;
-            overflow-y:auto;
-            }
+            overflow-y:auto;   
         }
 
        
@@ -258,6 +257,8 @@
             'shards': [[0,41], [4,10]],
             'fragments': [[0, 41], [10, 17]],
             'flagments': [[0, 41], [15, 20]],
+            'lead-like': [[0,41], [17, 26]],
+            'goldilocks': [[16,36], [18, 24]],
             'small-leads': [[0, 41], [17, 20]],
             'medium-leads': [[0, 41], [20, 23]],
             'big-leads': [[0, 41], [23,26]],
@@ -298,8 +299,11 @@
             localStorage.setItem('3d', JSON.stringify(data));
             localStorage.setItem('cols3d', JSON.stringify(cols));
             localStorage.setItem('rows3d', JSON.stringify(rows));
+            var t = document.getElementById("numberToggle");
+            numberToggles(t);
             renderTrancheTable();
 
+            
             var ul = document.getElementById("generation");
             
             Object.keys(generation).forEach(element => {
@@ -327,6 +331,8 @@
                 li.appendChild(a);
                 ul.appendChild(li);                   
             });
+
+            
         });
 
         function renderTrancheTable() {
@@ -352,7 +358,7 @@
                         trancheChosenTotal = trancheChosenTotal || x.chosen
                     })
                     let cell = $('#' + i + '-' + j)
-                    cell.html(numberToggle ? bigNumber(trancheSizeTotal) : trancheSizeTotal)
+                    cell.html(!numberToggle ? bigNumber(trancheSizeTotal) : trancheSizeTotal)
                  
                     let td = $('#cell-' + i + '-' + j)
                     let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(trancheSizeTotal)) / log_total));
@@ -380,12 +386,12 @@
                     }
                 }
             }
+            
+            rowSize.forEach((val, index) => $('#row-sum-' + index).html(numberToggle ? val: bigNumber(val)))
+            colSize.forEach((val, index) => $('#col-sum-' + index).html(numberToggle ? val : bigNumber(val)))
 
-            rowSize.forEach((val, index) => $('#row-sum-' + index).html(numberToggle ? bigNumber(val) : val))
-            colSize.forEach((val, index) => $('#col-sum-' + index).html(numberToggle ? bigNumber(val) : val))
-
-            $('#tranche-total').html(numberToggle ? bigNumber(totalSize) : totalSize)
-            $('#tranche-count').html(numberToggle ? bigNumber(trancheCount) : trancheCount)
+            $('#tranche-total').html(numberToggle ? totalSize : bigNumber(totalSize))
+            $('#tranche-count').html(numberToggle ? trancheCount: bigNumber(trancheCount))
         }
 
         function colToggle(obj) {
@@ -698,20 +704,26 @@
                             </ul>
                         </div>
                     </div>
-               
-        
-            
+                    
                     <div class="pull-right top-button">
+                        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal"
+                            onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i></button>
+                    </div>
+            
+                    <div class="pull-right top-button btn-group dropleft">
                         <div class="dropdown">
-                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Predefined Subsets
+                            <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown"><i class="glyphicon glyphicon-th"></i>
                                 <span class="caret"></span></button>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu pull-right">
+                                <li class="dropdown-header">Predefined Subsets</li>
                                 <li><a href="#" onclick="setPredefined('all')">All</a></li>
                                 <li><a href="#" onclick="setPredefined('none')">None</a></li>
                                 <li class="divider"></li>
                                 <li><a href="#" onclick="setPredefined('shards')">Shards</a></li>
                                 <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
                                 <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
+                                <li><a href="#" onclick="setPredefined('lead-like')">Lead-like</a></li>
+                                <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
                                 <li><a href="#" onclick="setPredefined('small-leads')">Small Leads</a></li>
                                 <li><a href="#" onclick="setPredefined('medium-leads')">Medium Leads</a></li>
                                 <li><a href="#" onclick="setPredefined('big-leads')">Big Leads</a></li>
@@ -738,10 +750,7 @@
                             <span class="slider round"></span>
                         </label>
                     </div>
-                    <div class="pull-right top-button">
-                        <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal"
-                            onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i>Download</button>
-                    </div>
+                    
 
                     <div class="col-sm-5 col-xs-3 col-md-5 col-lg-6 top-bar pull-right">
                         Heavy Atom Count
