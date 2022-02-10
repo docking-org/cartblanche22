@@ -355,7 +355,7 @@ def format_tin_results(results_raw, trancheidmap):
     for res in results_raw:
         smiles, sub_id, tranche, supplier_code, cat_shortname = res
         # once we arrive at a new substance
-        if sub_id != sub_prev and tranche != tranche_prev:
+        if (sub_id, tranche) != (sub_prev, tranche_prev):
             # flush the entry we were just building to the data stack if it exists
             if curr_entry:
                 # uniq-ify the codes before adding to entry
@@ -373,7 +373,7 @@ def format_tin_results(results_raw, trancheidmap):
             # aint gonna argue with it
             curr_entry = {
                 'smiles': smiles,
-                'zinc_id':"ZINC{}{}".format(hp, base62(sub_id)),
+                'zinc_id':"ZINC{}{}".format(hp, base62(sub_id).zfill(10)),
                 'sub_id' : sub_id,
                 'tranche': get_new_tranche(tranche),
                 'tranche_details': get_compound_details(smiles),
