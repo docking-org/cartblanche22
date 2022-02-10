@@ -105,7 +105,7 @@ class SearchJobSubstance(Resource):
         ids = file + textDataList
 
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
-	print(ids)
+        print(ids)
 
         task = chord([search20.s(zinc20=zinc20), getSubstanceList.s(zinc22)])(mergeResults.s())
         return redirect('search/result_zincsearch?task={task}'.format(task = task.id))
@@ -145,7 +145,7 @@ class SearchJobSubstance(Resource):
                 continue
             else:
                 discarded.append(identifier)
-	return zinc22, zinc20, discarded
+        return zinc22, zinc20, discarded
 
 def mergeResults(args):
     return args
