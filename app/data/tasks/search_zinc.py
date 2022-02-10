@@ -208,9 +208,9 @@ def getSubstanceList(zinc_ids):
         url = tranche_to_url_map.get(zinc_id[1])
         if not url:
             print("tranche url not found!", zinc_id)
-	    continue
+            continue
         if not url_to_ids_map.get(url):
-	    url_to_ids_map[url] = [zinc_id]
+            url_to_ids_map[url] = [zinc_id]
         else:
             url_to_ids_map[url].append(zinc_id)
     #if not url:
