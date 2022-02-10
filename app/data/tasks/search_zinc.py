@@ -73,6 +73,7 @@ class SearchJobSupplier(Resource):
         file = file.split("\n")
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         codes = file + textDataList
+        print(codes)
 
         task = SearchJobSupplier.generate_code_search_tasks(codes)
         return redirect('/search/result_suppliersearch?task={}'.format(task))
