@@ -320,7 +320,7 @@ def getSubstance(dsn, ids, timeout=3):
         ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
 
     results = curs.fetchall()
-    results = [(r[0], r[1], tranchenamemap[r[2]], r[3]) for r in results]
+    results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
     conn.rollback()
     conn.close()
 
