@@ -3,7 +3,7 @@ stages:
   - deploy
 
 variables:
-    CI_PROJECT_NAME: cartblanche22-dev
+    CI_PROJECT_NAME: cartblanche22-jose
 
 services:
   - redis:latest
@@ -13,7 +13,7 @@ build job:
         - master
     stage: build
     tags:
-        - cartblanche22-dev
+        - cartblanche22-jose
     script:
         - sudo docker image prune -a -f
         # - docker build -t cartblanche22:latest .
@@ -27,7 +27,7 @@ deploy job:
     services:
         - redis:latest
     tags:
-        - cartblanche22-dev
+        - cartblanche22-jose
     script:
         #- docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
         - docker build -t "${CI_PROJECT_NAME}" .
@@ -35,11 +35,9 @@ deploy job:
         # - docker rm cartblanche22-dev
         # - docker network create my_app
         # - docker run --net my_app --name redis -d redis
-        - docker run -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
+        - docker run --net my_app -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
                      -v /home/s_jcastanon/smallworld-java:/home/s_jcastanon/smallworld-java
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
         
-    services:
-        - redis:latest
