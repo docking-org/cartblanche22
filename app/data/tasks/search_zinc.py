@@ -424,16 +424,16 @@ def getCodes(url, codes):
 
         curs.execute("\
             select cat_content_id, machine_id_fk, supplier_code from (\
-                select supplier_code, sup_id from temp_query AS tq left join supplier_codes AS sc on tq.code = sc.supplier_code\
+                select supplier_code, sup_id from temp_query AS tq(code) left join supplier_codes AS sc on tq.code = sc.supplier_code\
             ) AS t left join supplier_map AS sm on t.sup_id = sm.sup_id_fk\
         ")
     else:
 
         curs.execute("\
             select cat_content_id, machine_id_fk, supplier_code from (\
-                select supplier_code, sup_id from (values {}) AS tq left join supplier_codes AS sc on tq.code = sc.supplier_code\
+                select supplier_code, sup_id from (values {}) AS tq(code) left join supplier_codes AS sc on tq.code = sc.supplier_code\
             ) AS t left join supplier_map AS sm on t.sup_id = sm.sup_id_fk\
-        ".format(','.join(['\'' + c + '\'' for c in codes])))
+        ".format(','.join(['(\'' + c + '\')' for c in codes])))
 
     results = curs.fetchall()
     conn.rollback()
@@ -477,7 +477,7 @@ def getTinSupplier(dsn, codes, timeout=3):
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
                         select cat_content_fk, sub_id_fk, tranche_id from temp_query AS tq, catalog_substance AS cs where cs.cat_content_fk = tq.cat_content_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.supplier_code\
+                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
         ")
@@ -491,8 +491,8 @@ def getTinSupplier(dsn, codes, timeout=3):
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                        select cat_content_fk, sub_id_fk, tranche_id from (values {}) AS tq, catalog_substance AS cs where cs.cat_content_fk = tq.cat_content_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.supplier_code\
+                        select cat_content_fk, sub_id_fk, tranche_id from (values {}) AS tq(cat_content_id, supplier_code), catalog_substance AS cs where cs.cat_content_fk = tq.cat_content_id\
+                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
         ".format(','.join(["({},{})".format(code[1], code[0]) for code in codes])))
