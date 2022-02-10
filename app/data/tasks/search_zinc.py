@@ -75,7 +75,7 @@ class SearchJobSupplier(Resource):
         codes = file + textDataList
 
         task = SearchJobSupplier.generate_code_search_tasks(codes)
-        return redirect('search/result_suppliersearch?task={}'.format(task))
+        return redirect('/search/result_suppliersearch?task={}'.format(task))
 
     def generate_code_search_tasks(codes):
         url_to_codes_map = {}
@@ -92,8 +92,7 @@ class SearchJobSupplier(Resource):
             taskList.append(getCodes.s(url, codes))
 
         result = chord(taskList)(mergeCodeResultsAndSubmitTinSupplierJobs.s())
-        return result.id
-            
+        return result.id 
 
 class SearchJobSubstance(Resource):
 
@@ -108,7 +107,8 @@ class SearchJobSubstance(Resource):
         print(ids)
 
         task = chord([search20.s(zinc20=zinc20), getSubstanceList.s(zinc22)])(mergeResults.s())
-        return redirect('search/result_zincsearch?task={task}'.format(task = task.id))
+        
+        return redirect('/search/result_zincsearch?task={task}'.format(task = task.id))
 
     def filter_zinc_ids(ids):
         zinc22 = []
