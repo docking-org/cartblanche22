@@ -495,7 +495,7 @@ def getTinSupplier(dsn, codes, timeout=3):
                     ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ".format(','.join(["({},{})".format(code[1], code[0]) for code in codes])))
+        ".format(','.join(["({},\'{}\')".format(code[1], code[0]) for code in codes])))
 
     results = curs.fetchall()
     results = [(r[0], r[1], tranchenamemap[r[2]], r[3]) for r in results]
