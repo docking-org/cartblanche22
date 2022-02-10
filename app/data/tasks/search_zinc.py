@@ -299,7 +299,7 @@ def getSubstance(dsn, ids, timeout=3):
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
                         select cat_content_fk, sub_id_fk, cs.tranche_id from temp_query AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.supplier_code\
+                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
         ")
@@ -314,7 +314,7 @@ def getSubstance(dsn, ids, timeout=3):
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
                         select cat_content_fk, sub_id_fk, cs.tranche_id from (values {}) AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.supplier_code\
+                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
         ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
