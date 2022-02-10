@@ -38,7 +38,7 @@ def get_tin_urls_from_ids(ids):
     tin_id_to_url_map = {}
     with conn.cursor() as curs:
         unique_ids = set(ids)
-        curs.execute("select tm.host, tm.port, tm.machine_id from (values {}) AS tq(machine_id) left join tin_machines AS tm on tq.machine_id = tm.machine_id".format(','.join(["({})".format(mid) for mid in unique_ids])))
+        curs.execute("select tm.hostname, tm.port, tm.machine_id from (values {}) AS tq(machine_id) left join tin_machines AS tm on tq.machine_id = tm.machine_id".format(','.join(["({})".format(mid) for mid in unique_ids])))
         for res in curs.fetchall():
             host, port, machine_id = res
             host = socket.gethostbyname(host)
