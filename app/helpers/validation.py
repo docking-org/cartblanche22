@@ -67,7 +67,7 @@ def antimony_hashes_to_urls(hashes):
 def get_tin_urls_from_tranches(tranches):
     zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
     zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
-    conn = psycopg2.connect(zinc22_common_url, connect_timeout=3)
+    conn = psycopg2.connect(zinc22_common_url)
     tranche_to_url_map = {}
     with conn.cursor() as curs:
         unique_tranches = set(tranches)

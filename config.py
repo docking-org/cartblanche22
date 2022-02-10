@@ -38,7 +38,7 @@ class Config(object):
         SQLALCHEMY_BINDS = {
         # Server Database
         # 'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
-        'zinc22_common': 'postgresql+psycopg2://zincuser@10.20.1.17:5534/zinc22_common',
+        'zinc22_common': 'postgresql+psycopg2://zincuser:@10.20.1.17:5534/zinc22_common',
         'zinc22': 'postgresql+psycopg2://test:@10.20.0.38:5432/zinc22',
         'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
         '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5434/tin',
