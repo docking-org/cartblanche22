@@ -9,7 +9,7 @@ from flask import render_template, request, json, jsonify, flash, Flask, redirec
 
 from app.data.models.tranche import TrancheModel
 
-from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers, base62, get_new_tranche, get_compound_details, antimony_hashes_to_urls, get_tin_urls_from_ids
+from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers, base62, get_new_tranche, get_compound_details, antimony_hashes_to_urls, get_tin_urls_from_ids, get_tin_urls_from_tranches
 
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
 from flask import jsonify, current_app, request, make_response
