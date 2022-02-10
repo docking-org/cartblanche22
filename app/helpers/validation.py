@@ -33,7 +33,7 @@ def get_all_unique_tin_servers():
 def get_tin_urls_from_ids(ids):
     zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
     zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
-    conn = psycopg2.connect(zinc22_common_url, timeout=3)
+    conn = psycopg2.connect(zinc22_common_url, connect_timeout=3)
     tin_id_to_url_map = {}
     with conn.cursor() as curs:
         unique_ids = set(ids)
@@ -46,7 +46,7 @@ def get_tin_urls_from_ids(ids):
 def antimony_hashes_to_urls(hashes):
     zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
     zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
-    conn = psycopg2.connect(zinc22_common_url, timeout=3)
+    conn = psycopg2.connect(zinc22_common_url, connect_timeout=3)
     hash_to_url_map = {}
     with conn.cursor() as curs:
         unique_hashes = set(hashes)
@@ -64,7 +64,7 @@ def antimony_hashes_to_urls(hashes):
 def get_tin_urls_from_tranches(tranches):
     zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
     zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
-    conn = psycopg2.connect(zinc22_common_url, timeout=3)
+    conn = psycopg2.connect(zinc22_common_url, connect_timeout=3)
     tranche_to_url_map = {}
     with conn.cursor() as curs:
         unique_tranches = set(tranches)
