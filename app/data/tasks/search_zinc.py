@@ -298,7 +298,7 @@ def getSubstance(dsn, ids, timeout=3):
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                        select cat_content_fk, sub_id_fk, tranche_id from temp_query AS tq, catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
+                        select cat_content_fk, sub_id_fk, tranche_id from temp_query AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.supplier_code\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
@@ -313,7 +313,7 @@ def getSubstance(dsn, ids, timeout=3):
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                        select cat_content_fk, sub_id_fk, tranche_id from (values {}) AS tq, catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
+                        select cat_content_fk, sub_id_fk, tranche_id from (values {}) AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.supplier_code\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
