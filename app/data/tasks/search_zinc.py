@@ -87,6 +87,7 @@ class SearchJobSupplier(Resource):
         hashes = [hashlib.sha256(code.encode('utf-8')).digest()[-2:] for code in codes]
         urls = antimony_hashes_to_urls(hashes)
         for code, hashv in zip(codes, hashes):
+            hashv = hex(int.from_bytes(hashv, "little"))[-2:]
             url = urls[hashv]
             if not url_to_codes_map.get(url):
                 url_to_codes_map[url] = [code]
