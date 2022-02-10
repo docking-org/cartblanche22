@@ -53,6 +53,8 @@ def antimony_hashes_to_urls(hashes):
     hash_to_url_map = {}
     with conn.cursor() as curs:
         unique_hashes = set(hashes)
+        # right now zinc22_common only hold two hex digits, instead of the full 4, so we chop it down here
+        unique_hashes = [hex(int.from_bytes(hashv, "little"))[-2:] for hashv in unique_hashes]
         curs.execute(
             "select am.host, am.port, t.hashseq from (\
                 select hashseq, partition from (values {}) AS tq(hash) left join antimony_hash_partitions AS ahp on tq.hash = ahp.hashseq\
