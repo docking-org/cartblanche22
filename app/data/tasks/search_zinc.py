@@ -106,10 +106,10 @@ class SearchJobSubstance(Resource):
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
         print(zinc22, zinc20, discarded)
 
-	try:
-        	task = chord([search20.s(zinc20=zinc20), getSubstanceList.s(zinc22)])(mergeResults.s())
-	except Exception as e:
-		print("err", e)
+        try:
+            task = chord([search20.s(zinc20=zinc20), getSubstanceList.s(zinc22)])(mergeResults.s())
+        except Exception as e:
+            print("err", e)
         
         return redirect('/search/result_zincsearch?task={task}'.format(task = task.id))
 
