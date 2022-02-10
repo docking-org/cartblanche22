@@ -29,8 +29,8 @@ class Config(object):
         ADMINS = ['cartblanche20@gmail.com'] or [os.getenv('MAIL_USERNAME')]
 
         CELERY_IMPORTS = ("app.data.tasks.search_zinc",)
-        CELERY_BROKER_URL = 'redis://redis:6379/0'
-        CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+        CELERY_BROKER_URL = 'redis://redis2:6380/0'
+        CELERY_RESULT_BACKEND = 'redis://redis2:6380/0'
 
         # CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
         # CELERY_RESULT_BACKEND = 'redis://0.0.0.0:6379/0'

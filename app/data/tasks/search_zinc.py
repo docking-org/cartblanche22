@@ -96,6 +96,7 @@ class SearchJobSupplier(Resource):
             
 
 class SearchJobSubstance(Resource):
+
     def post(self):
         data = request.form['myTextarea']
         file = request.files['zincfile'].read().decode("utf-8")
@@ -104,9 +105,10 @@ class SearchJobSubstance(Resource):
         ids = file + textDataList
 
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
+	print(ids)
 
         task = chord([search20.s(zinc20=zinc20), getSubstanceList.s(zinc22)])(mergeResults.s())
-        return redirect(('search/result_zincsearch?task={task}'.format(task = task.id)))
+        return redirect('search/result_zincsearch?task={task}'.format(task = task.id))
 
     def filter_zinc_ids(ids):
         zinc22 = []
@@ -143,6 +145,7 @@ class SearchJobSubstance(Resource):
                 continue
             else:
                 discarded.append(identifier)
+	return zinc22, zinc20, discarded
 
 def mergeResults(args):
     return args
