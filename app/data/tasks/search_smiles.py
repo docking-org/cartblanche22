@@ -53,23 +53,19 @@ def search(args, file_type=None):
     smilelist = args['smiles-in']
     dist = args['dist']
     adist = args['adist']
-
-
-    print(smilelist)
+    result = []
 
     with tempfile.NamedTemporaryFile() as tmp:
-        print(tmp.name)
         tmp.write(smilelist)
-
+        tmp.flush()
         res = subprocess.Popen("SWDIR=/nfs/db3/private_smallworld_4th_gen/ java -jar /home/s_jcastanon/smallworld-java/sw.jar " \
-                            "sim -db /nfs/db3/private_smallworld_4th_gen/maps/zinc22-All.smi.anon.map -v -n0 -d {dist} -lup 0 -ldn 0 " \
-                            "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles}".format(smiles=tmp.name, dist=dist), shell=True, stdout=subprocess.PIPE)
-        
+                            "sim -db /nfs/db3/private_smallworld_4th_gen/maps/zinc22-All.smi.anon.map -v -n0 -d {adist} -lup 0 -ldn 0 " \
+                            "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles} | grep='={dist}'".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
+        res.wait()
+        result = res.stdout.read()
+        print(result)
         tmp.close()
-        os.unlink(tmp.name)
-    result = res.stdout.read()
-    print(result)
-    result = result.decode().split('\n')
+        result = result.decode().split('\n')
     hits = []
     for line in result:
         if 'ZINC' in line:
