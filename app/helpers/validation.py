@@ -75,6 +75,8 @@ def get_tin_urls_from_tranches(tranches):
     tranche_to_url_map = {}
     with conn.cursor() as curs:
         unique_tranches = set(tranches)
+        if len(unique_tranches) == 0:
+            return tranche_to_url_map
         curs.execute(
             "select tm.tranche, tm.host, tm.port from (values {}) as tq(tranche) left join tranche_mappings as tm on tq.tranche = tm.tranche\
             ".format(','.join(["(\'{}\')".format(tranche) for tranche in unique_tranches]))
