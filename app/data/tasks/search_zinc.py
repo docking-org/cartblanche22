@@ -271,7 +271,7 @@ def mergeSubstanceResults(results):
     return results_final
 
 @celery.task
-def getSubstance(dsn, ids, timeout=3):
+def getSubstance(dsn, ids, timeout=1):
     tstart = time.time()
     conn = psycopg2.connect(dsn, connect_timeout=timeout)
     curs = conn.cursor()
@@ -411,8 +411,8 @@ def mergeCodeResultsAndSubmitTinSupplierJobs(results):
     return chord(tasklist)(mergeSubstanceResults.s()).id
 
 @celery.task
-def getCodes(url, codes):
-    conn = psycopg2.connect(url)
+def getCodes(url, codes, timeout=1):
+    conn = psycopg2.connect(url, connect_timeout=timeout)
     curs = conn.cursor()
 
     if len(codes) > 5000:
@@ -442,7 +442,7 @@ def getCodes(url, codes):
     return results
 
 @celery.task
-def getTinSupplier(dsn, codes, timeout=3):
+def getTinSupplier(dsn, codes, timeout=1):
     tstart = time.time()
     conn = psycopg2.connect(dsn, connect_timeout=timeout)
     curs = conn.cursor()
