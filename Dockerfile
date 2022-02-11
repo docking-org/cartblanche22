@@ -13,6 +13,6 @@ COPY app app
 COPY application.py config.py boot.sh requirements.txt ./
 RUN chmod +x boot.sh
 
-EXPOSE 5066
+EXPOSE 5000
 
 ENTRYPOINT ["./boot.sh"]
