@@ -2,6 +2,10 @@
 {% block styles %}
     {{ super() }}
     <style>
+
+        .title-text{
+            font-size: 19px;
+        }
         
         .div-tranche {
             max-height: 74vh;
@@ -31,7 +35,11 @@
             width: max-content;
             display: table;
             margin: 0 auto;
-            b
+            
+        }
+
+        .last-col{
+            box-shadow: 0 0 0 .5px black inset;
         }
 
         th {
@@ -107,7 +115,7 @@
             color: black;
             
             
-            box-shadow: 0 0 0 .25px black inset;
+            box-shadow: 0 0 0 .5px black inset;
         }
 
         tfoot th:first-child {
@@ -753,7 +761,10 @@
                     
 
                     <div class="col-sm-5 col-xs-3 col-md-5 col-lg-6 top-bar pull-right">
-                        Heavy Atom Count
+                        <p class="title-text">
+                            Heavy Atom Count
+                        </p>
+                            
                     </div>
                 </div>
                   </div>
@@ -764,7 +775,7 @@
             <div class="col-sm-1 col-xs-1"
                  style="background-color: white; height:74vh;  color:black; border-left: 1px solid #ccc;
                  border-right:1px solid #ccc;width: 2em; font-weight: bold;">
-                <p style="transform: rotate(-90deg); top: 25em; position: sticky;">LogP</p>
+                <p class="title-text" style="transform: rotate(-90deg); top: 21em; position: sticky;">LogP</p>
             </div>
             <div style="background-color: grey; border-bottom: 1px solid #ccc">
                 <div class="div-tranche">
@@ -782,8 +793,8 @@
                                         </div>
                                     </th>
                                 {% endfor %}
-                                <th>
-                                    <div class="div-last">Totals, by logp</div>
+                                <th class="last-col">
+                                    <div class="div-last">Totals</div>
                                 </th>
                             </tr>
                         </thead>
@@ -807,17 +818,13 @@
                                         </div>
                                     </td>
                                 {% endfor %}
-                                <td>
-                                    <div class="div-last">
-                              <span>
-                            {{ axes[2][row] }}/{{ axes[1][row] }}
-                        </span>
-                                        <br/>
-                                        <span id="row-sum-{{ row }}">
-                            Sum {{ row }}
-                        </span>
-                                    </div>
-                                </td>
+                        <td class="last-col">
+                            <div class="div-last">
+                                <span id="row-sum-{{ row }}">
+                                    Sum {{ row }}
+                                </span>
+                            </div>
+                        </td>
 
 
                             </tr>
@@ -842,13 +849,9 @@
                                     </div>
                                 </th>
                             {% endfor %}
-                            <th>
+                            <th class="last-col">
                                 <div class="div-last">
-
-                                    Tranches: <span id="tranche-count"></span>
-
-                                    <hr>
-                                    Total: <span id="tranche-total"></span>
+                                   = <span id="tranche-total"></span>
                                 </div>
                             </th>
 
