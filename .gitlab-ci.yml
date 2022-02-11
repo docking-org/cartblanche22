@@ -36,7 +36,7 @@ deploy job:
         # - docker stop cartblanche22-dev
         # - docker rm cartblanche22-dev
         - NET=net_${CI_COMMIT_REF_NAME}
-        - docker network create -d bridge ${NET}
+        # - docker network create -d bridge ${NET}
         - docker run --net ${NET} --name redis2 -p 6380:6379 -d redis --port 6380
         #- mkdir -p /tmp/logs_${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}
         - docker run --net ${NET} --privileged -v /tmp/logs_${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}:/tmp/logs -v /etc/localtime:/etc/localtime:ro --name ${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME} -d -p 0.0.0.0:5066:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}

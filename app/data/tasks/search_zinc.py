@@ -93,6 +93,7 @@ class SearchJobSupplier(Resource):
                 url_to_codes_map[url] = [code]
             else:
                 url_to_codes_map[url].append(code)
+        print(urls)
         taskList = []
         for url, codes in url_to_codes_map.items():
             url = url.replace('+psycopg2', '')
@@ -424,18 +425,23 @@ def getCodes(url, codes, timeout=10):
 
         curs.execute("\
             select cat_content_id, machine_id_fk, supplier_code from (\
-                select supplier_code, sup_id from temp_query AS tq(code) left join supplier_codes AS sc on tq.code = sc.supplier_code\
+                select supplier_code, sup_id from temp_query AS tq(code), supplier_codes as sc where tq.code = sc.supplier_code\
             ) AS t left join supplier_map AS sm on t.sup_id = sm.sup_id_fk\
         ")
     else:
 
         curs.execute("\
             select cat_content_id, machine_id_fk, supplier_code from (\
-                select supplier_code, sup_id from (values {}) AS tq(code) left join supplier_codes AS sc on tq.code = sc.supplier_code\
+                select supplier_code, sup_id from (values {}) AS tq(code), supplier_codes AS sc where tq.code = sc.supplier_code\
             ) AS t left join supplier_map AS sm on t.sup_id = sm.sup_id_fk\
         ".format(','.join(['(\'' + c + '\')' for c in codes])))
 
     results = curs.fetchall()
+    uniq_results = set([res[2] for res in results])
+    uniq_inputs = set(codes)
+    #if len(uniq_results) < len(uniq_inputs):
+    #    print("FAILED TO FIND CODES @ {}:".format(url))
+    #    print(uniq_inputs.difference(uniq_results))
     conn.rollback()
     conn.close()
 
@@ -499,7 +505,7 @@ def getTinSupplier(dsn, codes, timeout=10):
 
     results = curs.fetchall()
     results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
-    print(results)
+    #print(results)
     conn.rollback()
     conn.close()
 
