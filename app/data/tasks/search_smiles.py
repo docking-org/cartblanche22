@@ -65,7 +65,7 @@ def search(args, file_type=None):
     res = subprocess.Popen("SWDIR=/nfs/db3/private_smallworld_4th_gen/ java -jar /home/s_jcastanon/smallworld-java/sw.jar" \
                            "sim -db /nfs/db3/private_smallworld_4th_gen/maps/zinc22-All.smi.anon.map -v -n0 -d {dist} -lup 0 -ldn 0" \
                            "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles}".format(smiles=smilelist, dist=dist), shell=True, stdout=subprocess.PIPE)
-    result = res.stdout.read()
+    result = res.stdout.read().decode('utf-8')
     print(result)
     result = result.split('\n')
     hits = []
