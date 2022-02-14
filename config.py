@@ -29,15 +29,15 @@ class Config(object):
         MAIL_DEFAULT_SENDER = os.getenv('MAIL_USERNAME')
         ADMINS = ['cartblanche20@gmail.com'] or [os.getenv('MAIL_USERNAME')]
 
-<<<<<<< HEAD
-        CELERY_IMPORTS = ("app.data.tasks.search_zinc",)
-        CELERY_BROKER_URL = 'redis://localhost:6380/0'
-        CELERY_RESULT_BACKEND = 'db+sqlite:///celerydb.sqlite'
-=======
+#<<<<<<< HEAD
+#       CELERY_IMPORTS = ("app.data.tasks.search_zinc",)
+#        CELERY_BROKER_URL = 'redis://localhost:6380/0'
+#        CELERY_RESULT_BACKEND = 'db+sqlite:///celerydb.sqlite'
+#=======
         CELERY_IMPORTS = ("app.data.tasks.search_zinc", "app.data.tasks.search_smiles")
         CELERY_BROKER_URL = 'redis://redis:6379/0'
-        CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
->>>>>>> origin/dev
+        CELERY_RESULT_BACKEND = 'db+sqlite:///celerydb2.sqlite'
+#>>>>>>> origin/dev
 
         # CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
         # CELERY_RESULT_BACKEND = 'redis://0.0.0.0:6379/0'
