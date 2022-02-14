@@ -137,7 +137,8 @@ def search_bysmiles():
             'dist': dist,
             'adist': adist,
         }
-        url = "https://cartblanche22.docking.org/smilelist"
+        # url = "https://cartblanche22.docking.org/smilelist"
+        url = "http://localhost:5000/smilelist"
         response = requests.post(url, data=files)
         print(response)
         if response:

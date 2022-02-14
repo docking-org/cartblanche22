@@ -53,7 +53,9 @@ class SmileList(Resource):
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
         smiles = new_args.get('smiles-in').split(',')
+        smiles.pop()
         new_args['smiles-in'] = smiles
+        print(smiles)
 
         return self.getList(new_args, file_type)
 

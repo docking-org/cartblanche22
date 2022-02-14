@@ -277,6 +277,18 @@
             "R" : true
         }
 
+        let chargeMap = {
+            "J" : "J -4",
+            "K" : "K -3",
+            "L" : "L -2",
+            "M" : "M -1",
+            "N" : "N 0",
+            "O" : "O +1",
+            "P" : "P +2",
+            "Q" : "Q +3",
+            "R" : "R +4"
+        }
+
 
     
         $(document).ready(function () {
@@ -311,7 +323,7 @@
                 li.setAttribute('data-val', element); 
                 $(li).toggleClass('active');
                 var a = document.createElement("a");
-                a.appendChild(document.createTextNode(element));
+                a.appendChild(document.createTextNode(chargeMap[element]));
                 li.appendChild(a);
                 ul.appendChild(li);                   
             });
