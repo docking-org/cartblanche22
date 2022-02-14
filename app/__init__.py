@@ -74,6 +74,7 @@ def create_app(config_class=Config):
     from app.data.resources.tranche import Tranches
 
     from app.data.tasks.search_zinc import SearchJobSubstance, SearchJobSupplier
+    from app.data.tasks.search_smiles import SearchSmiles
 
     class MyModelView(ModelView):
         def is_accessible(self):
@@ -89,6 +90,7 @@ def create_app(config_class=Config):
     api.add_resource(Search, '/search.<file_type>')
     api.add_resource(SearchJobSubstance, '/searchJobSubstance')
     api.add_resource(SearchJobSupplier, '/searchJobSupplier')
+    api.add_resource(SearchSmiles, '/searchSmiles')
     api.add_resource(Substance, '/substance')
     api.add_resource(Substances, '/substances.<file_type>')
     sublist_routes = [
