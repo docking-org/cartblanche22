@@ -18,11 +18,6 @@ from app.data.resources.substance import SubstanceModel
 from flask_csv import send_csv
 import time
 
-# have to do this so we don't get annoying recursion error
-import gevent.monkey
-
-gevent.monkey.patch_all()
-
 import requests
 from datetime import datetime
 import itertools
