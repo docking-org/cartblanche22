@@ -47,6 +47,6 @@ deploy job:
                      -v /home/s_jcastanon/smallworld-java:/home/s_jcastanon/smallworld-java
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
-                     --name ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+                     --name ${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
     services:
         - redis:latest
