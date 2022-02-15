@@ -34,7 +34,7 @@ def smiles_result():
         print(data)
              
         if len(data) == 0:
-            return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
+            return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return", 404)
         return render_template('search/result_smiles.html', data_json=data, data=data)
 
 class SearchSmiles(Resource):
