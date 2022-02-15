@@ -18,6 +18,11 @@ from app.data.resources.substance import SubstanceModel
 from flask_csv import send_csv
 import time
 
+from gevent import monkey
+    # from psycogreen.gevent import patch_psycopg
+    #
+#monkey.patch_all(subprocess=True, ssl=False)
+
 import requests
 from datetime import datetime
 import itertools
@@ -165,6 +170,7 @@ def mergeResults(args):
 
 @celery.task
 def search20(zinc20):
+    monkey.patch_all(subprocess=True, ssl=False)
     zinc20_response = None
     data20 = None
     if len(zinc20) > 0:
