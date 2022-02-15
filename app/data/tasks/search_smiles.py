@@ -46,7 +46,7 @@ class SearchSmiles(Resource):
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         fileDataList = file.split('\n')
 
-	allSmiles = [smi for smi in textDataList + fileDataList if smi != '']
+        allSmiles = [smi for smi in textDataList + fileDataList if smi != '']
         files = {
             'smiles-in': ','.join(allSmiles),
             'dist': dist,
