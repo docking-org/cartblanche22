@@ -170,7 +170,7 @@ def mergeResults(args):
 
 @celery.task
 def search20(zinc20):
-    monkey.patch_all(subprocess=True, ssl=False)
+    #monkey.patch_all(subprocess=True, ssl=False)
     zinc20_response = None
     data20 = None
     if len(zinc20) > 0:
