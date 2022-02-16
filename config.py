@@ -30,15 +30,17 @@ class Config(object):
         ADMINS = ['cartblanche20@gmail.com'] or [os.getenv('MAIL_USERNAME')]
 
         CELERY_IMPORTS = ("app.data.tasks.search_zinc", "app.data.tasks.search_smiles")
+        
         CELERY_BROKER_URL = 'redis://redis:6379/0'
-        CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+        CELERY_RESULT_BACKEND = 'db+sqlite:///celerydb2.sqlite'
 
         # CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
         # CELERY_RESULT_BACKEND = 'redis://0.0.0.0:6379/0'
   
         SQLALCHEMY_BINDS = {
         # Server Database
-        # 'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
+        #'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
+        'zinc22_common': 'postgresql+psycopg2://zincuser:@10.20.1.17:5534/zinc22_common',
         'zinc22': 'postgresql+psycopg2://test:@10.20.0.38:5432/zinc22',
         'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
         '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5434/tin',
@@ -193,6 +195,7 @@ class Config(object):
         '10.20.1.21:5446': 'postgresql+psycopg2://tinuser:usertin@10.20.1.21:5446/tin',
         
         # Local Database
+        # 'zinc22_common': 'postgresql+psycopg2://zincuser:@localhost:5584/zinc22_common',
         # 'zinc22': 'postgresql+psycopg2://test@localhost:2223/zinc22',
         # 'tin': 'postgresql+psycopg2://tinuser:usertin@localhost:5437/tin',
         # "10.20.1.16:5434": "postgresql+psycopg2://tinuser:usertin@localhost:5434/tin",

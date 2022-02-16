@@ -33,9 +33,9 @@ deploy job:
         - docker build -t "${CI_PROJECT_NAME}" .
         # - docker stop cartblanche22-dev
         # - docker rm cartblanche22-dev
-        # - docker network create my_app
-        - docker run --net my_app --name redis -d redis
-        - docker run --net my_app -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
+        - docker network create cartblanche
+        - docker run --net cartblanche --name redis -d redis
+        - docker run --net cartblanche -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
                      -v /home/s_jcastanon/smallworld-java:/home/s_jcastanon/smallworld-java
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
