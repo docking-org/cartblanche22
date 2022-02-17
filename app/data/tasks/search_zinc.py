@@ -117,6 +117,7 @@ class SearchJobSubstance(Resource):
 
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
         print(zinc22, zinc20, discarded)
+        zinc20 = zinc20search(zinc20)
 
         try:
             task = chord([search20.s(zinc20=zinc20), getSubstanceList.s(zinc22)])(mergeResults.s())
@@ -166,9 +167,8 @@ class SearchJobSubstance(Resource):
 def mergeResults(args):
     return args
 
-@celery.task
-def search20(zinc20):
-    #monkey.patch_all(subprocess=True, ssl=False)
+
+def zinc20search(zinc20):
     zinc20_response = None
     data20 = None
     if len(zinc20) > 0:
@@ -204,6 +204,10 @@ def search20(zinc20):
                         zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
         data20 = list(zinc20_data.values())
     return data20
+
+@celery.task
+def search20(zinc20):
+    return zinc20
 
 b62_digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
