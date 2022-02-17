@@ -61,7 +61,7 @@ def search(args, file_type=None):
         tmp.flush()
         res = subprocess.Popen("SWDIR=/nfs/db3/private_smallworld_4th_gen/ java -jar /home/s_jcastanon/smallworld-java/sw.jar " \
                             "sim -db /nfs/db3/private_smallworld_4th_gen/maps/zinc22-All.smi.anon.map -v -n0 -d {adist} -lup 0 -ldn 0 " \
-                            "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles} | grep='={dist}'".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
+                            "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles} | grep '={dist}'".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
         out, err = res.communicate()
         result = out.decode().split('\n')
     hits = []
