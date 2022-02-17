@@ -27,7 +27,7 @@
         .ui-tooltip {
             padding: 10px 20px;
             color: black;
-            width: 30%;
+           
             border-radius: 20px;
             font: 14px "Helvetica Neue", Sans-Serif;
         {#box-shadow: 0 0 7px black;#} opacity: 1;
@@ -279,6 +279,18 @@
         {% endwith %}
         {# application content needs to be provided in the app_content block #}
         {% block app_content %}{% endblock %}
+    </div>
+
+    <div class="container-fluid">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {# application content needs to be provided in the app_content block #}
+        {% block tranchebrowser %}{% endblock %}
     </div>
 
     <footer>

@@ -4,12 +4,16 @@ from app.data.models.ip_address import IPAddressModel
 from app.data.models.port_number import PortNumberModel
 import re
 from sqlalchemy import func
+from config import Config
 from rdkit.Chem import MolFromSmiles
 from rdkit.Chem.Descriptors import MolWt
 from rdkit.Chem.Descriptors import MolLogP
 from rdkit.Chem.SaltRemover import SaltRemover
 from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.inchi import MolToInchiKey
+from flask import current_app
+import psycopg2
+import socket
 # from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 
 
@@ -28,8 +32,66 @@ def get_all_unique_tin_servers():
 
     return urls
 
+def get_tin_urls_from_ids(ids):
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
+    zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
+    conn = psycopg2.connect(zinc22_common_url, connect_timeout=3)
+    tin_id_to_url_map = {}
+    with conn.cursor() as curs:
+        unique_ids = set(ids)
+        curs.execute("select tm.hostname, tm.port, tm.machine_id from (values {}) AS tq(machine_id) left join tin_machines AS tm on tq.machine_id = tm.machine_id".format(','.join(["({})".format(mid) for mid in unique_ids])))
+        for res in curs.fetchall():
+            host, port, machine_id = res
+            host = socket.gethostbyname(host)
+            url = "postgresql+psycopg2://tinuser:usertin@{}:{}/tin".format(host, port)
+            tin_id_to_url_map[machine_id] = url
+    return tin_id_to_url_map
+
+def antimony_hashes_to_urls(hashes):
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
+    zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
+    conn = psycopg2.connect(zinc22_common_url, connect_timeout=3)
+    hash_to_url_map = {}
+    with conn.cursor() as curs:
+        unique_hashes = set(hashes)
+        # right now zinc22_common only hold two hex digits, instead of the full 4, so we chop it down here
+        unique_hashes = [hex(int.from_bytes(hashv, "little"))[-2:] for hashv in unique_hashes]
+        curs.execute(
+            "select am.host, am.port, t.hashseq from (\
+                select hashseq, partition from (values {}) AS tq(hash) left join antimony_hash_partitions AS ahp on tq.hash = ahp.hashseq\
+            ) AS t left join antimony_machines as am on t.partition = am.partition".format(','.join(["(\'{}\')".format(hseq) for hseq in unique_hashes])))
+        for res in curs.fetchall():
+            host, port, hashseq = res
+            if not host:
+                continue
+            host = socket.gethostbyname(host)
+            url_fmtd = "postgresql+psycopg2://antimonyuser@{}:{}/antimony".format(host, port)
+            hash_to_url_map[hashseq] = url_fmtd
+    return hash_to_url_map
+
+def get_tin_urls_from_tranches(tranches):
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
+    zinc22_common_url = zinc22_common_url.replace('+psycopg2', '')
+    conn = psycopg2.connect(zinc22_common_url)
+    tranche_to_url_map = {}
+    with conn.cursor() as curs:
+        unique_tranches = set(tranches)
+        if len(unique_tranches) == 0:
+            return tranche_to_url_map
+        curs.execute(
+            "select tm.tranche, tm.host, tm.port from (values {}) as tq(tranche) left join tranche_mappings as tm on tq.tranche = tm.tranche\
+            ".format(','.join(["(\'{}\')".format(tranche) for tranche in unique_tranches]))
+        )
+        for res in curs.fetchall():
+            tranche, host, port = res
+            host = str(host).split('-')
+            ip = '10.20.'+host[1]+'.'+host[2] + ':' + str(port)
+            print(ip)
+            tranche_to_url_map[tranche] = Config.SQLALCHEMY_BINDS[ip]
+    return tranche_to_url_map
 
 def get_all_tin_url():
+    zinc22_common_url = current_app.config["SQLALCHEMY_BINDS"]["zinc22_common"]
     urls = {}
 
     tranches = TrancheModel.query.with_entities(

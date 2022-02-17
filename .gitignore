@@ -4,6 +4,8 @@ __pycache__/
 .DS_Store
 .idea/
 .nfs*
+sshhosts.csv
+sshtunnel.sh
 
 # C extensions
 *.so
@@ -29,6 +31,7 @@ var/
 .installed.cfg
 *.egg
 migrations1026
+config.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -64,8 +67,8 @@ docs/_build/
 target
 
 
-
-
+config.py
+/node_modules
 .env
 deployment/
 .flaskenv
