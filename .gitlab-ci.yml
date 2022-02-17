@@ -16,7 +16,7 @@ build job:
         - cartblanche2
     script:
         - sudo docker image prune -a -f
-        - sudo docker network prune -a -f
+        - sudo docker network prune -f
         - docker network create cartblanche
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
 
