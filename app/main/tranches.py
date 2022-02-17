@@ -1,3 +1,5 @@
+from inspect import trace
+from itertools import groupby
 from flask import render_template, request, Response
 from app.main import application
 import json
@@ -5,44 +7,96 @@ from app.data.models.tranche import TrancheModel
 from app.data.forms.tranchesForms import Download2DForm, Download3DForm
 
 
-def URIFormatter(hac, logp, format, add_url, charge):
-    return "{}{}{}/{}{}{}.{}".format(base_url, add_url, hac, hac, logp, charge, format)
+def URIFormatter(hac, logp, format, add_url, charge, generation):
+    if generation != '':
+        return "{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+    else:
+         return "{}{}{}/{}{}{}.{}".format(base_url, add_url, hac, hac, logp, charge, format)
 
+def WyntonFormatter(hac, logp, format, add_url, charge, generation):
+    return "/wynton/group/bks/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+    
+def BKSLabFormatter(hac, logp, format, add_url, charge, generation):
+    return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
-def DBFormatter(hac, logp, format, add_url, charge):
-    return "{}/{}{}{}.{}".format(hac, hac, logp, charge, format)
+def AWSFormatter(hac, logp, format, add_url, charge, generation):
+    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
+def OCIFormatter(hac, logp, format, add_url, charge, generation):
+    return "oci://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
-def CurlDownloader(hac, logp, format, add_url, charge):
-    return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format}". \
+def DBFormatter(hac, logp, format, add_url, charge, generation):
+    if generation != "":
+        return "zinc22{}/{}/{}{}{}.{}".format(generation, hac, hac, logp, charge, format)
+    else:
+        return "{}/{}{}{}.{}".format(hac, hac, logp, charge, format)
+
+def CurlDownloader(hac, logp, format, add_url, charge, generation):
+    if generation != '':
+        return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/". \
+        format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, generation=generation)
+    else: 
+        return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format}". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge)
 
 
-def WgetDownloader(hac, logp, format, add_url, charge):
-    return "mkdir -pv {hac} && wget {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} -O {hac}/{hac}{logp}{charge}.{format}". \
+def WgetDownloader(hac, logp, format, add_url, charge, generation):
+    if generation != '':
+        return "wget -nH -r -l7 -np -A '*-{charge}-*{format}' {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/". \
+        format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, generation=generation)
+    else:
+        return "mkdir -pv {hac} && wget {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} -O {hac}/{hac}{logp}{charge}.{format}". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge)
 
 
-def PowerShellDownloader(hac, logp, format, add_url, charge):
-    return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} " \
+def PowerShellDownloader(hac, logp, format, add_url, charge, generation):
+    if generation != '':
+        return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/ " \
+           "-OutFile {hac}/{hac}{logp}{charge}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url,
+                                                                add_url_2D=add_url, charge=charge, generation=generation)
+    else:
+        return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} " \
            "-OutFile {hac}/{hac}{logp}{charge}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url,
                                                                 add_url_2D=add_url, charge=charge)
-
+                                                
+def RsyncDownloader(tranches, format):
+    st = "mkdir zinc-22{generation} \npushd zinc-22{generation}\n".format(generation = tranches[0][0:1])
+    for tranche in tranches:
+        hac = tranche[1:4]
+        logp = tranche[4:8]
+        generation = tranche[0:1]
+        charge = tranche[-1]
+        st+= "rsync -Larv --include='*/' --include='zinc-22{generation}/{hac}/{hac}{logp}/[a-z]/' "\
+        "--include='[a-z]/{hac}{logp}-{charge}-*{format}' --exclude='*' --verbose " \
+        "rsync://files.docking.org/ZINC22-3D . \n" .\
+        format(hac=hac, logp=logp, format=format, base_url=base_url, charge=charge, generation=generation)
+    st+= "popd"
+    return st
 
 URI_MIMETYPE_TO_FORMATTER = {
     'text/uri-list': URIFormatter,
+    'text/bkslab': BKSLabFormatter,
+    'text/aws': AWSFormatter,
+    'text/oci': OCIFormatter,
+    'text/wynton': WyntonFormatter,
     'text/x-ucsf-dock-database_index': DBFormatter,
     'application/x-ucsf-zinc-uri-downloadscript-curl': CurlDownloader,
     'application/x-ucsf-zinc-uri-downloadscript-wget': WgetDownloader,
-    'application/x-ucsf-zinc-uri-downloadscript-powershell': PowerShellDownloader
+    'application/x-ucsf-zinc-uri-downloadscript-powershell': PowerShellDownloader,
+    'application/x-ucsf-zinc-uri-downloadscript-rsync': RsyncDownloader
 }
 
 URI_EXTENSION_TO_MIMETYPE = {
     'uri': 'text/uri-list',
+    'bkslab': 'text/bkslab',
+    'aws': 'text/aws',
+    'oci': 'text/oci',
+    'wynton': 'text/wynton',
     'database_index': 'text/x-ucsf-dock-database_index',
     'curl': 'application/x-ucsf-zinc-uri-downloadscript-curl',
     'wget': 'application/x-ucsf-zinc-uri-downloadscript-wget',
     'powershell': 'application/x-ucsf-zinc-uri-downloadscript-powershell',
+    'rsync': 'application/x-ucsf-zinc-uri-downloadscript-rsync',
 }
 
 base_url = 'http://files.docking.org/'
@@ -94,16 +148,16 @@ def tranches2d():
 
 @application.route('/tranches/3d', methods=['GET'])
 def tranches3d():
-    tranches = TrancheModel.query.filter(TrancheModel.charge != '-').all()
+    tranches = TrancheModel.query.filter(TrancheModel.charge != '-').filter(TrancheModel.generation != '-').all()
     cell3DNew = [[{'tranches': [], 'size': 0, 'chosen': False} for x in range(62)] for y in range(61)]
     unfilteredSize = 0
     for i in tranches:
         row_idx = axes[0].index(str(i.h_num))
         col_idx = axes[1].index(str(i.p_num))
         if i.sum == 0:
-            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': False, 'charge': i.charge})
+            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': False, 'charge': i.charge, 'generation': i.generation})
         else:
-            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': True, 'charge': i.charge})
+            cell3DNew[col_idx][row_idx]['tranches'].append({'size': i.sum, 'chosen': True, 'charge': i.charge, 'generation': i.generation})
         cell3DNew[col_idx][row_idx]['size'] += i.sum
         unfilteredSize += i.sum
     for i in cell3DNew:
@@ -127,7 +181,8 @@ def tranches2dDownload():
     def gen_tranches(tranche):
         hac = tranche[0:3]
         logp = tranche[3:7]
-        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_2D, '')
+        generation = ""
+        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_2D, '', generation)
 
     arr = map(gen_tranches, data_)
     data = '\n'.join(list(arr))
@@ -146,14 +201,26 @@ def tranches3dDownload():
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
     add_url_3D = 'zinc22/3d/'
 
-    def gen_tranches(tranche):
-        hac = tranche[0:3]
-        logp = tranche[3:7]
-        charge = tranche[-1]
-        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge)
+    data_ = sorted(data_)
 
-    arr = map(gen_tranches, data_)
-    data = '\n'.join(list(arr))
+    def gen_tranches(tranche):
+        print(tranche)
+        hac = tranche[1:4]
+        logp = tranche[4:8]
+        generation = tranche[0:1]
+        charge = tranche[-1]
+        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
+
+ 
+    if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
+        util_func = lambda x: x[0]
+        temp = sorted(data_, key = util_func)
+        res = [list(ele) for i, ele in groupby(temp, util_func)]
+        arr = [RsyncDownloader(x, format) for x in res]
+        data = '\n'.join(list(arr))
+    else:    
+        arr = map(gen_tranches, data_)
+        data = '\n'.join(list(arr))
     download_filename = 'ZINC22-downloader-3D-{}.{}'.format(format, using)
     response = Response(data, mimetype=mimetype)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
