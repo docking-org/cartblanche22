@@ -6,7 +6,7 @@ from sqlalchemy.orm import load_only
 import random
 import sqlalchemy as sa
 from app.data.models.tin.tranches_mapping import Tranches
-
+from app.data.models.tin.catalog import CatalogSubstanceModel
 
 TABLE_ROW_COUNT_SQL = \
     """ SELECT CAST(reltuples AS BIGINT) AS num_rows

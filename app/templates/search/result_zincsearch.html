@@ -30,9 +30,11 @@
     {{ super() }}
     <script>
         $(document).ready(() => {
+            let datas22 = {{ data22 | tojson }};
+            let datas20 = {{ data20 | tojson}};
+           
+            console.log(datas22);
 
-            let datas22 = {{ data22_json|safe }};
-            let datas20 = {{ data20_json|safe }};
             if (datas22 == null){
                 datas22 = []
             }
@@ -100,28 +102,39 @@
 
             function addAddedClass(){
                 let count = 0;
-                datas22.forEach(e => {
-                    map22.set(e.zinc_id, e)
-                    let inCart = shoppingCart.inCart(e.zinc_id)
-                    if (inCart) {
-                        count++;
-                        $('#' + e.zinc_id).addClass('added')
-                    }
-                })
-                datas20.forEach(e => {
-                    map20.set(e.zinc_id, e)
-                    let inCart = shoppingCart.inCart(e.zinc_id)
-                    if (inCart) {
-                        count++;
-                        $('#' + e.zinc_id).addClass('added')
-                    }
-                })
+                
                 if (datas22.length > 0){
-                   $('#zinc22-tab').click();
+                    $('#zinc22-tab').click();
+                }
+                else if(datas20.length > 0){
+                    $('#zinc20-tab').click();
+                }
+
+                if (datas22.length > 0){
+                   
+                    datas22.forEach(e => {
+                        map22.set(e.zinc_id, e)
+                        let inCart = shoppingCart.inCart(e.zinc_id)
+                        if (inCart) {
+                            count++;
+                            $('#' + e.zinc_id).addClass('added')
+                        }
+                    });
                 }
                 if (datas20.length > 0){
-                   $('#zinc20-tab').click();
+                   
+
+                   datas20.forEach(e => {
+                        map20.set(e.zinc_id, e)
+                        let inCart = shoppingCart.inCart(e.zinc_id)
+                        if (inCart) {
+                            count++;
+                            $('#' + e.zinc_id).addClass('added')
+                        }
+                    })
                 }
+              
+               
                 if (count > datas22.length / 2) {
                     $('#deleteAll22').show();
                     $('#addAll22').hide();
@@ -137,8 +150,23 @@
                     $('#addAll20').show();
                     $('#deleteAll20').hide();
                 }
-
             };
+
+            /* function update_progress() {
+                // send GET request to status URL
+
+                $.ajax({
+                    url: "/searchJob?task=bfcdd260-5056-4b3a-960f-9f9cd81ca8d8",
+                    type: "get",
+                
+                    success: function(response) {
+                        datas22 = response;
+                    },
+                    error: function(xhr) {
+                        //Do Something to handle error
+                    }
+                 });
+            } */
 
         });
     </script>

@@ -27,7 +27,6 @@ from app.email_send import send_search_log
 #     XmlFormatter,
 # )
 
-
 logging.basicConfig(filename="std.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
@@ -46,6 +45,7 @@ mimetypes = {
 
 class SubstanceList(Resource):
     def post(self, file_type=None):
+        #SEARCH STEP 2
         args = request.values.to_dict()
         zinc_ids = request.values.get('zinc_id-in').split(',')
         args['zinc_id-in'] = zinc_ids
@@ -53,6 +53,8 @@ class SubstanceList(Resource):
 
     @classmethod
     def getList(cls, args, file_type=None):
+        #SEARCH STEP 3
+        print(args)
         zinc_ids = sorted(args.get('zinc_id-in'))
         output_fields = ""
         if args.get('output_fields'):
@@ -69,8 +71,8 @@ class SubstanceList(Resource):
         if args.get('timeout'):
             timeout = args.get('timeout')
 
+    
         urls = get_all_tin_url()
-
 
         for zinc_id in zinc_ids:
             if zinc_id:
@@ -97,7 +99,7 @@ class SubstanceList(Resource):
                 dict_zinc_ids[url].append(zinc_id)
                 dict_subid_zinc_id[int(base10(zinc_id))].append(zinc_id)
 
-        url = 'https://{}/substance'.format(request.host)
+        url = 'http://{}/substance'.format(request.host)
 
         for k, v in dict_ids.items():
             print("TIN URLS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
@@ -106,6 +108,7 @@ class SubstanceList(Resource):
             # print( 'tin_url', k.split('-')[0])
             # print(k, v)
 
+        #SEARCH STEP 4, DO REQUEST FOR ALL URLS
         resp = (grequests.post(url,
                                data={
                                    'sub_ids': ','.join([str(i) for i in v]),
@@ -115,16 +118,17 @@ class SubstanceList(Resource):
                                }, timeout=timeout) for k, v in dict_ids.items())
 
         data = defaultdict(list)
+        
         results = [json.loads(res.text) for res in grequests.map(resp) if res and res.status_code != 404]
-
+    
         flat_list = itertools.chain.from_iterable(results)
         data['items'] = list(flat_list)
 
         # gets search info with 'not found ids' from flat list
         data['search_info'] = [d['search_info'] for d in data['items'] if 'search_info' in d and d['search_info']['not_found_ids'] != 'All found']
 
-        if len(data['search_info']) > 0:
-            send_search_log(data['search_info'])
+        #if len(data['search_info']) > 0:
+            #send_search_log(data['search_info'])
 
         # gets only results from flat list
         data['items'] = [d for d in data['items'] if 'search_info' not in d]
