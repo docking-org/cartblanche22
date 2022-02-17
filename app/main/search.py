@@ -151,7 +151,7 @@ def search_bysmiles():
 @application.route('/search/search_bysupplier', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
-        text = Markup('Warning: the supplier code search is quite slow at the moment, and may not always give full results.<br>\
+        text = Markup('Warning: the supplier code search may not always give full results.<br>\
             If you are unable to locate molecules from a given supplier code, please contact us. <br>\
             <br>\
             To contact the cartblanche team, compose an email to one or all of the following recipients:<br>\
