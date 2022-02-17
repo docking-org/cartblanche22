@@ -3,7 +3,7 @@ stages:
   - deploy
 
 variables:
-    CI_PROJECT_NAME: cartblanche22-jose
+    CI_PROJECT_NAME: molecule-shopping-cart
 
 services:
   - redis:latest
@@ -13,31 +13,30 @@ build job:
         - master
     stage: build
     tags:
-        - cartblanche22-jose
+        - cartblanche22
     script:
         - sudo docker image prune -a -f
-        # - docker build -t cartblanche22:latest .
-        # - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
+        - sudo docker network prune -a -f
+        - docker network create cartblanche
+        - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
 
 deploy job:
     only:
         - master
-
     stage: deploy
     services:
         - redis:latest
     tags:
-        - cartblanche22-jose
+        - cartblanche22
     script:
-        #- docker run -d -p 0.0.0.0:5068:5000 cartblanche22:latest
-        - docker build -t "${CI_PROJECT_NAME}" .
-        # - docker stop cartblanche22-dev
-        # - docker rm cartblanche22-dev
-        - docker network create cartblanche
+        - docker stop ${CI_PROJECT_NAME}
+        - docker rm ${CI_PROJECT_NAME}
+        - docker stop redis
+        - docker rm redis
         - docker run --net cartblanche --name redis -d redis
         - docker run --net cartblanche -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
                      -v /home/s_jcastanon/smallworld-java:/home/s_jcastanon/smallworld-java
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
-                     --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5067:5000 ${CI_PROJECT_NAME}
+                     --name ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
         

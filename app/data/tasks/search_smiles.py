@@ -71,6 +71,7 @@ def search(args, file_type=None):
             row = line.split(' ')
             data['hitMappedSmiles'] = row[3]
             data['zinc_id'] = row[4]
-            hits.append(data)
+            if data not in hits: 
+                hits.append(data)
 
     return hits
