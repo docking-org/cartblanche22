@@ -4,10 +4,11 @@ boto3==1.17.69
 bcrypt==3.1.7
 blinker==1.4
 cachetools==4.1.0
+Celery==5.2.0
 certifi==2020.6.20
 cffi==1.13.2
 chardet==3.0.4
-Click==7.0
+Click==8.0.3
 cryptography==2.8
 csvalidate==1.1.1
 dominate==2.4.0
@@ -24,6 +25,7 @@ Flask-RESTful==0.3.8
 Flask-SQLAlchemy==2.4.4
 Flask-User==0.6.21
 Flask-WTF==0.14.3
+Flower
 gevent==20.9.0
 google-api-core==1.20.0
 google-api-python-client==1.9.3
@@ -62,6 +64,7 @@ python-dateutil==2.8.0
 python-dotenv==0.14.0
 python-editor==1.0.4
 pytz==2020.1
+redis-server
 requests==2.24.0
 requests-futures==1.0.0
 requests-oauthlib==1.3.0
@@ -82,4 +85,4 @@ zope.interface==5.2.0
 flask_jsontools
 dicttoxml
 gunicorn
-
+redis
