@@ -13,7 +13,7 @@ build job:
         - master
     stage: build
     tags:
-        - cartblanche22
+        - cartblanche2
     script:
         - sudo docker image prune -a -f
         - sudo docker network prune -a -f
@@ -27,7 +27,7 @@ deploy job:
     services:
         - redis:latest
     tags:
-        - cartblanche22
+        - cartblanche2
     script:
         - docker stop ${CI_PROJECT_NAME}
         - docker rm ${CI_PROJECT_NAME}
