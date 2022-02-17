@@ -148,9 +148,14 @@ class SearchJobSubstance(Resource):
                 identifier = identifier.replace('C', 'ZINC')
                 print(identifier)
                 
-            if identifier.isnumeric() or identifier[4:6] == '00':
+            if identifier[4:6] == '00':
                 zinc20.append(identifier)
                 continue
+
+            if identifier.isNumeric():
+                id = 'ZINC' + ((12 - len(identifier)) * '0') + identifier
+                zinc20.append(id)
+
             elif identifier[0:4].upper() == 'ZINC':
                 if(identifier[4:5].isalpha()):
                     zinc22.append(identifier)
@@ -170,13 +175,13 @@ def mergeResults(args):
 
 def zinc20search(zinc20):
     zinc20_response = None
-    data20 = None
+    data20 = []
     if len(zinc20) > 0:
         zinc20_files = {
             'zinc_id-in': zinc20,
             'output_fields': "zinc_id supplier_code smiles substance_purchasable"
         }
-        zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)
+        zinc20_response = requests.post("https://zinc20.docking.org/catitems.txt", data=zinc20_files)
 
     if zinc20_response:
         zinc20_data = {}
