@@ -152,9 +152,11 @@ class SearchJobSubstance(Resource):
                 zinc20.append(identifier)
                 continue
 
-            if identifier.isNumeric():
+            elif identifier.isnumeric():
                 id = 'ZINC' + ((12 - len(identifier)) * '0') + identifier
                 zinc20.append(id)
+                continue
+            
 
             elif identifier[0:4].upper() == 'ZINC':
                 if(identifier[4:5].isalpha()):
