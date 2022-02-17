@@ -16,7 +16,7 @@ build job:
         - cartblanche2
     script:
         - sudo docker image prune -a -f
-        - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
+       
 
 deploy job:
     only:
@@ -27,6 +27,7 @@ deploy job:
     tags:
         - cartblanche2
     script:
+        - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop ${CI_PROJECT_NAME}
         - docker rm ${CI_PROJECT_NAME}
         - docker stop redis
