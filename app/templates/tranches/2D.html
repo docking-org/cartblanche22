@@ -225,14 +225,14 @@
         
         $(document).ready(function () {
             console.log("2D")
-            var t = document.getElementById("numberToggle");
-            numberToggles(t);
             let data = {{ cell2DNew | safe }};
             let cols = new Array(62).fill(true);
             let rows = new Array(61).fill(true);
             localStorage.setItem('twoD', JSON.stringify(data));
             localStorage.setItem('cols', JSON.stringify(cols));
             localStorage.setItem('rows', JSON.stringify(rows));
+            var t = document.getElementById("numberToggle");
+            numberToggles(t);
             renderTrancheTable();
         });
 
