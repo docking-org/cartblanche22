@@ -65,7 +65,7 @@ let shoppingCart = (function () {
         let curIndex = 0;
         if (db === 'zinc22' && catalog !== null) {
             for (let s = 0; s < catalog.length; s++) {
-                let short_name = catalog[s].short_name.toLowerCase();
+                let short_name = catalog[s].catalog_name.toLowerCase();
                 let def_price = null;
                 if (!short_name.includes('zinc')) {
                     if (short_name === 'wuxi') {

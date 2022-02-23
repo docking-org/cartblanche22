@@ -156,6 +156,7 @@ class SubstanceList(Resource):
 
 class Substance(Resource):
     def post(self, file_type=None):
+        
         args = request.values
         sub_id_list = args.get('sub_ids').split(',')
         zinc_id_list = args.get('zinc_ids').split(',')

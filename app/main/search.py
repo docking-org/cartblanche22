@@ -2,7 +2,7 @@ from flask import render_template, request, json, jsonify, flash, Markup
 from app.main import application
 import requests
 from app.data.models.default_prices import DefaultPrices
-from app.data.resources.substance import SubstanceList
+from app.data.resources.substance import Substance, SubstanceList
 from flask_login import current_user
 import urllib.parse
 import re
@@ -230,22 +230,23 @@ def searchZinc20(identifier):
 @application.route('/searchZinc/<identifier>')
 def searchZinc(identifier):
     files = {
-        'zinc_id': identifier
+        'zinc_id-in': [identifier]
     }
-    # url = 'http://{}/search.json'.format(request.host)
-    url = base_url + 'search.json'
+    url = 'http://{}/search.json'.format(request.host)
+    #url = base_url + 'search.json'
     print(url)
     print(identifier)
-    response = requests.get(url, params=files)
+    #response = requests.get(url, params=files)
+    response = SubstanceList.getList(args=files)
+    
     if response:
         role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
             role = 'ucsf'
         else:
             role = 'public'
-        print(response)
-        data = response.json()
-        print(data)
+        data= json.loads(response.data.decode())
+        print(data['items'])
         catalogs = data['items'][0]['catalogs']
         prices = []
         zinc20_stock = None
