@@ -32,6 +32,7 @@
             if (localStorage.getItem('checkCart') == "True") {
                 cartCheck('{{is_authenticated}}', '{{cart|safe}}');
             }
+            
             const table = $('#table').DataTable({
                 "language": {
                     "emptyTable": "Cart is empty"
@@ -56,7 +57,7 @@
                             if (data.db.includes('zinc22')) {
                                 return "<a href='/searchZinc/" + data.identifier + "'><p id=''>" + data.identifier + "<br/>" + data.db + "</p></a>";
                             } else {
-                                return "<a><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
+                                return "<a href='/searchZinc20/" + data.identifier + "'><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
                             }
                         }
                     },

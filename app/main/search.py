@@ -1,5 +1,12 @@
+from app.data.models.vendors import Vendors
+from sqlalchemy.sql.expression import true
+from app.data.models.tin.catalog import CatalogModel
 from flask import render_template, request, json, jsonify, flash, Markup
 from app.main import application
+
+from gevent import monkey as curious_george
+curious_george.patch_all(thread=False, select=False)
+
 import requests
 from app.data.models.default_prices import DefaultPrices
 from app.data.resources.substance import SubstanceList
@@ -224,7 +231,70 @@ def search_smiles_vendor():
 
 @application.route('/searchZinc20/<identifier>')
 def searchZinc20(identifier):
-    pass
+    zinc20_files = {
+            'zinc_id-in': [identifier],
+            'output_fields': "zinc_id supplier_code smiles substance_purchasable catalog inchikey"
+    }
+    response = requests.post("https://zinc20.docking.org/catitems/subsets/for-sale.json", data=zinc20_files)
+    print(response)
+    if response:
+        role = ''
+        if current_user.is_authenticated and current_user.has_roles('ucsf'):
+            role = 'ucsf'
+        else:
+            role = 'public'
+        data= json.loads(response.text)
+        
+        
+        result = {}
+        catalogs = []
+        supplierCodes= []
+        
+        smile = data[0]['smiles']
+        max = 0
+        for item in data:
+            item['catalog']['catalog_name'] = item['catalog']['short_name']
+            cat = CatalogModel.query.filter_by(short_name = item['catalog']['short_name']).first()
+            if item['substance_purchasable'] > max:
+                catalogs = [item['catalog']]
+                supplierCodes = [item['supplier_code']]
+                max = item['substance_purchasable']
+        result['smiles'] = smile
+        c = catalogs[0]  
+        result['supplier'] = [{
+            'assigned': True,
+            'cat_name': c['name'],
+            'price': 240,
+            'purchase': 1,
+            'quantity': 10,
+            'shipping': "6 weeks",
+            'supplier_code': supplierCodes[0],
+            'unit': "mg"
+        }]
+        result['catalogs'] = catalogs
+        result['tranche'] = 'here'
+        result['zinc20'] = true
+        result['tranche_details'] = {}
+        result['tranche_details']['inchi_key'] = data[0]['inchikey']
+        result['supplier_code'] = supplierCodes
+        
+        
+        prices = [{
+                'category_name' : c['name'],
+                'short_name': c['short_name'],
+                'unit' :'10mg',
+                'price': '10.0',
+                'shipping': '6 weeks'
+        }]
+          
+       
+        return render_template('molecule/mol_index.html', data=result, prices=prices,
+                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock='zinc20_stock')
+    else:
+        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
+
+
 
 
 @application.route('/searchZinc/<identifier>')
@@ -232,23 +302,21 @@ def searchZinc(identifier):
     files = {
         'zinc_id': identifier
     }
-    # url = 'http://{}/search.json'.format(request.host)
-    url = base_url + 'search.json'
-    print(url)
-    print(identifier)
-    response = requests.get(url, params=files)
+   
+    response = SubstanceList.getList(args=files)
+    
     if response:
         role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
             role = 'ucsf'
         else:
             role = 'public'
-        print(response)
-        data = response.json()
+        data= json.loads(response.data.decode())
         print(data)
         catalogs = data['items'][0]['catalogs']
         prices = []
-        zinc20_stock = None
+       
+        
         for i in range(len(catalogs)):
             c = catalogs[i]
             s = c['catalog_name'].lower()
@@ -264,13 +332,10 @@ def searchZinc(identifier):
             # else:
             #     pass
             #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-        print(zinc20_stock)
         smile = data['items'][0]['smiles']
-        print('data', data['items'][0])
-        print('prices', prices)
-        print('response', response)
-        print('identifer', identifier)
-        return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices,
+        data['items'][0]['zinc20']= False
+        data['items'][0]['supplier']= []
+        return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices, 
                                smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
         return render_template('errors/search404.html', lines=files, href='/search/zincid',

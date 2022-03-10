@@ -303,7 +303,7 @@ function molChanged(smiles) {
     if (config.WebApp.SearchAsYouDraw) {
                 newSearch(smiles);
         //adding hg database check
-        checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)
+        //checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)
     }
 }
 
@@ -419,8 +419,9 @@ function stopStreaming() {
 function init_table(table, url) {
     if (!dtable) {
         $('#splash').css('display', 'none');
-        var columns = [{
-            "title": "Compound (<input type='checkbox' name='optColEdits' onchange='toggle_color()'>Color, <input type='checkbox' name='optAlign' onchange='toggle_align()'>Align)",
+        var columns = [
+            {
+            "title": "<span class='glyphicon glyphicon-shopping-cart'/>&nbsp&nbsp&nbsp&nbsp&nbsp  Compound (<input type='checkbox' name='optColEdits' onchange='toggle_color()'>Color, <input type='checkbox' name='optAlign' onchange='toggle_align()'>Align)",
             "name": "alignment",
             "class": "compound",
             "sortable": false,
@@ -491,7 +492,7 @@ function hide_imgpop() {
 function show_imgpop(img) {
     var popup = $('#imgpop');
     popup.empty();
-    popup.append('<img width="300px" height="180px" src="' + img.src + '"/>');
+    popup.append('<img width="300px" height="180px"  src="' + img.src + '"/>');
     var offset = $(img).offset();
     popup.css('left', offset.left + 160 + 'px');
     popup.css('top', offset.top - 50 + 'px');
@@ -546,8 +547,8 @@ function flex_renderer(data, type, row) {
 
 function hit_renderer(data, type, row) {
     var table = $("<table class='compound_cell'></table>");
-    var img = $('<img width="150px" height="90px" />');
-    let button = $('<button type="button" class="btn btn-info">Add to Cart</button>')
+    var img = $('<img width="100px" height="90px" />');
+    let button = $('<input type="checkbox" style="width:25px" />')
     var color = $('input[name="optColEdits"]').prop('checked');
     var align = $('input[name="optAlign"]').prop('checked');
     var base_url = config.WebApp.DepictionUrl;
@@ -593,6 +594,7 @@ function hit_renderer(data, type, row) {
     button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     button.attr('data-smile', data.hitSmiles.split(" ")[0])
     button.attr('onclick', 'toggleCart(this)');
+    button.attr('class', 'btn btn-info');
   //   let cart = JSON.parse(localStorage.getItem('cart'))
   //   if(cart==null){
   //   cart = []
@@ -606,8 +608,8 @@ function hit_renderer(data, type, row) {
     //     button.attr('class', 'btn btn-danger')
     // }
     if(shoppingCart.inCart(id)){
-                button.html('Remove')
-        button.attr('class', 'btn btn-danger')
+        button.attr('checked',true);
+        button.attr('class', 'btn btn-danger');
 
     }
     if (href) {
@@ -627,8 +629,8 @@ function hit_renderer(data, type, row) {
     $props.css('font-size', 'smaller');
     div.append($props);
     var row = $('<tr onclick="trToggle(this)"></tr>');
-    row.append($("<td style='width: 50px; margin:50px;'></td>").append(button));
-    row.append($("<td style='width: 150px;'></td>").append(img));
+    row.append($("<td style='width: 2px; margin:auto;'></td>").append(button));
+    row.append($("<td style='width: 100px; '></td>").append(img));
     row.append($("<td style='line-height: 100%;'></td>").append(div));
     table.append(row);
 

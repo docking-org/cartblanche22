@@ -15,6 +15,7 @@
                 $('#addItem').hide()
             let inCart = shoppingCart.inCart('{{ data.zinc_id }}')
             console.log('inCart', inCart)
+            
             if (inCart) {
                 $('#deleteItem').show()
                 $('#addItem').hide()
@@ -28,7 +29,14 @@
             let smiles = JSON.parse('{{ data.smiles|tojson }}')
             $('#addItem').on('click', () => {
                 console.log('add Item clicked')
-                shoppingCart.addItemToCart(identifier, 'zinc22', smiles, supplier_codes, catalogs)
+           
+                if('{{data.zinc20}}' !== "False"){
+                    let supplier = JSON.parse('{{ data.supplier|tojson }}')
+                    shoppingCart.addItemToCart(identifier, 'zinc20', smiles, supplier_codes, supplier)    
+                }
+                else{
+                    shoppingCart.addItemToCart(identifier, 'zinc22', smiles, supplier_codes, catalogs)
+                }
                 $('#deleteItem').show()
                 $('#addItem').hide()
             });
@@ -129,8 +137,14 @@
                            id="scaffold-inchi-field-label"
                            class="input-group-addon"
                            title="Click to copy to clipboard">InChI</label>
+                    {% if data.tranche %}
                     <input type="text" class="form-control" id="scaffold-inchi-field" readonly
                            value="{{ data.tranche_details.inchi }}">
+                    {% else %}
+                    <input type="text" class="form-control" id="scaffold-inchi-field" readonly
+                    value="n/a">
+                    {% endif %}
+                    
                     {#                    <span class="input-group-btn">#}
                     {#                        <button class="btn btn-default"#}
                     {#                                type="button"#}
@@ -146,8 +160,13 @@
                            id="scaffold-inchikey-field-label"
                            class="input-group-addon"
                            title="Click to copy to clipboard">InChI Key</label>
+                    {% if data.tranche %}
                     <input class="form-control" id="scaffold-inchikey-field"
                            value="{{ data.tranche_details.inchi_key }}" readonly>
+                    {% else %}
+                    <input class="form-control" id="scaffold-inchikey-field"
+                    value="n/a" readonly>
+                    {% endif %}
                     {#                    <span class="input-group-btn">#}
                     {#                        <button class="btn btn-default"#}
                     {#                                type="button"#}

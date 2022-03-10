@@ -44,8 +44,6 @@ class SearchSmiles(Resource):
         }
                
         task = search.delay(args=files)
-
-        
         return redirect(('search/result_smiles?task={task}'.format(task = task.id)))
 
 @celery.task

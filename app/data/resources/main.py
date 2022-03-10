@@ -1,3 +1,6 @@
+from app.data.tasks.search_smiles import search
+from app.celery_worker import celery, flask_app, db
+from celery.result import AsyncResult
 from flask_restful import Resource, reqparse
 from werkzeug.datastructures import FileStorage
 from app.data.resources.substance import SubstanceList
@@ -14,6 +17,7 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from requests import Session
 from requests_futures.sessions import FuturesSession
 from datetime import datetime
+
 
 parser = reqparse.RequestParser()
 session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
@@ -339,9 +343,30 @@ class Smiles(Resource):
         args = parser.parse_args()
         new_args = {key: val for key, val in args.items() if val is not None}
 
-        uploaded_file = new_args.get('smiles-in').stream.read().decode("latin-1")
+        # uploaded_file = new_args.get('smiles-in').stream.read().decode("latin-1")
+        # lines = uploaded_file.split('\n')
+        # new_args['smiles-in'] = lines
+        # return SmileList.getList(new_args, file_type)
+        if new_args.get('adist'):
+            adist = new_args.get('adist')
+        else:
+            adist = 0
+            
+        if new_args.get('dist'):
+            dist = new_args.get('dist')
+        else:
+            dist = 0
+        
+        files = {
+            'smiles-in': new_args.get('smiles-in').stream.read().decode(),
+            'dist': dist,
+            'adist': adist,
+        }
+        
+        smileSearch = search.delay(args=files)
+        task= AsyncResult(smileSearch)
+        data = task.get()
+        print(data)
+        return data
 
-        lines = uploaded_file.split('\n')
-        new_args['smiles-in'] = lines
-
-        return SmileList.getList(new_args, file_type)
+        
