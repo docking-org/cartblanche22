@@ -63,9 +63,11 @@ let shoppingCart = (function () {
         let minPrice = Number.MAX_VALUE;
         let minPriceIndex = 0;
         let curIndex = 0;
+        
         if (db === 'zinc22' && catalog !== null) {
             for (let s = 0; s < catalog.length; s++) {
-                let short_name = catalog[s].short_name.toLowerCase();
+                console.log(catalog[s])
+                let short_name = catalog[s].catalog_name.toLowerCase();
                 let def_price = null;
                 if (!short_name.includes('zinc')) {
                     if (short_name === 'wuxi') {
@@ -79,9 +81,10 @@ let shoppingCart = (function () {
                         def_price = default_prices[short_name];
                     }
                 }
-                if (def_price !== null) {
+                if (def_price !== undefined) {
                     let assigned = false;
                     let purchase = 0;
+                    console.log(def_price)
                     if (def_price.price < minPrice) {
                         minPriceIndex = curIndex;
                     }
@@ -148,7 +151,14 @@ let shoppingCart = (function () {
             if (item_index !== -1) {
                 return;
             }
-            let vendors = obj.getPossibleVendors(db, catalog, supplier);
+            let vendors;
+            if(db !== 'zinc20'){
+                vendors = obj.getPossibleVendors(db, catalog, supplier);
+            }
+            else{
+                vendors = catalog;
+            }
+            
             console.log("about to addItemToCart:", identifier, db, smile, vendors);
             var item = new Item(identifier, db, smile, vendors);
             cart.push(item);
@@ -283,6 +293,7 @@ let shoppingCart = (function () {
     obj.listCart = function () { // -> array of Items
         var cartCopy = [];
         let num = 1;
+        console.log(cart);
         for (let i = 0; i < cart.length; i++) {
             let it = cart[i];
             if (it.supplier.length == 0) {
