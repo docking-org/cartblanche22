@@ -4,8 +4,8 @@ from app.data.models.tin.catalog import CatalogModel
 from flask import render_template, request, json, jsonify, flash, Markup
 from app.main import application
 
-from gevent import monkey as curious_george
-curious_george.patch_all(thread=False, select=False)
+# from gevent import monkey as curious_george
+# curious_george.patch_all(thread=False, select=False)
 
 import requests
 from app.data.models.default_prices import DefaultPrices
