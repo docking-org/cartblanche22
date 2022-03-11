@@ -22,8 +22,8 @@ from flask import jsonify, current_app, request, make_response
 from flask_csv import send_csv
 import time
 import pandas as pd
-from gevent import monkey as curious_george
-curious_george.patch_all(thread=False, select=False)
+# from gevent import monkey as curious_george
+# curious_george.patch_all(thread=False, select=False)
 
 from app.celery_worker import celery, flask_app, db
 from celery.result import AsyncResult

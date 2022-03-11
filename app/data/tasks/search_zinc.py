@@ -16,8 +16,8 @@ from collections import defaultdict
 from flask_csv import send_csv
 import time
 
-from gevent import monkey as curious_george
-curious_george.patch_all(thread=False, select=False)
+# from gevent import monkey as curious_george
+# curious_george.patch_all(thread=False, select=False)
 
 import requests
 from datetime import datetime
