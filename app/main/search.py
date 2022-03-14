@@ -1,11 +1,14 @@
+from gevent import monkey
+import socket
+import grequests
+from importlib import reload
+reload(socket)
 from app.data.models.vendors import Vendors
 from sqlalchemy.sql.expression import true
 from app.data.models.tin.catalog import CatalogModel
 from flask import render_template, request, json, jsonify, flash, Markup
 from app.main import application
 
-# from gevent import monkey as curious_george
-# curious_george.patch_all(thread=False, select=False)
 
 import requests
 from app.data.models.default_prices import DefaultPrices
@@ -235,7 +238,9 @@ def searchZinc20(identifier):
             'zinc_id-in': [identifier],
             'output_fields': "zinc_id supplier_code smiles substance_purchasable catalog inchikey"
     }
+    monkey.patch_socket()  
     response = requests.post("https://zinc20.docking.org/catitems/subsets/for-sale.json", data=zinc20_files)
+    reload(socket)
     print(response)
     if response:
         role = ''
@@ -300,7 +305,7 @@ def searchZinc20(identifier):
 @application.route('/searchZinc/<identifier>')
 def searchZinc(identifier):
     files = {
-        'zinc_id': identifier
+        'zinc_id-in': [identifier]
     }
    
     response = SubstanceList.getList(args=files)
