@@ -1,4 +1,6 @@
 from gevent import monkey
+from celery.execute import send_task
+from celery.result import AsyncResult
 import socket
 import grequests
 from importlib import reload
@@ -304,24 +306,29 @@ def searchZinc20(identifier):
 
 @application.route('/searchZinc/<identifier>')
 def searchZinc(identifier):
-    files = {
-        'zinc_id-in': [identifier]
-    }
+    # files = {
+    #     'zinc_id-in': [identifier]
+    # }
    
-    response = SubstanceList.getList(args=files)
-    
-    if response:
+    # using celery zincid search here
+    task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
+    result = task.get()
+    result = AsyncResult(result)
+    res = result.get()
+   
+    if res:
         role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
             role = 'ucsf'
         else:
             role = 'public'
-        data= json.loads(response.data.decode())
+        data= res
         print(data)
-        catalogs = data['items'][0]['catalogs']
+        
+        catalogs = data[0]['catalogs']
+        print(catalogs)
         prices = []
        
-        
         for i in range(len(catalogs)):
             c = catalogs[i]
             s = c['catalog_name'].lower()
@@ -337,11 +344,11 @@ def searchZinc(identifier):
             # else:
             #     pass
             #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-        smile = data['items'][0]['smiles']
-        data['items'][0]['zinc20']= False
-        data['items'][0]['supplier']= []
-        return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices, 
-                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock='zinc20_stock')
+        smile = data[0]['smiles']
+        data[0]['zinc20']= False
+        data[0]['supplier']= []
+        return render_template('molecule/mol_index.html', data=data[0], prices=prices, 
+                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
         return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
