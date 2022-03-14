@@ -30,7 +30,7 @@ class Config(object):
         ADMINS = ['cartblanche20@gmail.com'] or [os.getenv('MAIL_USERNAME')]
 
         CELERY_IMPORTS = ("app.data.tasks.search_zinc", "app.data.tasks.search_smiles", "app.data.tasks.get_random" )
-        # CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
+        #CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
         CELERY_BROKER_URL = 'redis://redis:6379/0'
         CELERY_RESULT_BACKEND = 'db+sqlite:///celerydb2.sqlite'
 

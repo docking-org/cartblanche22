@@ -81,7 +81,7 @@ let shoppingCart = (function () {
                         def_price = default_prices[short_name];
                     }
                 }
-                if (def_price !== undefined) {
+                if (def_price !== null) {
                     let assigned = false;
                     let purchase = 0;
                     console.log(def_price)
