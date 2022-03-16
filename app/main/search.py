@@ -1,5 +1,17 @@
+from gevent import monkey
+from celery.execute import send_task
+from celery.result import AsyncResult
+import socket
+import grequests
+from importlib import reload
+reload(socket)
+from app.data.models.vendors import Vendors
+from sqlalchemy.sql.expression import true
+from app.data.models.tin.catalog import CatalogModel
 from flask import render_template, request, json, jsonify, flash, Markup
 from app.main import application
+
+
 import requests
 from app.data.models.default_prices import DefaultPrices
 from app.data.resources.substance import Substance, SubstanceList
@@ -224,32 +236,99 @@ def search_smiles_vendor():
 
 @application.route('/searchZinc20/<identifier>')
 def searchZinc20(identifier):
-    pass
-
-
-@application.route('/searchZinc/<identifier>')
-def searchZinc(identifier):
-    files = {
-        'zinc_id-in': [identifier]
+    zinc20_files = {
+            'zinc_id-in': [identifier],
+            'output_fields': "zinc_id supplier_code smiles substance_purchasable catalog inchikey"
     }
-    url = 'http://{}/search.json'.format(request.host)
-    #url = base_url + 'search.json'
-    print(url)
-    print(identifier)
-    #response = requests.get(url, params=files)
-    response = SubstanceList.getList(args=files)
-    
+    monkey.patch_socket()  
+    response = requests.post("https://zinc20.docking.org/catitems/subsets/for-sale.json", data=zinc20_files)
+    reload(socket)
+    print(response)
     if response:
         role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
             role = 'ucsf'
         else:
             role = 'public'
-        data= json.loads(response.data.decode())
-        print(data['items'])
-        catalogs = data['items'][0]['catalogs']
+        data= json.loads(response.text)
+        
+        
+        result = {}
+        catalogs = []
+        supplierCodes= []
+        
+        smile = data[0]['smiles']
+        max = 0
+        for item in data:
+            item['catalog']['catalog_name'] = item['catalog']['short_name']
+            cat = CatalogModel.query.filter_by(short_name = item['catalog']['short_name']).first()
+            if item['substance_purchasable'] > max:
+                catalogs = [item['catalog']]
+                supplierCodes = [item['supplier_code']]
+                max = item['substance_purchasable']
+        result['smiles'] = smile
+        c = catalogs[0]  
+        result['supplier'] = [{
+            'assigned': True,
+            'cat_name': c['name'],
+            'price': 240,
+            'purchase': 1,
+            'quantity': 10,
+            'shipping': "6 weeks",
+            'supplier_code': supplierCodes[0],
+            'unit': "mg"
+        }]
+        result['catalogs'] = catalogs
+        result['tranche'] = 'here'
+        result['zinc20'] = true
+        result['tranche_details'] = {}
+        result['tranche_details']['inchi_key'] = data[0]['inchikey']
+        result['supplier_code'] = supplierCodes
+        
+        
+        prices = [{
+                'category_name' : c['name'],
+                'short_name': c['short_name'],
+                'unit' :'10mg',
+                'price': '10.0',
+                'shipping': '6 weeks'
+        }]
+          
+       
+        return render_template('molecule/mol_index.html', data=result, prices=prices,
+                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock='zinc20_stock')
+    else:
+        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
+
+
+
+
+@application.route('/searchZinc/<identifier>')
+def searchZinc(identifier):
+    # files = {
+    #     'zinc_id-in': [identifier]
+    # }
+   
+    # using celery zincid search here
+    task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
+    result = task.get()
+    result = AsyncResult(result)
+    res = result.get()
+   
+    if res:
+        role = ''
+        if current_user.is_authenticated and current_user.has_roles('ucsf'):
+            role = 'ucsf'
+        else:
+            role = 'public'
+        data= res
+        print(data)
+        
+        catalogs = data[0]['catalogs']
+        print(catalogs)
         prices = []
-        zinc20_stock = None
+       
         for i in range(len(catalogs)):
             c = catalogs[i]
             s = c['catalog_name'].lower()
@@ -265,14 +344,11 @@ def searchZinc(identifier):
             # else:
             #     pass
             #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-        print(zinc20_stock)
-        smile = data['items'][0]['smiles']
-        print('data', data['items'][0])
-        print('prices', prices)
-        print('response', response)
-        print('identifer', identifier)
-        return render_template('molecule/mol_index.html', data=data['items'][0], prices=prices,
-                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock='zinc20_stock')
+        smile = data[0]['smiles']
+        data[0]['zinc20']= False
+        data[0]['supplier']= []
+        return render_template('molecule/mol_index.html', data=data[0], prices=prices, 
+                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
         return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404

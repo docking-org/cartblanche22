@@ -17,7 +17,6 @@ build job:
     script:
         - sudo docker image prune -a -f
        
-
 deploy job:
     only:
         - master

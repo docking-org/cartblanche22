@@ -1,3 +1,8 @@
+from app.celery_worker import celery, flask_app, db
+from celery import group, chord
+from celery.execute import send_task
+
+from celery.result import AsyncResult
 from flask_restful import Resource, reqparse
 from app.data.models.tin.substance import SubstanceModel
 from app.data.models.tranche import TrancheModel
@@ -255,12 +260,18 @@ class Substances(Resource):
         # parser.add_argument('show_missing', type=str)
         args = parser.parse_args()
 
-        uploaded_file = args.get('zinc_id-in').stream.read().decode("latin-1")
+        uploaded_file = args.get('zinc_id-in').stream.read().decode()
 
         lines = uploaded_file.split('\n')
-        args['zinc_id-in'] = lines
-        return SubstanceList.getList(args, file_type)
-
+        #args['zinc_id-in'] = lines
+        
+        task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines[:-1]]) 
+       
+        result = task.get()
+        result = AsyncResult(result)
+        res = result.get()
+        return res
+        # return SubstanceList.getList(args, file_type)
 
 class SubstanceRandomList(Resource):
     def post(self, file_type=None):
