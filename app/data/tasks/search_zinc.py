@@ -332,7 +332,7 @@ def getSubstance(dsn, ids, timeout=10):
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
                     select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
-                        select sb.sub_id, sb.smiles, sb.stranche_id from temp_query AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                        select sb.sub_id, sb.smiles, sb.tranche_id from temp_query AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
                 ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
@@ -347,7 +347,7 @@ def getSubstance(dsn, ids, timeout=10):
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
                     select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
-                        select sb.sub_id, sb.smiles, sb.stranche_id from (values {}) AS tq(sub_id, tranche_id) substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                        select sb.sub_id, sb.smiles, sb.tranche_id from (values {}) AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
                 ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
