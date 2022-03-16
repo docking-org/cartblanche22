@@ -317,13 +317,24 @@ def getSubstance(dsn, ids, timeout=10):
         curs.copy_from(query_fileobj, 'temp_query', sep=',', columns=('sub_id', 'tranche_id'))
 
         # perform query to select all desired information from data
-        curs.execute("\
+        # this is the old version that joins catalog_substance first, we should join substance first so we make sure to retrieve a substance even if it has no mapped entries
+        """curs.execute("\
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
                         select cat_content_fk, sub_id_fk, cs.tranche_id from temp_query AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
+            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+        ")"""
+
+        curs.execute("\
+            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
+                    select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
+                        select sb.sub_id, sb.smiles, sb.stranche_id from temp_query AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                    ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
+                ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
         ")
     else:
@@ -334,13 +345,23 @@ def getSubstance(dsn, ids, timeout=10):
         # so it is better at scale to transmit data with copy_from than to hardcode values into query
         curs.execute("\
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
+                    select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
+                        select sb.sub_id, sb.smiles, sb.stranche_id from (values {}) AS tq(sub_id, tranche_id) substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                    ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
+                ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
+            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
+        """
+        curs.execute("\
+            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
                         select cat_content_fk, sub_id_fk, cs.tranche_id from (values {}) AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
+        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))"""
 
     results = curs.fetchall()
     results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
