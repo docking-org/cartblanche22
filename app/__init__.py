@@ -75,6 +75,7 @@ def create_app(config_class=Config):
 
     from app.data.tasks.search_zinc import SearchJobSubstance, SearchJobSupplier
     from app.data.tasks.search_smiles import SearchSmiles
+    from app.data.tasks.get_random import GetRandomMolecules
 
     class MyModelView(ModelView):
         def is_accessible(self):
@@ -108,7 +109,8 @@ def create_app(config_class=Config):
         '/smilelist.<file_type>',
     ]
     api.add_resource(SmileList, *smilelist_routes)
-    api.add_resource(SubstanceRandom, '/substance/random.<file_type>')
+    api.add_resource(GetRandomMolecules, '/substance/random.<file_type>')
+    
     api.add_resource(SubstanceRandomList, '/subrandom')
 
 

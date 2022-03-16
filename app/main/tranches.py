@@ -140,7 +140,7 @@ def tranches2d():
         else:
             cell2DNew[col_idx][row_idx] = {'size': i.sum, 'chosen': True}
         unfilteredSize += i.sum
-    print(cell2DNew)
+  
     return render_template('tranches/2D.html', tranches=tranches, axes=axes,
                            cell2DNew=json.dumps(cell2DNew),
                            ticks=ticks, unfilteredSize=unfilteredSize)

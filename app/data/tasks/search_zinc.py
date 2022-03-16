@@ -1,25 +1,24 @@
 from app.main import application
 
-from app.main.search import search_byzincid
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, reqparse
 
-from app.data.resources.substance import SubstanceList
 from flask import render_template, request, json, jsonify, flash, Flask, redirect,g 
 
-from app.data.models.tranche import TrancheModel
 
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers, base62, get_new_tranche, get_compound_details, antimony_hashes_to_urls, get_tin_urls_from_ids, get_tin_urls_from_tranches
 
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
 from flask import jsonify, current_app, request, make_response
 from collections import defaultdict
-from app.data.resources.substance import SubstanceModel
+
 from flask_csv import send_csv
 import time
 
-from gevent import monkey
 
+# from gevent import monkey as curious_george
+# curious_george.patch_all(thread=False, select=False)
 
 import requests
 from datetime import datetime
@@ -223,7 +222,6 @@ logp_range_map_rev={e:b62_digits[i] for i, e in enumerate(logp_range)}
 @celery.task
 def getSubstanceList(zinc_ids):
     #SEARCH STEP 3
-
     zinc_ids = [(base10(zinc_id), "H{:02d}{}".format(b62_digits.index(zinc_id[4]), logp_range_map[zinc_id[5]])) for zinc_id in zinc_ids]
     tranche_to_url_map = get_tin_urls_from_tranches([zinc_id[1] for zinc_id in zinc_ids])
     #urls = get_all_tin_url()
@@ -318,13 +316,24 @@ def getSubstance(dsn, ids, timeout=10):
         curs.copy_from(query_fileobj, 'temp_query', sep=',', columns=('sub_id', 'tranche_id'))
 
         # perform query to select all desired information from data
-        curs.execute("\
+        # this is the old version that joins catalog_substance first, we should join substance first so we make sure to retrieve a substance even if it has no mapped entries
+        """curs.execute("\
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
                         select cat_content_fk, sub_id_fk, cs.tranche_id from temp_query AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
+            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+        ")"""
+
+        curs.execute("\
+            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
+                    select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
+                        select sb.sub_id, sb.smiles, sb.tranche_id from temp_query AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                    ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
+                ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
         ")
     else:
@@ -335,13 +344,23 @@ def getSubstance(dsn, ids, timeout=10):
         # so it is better at scale to transmit data with copy_from than to hardcode values into query
         curs.execute("\
             select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
+                    select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
+                        select sb.sub_id, sb.smiles, sb.tranche_id from (values {}) AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                    ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
+                ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
+            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
+        """
+        curs.execute("\
+            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
                 select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
                     select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
                         select cat_content_fk, sub_id_fk, cs.tranche_id from (values {}) AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
                     ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
                 ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
             ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
+        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))"""
 
     results = curs.fetchall()
     results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
@@ -540,81 +559,3 @@ def getTinSupplier(dsn, codes, timeout=10):
     all_data = {'items':data, 'search_info':search_info}
 
     return all_data
-
-"""
-@celery.task
-def getSubstance(args, file_type=None):
-    db.choose_tenant(args.get("tin_url"))
-
-    sub_id_list = args.get('sub_ids').split(',')
-    zinc_id_list = args.get('zinc_ids').split(',')
-    sub_ids = (int(id) for id in sub_id_list)
-    sub_ids_len = len(args.get('sub_ids').split(','))
-
-    print("REQUESTED TIN_URL from Substance POST", args.get('tin_url'))
-    time1 = time.time()
-    try:
-        substances = SubstanceModel.query.filter(SubstanceModel.sub_id.in_(sub_ids)).all()
-    except Exception as e:
-        search_info = {
-            'tin_url': args.get('tin_url'),
-            'expected_result_count': sub_ids_len,
-            'returned_result_count': 0,
-            'expected_ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-            'returned_ids': '================SQL SERVER CONNECTION ERROR==============',
-            'not_found_ids': 'Please check {} server connection'.format(args.get('tin_url')),
-            'elapsed_time': 'It took {:.3f} s'.format((time.time() - time1) % 60),
-            'exception error': str(e)
-        }
-        return [{'message': 'Couldn\'t connect to db', 'search_info': search_info}]
-
-    time2 = time.time()
-    strtime1 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time1))
-    strtime2 = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time2))
-    print('{:s} !!!!!!!!!! started at {} and finished at {}. It took {:.3f} s'.format(args.get('tin_url'), strtime1,
-                                                                                        strtime2,
-                                                                                        (time2 - time1) % 60))
-    print("{} server returned {} results and {} result was expecting".format(args.get('tin_url'), len(substances),
-                                                                                sub_ids_len))
-
-    data = []
-    unmatched = set()
-    matched = set()
-    for sub in substances:
-        data_dict = sub.json()
-        sub_id_list.remove(str(data_dict['sub_id']))
-        
-        if 'output_fields' in args and args.get('output_fields'):
-
-            output_fields = args.get('output_fields').replace(" ", "").split(",")
-            output_fields = [i for i in data_dict.keys() if i in output_fields]
-
-            new_dict = {output_field: data_dict[output_field] for output_field in output_fields}
-            data_dict = new_dict
-        if data_dict['zinc_id'] in zinc_id_list:
-            data.append(data_dict)
-            matched.add(data_dict['zinc_id'])
-        else:
-            unmatched.add(data_dict['zinc_id'])
-
-    # if args.get('show_missing') and args.get('show_missing').lower() == 'on':
-    #     print("missing sub_ids:", sub_id_list)
-    #     return jsonify({args.get('tin_url'): sub_id_list})
-    notfound_ids = [id for id in zinc_id_list if id not in matched]
-
-    search_info = {
-        'tin_url': args.get('tin_url'),
-        'expected_result_count': sub_ids_len,
-        'returned_result_count': len(substances),
-        'expected_ids': 'Originally searched zinc ids: {}'.format(zinc_id_list),
-        'returned_ids': 'Wrong zinc ids returned: {}'.format(unmatched) if unmatched else "All matched",
-        'not_found_ids': notfound_ids if notfound_ids else "All found",
-        'elapsed_time': 'It took {:.3f} s'.format((time2 - time1) % 60)
-    }
-    
-    if(len(notfound_ids) == 0):
-        data.append({'search_info': search_info})
-        return data
-    else:
-        return {'message': 'Not found', 'search_info': search_info}
-"""

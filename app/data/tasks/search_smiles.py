@@ -45,7 +45,6 @@ class SearchSmiles(Resource):
                
         task = search.delay(args=files)
 
-        
         return redirect(('search/result_smiles?task={task}'.format(task = task.id)))
 
 @celery.task
@@ -75,3 +74,4 @@ def search(args, file_type=None):
                 hits.append(data)
 
     return hits
+ 

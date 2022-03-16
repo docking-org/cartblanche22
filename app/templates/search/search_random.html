@@ -13,12 +13,11 @@
             console.log(format,amountformat)
             formData.append('count', amountformat);
             $.ajax({
-                {#url: 'https://cartblanche22.docking.org/substance/random.' + format,#}
                 url: '/substance/random.' + format,
                 cache: false,
                 contentType: false,
                 processData: false,
-                data: formData,
+                data: [amountformat, format],
                 type: 'POST',
                 success: function (response) {
                     if (format == 'json') {
@@ -26,8 +25,7 @@
                             type: 'application/json',
                         });
                     } else {
-                        blob = new Blob([response], {type: 'text/' + format})
-
+                        blob = new Blob([(response)], {type: 'text/' + format})
                     }
                     saveAs(blob, "random" + amountformat + '.' + format)
                     $('#exampleModal').modal('hide');
