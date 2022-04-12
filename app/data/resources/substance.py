@@ -268,6 +268,7 @@ class Substances(Resource):
         result = task.get()
         result = AsyncResult(result)
         res = result.get()
+        
         return res
         # return SubstanceList.getList(args, file_type)
 
