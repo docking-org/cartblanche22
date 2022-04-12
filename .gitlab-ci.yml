@@ -15,8 +15,8 @@ build job:
     tags:
         - cartblanche2
     script:
-        - sudo docker image prune -a -f
-       
+        - sudo docker image prune -a -f    
+
 deploy job:
     only:
         - master
