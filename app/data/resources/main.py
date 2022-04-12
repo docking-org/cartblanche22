@@ -1,6 +1,8 @@
 from app.data.tasks.search_smiles import search
+
 from app.celery_worker import celery, flask_app, db
 from celery.result import AsyncResult
+from celery.execute import send_task
 from flask_restful import Resource, reqparse
 from werkzeug.datastructures import FileStorage
 from app.data.resources.substance import SubstanceList
@@ -363,8 +365,8 @@ class Smiles(Resource):
             'adist': adist,
         }
         
-        smileSearch = search.delay(args=files)
-        task= AsyncResult(smileSearch)
+        smileSearch = send_task('app.data.tasks.search_smiles.search', [files]) 
+        task = AsyncResult(smileSearch)
         data = task.get()
         print(data)
         return data
