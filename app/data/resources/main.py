@@ -20,6 +20,7 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from requests import Session
 from requests_futures.sessions import FuturesSession
 from datetime import datetime
+import pandas as pd
 
 
 parser = reqparse.RequestParser()
@@ -374,7 +375,14 @@ class Smiles(Resource):
         
         smileSearch = send_task('app.data.tasks.search_smiles.search', [files]) 
         data = smileSearch.get()
-        print(data)
+        
+        if(file_type == "csv"):
+            res = pd.DataFrame(data)
+            return res.to_csv(encoding='utf-8', index=False)
+        elif(file_type == "txt"):
+            res = pd.DataFrame(data)
+            return res.to_csv(encoding='utf-8', index=False, sep=" ")
+        
         return data
 
         

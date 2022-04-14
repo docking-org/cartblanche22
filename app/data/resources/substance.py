@@ -21,6 +21,7 @@ import logging
 import requests
 import random
 import re
+import pandas as pd
 from app.email_send import send_search_log
 
 # from app.formatters import (
@@ -267,10 +268,16 @@ class Substances(Resource):
        
         result = task.get()
         result = AsyncResult(result)
-        res = result.get()
+        results = result.get()
         
-        return res
-        # return SubstanceList.getList(args, file_type)
+        if(file_type == "csv"):
+            res = pd.DataFrame(results)
+            return res.to_csv(encoding='utf-8', index=False)
+        elif(file_type == "txt"):
+            res = pd.DataFrame(results)
+            return res.to_csv(encoding='utf-8', index=False, sep=" ")
+        
+        return results
 
 class SubstanceRandomList(Resource):
     def post(self, file_type=None):
