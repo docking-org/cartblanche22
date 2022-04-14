@@ -14,7 +14,7 @@ deploy job:
     services:
         - redis:latest
     tags:
-        - cartblanche2
+        - cartblanche-dev
     script:
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop ${CI_PROJECT_NAME}
