@@ -77,4 +77,3 @@ migrations
 migrationsPsql
 app.db
 requirementsTest.txt
-.gitlab-ci.yml
