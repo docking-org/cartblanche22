@@ -233,7 +233,6 @@ def search_smiles():
 def search_smiles_vendor():
     return render_template('search/search_smiles_vendor.html')
 
-
 @application.route('/searchZinc20/<identifier>')
 def searchZinc20(identifier):
     zinc20_files = {
@@ -301,9 +300,6 @@ def searchZinc20(identifier):
         return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
 
-
-
-
 @application.route('/searchZinc/<identifier>')
 def searchZinc(identifier):
     # files = {
@@ -311,6 +307,15 @@ def searchZinc(identifier):
     # }
    
     # using celery zincid search here
+    data, res, smile, prices = getZincData(identifier)
+    if data:
+        return render_template('molecule/mol_index.html', data=data, prices=prices, 
+                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
+    else:
+        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
+
+def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
     result = task.get()
     result = AsyncResult(result)
@@ -347,12 +352,7 @@ def searchZinc(identifier):
         smile = data[0]['smiles']
         data[0]['zinc20']= False
         data[0]['supplier']= []
-        return render_template('molecule/mol_index.html', data=data[0], prices=prices, 
-                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
-    else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
-                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
-
+        return data[0], res, smile, prices
 
 @application.route('/sw')
 def sw():

@@ -69,7 +69,6 @@ def search_result_supplier():
 
 
 class SearchJobSupplier(Resource):
-
     def post(self):
         data = request.form['supplierTextarea']
         file = request.files['supplierfile'].read().decode("utf-8")
@@ -84,7 +83,14 @@ class SearchJobSupplier(Resource):
         except Exception as e:
             print(e)
         return redirect('/search/result_suppliersearch?task={}'.format(task))
-
+    
+    def curlSearch(data):
+        try:
+            task = SearchJobSupplier.generate_code_search_tasks(data)
+        except Exception as e:
+            print(e)
+        return task
+        
     def generate_code_search_tasks(codes):
         url_to_codes_map = {}
         hashes = [hashlib.sha256(code.encode('utf-8')).digest()[-2:] for code in codes]
