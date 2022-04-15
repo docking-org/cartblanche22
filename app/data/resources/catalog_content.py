@@ -1,3 +1,5 @@
+from app.data.tasks.search_zinc import SearchJobSupplier
+from celery.result import AsyncResult
 from flask_restful import Resource, reqparse
 from app.data.models.tin.catalog import CatalogContentModel
 from app.data.models.server_mapping import ServerMappingModel
@@ -14,6 +16,7 @@ from flask_csv import send_csv
 from datetime import datetime
 import itertools
 from app.email_send import send_search_log
+import pandas as pd
 
 parser = reqparse.RequestParser()
 
@@ -150,6 +153,16 @@ class CatalogContents(Resource):
         args = parser.parse_args()
         uploaded_file = args.get('supplier_code-in').stream.read().decode("latin-1")
         lines = [x for x in uploaded_file.split('\n') if x]
-        args['supplier_code-in'] = lines
+        task = SearchJobSupplier.curlSearch(lines)
+        antimony_task = AsyncResult(task)
+        tinsearch_task = AsyncResult(antimony_task.get())
+        results = tinsearch_task.get()
+        
+        if(file_type == "csv"):
+                res = pd.DataFrame(results)
+                return res.to_csv(encoding='utf-8', index=False)
+        elif(file_type == "txt"):
+                res = pd.DataFrame(results)
+                return res.to_csv(encoding='utf-8', index=False, sep=" ")
 
-        return CatalogContentList.getList(args, file_type)
+        return results

@@ -1,6 +1,9 @@
 from app.data.tasks.search_smiles import search
+
 from app.celery_worker import celery, flask_app, db
+from app.main.search import getZincData, searchZinc
 from celery.result import AsyncResult
+from celery.execute import send_task
 from flask_restful import Resource, reqparse
 from werkzeug.datastructures import FileStorage
 from app.data.resources.substance import SubstanceList
@@ -17,6 +20,7 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from requests import Session
 from requests_futures.sessions import FuturesSession
 from datetime import datetime
+import pandas as pd
 
 
 parser = reqparse.RequestParser()
@@ -30,8 +34,14 @@ session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
 class Search(Resource):
     def getDataByID(self, args, file_type=None):
         zinc_id = args.get('zinc_id')
-        args['zinc_id-in'] = [zinc_id]
-        return SubstanceList.getList(args, file_type)
+        output_fields = args.get('output_fields').split(',')
+        
+        result = {}
+        data, res, smile, prices = getZincData(zinc_id)
+        for field in output_fields:
+            result[field] = data[field]
+            
+        return result
 
     def get(self, file_type=None):
         parser.add_argument('output_fields', type=str)
@@ -363,10 +373,16 @@ class Smiles(Resource):
             'adist': adist,
         }
         
-        smileSearch = search.delay(args=files)
-        task= AsyncResult(smileSearch)
-        data = task.get()
-        print(data)
+        smileSearch = send_task('app.data.tasks.search_smiles.search', [files]) 
+        data = smileSearch.get()
+        
+        if(file_type == "csv"):
+            res = pd.DataFrame(data)
+            return res.to_csv(encoding='utf-8', index=False)
+        elif(file_type == "txt"):
+            res = pd.DataFrame(data)
+            return res.to_csv(encoding='utf-8', index=False, sep=" ")
+        
         return data
 
         
