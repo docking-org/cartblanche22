@@ -1,4 +1,4 @@
-from app.data.tasks.search_smiles import search
+from app.data.tasks.search_smiles import search, curlSearch
 
 from app.celery_worker import celery, flask_app, db
 from app.main.search import getZincData, searchZinc
@@ -21,7 +21,6 @@ from requests import Session
 from requests_futures.sessions import FuturesSession
 from datetime import datetime
 import pandas as pd
-
 
 parser = reqparse.RequestParser()
 session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
@@ -373,9 +372,10 @@ class Smiles(Resource):
             'adist': adist,
         }
         
-        smileSearch = send_task('app.data.tasks.search_smiles.search', [files]) 
-        data = smileSearch.get()
-        
+        #smileSearch = send_task('app.data.tasks.search_smiles.curlSearch', [files]) 
+        data = curlSearch(files=files)
+        print(data)
+        print("here")
         if(file_type == "csv"):
             res = pd.DataFrame(data)
             return res.to_csv(encoding='utf-8', index=False)
