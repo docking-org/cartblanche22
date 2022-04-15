@@ -12,22 +12,24 @@ from flask import render_template, request, json, jsonify, flash, Flask, redirec
 from flask import jsonify, current_app, request, make_response
 from app import celery_worker
 from app.celery_worker import celery, flask_app, db
+from celery import group, chord
 from celery.result import AsyncResult
 from app.email_send import send_search_log
+from app.data.tasks.search_zinc import getSubstanceList
 
 
 @application.route('/search/result_smiles', methods=['GET'])
 def smiles_result():
     if request.method == 'GET':
         data = request.args.get("task")
-        task= AsyncResult(data)
-        
+        task = AsyncResult(data)
         data = task.get()
-        print(data)
+        task = AsyncResult(data)
+        data = task.get()
              
         if len(data) == 0:
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return render_template('search/result_smiles.html', data_json=data, data=data)
+        return render_template('search/result_smiles.html', data22=data, data20=[])
 
 class SearchSmiles(Resource):
     def post(self):
@@ -43,9 +45,35 @@ class SearchSmiles(Resource):
             'adist': adist,
         }
                
+<<<<<<< HEAD
         task = search.delay(args=files)
+=======
+        #task = search.delay()
+        task = search.delay(files) 
+      
+        data = task.get()
+        print(data)
+        task = getSubstanceList.delay(data)
+>>>>>>> dev
 
         return redirect(('search/result_smiles?task={task}'.format(task = task.id)))
+
+def curlSearch(files): 
+    task = search.delay(files)
+    print(task) 
+    data = task.get()
+    task = getSubstanceList.delay(data)
+    
+    data = task.get()
+    task = AsyncResult(data)
+    data = task.get()
+    print(data)
+    
+    return data
+
+@celery.task
+def formatIds(args):
+    return args[0]
 
 @celery.task
 def search(args, file_type=None):   
@@ -72,6 +100,15 @@ def search(args, file_type=None):
             data['zinc_id'] = row[4]
             if data not in hits: 
                 hits.append(data)
+<<<<<<< HEAD
 
     return hits
  
+=======
+   
+    ids = []
+    for hit in hits:
+        ids.append(hit['zinc_id'])
+    
+    return ids
+>>>>>>> dev
