@@ -45,17 +45,13 @@ class SearchSmiles(Resource):
             'adist': adist,
         }
                
-<<<<<<< HEAD
-        task = search.delay(args=files)
-=======
+
         #task = search.delay()
         task = search.delay(files) 
       
         data = task.get()
         print(data)
         task = getSubstanceList.delay(data)
->>>>>>> dev
-
         return redirect(('search/result_smiles?task={task}'.format(task = task.id)))
 
 def curlSearch(files): 
@@ -100,15 +96,9 @@ def search(args, file_type=None):
             data['zinc_id'] = row[4]
             if data not in hits: 
                 hits.append(data)
-<<<<<<< HEAD
 
-    return hits
- 
-=======
-   
     ids = []
     for hit in hits:
         ids.append(hit['zinc_id'])
     
     return ids
->>>>>>> dev
