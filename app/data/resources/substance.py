@@ -262,24 +262,31 @@ class Substances(Resource):
         args = parser.parse_args()
 
         uploaded_file = args.get('zinc_id-in').stream.read().decode()
-
+        output_fields = args.get('output_fields').split(',')
         lines = [x for x in re.split(r'\n|\r|(\r\n)', uploaded_file) if x!='' and x!= None]
         #args['zinc_id-in'] = lines
         
-        task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines[:-1]]) 
+        task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines]) 
        
         result = task.get()
         result = AsyncResult(result)
         results = result.get()
         
+        result = []
+        for mol in results:
+            newmol = {}
+            for field in output_fields:
+                newmol[field] = mol[field]
+            result.append(newmol)
+        
         if(file_type == "csv"):
-            res = pd.DataFrame(results)
+            res = pd.DataFrame(result)
             return res.to_csv(encoding='utf-8', index=False)
         elif(file_type == "txt"):
-            res = pd.DataFrame(results)
+            res = pd.DataFrame(result)
             return res.to_csv(encoding='utf-8', index=False, sep=" ")
         
-        return results
+        return result
 
 class SubstanceRandomList(Resource):
     def post(self, file_type=None):
