@@ -116,9 +116,9 @@ class SearchJobSubstance(Resource):
     def post(self):
         data = request.form['myTextarea']
         file = request.files['zincfile'].read().decode("utf-8")
-        file = file.split("\n")
-        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        ids = file + textDataList
+        
+        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data+" "+file) if x!='']
+        ids = textDataList
 
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
         print(zinc22, zinc20, discarded)
@@ -228,7 +228,9 @@ logp_range_map_rev={e:b62_digits[i] for i, e in enumerate(logp_range)}
 @celery.task
 def getSubstanceList(zinc_ids):
     #SEARCH STEP 3
+ 
     zinc_ids = [(base10(zinc_id), "H{:02d}{}".format(b62_digits.index(zinc_id[4]), logp_range_map[zinc_id[5]])) for zinc_id in zinc_ids]
+    
     tranche_to_url_map = get_tin_urls_from_tranches([zinc_id[1] for zinc_id in zinc_ids])
     #urls = get_all_tin_url()
     url_to_ids_map = {}
