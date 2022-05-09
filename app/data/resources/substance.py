@@ -263,7 +263,7 @@ class Substances(Resource):
 
         uploaded_file = args.get('zinc_id-in').stream.read().decode()
 
-        lines = uploaded_file.split('\n')
+        lines = [x for x in re.split(r'\n|\r|(\r\n)', uploaded_file) if x!='' and x!= None]
         #args['zinc_id-in'] = lines
         
         task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines[:-1]]) 

@@ -115,11 +115,13 @@ class SearchJobSubstance(Resource):
 
     def post(self):
         data = request.form['myTextarea']
-        file = request.files['zincfile'].read().decode("utf-8")
-        file = file.split("\n")
+        file = request.files['zincfile'].read().decode()
+        file = [x for x in re.split(r'\n|\r|(\r\n)', file) if x!='' and x!= None]
+    
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        ids = file + textDataList
-
+        
+        ids = textDataList+ file
+        
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
         print(zinc22, zinc20, discarded)
         zinc20 = zinc20search(zinc20)
