@@ -1,5 +1,4 @@
 stages:
-  - build
   - deploy
 
 variables:
@@ -8,23 +7,14 @@ variables:
 services:
   - redis:latest
 
-build job:
-    only:
-        - master
-    stage: build
-    tags:
-        - cartblanche2
-    script:
-        - sudo docker image prune -a -f
-       
 deploy job:
     only:
-        - master
+        - dev
     stage: deploy
     services:
         - redis:latest
     tags:
-        - cartblanche2
+        - cartblanche-dev
     script:
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop ${CI_PROJECT_NAME}
@@ -37,4 +27,3 @@ deploy job:
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
-        
