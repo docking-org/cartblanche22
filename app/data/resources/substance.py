@@ -77,6 +77,7 @@ class SubstanceList(Resource):
         if args.get('timeout'):
             timeout = args.get('timeout')
 
+    
         urls = get_all_tin_url()
 
         for zinc_id in zinc_ids:
@@ -161,6 +162,7 @@ class SubstanceList(Resource):
 
 class Substance(Resource):
     def post(self, file_type=None):
+        
         args = request.values
         sub_id_list = args.get('sub_ids').split(',')
         zinc_id_list = args.get('zinc_ids').split(',')

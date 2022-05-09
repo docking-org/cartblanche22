@@ -228,7 +228,6 @@ logp_range_map_rev={e:b62_digits[i] for i, e in enumerate(logp_range)}
 @celery.task
 def getSubstanceList(zinc_ids):
     #SEARCH STEP 3
-    print(zinc_ids)
     zinc_ids = [(base10(zinc_id), "H{:02d}{}".format(b62_digits.index(zinc_id[4]), logp_range_map[zinc_id[5]])) for zinc_id in zinc_ids]
     tranche_to_url_map = get_tin_urls_from_tranches([zinc_id[1] for zinc_id in zinc_ids])
     #urls = get_all_tin_url()

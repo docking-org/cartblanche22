@@ -13,7 +13,6 @@ class Config(object):
         SECURITY_PASSWORD_SALT = os.getenv("nemeltdavs")
         # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
         # SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI_LOCAL_ZINC22")
-
         
         # ZINC_SMALL_WORLD_SERVER = "http://localhost:5584"
         ZINC_SMALL_WORLD_SERVER = "http://10.20.0.5:8080"
