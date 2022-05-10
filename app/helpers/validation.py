@@ -11,6 +11,9 @@ from rdkit.Chem.Descriptors import MolLogP
 from rdkit.Chem.SaltRemover import SaltRemover
 from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.inchi import MolToInchiKey
+from rdkit import RDLogger
+lg = RDLogger.logger()
+lg.setLevel(RDLogger.CRITICAL) #comment out to enable rdkit logs
 from flask import current_app
 import psycopg2
 import socket

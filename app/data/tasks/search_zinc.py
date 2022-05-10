@@ -1,3 +1,6 @@
+from gc import callbacks
+from posixpath import split
+from uuid import uuid4
 from app.main import application
 
 
@@ -6,7 +9,7 @@ from flask_restful import Resource, reqparse
 
 from flask import render_template, request, json, jsonify, flash, Flask, redirect,g 
 
-
+from celery.exceptions import SoftTimeLimitExceeded
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers, base62, get_new_tranche, get_compound_details, antimony_hashes_to_urls, get_tin_urls_from_ids, get_tin_urls_from_tranches
 
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
@@ -27,7 +30,7 @@ import re
 
 from app import celery_worker
 from app.celery_worker import celery, flask_app, db
-from celery import group, chord
+from celery import group, chord, shared_task
 from celery.result import AsyncResult
 from app.email_send import send_search_log
 import ast
@@ -35,6 +38,56 @@ import psycopg2
 import io
 import hashlib
 
+
+@application.route('/search/progress', methods=['GET'])
+def search_status():
+    data = request.args.get("task")
+    
+    task = AsyncResult(data)
+    data = task.get()
+    data = data[1][1]
+  
+   
+    total = len(data)
+    done = 0
+    for task in data:
+        res = AsyncResult(str(task))
+        if res.ready():
+            done +=1
+   
+    
+    if done != 0:
+        if (done/total) == 1:
+            return redirect("/search/result_zincsearch?task="+request.args.get("task"), code=200)
+        return render_template('search/result_status.html', progress = round((done/total), 2))
+    else:
+        return render_template('search/result_status.html', progress = 0)
+    
+@application.route('/search/update_progress', methods=['GET'])
+def update_progress():
+    data = request.args.get("task")
+    
+    task = AsyncResult(data)
+    data = task.get()
+    data = data[1][1]
+  
+   
+    total = len(data)
+    done = 0
+    for task in data:
+        res = AsyncResult(task)
+        if res.ready():
+            done +=1
+ 
+    
+    if done != 0:
+        if (done/total) == 1:
+            return jsonify(1)
+        return jsonify(round((done/total),2))
+    else:
+        return jsonify(0)
+    
+    
 @application.route('/search/result_zincsearch', methods=['GET'])
 def search_result():
     if request.method == 'GET':
@@ -44,8 +97,13 @@ def search_result():
         data = task.get()
 
         list20 = data[0]
-        task22 = data[1]
+        task22 = data[1][0]
         list22 = []
+        
+        sublist = data[1][1]
+        for i in sublist:
+            task = AsyncResult(str(i))
+            task.forget()
         
         if task22 != None:
             task = AsyncResult(task22)
@@ -131,7 +189,7 @@ class SearchJobSubstance(Resource):
         except Exception as e:
             print("err", e)
         
-        return redirect('/search/result_zincsearch?task={task}'.format(task = task.id))
+        return redirect('/search/progress?task={task}'.format(task = task.id))
 
     def filter_zinc_ids(ids):
         zinc22 = []
@@ -219,7 +277,9 @@ def zinc20search(zinc20):
         data20 = list(zinc20_data.values())
     return data20
 
-@celery.task
+@celery.task( default_retry_delay=30,
+    max_retries=15,
+    soft_time_limit=10)
 def search20(zinc20):
     return zinc20
 
@@ -227,6 +287,7 @@ b62_digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
 logp_range_map={b62_digits[i]:e for i, e in enumerate(logp_range)}
 logp_range_map_rev={e:b62_digits[i] for i, e in enumerate(logp_range)}
+
 @celery.task
 def getSubstanceList(zinc_ids):
     #SEARCH STEP 3
@@ -273,15 +334,32 @@ def getSubstanceList(zinc_ids):
 
     #SEARCH STEP 4, DO REQUEST FOR ALL URLS
     taskList = []
-    for url, ids in url_to_ids_map.items(): 
+    taskids = []
+    for url, ids in url_to_ids_map.items():   
+        # if len(ids) > 30000: 
+        #     splitlist = list(chunks(ids, 30000))
+            
+        #     for l in splitlist:
+        #         url = url.replace('+psycopg2', '')
+        #         task_id = uuid4()
+        #         taskids.append(task_id)
+        #         task = getSubstance.s(url, l).set(task_id=str(task_id))
+        #         taskList.append(task) 
         
         url = url.replace('+psycopg2', '')
-        task = getSubstance.s(url, ids)
+        task_id = uuid4()
+        taskids.append(task_id)
+        task = getSubstance.s(url, ids).set(task_id=str(task_id))
         taskList.append(task)
 
-    result = chord(taskList)(mergeSubstanceResults.s())
+    callback = mergeSubstanceResults.s()
+    res = chord(taskList)(callback)
 
-    return result.id
+    return [res.id, taskids]
+
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 @celery.task
 def mergeSubstanceResults(results):
@@ -295,104 +373,124 @@ def mergeSubstanceResults(results):
         send_search_log(error_logs)
     return results_final
 
-@celery.task
-def getSubstance(dsn, ids, timeout=10):
-    tstart = time.time()
-    conn = psycopg2.connect(dsn, connect_timeout=timeout)
-    curs = conn.cursor()
+@celery.task(soft_time_limit=120, bind=True)
+def getSubstance(self, dsn, ids, timeout=10):
+    try:
+        tstart = time.time()
+        conn = psycopg2.connect(dsn, connect_timeout=timeout, options='-c statement_timeout=100000')
+        curs = conn.cursor()
 
-    # get tranche information from db (could streamline, but it's not an expensive operation)
-    curs.execute("select tranche_name, tranche_id from tranches")
-    trancheidmap = {}
-    tranchenamemap = {}
-    for trancheobj in curs.fetchall():
-        tranchename = trancheobj[0]
-        trancheid = trancheobj[1]
-        trancheidmap[tranchename] = trancheid
-        tranchenamemap[trancheid] = tranchename
+        # get tranche information from db (could streamline, but it's not an expensive operation)
+        curs.execute("select tranche_name, tranche_id from tranches")
+        trancheidmap = {}
+        tranchenamemap = {}
+        for trancheobj in curs.fetchall():
+            tranchename = trancheobj[0]
+            trancheid = trancheobj[1]
+            trancheidmap[tranchename] = trancheid
+            tranchenamemap[trancheid] = tranchename
 
-    if len(ids) > 5000:
-        # create a temporary table to hold our query data
-        curs.execute(
-            "CREATE TEMPORARY TABLE temp_query (\
-                sub_id bigint,\
-                tranche_id smallint\
-            )"
-        )
+        if len(ids) > 5000:
+            # create a temporary table to hold our query data
+            
+            curs.execute(
+                "CREATE TEMPORARY TABLE temp_query (\
+                    sub_id bigint,\
+                    tranche_id smallint\
+                )"
+            )
 
-        # format the query data and copy over to db
-        query_data = '\n'.join(["{},{}".format(id[0], trancheidmap[id[1]]) for id in ids])
-        query_fileobj = io.StringIO(query_data)
-        curs.copy_from(query_fileobj, 'temp_query', sep=',', columns=('sub_id', 'tranche_id'))
+            # format the query data and copy over to db
+            try:
+                query_data = '\n'.join(["{},{}".format(id[0], trancheidmap[id[1]]) for id in ids])
+            except KeyError: 
+                tfinish = time.time()
+                not_found = 'all'
+                search_info = {
+                    'tin_url': dsn,
+                    'expected_ids': 'Originally searched zinc ids: {}'.format(ids),
+                    'not_found_ids': 'Not Found: {}'.format(not_found) if len(not_found) > 0 else "All found",
+                    'elapsed_time': 'It took {:.3f} s'.format((tfinish-tstart))  
+                }
 
-        # perform query to select all desired information from data
-        # this is the old version that joins catalog_substance first, we should join substance first so we make sure to retrieve a substance even if it has no mapped entries
-        """curs.execute("\
-            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
-                    select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                        select cat_content_fk, sub_id_fk, cs.tranche_id from temp_query AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
-                ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
-            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ")"""
+                all_data = {'items':[], 'search_info':search_info}
+                return all_data
+            query_fileobj = io.StringIO(query_data)
+            curs.copy_from(query_fileobj, 'temp_query', sep=',', columns=('sub_id', 'tranche_id'))
 
-        curs.execute("\
-            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
-                    select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
-                        select sb.sub_id, sb.smiles, sb.tranche_id from temp_query AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
-                    ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
-                ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
-            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ")
-    else:
+            # perform query to select all desired information from data
+            # this is the old version that joins catalog_substance first, we should join substance first so we make sure to retrieve a substance even if it has no mapped entries
+            """curs.execute("\
+                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                    select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
+                        select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
+                            select cat_content_fk, sub_id_fk, cs.tranche_id from temp_query AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
+                        ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
+                    ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
+                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+            ")"""
 
-        # if looking up small number of codes avoid overhead by using hardcoded VALUES data
-        # unsure if this is identical in performance or worse performance than temporary tables
-        # I believe there is some overhead associated with processing query lines
-        # so it is better at scale to transmit data with copy_from than to hardcode values into query
-        curs.execute("\
-            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
-                    select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
-                        select sb.sub_id, sb.smiles, sb.tranche_id from (values {}) AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
-                    ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
-                ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
-            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
-        """
-        curs.execute("\
-            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
-                    select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                        select cat_content_fk, sub_id_fk, cs.tranche_id from (values {}) AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
-                ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
-            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))"""
+            curs.execute("\
+                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                    select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
+                        select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
+                            select sb.sub_id, sb.smiles, sb.tranche_id from temp_query AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                        ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
+                    ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
+                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+            ")
+        else:
 
-    results = curs.fetchall()
-    results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
-    conn.rollback()
-    conn.close()
+            # if looking up small number of codes avoid overhead by using hardcoded VALUES data
+            # unsure if this is identical in performance or worse performance than temporary tables
+            # I believe there is some overhead associated with processing query lines
+            # so it is better at scale to transmit data with copy_from than to hardcode values into query
+            curs.execute("\
+                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                    select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
+                        select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
+                            select sb.sub_id, sb.smiles, sb.tranche_id from (values {}) AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
+                        ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
+                    ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
+                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+            ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
+            """
+            curs.execute("\
+                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
+                    select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
+                        select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
+                            select cat_content_fk, sub_id_fk, cs.tranche_id from (values {}) AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
+                        ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
+                    ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
+                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
+            ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))"""
 
-    data = format_tin_results(results, trancheidmap)
+        
+        results = curs.fetchall()
+        results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
+        conn.rollback()
+        conn.close()
 
-    tfinish = time.time()
-    not_found = [d for d in data if not d['smiles']]
+        data = format_tin_results(results, trancheidmap)
 
-    search_info = {
-        'tin_url': dsn,
-        'expected_ids': 'Originally searched zinc ids: {}'.format(ids),
-        'not_found_ids': 'Not Found: {}'.format(not_found) if len(not_found) > 0 else "All found",
-        'elapsed_time': 'It took {:.3f} s'.format((tfinish-tstart))  
-    }
+        tfinish = time.time()
+        not_found = [d for d in data if not d['smiles']]
 
-    all_data = {'items':data, 'search_info':search_info}
+        search_info = {
+            'tin_url': dsn,
+            'expected_ids': 'Originally searched zinc ids: {}'.format(ids),
+            'not_found_ids': 'Not Found: {}'.format(not_found) if len(not_found) > 0 else "All found",
+            'elapsed_time': 'It took {:.3f} s'.format((tfinish-tstart))  
+        }
 
-    return all_data
+        all_data = {'items':data, 'search_info':search_info}
 
+        return all_data
+    except:
+        self.update_state(state='SUCCESS')
+        return {'items':[], 'search_info':{}}
+        
+    
 def format_tin_results(results_raw, trancheidmap):
     # extensive result formatting & sorting below
     sub_prev, tranche_prev = None, None
@@ -454,7 +552,19 @@ def mergeCodeResultsAndSubmitTinSupplierJobs(results):
         url = dbids_map[dbid]
         url = url.replace('+psycopg2', '') # this bit is only for sqlalchemy connections, remove it for raw psycopg2 connections
         tasklist.append(getTinSupplier.s(url, codes))
-    return chord(tasklist)(mergeSubstanceResults.s()).id
+    callback = mergeSubstanceResults.s()
+    res = chord(tasklist)(callback)
+
+    return res.id
+
+@shared_task(bind=True)
+def celery_bug_fix(self, *args, **kwargs):
+    '''
+    celery chords only correctly handle errors with at least 2 tasks, 
+    so we always append a celery_bug_fix task
+    https://github.com/celery/celery/issues/3709
+    '''
+    pass
 
 @celery.task
 def getCodes(url, codes, timeout=10):

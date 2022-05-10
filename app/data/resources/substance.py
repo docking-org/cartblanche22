@@ -9,7 +9,7 @@ from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
-from flask import jsonify, current_app, request, make_response
+from flask import jsonify, current_app, request, make_response, redirect, Response,stream_with_context
 from collections import defaultdict
 import grequests
 import json
@@ -251,8 +251,45 @@ class Substance(Resource):
 
         return {'message': 'Not found', 'search_info': search_info}, 404
 
-
+def progress(task, output_fields, file_type):            
+    data = str(task)
+    task = AsyncResult(data)
+    data = task.get()
+    
+    task = data[0]
+    sublist = data[1]
+    
+    while(True):
+        time.sleep(5)
+        task = str(task)
+        res = AsyncResult(task)
+        if res.ready():
+            for i in sublist:
+                task = AsyncResult(str(i))
+                task.forget()
+            res = res.get()
+            result = []
+            for mol in res:
+                newmol = {}
+                for field in output_fields:
+                    newmol[field] = mol[field]
+                result.append(newmol)
+            
+            if(file_type == "csv"):
+                res = pd.DataFrame(result)
+                return str(res.to_csv(encoding='utf-8', index=False))
+                
+            elif(file_type == "txt"):
+                res = pd.DataFrame(result)
+                return str(res.to_csv(encoding='utf-8', index=False, sep=" "))
+                
+            else:
+                return str(res)
+    
+    
+        
 class Substances(Resource):
+        
     def post(self, file_type=None):
         parser.add_argument('zinc_id-in', location='files', type=FileStorage, required=True)
         parser.add_argument('chunk', type=int)
@@ -267,26 +304,9 @@ class Substances(Resource):
         #args['zinc_id-in'] = lines
         
         task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines]) 
+
+        return Response(progress(task=task, output_fields=output_fields, file_type=file_type))
        
-        result = task.get()
-        result = AsyncResult(result)
-        results = result.get()
-        
-        result = []
-        for mol in results:
-            newmol = {}
-            for field in output_fields:
-                newmol[field] = mol[field]
-            result.append(newmol)
-        
-        if(file_type == "csv"):
-            res = pd.DataFrame(result)
-            return res.to_csv(encoding='utf-8', index=False)
-        elif(file_type == "txt"):
-            res = pd.DataFrame(result)
-            return res.to_csv(encoding='utf-8', index=False, sep=" ")
-        
-        return result
 
 class SubstanceRandomList(Resource):
     def post(self, file_type=None):
