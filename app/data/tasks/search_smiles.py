@@ -24,7 +24,7 @@ def smiles_result():
         data = request.args.get("task")
         task = AsyncResult(data)
         data = task.get()
-        task = AsyncResult(data)
+        task = AsyncResult(data[0])
         data = task.get()
              
         if len(data) == 0:
@@ -61,7 +61,7 @@ def curlSearch(files):
     task = getSubstanceList.delay(data)
     
     data = task.get()
-    task = AsyncResult(data)
+    task = AsyncResult(data[0])
     data = task.get()
     print(data)
     
