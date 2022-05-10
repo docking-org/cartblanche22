@@ -1,3 +1,6 @@
+from email import header
+
+from jmespath import search
 from app.celery_worker import celery, flask_app, db
 from celery import group, chord
 from celery.execute import send_task
@@ -267,7 +270,10 @@ def progress(task, output_fields, file_type):
             for i in sublist:
                 task = AsyncResult(str(i))
                 task.forget()
-            res = res.get()
+            try:
+                res = res.get()
+            except:
+                res = []
             result = []
             for mol in res:
                 newmol = {}
@@ -289,6 +295,51 @@ def progress(task, output_fields, file_type):
     
         
 class Substances(Resource):
+    def search(self, lines, output_fields, file_type):
+        maintasks = []
+        splitlist = list(chunks(lines, 10000))
+        for spl in splitlist:
+            task = send_task('app.data.tasks.search_zinc.getSubstanceList', [spl])
+            maintasks.append(task)
+        header = True
+        print(maintasks)
+        while len(maintasks) != 0:
+            time.sleep(5)
+            for maintask in maintasks:
+                task = AsyncResult(str(maintask))
+                
+                data = task.get()
+                data = data[0]
+                task = AsyncResult(data)
+                if(task.ready()):
+                    result = []
+                    print(maintask)
+                    maintasks.remove(maintask)
+                    data = task.get()
+                    
+                    for mol in data:
+                        newmol = {}
+                        for field in output_fields:
+                            newmol[field] = mol[field]
+                        result.append(newmol)
+                    
+                    if(file_type == "csv"):   
+                        res = pd.DataFrame(result)
+                        yield str(res.to_csv(encoding='utf-8', index=False, header=header))
+                        
+                    elif(file_type == "txt"):
+                        res = pd.DataFrame(result)
+                        yield str(res.to_csv(encoding='utf-8', index=False, sep=" ", header=header))
+                        
+                    else:
+                        if header:
+                            yield "["
+                        for mol in result:
+                            yield str(mol)+","
+                    header = False 
+        if(file_type == "json"):   
+            yield "]"
+        return 
         
     def post(self, file_type=None):
         parser.add_argument('zinc_id-in', location='files', type=FileStorage, required=True)
@@ -301,12 +352,33 @@ class Substances(Resource):
         uploaded_file = args.get('zinc_id-in').stream.read().decode()
         output_fields = args.get('output_fields').split(',')
         lines = [x for x in re.split(r'\n|\r|(\r\n)', uploaded_file) if x!='' and x!= None]
-        #args['zinc_id-in'] = lines
         
-        task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines]) 
-
-        return Response(progress(task=task, output_fields=output_fields, file_type=file_type))
-       
+        result = []
+        
+        if len(lines) > 10000: 
+            return Response(stream_with_context(self.search(lines =lines, output_fields=output_fields,file_type=file_type)))
+        else:
+            task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines]) 
+            task = AsyncResult(str(task))
+                    
+            data = task.get()
+            data = data[0]
+            task = AsyncResult(data)
+            data = task.get()
+            print("here")
+            
+            if(file_type == "csv"):
+                res = pd.DataFrame(data)
+                return res.to_csv(encoding='utf-8', index=False)
+            elif(file_type == "txt"):
+                res = pd.DataFrame(data)
+                return res.to_csv(encoding='utf-8', index=False, sep=" ")
+            else:
+                return data
+    
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 class SubstanceRandomList(Resource):
     def post(self, file_type=None):

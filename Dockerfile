@@ -17,6 +17,7 @@ ENV PATH /opt/conda/envs/cartblanche-rdkit-env/bin:$PATH
 RUN pip install -r requirements.txt
 
 RUN apt-get install -y vim
+RUN apt-get install -y rabbitmq-server
 
 EXPOSE 5000
 

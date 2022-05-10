@@ -318,7 +318,7 @@ def searchZinc(identifier):
 def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
     result = task.get()
-    result = AsyncResult(result)
+    result = AsyncResult(result[0])
     res = result.get()
    
     if res:

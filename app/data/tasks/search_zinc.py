@@ -189,7 +189,10 @@ class SearchJobSubstance(Resource):
         except Exception as e:
             print("err", e)
         
-        return redirect('/search/progress?task={task}'.format(task = task.id))
+        if(len(ids) > 300):
+            return redirect('/search/progress?task={task}'.format(task = task.id))
+        else:
+            return redirect('/search/result_zincsearch?task={task}'.format(task = task.id))
 
     def filter_zinc_ids(ids):
         zinc22 = []
@@ -336,15 +339,14 @@ def getSubstanceList(zinc_ids):
     taskList = []
     taskids = []
     for url, ids in url_to_ids_map.items():   
-        # if len(ids) > 30000: 
-        #     splitlist = list(chunks(ids, 30000))
-            
-        #     for l in splitlist:
-        #         url = url.replace('+psycopg2', '')
-        #         task_id = uuid4()
-        #         taskids.append(task_id)
-        #         task = getSubstance.s(url, l).set(task_id=str(task_id))
-        #         taskList.append(task) 
+        if len(ids) > 50000: 
+            splitlist = list(chunks(ids, 50000))
+            for l in splitlist:
+                url = url.replace('+psycopg2', '')
+                task_id = uuid4()
+                taskids.append(task_id)
+                task = getSubstance.s(url, l).set(task_id=str(task_id))
+                taskList.append(task) 
         
         url = url.replace('+psycopg2', '')
         task_id = uuid4()
@@ -365,19 +367,20 @@ def chunks(lst, n):
 def mergeSubstanceResults(results):
     results_final = []
     error_logs = []
-    for result in results:
+    if results:
+        for result in results:
         #if result['search_info']['not_found_ids'] != "All found" and application.config['EMAIL_ZINCSEARCH_ERROR_LOGS']:
         #    error_logs.append(result['search_info'])
-        results_final.extend(result['items'])
+            results_final.extend(result['items'])
     if len(error_logs) > 0:
         send_search_log(error_logs)
     return results_final
 
-@celery.task(soft_time_limit=120, bind=True)
-def getSubstance(self, dsn, ids, timeout=10):
+@celery.task()
+def getSubstance(dsn, ids, timeout=10):
     try:
         tstart = time.time()
-        conn = psycopg2.connect(dsn, connect_timeout=timeout, options='-c statement_timeout=100000')
+        conn = psycopg2.connect(dsn, connect_timeout=timeout, options='-c statement_timeout=200s')
         curs = conn.cursor()
 
         # get tranche information from db (could streamline, but it's not an expensive operation)
@@ -487,7 +490,6 @@ def getSubstance(self, dsn, ids, timeout=10):
 
         return all_data
     except:
-        self.update_state(state='SUCCESS')
         return {'items':[], 'search_info':{}}
         
     
