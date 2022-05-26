@@ -116,14 +116,18 @@ def search_result():
 @application.route('/search/result_suppliersearch', methods=['GET'])
 def search_result_supplier():
 
-    antimony_task = AsyncResult(request.args.get('task'))
-    tinsearch_task = AsyncResult(antimony_task.get())
+    args = AsyncResult(request.args.get('task'))
+    if args != "None":
+        antimony_task = AsyncResult(args)
+        tinsearch_task = AsyncResult(antimony_task.get())
 
-    result = tinsearch_task.get()
+        result = tinsearch_task.get()
+        
 
-    if len(result) == 0:
-        return render_template('errors/search404.html', href='/search/search_by_suppliercode', header="We didn't find those codes in the Zinc22 database. Click here to return")
-    return render_template('search/result_zincsearch.html', data22=result, data20=[])
+        if len(result) != 0:
+            return render_template('search/result_zincsearch.html', data22=result, data20=[])
+    
+    return render_template('errors/search404.html', href='/search/search_by_suppliercode', header="We didn't find those codes in the Zinc22 database. Click here to return")
 
 
 class SearchJobSupplier(Resource):
@@ -135,13 +139,16 @@ class SearchJobSupplier(Resource):
         codes = file + textDataList
         codes = [code for code in codes if code != '']
         print(codes)
-
+    
         try:
             task = SearchJobSupplier.generate_code_search_tasks(codes)
         except Exception as e:
             print(e)
-        return redirect('/search/result_suppliersearch?task={}'.format(task))
     
+        return redirect('/search/result_suppliersearch?task={}'.format(task))
+            
+        
+
     def curlSearch(data):
         try:
             task = SearchJobSupplier.generate_code_search_tasks(data)
@@ -380,7 +387,7 @@ def mergeSubstanceResults(results):
 def getSubstance(dsn, ids, timeout=10):
     try:
         tstart = time.time()
-        conn = psycopg2.connect(dsn, connect_timeout=timeout, options='-c statement_timeout=200s')
+        conn = psycopg2.connect(dsn, connect_timeout=timeout, options='-c statement_timeout=3600s')
         curs = conn.cursor()
 
         # get tranche information from db (could streamline, but it's not an expensive operation)
@@ -558,15 +565,6 @@ def mergeCodeResultsAndSubmitTinSupplierJobs(results):
     res = chord(tasklist)(callback)
 
     return res.id
-
-@shared_task(bind=True)
-def celery_bug_fix(self, *args, **kwargs):
-    '''
-    celery chords only correctly handle errors with at least 2 tasks, 
-    so we always append a celery_bug_fix task
-    https://github.com/celery/celery/issues/3709
-    '''
-    pass
 
 @celery.task
 def getCodes(url, codes, timeout=10):
