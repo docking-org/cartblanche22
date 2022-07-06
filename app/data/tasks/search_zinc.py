@@ -116,7 +116,7 @@ def search_result():
 @application.route('/search/result_suppliersearch', methods=['GET'])
 def search_result_supplier():
 
-    args = AsyncResult(request.args.get('task'))
+    args = request.args.get('task')
     if args != "None":
         antimony_task = AsyncResult(args)
         tinsearch_task = AsyncResult(antimony_task.get())
