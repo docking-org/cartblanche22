@@ -33,7 +33,7 @@ class Config(object):
         CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost/'
         CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
-        # CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
+        #CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
         #CELERY_RESULT_BACKEND = 'redis://0.0.0.0:6379/0'
   
         SQLALCHEMY_BINDS = {
