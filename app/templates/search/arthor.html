@@ -185,7 +185,8 @@
         }
 
         function setDownloadLinks() {
-            var limit = 500;
+            // 100 Download Size
+            var limit = 100;
             var params = $.param({
                 query: arthor.query,
                 type: arthor.type,
@@ -195,10 +196,12 @@
                 flags: arthor.flags
             });
             var base_url = arthor.url + '/dt/' + arthor.table + '/search';
-            $('#arthor_sdf_link_500').attr('href', base_url + '.sdf?' + params);
-            $('#arthor_tsv_link_500').attr('href', base_url + '.tsv?' + params);
-            $('#arthor_csv_link_500').attr('href', base_url + '.csv?' + params);
-            var limit = 5000;
+            $('#arthor_sdf_link_100').attr('href', base_url + '.sdf?' + params);
+            $('#arthor_tsv_link_100').attr('href', base_url + '.tsv?' + params);
+            $('#arthor_csv_link_100').attr('href', base_url + '.csv?' + params);
+
+            // 1,000 Download Size
+            var limit = 1000;
             var params = $.param({
                 query: arthor.query,
                 type: arthor.type,
@@ -208,9 +211,11 @@
                 flags: arthor.flags
             });
             var base_url = arthor.url + '/dt/' + arthor.table + '/search';
-            $('#arthor_sdf_link_5000').attr('href', base_url + '.sdf?' + params);
-            $('#arthor_tsv_link_5000').attr('href', base_url + '.tsv?' + params);
-            $('#arthor_csv_link_5000').attr('href', base_url + '.csv?' + params);
+            $('#arthor_sdf_link_1k').attr('href', base_url + '.sdf?' + params);
+            $('#arthor_tsv_link_1k').attr('href', base_url + '.tsv?' + params);
+            $('#arthor_csv_link_1k').attr('href', base_url + '.csv?' + params);
+
+            // 10,000 Download Size
             var limit = 10000;
             var params = $.param({
                 query: arthor.query,
@@ -221,22 +226,11 @@
                 flags: arthor.flags
             });
             var base_url = arthor.url + '/dt/' + arthor.table + '/search';
-            $('#arthor_sdf_link_10000').attr('href', base_url + '.sdf?' + params);
-            $('#arthor_tsv_link_10000').attr('href', base_url + '.tsv?' + params);
-            $('#arthor_csv_link_10000').attr('href', base_url + '.csv?' + params);
-            var limit = 50000;
-            var params = $.param({
-                query: arthor.query,
-                type: arthor.type,
-                draw: 0,
-                start: 0,
-                length: limit,
-                flags: arthor.flags
-            });
-            var base_url = arthor.url + '/dt/' + arthor.table + '/search';
-            $('#arthor_tsv_link_50000').attr('href', base_url + '.tsv?' + params);
-            $('#arthor_csv_link_50000').attr('href', base_url + '.csv?' + params);
-            $('#arthor_sdf_link_50000').attr('href', base_url + '.sdf?' + params);
+            $('#arthor_sdf_link_10k').attr('href', base_url + '.sdf?' + params);
+            $('#arthor_tsv_link_10k').attr('href', base_url + '.tsv?' + params);
+            $('#arthor_csv_link_10k').attr('href', base_url + '.csv?' + params);
+
+            // 100,000 Download Size
             var limit = 100000;
             var params = $.param({
                 query: arthor.query,
@@ -246,6 +240,42 @@
                 length: limit,
                 flags: arthor.flags
             });
+            var base_url = arthor.url + '/dt/' + arthor.table + '/search';
+            $('#arthor_sdf_link_100k').attr('href', base_url + '.sdf?' + params);
+            $('#arthor_tsv_link_100k').attr('href', base_url + '.tsv?' + params);
+            $('#arthor_csv_link_100k').attr('href', base_url + '.csv?' + params);
+
+            // 200,000 Download Size
+            var limit = 200000;
+            var params = $.param({
+                query: arthor.query,
+                type: arthor.type,
+                draw: 0,
+                start: 0,
+                length: limit,
+                flags: arthor.flags
+            });
+            var base_url = arthor.url + '/dt/' + arthor.table + '/search';
+            $('#arthor_sdf_link_200k').attr('href', base_url + '.sdf?' + params);
+            $('#arthor_tsv_link_200k').attr('href', base_url + '.tsv?' + params);
+            $('#arthor_csv_link_200k').attr('href', base_url + '.csv?' + params);
+
+            // 300,000 Download Size
+            var limit = 300000;
+            var params = $.param({
+                query: arthor.query,
+                type: arthor.type,
+                draw: 0,
+                start: 0,
+                length: limit,
+                flags: arthor.flags
+            });
+            var base_url = arthor.url + '/dt/' + arthor.table + '/search';
+            $('#arthor_sdf_link_300k').attr('href', base_url + '.sdf?' + params);
+            $('#arthor_tsv_link_300k').attr('href', base_url + '.tsv?' + params);
+            $('#arthor_csv_link_300k').attr('href', base_url + '.csv?' + params);
+
+
             var base_url = arthor.url + '/dt/' + arthor.table + '/search';
             $('#arthor_tsv_link_100000').attr('href', base_url + '.tsv?' + params);
             $('#arthor_csv_link_100000').attr('href', base_url + '.csv?' + params);
@@ -368,17 +398,19 @@
                             </div>
                             <div class="modal-body">
                                 <ul class="list-group">
-                                    <li class="list-group-item"><a id="arthor_tsv_link_500" href="#"><i
-                                            class="fa fa-download"></i> Download 500 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_tsv_link_5000" href="#"><i
-                                            class="fa fa-download"></i> Download 5000 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_tsv_link_10000" href="#"><i
-                                            class="fa fa-download"></i> Download 10000 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_tsv_link_50000" href="#"><i
-                                            class="fa fa-download"></i> Download 50000 molecules </a></li>
-                                    <li class="list-group-item"><a id="arthor_tsv_link_100000" href="#"><i
-                                            class="fa fa-download"></i> Download 100000 molecules </a></li>
-                                    {#     <li class="list-group-item"><a id="arthor_tsv_link_500000" href="#"><i class="fa fa-download"></i> Download 500000 molecules </a></li>#}
+                                    <li class="list-group-item"><a id="arthor_tsv_link_100" href="#"><i
+                                            class="fa fa-download"></i> Download 100 molecules</a></li>
+                                    <li class="list-group-item"><a id="arthor_tsv_link_1k" href="#"><i
+                                                class="fa fa-download"></i> Download 1,000 molecules</a></li>
+                                    <li class="list-group-item"><a id="arthor_tsv_link_10k" href="#"><i
+                                                class="fa fa-download"></i> Download 10,000 molecules</a></li>
+                                    <li class="list-group-item"><a id="arthor_tsv_link_100k" href="#"><i
+                                                class="fa fa-download"></i> Download 100,000 molecules </a></li>
+                                    <li class="list-group-item"><a id="arthor_tsv_link_200k" href="#"><i
+                                                class="fa fa-download"></i> Download 200,000 molecules </a></li>
+                                    <li class="list-group-item"><a id="arthor_tsv_link_300k" href="#"><i
+                                                class="fa fa-download"></i> Download 300,000 molecules </a></li>
+
                                 </ul>
                             </div>
                             <div class="modal-footer">
@@ -401,17 +433,18 @@
                             </div>
                             <div class="modal-body">
                                 <ul class="list-group">
-                                    <li class="list-group-item"><a id="arthor_csv_link_500" href="#"><i
-                                            class="fa fa-download"></i> Download 500 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_csv_link_5000" href="#"><i
-                                            class="fa fa-download"></i> Download 5000 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_csv_link_10000" href="#"><i
-                                            class="fa fa-download"></i> Download 10000 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_csv_link_50000" href="#"><i
-                                            class="fa fa-download"></i> Download 50000 molecules </a></li>
-                                    <li class="list-group-item"><a id="arthor_csv_link_100000" href="#"><i
-                                            class="fa fa-download"></i> Download 100000 molecules </a></li>
-                                    {#     <li class="list-group-item"><a id="arthor_csv_link_500000" href="#"><i class="fa fa-download"></i> Download 500000 molecules </a></li>#}
+                                <li class="list-group-item"><a id="arthor_csv_link_100" href="#"><i
+                                            class="fa fa-download"></i> Download 100 molecules</a></li>
+                                <li class="list-group-item"><a id="arthor_csv_link_1k" href="#"><i
+                                            class="fa fa-download"></i> Download 1,000 molecules</a></li>
+                                <li class="list-group-item"><a id="arthor_csv_link_10k" href="#"><i
+                                            class="fa fa-download"></i> Download 10,000 molecules</a></li>
+                                <li class="list-group-item"><a id="arthor_csv_link_100k" href="#"><i
+                                            class="fa fa-download"></i> Download 100,000 molecules </a></li>
+                                <li class="list-group-item"><a id="arthor_csv_link_200k" href="#"><i
+                                            class="fa fa-download"></i> Download 200,000 molecules </a></li>
+                                <li class="list-group-item"><a id="arthor_csv_link_300k" href="#"><i
+                                            class="fa fa-download"></i> Download 300,000 molecules </a></li>
                                 </ul>
                             </div>
                             <div class="modal-footer">
@@ -434,17 +467,19 @@
                             </div>
                             <div class="modal-body">
                                 <ul class="list-group">
-                                    <li class="list-group-item"><a id="arthor_sdf_link_500" href="#"><i
-                                            class="fa fa-download"></i> Download 500 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_sdf_link_5000" href="#"><i
-                                            class="fa fa-download"></i> Download 5000 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_sdf_link_10000" href="#"><i
-                                            class="fa fa-download"></i> Download 10000 molecules</a></li>
-                                    <li class="list-group-item"><a id="arthor_sdf_link_50000" href="#"><i
-                                            class="fa fa-download"></i> Download 50000 molecules </a></li>
-                                    <li class="list-group-item"><a id="arthor_sdf_link_100000" href="#"><i
-                                            class="fa fa-download"></i> Download 100000 molecules </a></li>
-                                    {#     <li class="list-group-item"><a id="arthor_sdf_link_500000" href="#"><i class="fa fa-download"></i> Download 500000 molecules </a></li>#}
+                                    <li class="list-group-item"><a id="arthor_sdf_link_100" href="#"><i
+                                            class="fa fa-download"></i> Download 100 molecules</a></li>
+                                    <li class="list-group-item"><a id="arthor_sdf_link_1k" href="#"><i
+                                                class="fa fa-download"></i> Download 1,000 molecules</a></li>
+                                    <li class="list-group-item"><a id="arthor_sdf_link_10k" href="#"><i
+                                                class="fa fa-download"></i> Download 10,000 molecules</a></li>
+                                    <li class="list-group-item"><a id="arthor_sdf_link_100k" href="#"><i
+                                                class="fa fa-download"></i> Download 100,000 molecules </a></li>
+                                    <li class="list-group-item"><a id="arthor_sdf_link_200k" href="#"><i
+                                                class="fa fa-download"></i> Download 200,000 molecules </a></li>
+                                    <li class="list-group-item"><a id="arthor_sdf_link_300k" href="#"><i
+                                                class="fa fa-download"></i> Download 300,000 molecules </a></li>
+
                                 </ul>
                             </div>
                             <div class="modal-footer">
