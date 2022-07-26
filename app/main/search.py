@@ -306,20 +306,19 @@ def searchZinc(identifier):
 
 def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
-    result = task.get()
-    result = AsyncResult(result[0])
-    res = result.get()
-   
+    res = task.get()
+    
     if res:
         role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
             role = 'ucsf'
         else:
             role = 'public'
-        data= res
+        data= res[0] 
+        print("here")
         print(data)
         
-        catalogs = data[0]['catalogs']
+        catalogs = data['catalogs']
         print(catalogs)
         prices = []
        
@@ -338,10 +337,10 @@ def getZincData(identifier):
             # else:
             #     pass
             #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-        smile = data[0]['smiles']
-        data[0]['zinc20']= False
-        data[0]['supplier']= []
-        return data[0], res, smile, prices
+        smile = data['smiles']
+        data['zinc20']= False
+        data['supplier']= []
+        return data, res, smile, prices
 
 @application.route('/sw')
 def sw():

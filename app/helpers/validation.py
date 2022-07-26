@@ -12,6 +12,7 @@ from rdkit.Chem.SaltRemover import SaltRemover
 from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.inchi import MolToInchiKey
 from rdkit import RDLogger
+import os
 lg = RDLogger.logger()
 lg.setLevel(RDLogger.CRITICAL) #comment out to enable rdkit logs
 from flask import current_app
@@ -238,3 +239,46 @@ def get_new_tranche(tranche):
         'logp': logp_mapping[p_num]
     }
     return tranche_args
+
+digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
+#logp_range_rev={e:i for i, e in enumerate(logp_range)}
+digits_map = { digit : i for i, digit in enumerate(digits) }
+b62_table = [62**i for i in range(12)]
+
+def base62_rev(s):
+    tot = 0
+    for i, c in enumerate(reversed(s)):
+        val = digits_map[c]
+        tot += val * b62_table[i]
+    return tot
+
+def get_sub_id(zinc_id):
+    return base62_rev(zinc_id[8:])
+
+def get_zinc_id(sub_id, tranche_name):
+    if not tranche_name:
+        return "ZINC" + "??00" + "{:0>8s}".format(base62(sub_id))
+    hac = digits[int(tranche_name[1:3])]
+    lgp = digits[logp_range.index(tranche_name[3:])]
+    zid = "ZINC" + hac + lgp + "00" + "{:0>8s}".format(base62(sub_id))
+    return zid
+
+def get_tranche(zinc_id):
+    hac = base62_rev(zinc_id[4])
+    lgp = base62_rev(zinc_id[5])
+    tranche = "H{:>02d}{}".format(hac, logp_range[lgp])
+    return tranche
+
+def get_conn_string(partition_host_port, db='tin', user='tinuser'):
+    host, port = partition_host_port.split(':')
+    if host == os.uname()[1].split('.')[0]:
+        host = "localhost"
+    
+    toNum  = "10.20."+ host[1]+"."+host[2]
+    return "postgresql://{0}@{1}:{2}/{3}".format(user, host, port, db)
+    #return Config.SQLALCHEMY_BINDS[toNum+":"+port].replace("/db","/"+db).replace("username", user)
+
+def get_tin_partition(zinc_id, tranche_map):
+    return tranche_map.get(get_tranche(zinc_id)) or "fake"
+
