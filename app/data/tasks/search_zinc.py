@@ -86,7 +86,7 @@ def search_result():
             
         if(len(list22) == 0 and len(list20) == 0):
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return render_template('search/result.html', data22=list22, data20=list20, missing22=missing)
+        return render_template('search/result_zincsearch.html', data22=list22, data20=list20, missing22=missing)
 
 @application.route('/search/result_suppliersearch', methods=['GET'])
 def search_result_supplier():
@@ -102,7 +102,7 @@ def search_result_supplier():
        
             if len(list22) == 0:
                 return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-            return render_template('search/result.html', data22=list22, data20=[], missing22=missing)
+            return render_template('search/result_supplier.html', data22=list22, data20=[], missing22=missing)
 
 class SearchJobSupplier(Resource):
     def post(self):
