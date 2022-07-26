@@ -1,43 +1,31 @@
-from gc import callbacks
-from posixpath import split
-from uuid import uuid4
-from app.main import application
-
-
-from flask_sqlalchemy import SQLAlchemy
-from flask_restful import Resource, reqparse
-
-from flask import render_template, request, json, jsonify, flash, Flask, redirect,g 
-
-from celery.exceptions import SoftTimeLimitExceeded
-from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers, base62, get_new_tranche, get_compound_details, antimony_hashes_to_urls, get_tin_urls_from_ids, get_tin_urls_from_tranches
-
-from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
-from flask import jsonify, current_app, request, make_response
-from collections import defaultdict
-
-from flask_csv import send_csv
-import time
-
-
-# from gevent import monkey as curious_george
-# curious_george.patch_all(thread=False, select=False)
-
-import requests
-from datetime import datetime
-import itertools
-import re
-
-from app import celery_worker
-from app.celery_worker import celery, flask_app, db
-from celery import group, chord, shared_task
-from celery.result import AsyncResult
-from app.email_send import send_search_log
-import ast
-import psycopg2
 import io
 import hashlib
+import subprocess, tempfile, io, hashlib, psycopg2
+from urllib.parse import urlencode, urlparse, quote
+import time
+import requests
+import re
+import json
 
+import urllib3
+
+from app.helpers.validation import base62, get_compound_details, get_tin_partition, get_conn_string, base62_rev, get_sub_id, get_zinc_id, get_tranche, get_conn_string, get_tin_partition
+from flask import jsonify, current_app, request
+from flask_restful import Resource
+from app.main import application
+from config import Config
+from flask import render_template, request, jsonify, redirect
+
+from app.celery_worker import celery, flask_app, db
+from celery import chord, current_task
+from celery.result import AsyncResult
+from app.email_send import send_search_log
+
+client_configuration = {
+        "mem_max_sort" : int(5.12e8), # in bytes
+        #"mem_max_cached_file" : int(2.56e8), # in bytes
+        "mem_max_cached_file" : 0
+}
 
 @application.route('/search/progress', methods=['GET'])
 def search_status():
@@ -47,7 +35,6 @@ def search_status():
     data = task.get()
     data = data[1][1]
   
-   
     total = len(data)
     done = 0
     for task in data:
@@ -55,10 +42,9 @@ def search_status():
         if res.ready():
             done +=1
    
-    
     if done != 0:
         if (done/total) == 1:
-            return redirect("/search/result_zincsearch?task="+request.args.get("task"), code=200)
+            return redirect("/search/result?task="+request.args.get("task"), code=200)
         return render_template('search/result_status.html', progress = round((done/total), 2))
     else:
         return render_template('search/result_status.html', progress = 0)
@@ -69,8 +55,7 @@ def update_progress():
     
     task = AsyncResult(data)
     data = task.get()
-    data = data[1][1]
-  
+    
    
     total = len(data)
     done = 0
@@ -87,7 +72,6 @@ def update_progress():
     else:
         return jsonify(0)
     
-    
 @application.route('/search/result_zincsearch', methods=['GET'])
 def search_result():
     if request.method == 'GET':
@@ -97,38 +81,32 @@ def search_result():
         data = task.get()
 
         list20 = data[0]
-        task22 = data[1][0]
-        list22 = []
+        list22 = data[1]["found"]
+        missing = data[1]["missing"][:-1]
         
-        sublist = data[1][1]
-        for i in sublist:
-            task = AsyncResult(str(i))
-            task.forget()
-        
-        if task22 != None:
-            task = AsyncResult(task22)
-            list22 = task.get()
+        for entry in list22:
+            print(entry["smiles"])
+            entry["smiles_url"] = quote(entry["smiles"])
             
         if(len(list22) == 0 and len(list20) == 0):
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return render_template('search/result_zincsearch.html', data22=list22, data20=list20)
+        return render_template('search/result_zincsearch.html', data22=list22, data20=list20, missing22=missing)
 
 @application.route('/search/result_suppliersearch', methods=['GET'])
 def search_result_supplier():
-
-    args = request.args.get('task')
-    if args != "None":
-        antimony_task = AsyncResult(args)
-        tinsearch_task = AsyncResult(antimony_task.get())
-
-        result = tinsearch_task.get()
-        
-
-        if len(result) != 0:
-            return render_template('search/result_zincsearch.html', data22=result, data20=[])
-    
-    return render_template('errors/search404.html', href='/search/search_by_suppliercode', header="We didn't find those codes in the Zinc22 database. Click here to return")
-
+        if request.method == 'GET':
+            data = request.args.get("task")
+            task = AsyncResult(data)
+            list22 = task.get()['found']
+            missing = task.get()['missing']
+            print(missing)
+            for entry in list22:
+                print(entry["smiles"])
+                entry["smiles_url"] = quote(entry["smiles"])
+       
+            if len(list22) == 0:
+                return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
+            return render_template('search/result_supplier.html', data22=list22, data20=[], missing22=missing)
 
 class SearchJobSupplier(Resource):
     def post(self):
@@ -141,43 +119,20 @@ class SearchJobSupplier(Resource):
         print(codes)
     
         try:
-            task = SearchJobSupplier.generate_code_search_tasks(codes)
+            task = vendorSearch.delay(codes)
         except Exception as e:
             print(e)
     
         return redirect('/search/result_suppliersearch?task={}'.format(task))
             
-        
-
     def curlSearch(data):
         try:
-            task = SearchJobSupplier.generate_code_search_tasks(data)
+            task = vendorSearch.delay(data)
         except Exception as e:
             print(e)
         return task
-        
-    def generate_code_search_tasks(codes):
-        url_to_codes_map = {}
-        hashes = [hashlib.sha256(code.encode('utf-8')).digest()[-2:] for code in codes]
-        urls = antimony_hashes_to_urls(hashes)
-        for code, hashv in zip(codes, hashes):
-            hashv = hex(int.from_bytes(hashv, "little"))[-2:]
-            url = urls[hashv]
-            if not url_to_codes_map.get(url):
-                url_to_codes_map[url] = [code]
-            else:
-                url_to_codes_map[url].append(code)
-        print(urls)
-        taskList = []
-        for url, codes in url_to_codes_map.items():
-            url = url.replace('+psycopg2', '')
-            taskList.append(getCodes.s(url, codes))
-
-        result = chord(taskList)(mergeCodeResultsAndSubmitTinSupplierJobs.s())
-        return result.id 
 
 class SearchJobSubstance(Resource):
-
     def post(self):
         data = request.form['myTextarea']
         file = request.files['zincfile'].read().decode()
@@ -185,7 +140,7 @@ class SearchJobSubstance(Resource):
     
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         
-        ids = textDataList+ file
+        ids = textDataList + file
         
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
         print(zinc22, zinc20, discarded)
@@ -231,7 +186,6 @@ class SearchJobSubstance(Resource):
                 id = 'ZINC' + ((12 - len(identifier)) * '0') + identifier
                 zinc20.append(id)
                 continue
-            
 
             elif identifier[0:4].upper() == 'ZINC':
                 if(identifier[4:5].isalpha()):
@@ -248,7 +202,6 @@ class SearchJobSubstance(Resource):
 @celery.task
 def mergeResults(args):
     return args
-
 
 def zinc20search(zinc20):
     zinc20_response = None
@@ -293,389 +246,404 @@ def zinc20search(zinc20):
 def search20(zinc20):
     return zinc20
 
-b62_digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
-logp_range_map={b62_digits[i]:e for i, e in enumerate(logp_range)}
-logp_range_map_rev={e:b62_digits[i] for i, e in enumerate(logp_range)}
-
-@celery.task
-def getSubstanceList(zinc_ids):
-    #SEARCH STEP 3
- 
-    zinc_ids = [(base10(zinc_id), "H{:02d}{}".format(b62_digits.index(zinc_id[4]), logp_range_map[zinc_id[5]])) for zinc_id in zinc_ids]
-    
-    tranche_to_url_map = get_tin_urls_from_tranches([zinc_id[1] for zinc_id in zinc_ids])
-    #urls = get_all_tin_url()
-    url_to_ids_map = {}
-
-    for zinc_id in zinc_ids:
-
-        url = tranche_to_url_map.get(zinc_id[1])
-        if not url:
-            print("tranche url not found!", zinc_id)
-            continue
-        if not url_to_ids_map.get(url):
-            url_to_ids_map[url] = [zinc_id]
-        else:
-            url_to_ids_map[url].append(zinc_id)
-    #if not url:
-            #    print("url not found", zinc_id)
-            #    continue
-            #hac = b62_digits.index(zinc_id[4])
-            #logp = logp_range[zinc_id[5]]
-            #tranche = "H{:02d}{}".format(hac, logp)
-
-            #zinc_id = (base10(zinc_id), tranche)
-
-            #if not url_to_ids_map.get(url):
-            #    url_to_ids_map = [zinc_id]
-            #else:
-            #    url_to_ids_map.append(zinc_id)
-
-            # pattern = "^ZINC[a-zA-Z]{2}[0-9a-zA-Z]+"
-            #pattern = "^ZINC[1-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z]+"
-            #if not url or not re.match(pattern, zinc_id):
-            #    print("url or zinc_id not found", zinc_id)
-            #    continue
-
-    print("TIN URLS ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-    for k, v in url_to_ids_map.items():
-        print(k, len(v))
-
-    #SEARCH STEP 4, DO REQUEST FOR ALL URLS
-    taskList = []
-    taskids = []
-    for url, ids in url_to_ids_map.items():   
-        if len(ids) > 50000: 
-            splitlist = list(chunks(ids, 50000))
-            for l in splitlist:
-                url = url.replace('+psycopg2', '')
-                task_id = uuid4()
-                taskids.append(task_id)
-                task = getSubstance.s(url, l).set(task_id=str(task_id))
-                taskList.append(task) 
-        
-        url = url.replace('+psycopg2', '')
-        task_id = uuid4()
-        taskids.append(task_id)
-        task = getSubstance.s(url, ids).set(task_id=str(task_id))
-        taskList.append(task)
-
-    callback = mergeSubstanceResults.s()
-    res = chord(taskList)(callback)
-
-    return [res.id, taskids]
-
-def chunks(lst, n):
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
-
 @celery.task
 def mergeSubstanceResults(results):
     results_final = []
     error_logs = []
     if results:
         for result in results:
-        #if result['search_info']['not_found_ids'] != "All found" and application.config['EMAIL_ZINCSEARCH_ERROR_LOGS']:
-        #    error_logs.append(result['search_info'])
             results_final.extend(result['items'])
     if len(error_logs) > 0:
         send_search_log(error_logs)
     return results_final
 
-@celery.task()
-def getSubstance(dsn, ids, timeout=10):
-    try:
-        tstart = time.time()
-        conn = psycopg2.connect(dsn, connect_timeout=timeout, options='-c statement_timeout=3600s')
-        curs = conn.cursor()
-
-        # get tranche information from db (could streamline, but it's not an expensive operation)
-        curs.execute("select tranche_name, tranche_id from tranches")
-        trancheidmap = {}
-        tranchenamemap = {}
-        for trancheobj in curs.fetchall():
-            tranchename = trancheobj[0]
-            trancheid = trancheobj[1]
-            trancheidmap[tranchename] = trancheid
-            tranchenamemap[trancheid] = tranchename
-
-        if len(ids) > 5000:
-            # create a temporary table to hold our query data
-            
-            curs.execute(
-                "CREATE TEMPORARY TABLE temp_query (\
-                    sub_id bigint,\
-                    tranche_id smallint\
-                )"
-            )
-
-            # format the query data and copy over to db
-            try:
-                query_data = '\n'.join(["{},{}".format(id[0], trancheidmap[id[1]]) for id in ids])
-            except KeyError: 
-                tfinish = time.time()
-                not_found = 'all'
-                search_info = {
-                    'tin_url': dsn,
-                    'expected_ids': 'Originally searched zinc ids: {}'.format(ids),
-                    'not_found_ids': 'Not Found: {}'.format(not_found) if len(not_found) > 0 else "All found",
-                    'elapsed_time': 'It took {:.3f} s'.format((tfinish-tstart))  
-                }
-
-                all_data = {'items':[], 'search_info':search_info}
-                return all_data
-            query_fileobj = io.StringIO(query_data)
-            curs.copy_from(query_fileobj, 'temp_query', sep=',', columns=('sub_id', 'tranche_id'))
-
-            # perform query to select all desired information from data
-            # this is the old version that joins catalog_substance first, we should join substance first so we make sure to retrieve a substance even if it has no mapped entries
-            """curs.execute("\
-                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                    select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
-                        select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                            select cat_content_fk, sub_id_fk, cs.tranche_id from temp_query AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
-                        ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
-                    ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
-                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-            ")"""
-
-            curs.execute("\
-                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                    select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
-                        select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
-                            select sb.sub_id, sb.smiles, sb.tranche_id from temp_query AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
-                        ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
-                    ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
-                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-            ")
-        else:
-
-            # if looking up small number of codes avoid overhead by using hardcoded VALUES data
-            # unsure if this is identical in performance or worse performance than temporary tables
-            # I believe there is some overhead associated with processing query lines
-            # so it is better at scale to transmit data with copy_from than to hardcode values into query
-            curs.execute("\
-                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                    select tt.smiles, tt.sub_id, tt.tranche_id, cc.supplier_code, cc.cat_id_fk from (\
-                        select cs.cat_content_fk, t.sub_id, t.tranche_id, t.smiles from (\
-                            select sb.sub_id, sb.smiles, sb.tranche_id from (values {}) AS tq(sub_id, tranche_id), substance AS sb where sb.sub_id = tq.sub_id and sb.tranche_id = tq.tranche_id\
-                        ) AS t left join catalog_substance AS cs on t.sub_id = cs.sub_id_fk and t.tranche_id = cs.tranche_id\
-                    ) AS tt left join catalog_content AS cc on tt.cat_content_fk = cc.cat_content_id\
-                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-            ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))
-            """
-            curs.execute("\
-                select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                    select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
-                        select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                            select cat_content_fk, sub_id_fk, cs.tranche_id from (values {}) AS tq(sub_id, tranche_id), catalog_substance AS cs where cs.sub_id_fk = tq.sub_id and cs.tranche_id = tq.tranche_id\
-                        ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
-                    ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
-                ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-            ".format(','.join(["({},{})".format(id[0], trancheidmap[id[1]]) for id in ids])))"""
-
-        
-        results = curs.fetchall()
-        results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
-        conn.rollback()
-        conn.close()
-
-        data = format_tin_results(results, trancheidmap)
-
-        tfinish = time.time()
-        not_found = [d for d in data if not d['smiles']]
-
-        search_info = {
-            'tin_url': dsn,
-            'expected_ids': 'Originally searched zinc ids: {}'.format(ids),
-            'not_found_ids': 'Not Found: {}'.format(not_found) if len(not_found) > 0 else "All found",
-            'elapsed_time': 'It took {:.3f} s'.format((tfinish-tstart))  
-        }
-
-        all_data = {'items':data, 'search_info':search_info}
-
-        return all_data
-    except:
-        return {'items':[], 'search_info':{}}
-        
-    
-def format_tin_results(results_raw, trancheidmap):
-    # extensive result formatting & sorting below
-    sub_prev, tranche_prev = None, None
-    curr_codes, curr_entry = None, None
-    data = []
-    for res in results_raw:
-        smiles, sub_id, tranche, supplier_code, cat_shortname = res
-        # once we arrive at a new substance
-        if (sub_id, tranche) != (sub_prev, tranche_prev):
-            # flush the entry we were just building to the data stack if it exists
-            if curr_entry:
-                # uniq-ify the codes before adding to entry
-                curr_codes = list(set(curr_codes))
-                curr_entry['supplier_code'] = [c[0] for c in curr_codes]
-                # catalog information thrown in, all we need is the name
-                curr_entry['catalogs'] = [{'catalog_name':c[1]} for c in curr_codes]
-                data.append(curr_entry)
-            # construct the next entry (minus supplier codes, which we will build as we encounter them)
-            curr_codes = []
-            tranche_h_digit = b62_digits[int(tranche[1:3])]
-            tranche_p_digit = logp_range_map_rev[tranche[3:]]
-            hp = tranche_h_digit + tranche_p_digit
-            # current html template code expects all this stuff
-            # aint gonna argue with it
-            curr_entry = {
-                'smiles': smiles,
-                'zinc_id':"ZINC{}{}".format(hp, base62(sub_id).zfill(10)),
-                'sub_id' : sub_id,
-                'tranche': get_new_tranche(tranche),
-                'tranche_details': get_compound_details(smiles),
-                'tranche_id': trancheidmap[tranche]
-            }
-        if supplier_code:
-            curr_codes.append((supplier_code, cat_shortname))
-        sub_prev = sub_id
-        tranche_prev = tranche
-    # finalize & flush the last entry to the stack
-    if curr_entry: # this if statement shouldn't be necessary, but keeping it here just in case someone manages to do an empty search
-        curr_codes = list(set(curr_codes))
-        curr_entry['supplier_code'] = [c[0] for c in curr_codes]
-        curr_entry['catalogs'] = [{'catalog_name':c[1]} for c in curr_codes]
-        data.append(curr_entry)
-    return data
-
 @celery.task
-def mergeCodeResultsAndSubmitTinSupplierJobs(results):
-    dbid_to_code_map = {}
-    for result in results:
-        for entry in result:
-            cat_content_id, machine_id_fk, supplier_code = entry
-            if not dbid_to_code_map.get(machine_id_fk):
-                dbid_to_code_map[machine_id_fk] = [(supplier_code, cat_content_id)]
+def vendorSearch(vendor_ids):
+    result = {}
+    t_start = time.time()
+
+
+    # all configuration prepartion
+    config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS['zinc22_common'])
+    config_curs = config_conn.cursor()
+    config_curs.execute("select tranche, host, port from tranche_mappings")
+    tranche_map = {}
+    for result in config_curs.fetchall():
+        tranche = result[0]
+        host = result[1]
+        port = result[2]
+        tranche_map[tranche] = ':'.join([host, str(port)])
+    config_curs.execute("select machine_id, hostname, port from tin_machines")
+    # extra configuration for cartblanche, translates machine_id to host:port
+    machine_id_map = {}
+    for result in config_curs.fetchall():
+        machine_id = result[0]
+        host = result[1]
+        port = result[2]
+        machine_id_map[machine_id] = ':'.join([host, str(port)])
+  
+    sb_partition_map = {}
+    config_curs.execute("select hashseq, host, port from antimony_hash_partitions ahp left join antimony_machines am on ahp.partition = am.partition")
+    for result in config_curs.fetchall():
+        hashseq = result[0]
+        host    = result[1]
+        port    = result[2]
+        sb_partition_map[hashseq] = ':'.join([host, str(port)])
+  
+    input_size = len(vendor_ids)
+    
+    expected_result_size = input_size * 2.5
+    if expected_result_size > client_configuration["mem_max_cached_file"]:
+        data_file = tempfile.NamedTemporaryFile(mode='w+')
+        tf_input  = tempfile.NamedTemporaryFile(mode='w+')
+        tf_inter  = tempfile.NamedTemporaryFile(mode='w+')
+    else:
+        # use stringIO if the file is small enough to fit into memory
+        data_file = io.StringIO()
+        tf_input  = tempfile.NamedTemporaryFile(mode='w+', dir='/dev/shm') # to use gnu sort we need an actual file (or a thread writing the StringIO data concurrently, which is too complicated for my taste)
+        tf_inter  = tempfile.NamedTemporaryFile(mode='w+', dir='/dev/shm')
+        
+    with data_file, tf_input, tf_inter, tempfile.NamedTemporaryFile(mode='w+') as output_file, tempfile.NamedTemporaryFile(mode='w+') as missing_file:
+        result = {}
+        def sha256(a):
+            return hashlib.sha256(a.encode('utf-8')).hexdigest()
+        total_length = 0
+ 
+        for vendor in vendor_ids:
+            vendor = vendor.strip()
+            v_partition = sha256(vendor)[-4:-2] # leftmost two digits of rightmost four digits makes up the database key
+            v_db = sb_partition_map[v_partition]
+            tf_input.write("{} {}\n".format(vendor, v_db))
+            total_length += 1
+        tf_input.flush()
+    
+        # ========== FIRST SORT PROC- SEARCH SB ==========
+        # limit sort memory usage according to configuration, we want the client-side search process to have as low a footprint as possible, while remaining fast for typical usage
+        sort_mem_arg = "{}K".format(client_configuration["mem_max_sort"]//1000)
+        
+        # sort by the database each id belongs to 
+        with subprocess.Popen(["/usr/bin/sort", "-k2", "-S{}".format(sort_mem_arg), tf_input.name], stdout=subprocess.PIPE) as sort_proc:
+            def search(p_id, data_file, output_file, missing_file):
+                search_conn = None
+                try:
+                    data_file.flush()
+                    data_file.seek(0)
+                    search_database = get_conn_string(p_id, user='antimonyuser', db='antimony')
+                    search_conn = psycopg2.connect(search_database, connect_timeout=1)
+                    search_curs = search_conn.cursor()
+                    # output fmt: VENDOR CAT_CONTENT_ID MACHINE_ID
+                    get_vendor_results_antimony(data_file, search_curs, output_file, missing_file)
+                except psycopg2.OperationalError as e:
+                    print("failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database))
+                    for line in data_file:
+                        vendor = line.strip()
+                        missing_file.write(vendor +'\n')
+                finally:
+                    if search_conn: search_conn.close()
+        
+            p_id_prev = None
+            projected_size = 0
+            curr_size = 0
+            for line in sort_proc.stdout:
+                vendor, p_id = line.decode('utf-8').strip().split()
+                if p_id != p_id_prev and p_id_prev != None:
+                    t_elapsed = time.time() - t_start
+                    #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                    search(p_id_prev, data_file, tf_inter, missing_file) # set our "missing" file as output
+                    curr_size += projected_size
+                    projected_size = 0
+                    data_file.seek(0)
+                    data_file.truncate()
+                data_file.write(vendor + '\n')
+                projected_size += 1
+                p_id_prev = p_id
+            if projected_size > 0:
+                t_elapsed = time.time() - t_start
+                #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                search(p_id_prev, data_file, tf_inter, missing_file)
+                data_file.seek(0)
+                data_file.truncate()
+                
+        t_elapsed = time.time() - t_start
+        #printProgressBar(total_length, total_length, prefix = "", suffix="done searching sb!", length=50, t_elapsed=t_elapsed)
+        tf_inter.flush()
+        
+        missing_file.seek(0)
+        
+        result["missing"] = missing_file.read().split("\n")
+                
+        # ========== SECOND SORT PROC- SEARCH SN =============
+        with subprocess.Popen(["/usr/bin/sort", "-k3", "-S{}".format(sort_mem_arg), tf_inter.name], stdout=subprocess.PIPE) as sort_proc:
+            def search(p_id, data_file, output_file):
+                search_conn = None
+                try:
+                    data_file.flush()
+                    data_file.seek(0)
+                    search_database = get_conn_string(p_id)
+                    search_conn = psycopg2.connect(search_database, connect_timeout=1)
+                    search_curs = search_conn.cursor()
+                    t_elapsed = time.time() - t_start
+                    get_vendor_results_cat_id(data_file, search_curs, output_file)
+                except psycopg2.OperationalError as e:
+                    print("failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database))
+                    for line in data_file:
+                        vendor, cat_content_id = line.strip().split()
+                        tokens = ["_null_", "_null_", "_null_", vendor, "_null_"]
+                        output_file.write('\t'.join(tokens) +'\n')
+                finally:
+                    if search_conn: search_conn.close()
+                    
+            p_id_prev = None
+            projected_size = 0
+            curr_size = 0
+            for line in sort_proc.stdout:
+                vendor, cat_content_id, p_id = line.decode('utf-8').strip().split()
+                if p_id != p_id_prev and p_id_prev != None:
+                    t_elapsed = time.time() - t_start
+                    p_id_prev = machine_id_map[int(p_id_prev)] # correct from number to actual database
+                    #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                    search(p_id_prev, data_file, output_file)
+                    data_file.seek(0)
+                    data_file.truncate()
+                    curr_size += projected_size
+                    projected_size = 0
+                data_file.write(vendor + '\n')
+                projected_size += 1
+                p_id_prev = p_id
+            if projected_size > 0:
+                p_id_prev = machine_id_map[int(p_id_prev)]
+                #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                search(p_id_prev, data_file, output_file)
+    
+        t_elapsed = time.time() - t_start
+        #printProgressBar(total_length, total_length, prefix = "", suffix="done searching sn!", length=50, t_elapsed=t_elapsed)
+        
+        output_file.seek(0)
+        result["found"] = []
+        for line in output_file.readlines():
+            for line in json.loads(line):
+                result["found"].append(line)
+
+        return result
+        #printProgressBar(total_l
+    
+@celery.task
+def getSubstanceList(zinc_ids, get_vendors=True):
+    t_start = time.time()
+
+    # all configuration prepartion
+    config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
+    config_curs = config_conn.cursor()
+    config_curs.execute("select tranche, host, port from tranche_mappings")
+    tranche_map = {}
+    for result in config_curs.fetchall():
+        tranche = result[0]
+        host = result[1]
+        port = result[2]
+        tranche_map[tranche] = ':'.join([host, str(port)])
+
+    input_size = len(zinc_ids)
+    expected_result_size = (input_size*8) if get_vendors else (input_size*4)
+    if expected_result_size > client_configuration["mem_max_cached_file"]:
+        data_file = tempfile.NamedTemporaryFile(mode='w+')
+        tf_input  = tempfile.NamedTemporaryFile(mode='w+')
+    else:
+        # use stringIO if the file is small enough to fit into memory
+        data_file = io.StringIO()
+        tf_input  = tempfile.NamedTemporaryFile(mode='w+') # except for this, see explanation in similar section above
+
+    with tf_input, tempfile.NamedTemporaryFile(mode='w+') as output_file, data_file, tempfile.NamedTemporaryFile(mode='w+') as missing_file:
+        result = {}
+        total_length = 0
+        
+        for zinc_id in zinc_ids:
+            zinc_id = zinc_id.strip()
+            id_partition = get_tin_partition(zinc_id, tranche_map)
+            if id_partition != 'fake':
+                tf_input.write("{} {}\n".format(zinc_id, id_partition))
+                total_length += 1
             else:
-                dbid_to_code_map[machine_id_fk].append((supplier_code, cat_content_id))
+                missing_file.write(zinc_id + "\n")    
+        tf_input.flush()
+        missing_file.flush()
+        # limit sort memory usage according to configuration, we want the client-side search process to have as low a footprint as possible, while remaining fast for typical usage
+        sort_mem_arg = "{}K".format(client_configuration["mem_max_sort"]//1000)
+        
+        # sort by the database each id belongs to 
+        with subprocess.Popen(["/usr/bin/sort", "-k2", "-S{}".format(sort_mem_arg), tf_input.name],  stdout=subprocess.PIPE) as sort_proc:        
+            def search(p_id, data_file, output_file, tranches_internal):
+                search_conn = None
+                try:
+                    data_file.flush()
+                    data_file.seek(0)
+                  
+                    search_database = get_conn_string(p_id)
+                    search_conn = psycopg2.connect(search_database, connect_timeout=1)
+                    search_curs = search_conn.cursor()
+                    t_elapsed = time.time() - t_start
+                    if get_vendors:
+                        get_vendor_results(data_file, search_curs, output_file, tranches_internal)
+                    else:
+                        get_smiles_results(data_file, search_curs, output_file, tranches_internal)
+                        
+                except psycopg2.OperationalError as e:
+                    print("failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database))
+                    tranches_internal_rev = {t[1] : t[0] for t in tranches_internal.items()}
+                    for line in data_file:
+                        sub_id, tranche_id_int = line.split()
+                        sub_id = int(sub_id)
+                        tranche = tranches_internal_rev[int(tranche_id_int)]
+                        tokens = ["_null_", get_zinc_id(sub_id, tranche), tranche] + (2 if get_vendors else 0) * ["_null_"]
+                        missing_file.write('\t'.join(tokens) +'\n')
+                finally:
+                    if search_conn: search_conn.close()
+            
+            p_id_prev = None
+            projected_size = 0
+            curr_size = 0
+            tranches_internal = {}
+            for line in sort_proc.stdout:
+                zinc_id, p_id = line.decode('utf-8').strip().split()
+                if p_id != p_id_prev and p_id_prev != None:
+                    t_elapsed = time.time() - t_start
+                    #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                    
+                    search(p_id_prev, data_file, output_file, tranches_internal)
+                
+                    curr_size += projected_size
+                    projected_size = 0
+                    tranches_internal.clear()
+                    data_file.seek(0)
+                    data_file.truncate()
+                sub_id, tranche = get_sub_id(zinc_id), get_tranche(zinc_id)
+                tranche_id_int = tranches_internal.get(tranche)
+
+                # instead of copying the tranche configuration over from the backend server, we just create our own here
+                # we don't use tranche information from zinc22, we keep the tranche information encoded in the input zinc id. 
+                # zinc22 tranches have occasionally mutated one or two off and we want to avoid user confusion (what is this new zinc id doing in my output ?!)
+                if not tranche_id_int:
+                    # the whole point of this is to reduce the overhead of carrying the original tranche information through the query, so reduce it to smallint size (char(2)) instead of char(8)
+                    tranche_id_int = len(tranches_internal)+1
+                    assert(tranche_id_int < 65536) # keep size under postgres smallint limit
+                    tranches_internal[tranche] = tranche_id_int
+
+                data_file.write(str(sub_id) + '\t' + str(tranche_id_int) + '\n')
+                projected_size += 1
+                p_id_prev = p_id
+            if projected_size > 0:
+                t_elapsed = time.time() - t_start
+                #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+
+                search(p_id_prev, data_file, output_file, tranches_internal)
+                
+        t_elapsed = time.time() - t_start
+        output_file.seek(0)
+        result["found"] = []
+        for line in output_file.readlines():
+            try:
+                for line in json.loads(line):
+                    result["found"].append(line)
+            except:
+                print()
+
+        missing_file.seek(0)
+        result["missing"] = missing_file.read().split("\n")
+        return result
+        #printProgressBar(total_length, total_length, prefix = "", suffix="done searching sn!", length=50, t_elapsed=t_elapsed)
+
+def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
+    search_curs.execute("create temporary table cb_sub_id_input (sub_id bigint, tranche_id_orig smallint)")
+    search_curs.copy_from(data_file, 'cb_sub_id_input', sep='\t', columns=['sub_id', 'tranche_id_orig'])
+    search_curs.execute("create temporary table cb_sub_output (smiles text, sub_id bigint, tranche_id smallint, tranche_id_orig smallint)")
+    search_curs.execute("call get_some_substances_by_id('cb_sub_id_input', 'cb_sub_output')")
+    search_curs.execute("select smiles, sub_id, tranche_id_orig from cb_sub_output")
+
+    parse_tin_results(search_curs, output_file, tranches_internal)
+
+def get_vendor_results(data_file, search_curs, output_file, tranches_internal):
+    search_curs.execute("create temporary table cb_sub_id_input (sub_id bigint, tranche_id_orig smallint)")
+    search_curs.copy_from(data_file, 'cb_sub_id_input', sep='\t', columns=['sub_id', 'tranche_id_orig'])
+    search_curs.execute("create temporary table cb_pairs_output (smiles text, sub_id bigint, tranche_id smallint, supplier_code text, cat_content_id bigint, cat_id_fk smallint, tranche_id_orig smallint)")
+    search_curs.execute("call cb_get_some_pairs_by_sub_id()")
+    search_curs.execute("select smiles, sub_id, tranche_id_orig, supplier_code, catalog.short_name from cb_pairs_output left join catalog on cb_pairs_output.cat_id_fk = catalog.cat_id")
     
-    tasklist = []
-    dbids_map = get_tin_urls_from_ids(dbid_to_code_map.keys())
-    for dbid, codes in dbid_to_code_map.items():
-        url = dbids_map[dbid]
-        url = url.replace('+psycopg2', '') # this bit is only for sqlalchemy connections, remove it for raw psycopg2 connections
-        tasklist.append(getTinSupplier.s(url, codes))
-    callback = mergeSubstanceResults.s()
-    res = chord(tasklist)(callback)
+    parse_tin_results(search_curs, output_file, tranches_internal)
+    
+def get_vendor_results_antimony(data_file, search_curs, output_file, missing_file):
+    search_curs.execute("create temporary table tq_in (supplier_code text)")
+    search_curs.copy_from(data_file, 'tq_in', columns=['supplier_code'])
+    # we have a more standard query for antimony, since it's not as complicated as tin and therefore doesn't need custom database functions
+    search_curs.execute("select tq_in.supplier_code, cat_content_id, machine_id_fk from tq_in left join supplier_codes on tq_in.supplier_code = supplier_codes.supplier_code left join supplier_map on sup_id = sup_id_fk")
+    
+    results = search_curs.fetchmany(5000)
+    while len(results) > 0:
+        for result in results:
+            supplier_code   = result[0]
+            cat_content_id  = result[1]
+            machine_id_fk   = result[2]
+            if not cat_content_id:
+                # we need to pass data returned by antimony to tin
+                # it doesn't make sense to look up a bunch of nulls, so save the misses from this stage separately and add them to the end result later
+                missing_file.write(supplier_code + '\n')
+            else:
+                output_file.write('\t'.join([supplier_code, str(cat_content_id), str(machine_id_fk)]) + '\n')
+        results = search_curs.fetchmany(5000)
 
-    return res.id
+def get_vendor_results_cat_id(data_file, search_curs, output_file):
+    search_curs.execute("create temporary table cb_vendor_input (supplier_code text)")
+    search_curs.copy_from(data_file, 'cb_vendor_input', sep=',', columns=['supplier_code'])
+    search_curs.execute("create temporary table cb_pairs_output (smiles text, sub_id bigint, tranche_id smallint, supplier_code text, cat_content_id bigint, cat_id smallint)")
+    search_curs.execute("call cb_get_some_pairs_by_vendor()")
+    search_curs.execute("select smiles, sub_id, tranches.tranche_name, supplier_code, catalog.short_name from cb_pairs_output left join tranches on cb_pairs_output.tranche_id = tranches.tranche_id left join catalog on cb_pairs_output.cat_id = catalog.cat_id")
+    
+    parse_tin_results(search_curs, output_file)
 
-@celery.task
-def getCodes(url, codes, timeout=10):
-    conn = psycopg2.connect(url, connect_timeout=timeout)
-    curs = conn.cursor()
+    
+def parse_tin_results(search_curs, output_file, tranches_internal= None):
+    output = []
+    ids = {}
 
-    if len(codes) > 5000:
-        curs.execute("CREATE TEMPORARY TABLE temp_query (code varchar)")
-
-        query_data = "\n".join(codes)
-        query_fileobj = io.StringIO(query_data)
-        curs.copy_from(query_fileobj, 'temp_query', columns=('code'))
-
-        curs.execute("\
-            select cat_content_id, machine_id_fk, supplier_code from (\
-                select supplier_code, sup_id from temp_query AS tq(code), supplier_codes as sc where tq.code = sc.supplier_code\
-            ) AS t left join supplier_map AS sm on t.sup_id = sm.sup_id_fk\
-        ")
-    else:
-
-        curs.execute("\
-            select cat_content_id, machine_id_fk, supplier_code from (\
-                select supplier_code, sup_id from (values {}) AS tq(code), supplier_codes AS sc where tq.code = sc.supplier_code\
-            ) AS t left join supplier_map AS sm on t.sup_id = sm.sup_id_fk\
-        ".format(','.join(['(\'' + c + '\')' for c in codes])))
-
-    results = curs.fetchall()
-    uniq_results = set([res[2] for res in results])
-    uniq_inputs = set(codes)
-    #if len(uniq_results) < len(uniq_inputs):
-    #    print("FAILED TO FIND CODES @ {}:".format(url))
-    #    print(uniq_inputs.difference(uniq_results))
-    conn.rollback()
-    conn.close()
-
-    return results
-
-@celery.task
-def getTinSupplier(dsn, codes, timeout=10):
-    tstart = time.time()
-    conn = psycopg2.connect(dsn, connect_timeout=timeout)
-    curs = conn.cursor()
-
-    # get tranche information from db (could streamline, but it's not an expensive operation)
-    curs.execute("select tranche_name, tranche_id from tranches")
-    trancheidmap = {}
-    tranchenamemap = {}
-    for trancheobj in curs.fetchall():
-        tranchename = trancheobj[0]
-        trancheid = trancheobj[1]
-        trancheidmap[tranchename] = trancheid
-        tranchenamemap[trancheid] = tranchename
-
-    if len(codes) > 5000:
-        # create a temporary table to hold our query data
-        curs.execute(
-            "CREATE TEMPORARY TABLE temp_query (\
-                cat_content_id bigint,\
-                supplier_code varchar,\
-            )"
-        )
-
-        # format the query data and copy over to db
-        query_data = '\n'.join(["{},{}".format(code[1], code[0]) for code in codes])
-        query_fileobj = io.StringIO(query_data)
-        curs.copy_from(query_fileobj, 'temp_query', sep=',', columns=('cat_content_id', 'supplier_code'))
-
-        # perform query to select all desired information from data
-        curs.execute("\
-            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
-                    select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                        select cat_content_fk, sub_id_fk, tranche_id from temp_query AS tq, catalog_substance AS cs where cs.cat_content_fk = tq.cat_content_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
-                ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
-            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ")
-    else:
-
-        # if looking up small number of codes avoid overhead by using hardcoded VALUES data
-        # unsure if this is identical in performance or worse performance than temporary tables
-        # I believe there is some overhead associated with processing query lines
-        # so it is better at scale to transmit data with copy_from than to hardcode values into query
-        curs.execute("\
-            select ttt.smiles, ttt.sub_id, ttt.tranche_id, ttt.supplier_code, short_name from (\
-                select sb.smiles, sb.sub_id, sb.tranche_id, tt.supplier_code, tt.cat_id_fk from (\
-                    select cc.cat_content_id, cc.supplier_code, cc.cat_id_fk, t.sub_id_fk, t.tranche_id from (\
-                        select cat_content_fk, sub_id_fk, tranche_id from (values {}) AS tq(cat_content_id, supplier_code), catalog_substance AS cs where cs.cat_content_fk = tq.cat_content_id\
-                    ) AS t left join catalog_content AS cc on t.cat_content_fk = cc.cat_content_id\
-                ) AS tt left join substance AS sb on tt.sub_id_fk = sb.sub_id and tt.tranche_id = sb.tranche_id\
-            ) AS ttt left join catalog AS cat on ttt.cat_id_fk = cat.cat_id order by ttt.sub_id, ttt.tranche_id\
-        ".format(','.join(["({},\'{}\')".format(code[1], code[0]) for code in codes])))
-
-    results = curs.fetchall()
-    results = [(r[0], r[1], tranchenamemap[r[2]], r[3], r[4]) for r in results]
-    #print(results)
-    conn.rollback()
-    conn.close()
-
-    data = format_tin_results(results, trancheidmap)
-
-    tfinish = time.time()
-    not_found = [d for d in data if not d['smiles']]
-
-    search_info = {
-        'tin_url': dsn,
-        'expected_ids': 'Originally searched codes: {}'.format(codes),
-        'not_found_ids': 'Not Found: {}'.format(not_found) if len(not_found) > 0 else "All found",
-        'elapsed_time': 'It took {:.3f} s'.format((tfinish-tstart))  
-    }
-
-    all_data = {'items':data, 'search_info':search_info}
-
-    return all_data
+    if tranches_internal:
+        tranches_internal_rev = { t[1] : t[0] for t in tranches_internal.items() }
+        
+    results = search_curs.fetchmany(5000)
+    while len(results) > 0:
+        for result in results:
+            smiles          = result[0] or "_null_"
+            sub_id          = result[1]
+            if tranches_internal:
+                tranche_id_orig = result[2]
+                tranche_name    = tranches_internal_rev[tranche_id_orig]
+            else:
+                tranche_name = result[2]
+                
+            supplier_codes   = result[3]
+            catalog        = result[4]
+            tranche_details = get_compound_details(smiles)
+            zinc_id = get_zinc_id(sub_id, tranche_name)
+            if not zinc_id in ids:
+                ids[zinc_id] = {
+                "zinc_id":zinc_id, 
+                "sub_id":sub_id, 
+                "smiles":smiles, 
+                "tranche":{
+                    "h_num": tranche_name[0:3],
+                    "logp": tranche_name[3:4],
+                    "mwt": tranche_name[4:5],
+                    "p_num": tranche_name[3:]
+                },
+                "supplier_code": [supplier_codes], 
+                "catalogs": [{"catalog_name": catalog}], 
+                "tranche_details": tranche_details
+                }
+            else:
+                if catalog:
+                    ids[zinc_id]["catalogs"].append({
+                        "catalog_name": catalog
+                    })
+                    ids[zinc_id]["supplier_code"].append(supplier_codes)
+        results = search_curs.fetchmany(5000)
+        
+    output = list(ids.values())
+    output_file.write(json.dumps(output) + "\n")
+    output_file.flush()
