@@ -1,4 +1,6 @@
 from inspect import trace
+import psycopg2
+from config import Config
 from itertools import groupby
 from flask import render_template, request, Response
 from app.main import application
@@ -191,6 +193,18 @@ def tranches2dDownload():
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
     return response
 
+def get3dfiles(gen, tranche, charge):
+    zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
+    conn = psycopg2.connect(zinc22_common_url)
+    curs = conn.cursor()
+
+    curs.execute("select suffix from holdings_3d where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
+    file_results = []
+    for r in curs.fetchall():
+        suffix = r[0]
+        file_results.append(suffix)
+    return file_results
+
 
 @application.route('/tranches/3d/download', methods=['POST'])
 def tranches3dDownload():
@@ -209,8 +223,11 @@ def tranches3dDownload():
         logp = tranche[4:8]
         generation = tranche[0:1]
         charge = tranche[-1]
-        return URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
-
+        prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
+        res = []
+        for suffix in get3dfiles(generation, hac+logp, charge):
+            res.append(prefix + f"/{hac}{logp}-{charge}-{suffix}.{format}")
+        return res
  
     if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
         util_func = lambda x: x[0]
@@ -218,9 +235,13 @@ def tranches3dDownload():
         res = [list(ele) for i, ele in groupby(temp, util_func)]
         arr = [RsyncDownloader(x, format) for x in res]
         data = '\n'.join(list(arr))
-    else:    
-        arr = map(gen_tranches, data_)
+    else:
+        arr = []
+	
+    for d in data_:
+        arr.extend(gen_tranches(d))
         data = '\n'.join(list(arr))
+        
     download_filename = 'ZINC22-downloader-3D-{}.{}'.format(format, using)
     response = Response(data, mimetype=mimetype)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
