@@ -1,3 +1,6 @@
+from email import header
+
+from jmespath import search
 from app.celery_worker import celery, flask_app, db
 from celery import group, chord
 from celery.execute import send_task
@@ -9,7 +12,7 @@ from app.data.models.tranche import TrancheModel
 from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
-from flask import jsonify, current_app, request, make_response
+from flask import jsonify, current_app, request, make_response, redirect, Response,stream_with_context
 from collections import defaultdict
 import grequests
 import json
@@ -251,8 +254,93 @@ class Substance(Resource):
 
         return {'message': 'Not found', 'search_info': search_info}, 404
 
-
+def progress(task, output_fields, file_type):            
+    data = str(task)
+    task = AsyncResult(data)
+    data = task.get()
+    
+    task = data[0]
+    sublist = data[1]
+    
+    while(True):
+        time.sleep(5)
+        task = str(task)
+        res = AsyncResult(task)
+        if res.ready():
+            for i in sublist:
+                task = AsyncResult(str(i))
+                task.forget()
+            try:
+                res = res.get()
+            except:
+                res = []
+            result = []
+            for mol in res:
+                newmol = {}
+                for field in output_fields:
+                    newmol[field] = mol[field]
+                result.append(newmol)
+            
+            if(file_type == "csv"):
+                res = pd.DataFrame(result)
+                return str(res.to_csv(encoding='utf-8', index=False))
+                
+            elif(file_type == "txt"):
+                res = pd.DataFrame(result)
+                return str(res.to_csv(encoding='utf-8', index=False, sep=" "))
+                
+            else:
+                return str(res)
+    
+    
+        
 class Substances(Resource):
+    def search(self, lines, output_fields, file_type):
+        maintasks = []
+        splitlist = list(chunks(lines, 10000))
+        for spl in splitlist:
+            task = send_task('app.data.tasks.search_zinc.getSubstanceList', [spl])
+            maintasks.append(task)
+        header = True
+        print(maintasks)
+        while len(maintasks) != 0:
+            time.sleep(5)
+            for maintask in maintasks:
+                task = AsyncResult(str(maintask))
+                
+                data = task.get()
+                data = data[0]
+                task = AsyncResult(data)
+                if(task.ready()):
+                    result = []
+                    print(maintask)
+                    maintasks.remove(maintask)
+                    data = task.get()
+                    
+                    for mol in data:
+                        newmol = {}
+                        for field in output_fields:
+                            newmol[field] = mol[field]
+                        result.append(newmol)
+                    
+                    if(file_type == "csv"):   
+                        res = pd.DataFrame(result)
+                        yield str(res.to_csv(encoding='utf-8', index=False, header=header))
+                        
+                    elif(file_type == "txt"):
+                        res = pd.DataFrame(result)
+                        yield str(res.to_csv(encoding='utf-8', index=False, sep=" ", header=header))
+                        
+                    else:
+                        if header:
+                            yield "["
+                        for mol in result:
+                            yield str(mol)+","
+                    header = False 
+        if(file_type == "json"):   
+            yield "]"
+        return 
+        
     def post(self, file_type=None):
         parser.add_argument('zinc_id-in', location='files', type=FileStorage, required=True)
         parser.add_argument('chunk', type=int)
@@ -263,30 +351,34 @@ class Substances(Resource):
 
         uploaded_file = args.get('zinc_id-in').stream.read().decode()
         output_fields = args.get('output_fields').split(',')
-        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', uploaded_file) if x!='']
-        #args['zinc_id-in'] = lines
-        
-        task = send_task('app.data.tasks.search_zinc.getSubstanceList', [textDataList]) 
-       
-        result = task.get()
-        result = AsyncResult(result)
-        results = result.get()
+        lines = [x for x in re.split(r'\n|\r|(\r\n)', uploaded_file) if x!='' and x!= None]
         
         result = []
-        for mol in results:
-            newmol = {}
-            for field in output_fields:
-                newmol[field] = mol[field]
-            result.append(newmol)
         
-        if(file_type == "csv"):
-            res = pd.DataFrame(result)
-            return res.to_csv(encoding='utf-8', index=False)
-        elif(file_type == "txt"):
-            res = pd.DataFrame(result)
-            return res.to_csv(encoding='utf-8', index=False, sep=" ")
-        
-        return result
+        if len(lines) > 10000: 
+            return Response(stream_with_context(self.search(lines =lines, output_fields=output_fields,file_type=file_type)))
+        else:
+            task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines]) 
+            task = AsyncResult(str(task))
+                    
+            data = task.get()
+            data = data[0]
+            task = AsyncResult(data)
+            data = task.get()
+            print("here")
+            
+            if(file_type == "csv"):
+                res = pd.DataFrame(data)
+                return res.to_csv(encoding='utf-8', index=False)
+            elif(file_type == "txt"):
+                res = pd.DataFrame(data)
+                return res.to_csv(encoding='utf-8', index=False, sep=" ")
+            else:
+                return data
+    
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 class SubstanceRandomList(Resource):
     def post(self, file_type=None):
