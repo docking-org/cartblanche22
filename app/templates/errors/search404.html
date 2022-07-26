@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Sorry for the inconvenience! </h2>
-    <h4><a href="{{ href }}"> {{ header }}</a></h4>
-{#<p> </p>#}
-{#    <p>{{ lines }}</p>#}
-<p><a href="{{ url_for('main.cartblanche') }}">Go to main page</a></p>
+    <div class="container">
+    <h2><b>No molecules found in either ZINC-22 or ZINC20. </b></h2>
+    <br>
+    If you believe you have received this message in error, please write to
+    chemistry4biology@gmail.com specifying the codes you were looking for
+    and where you got them from (to help us with tracking down the problem).
+    <br>
+    <br>
+    <p><a href="{{ url_for('main.cartblanche') }}">Return to main page</a></p>
+    </div>
+
 {% endblock %}

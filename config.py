@@ -30,24 +30,24 @@ class Config(object):
 
         CELERY_IMPORTS = ("app.data.tasks.search_zinc", "app.data.tasks.search_smiles", "app.data.tasks.get_random" )
 
-        CELERY_BROKER_URL = 'redis://redis:6379/0'
-        CELERY_RESULT_BACKEND = 'db+sqlite:///celerydb2.sqlite'
+        CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost/'
+        CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
-        # CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
-        # CELERY_RESULT_BACKEND = 'redis://0.0.0.0:6379/0'
+        #CELERY_BROKER_URL = 'redis://0.0.0.0:6379/0'
+        #CELERY_RESULT_BACKEND = 'redis://0.0.0.0:6379/0'
   
         SQLALCHEMY_BINDS = {
         # Server Database
-        # 'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
+        'zinc22': 'postgresql+psycopg2://test:@mem2.cluster.ucsf.bkslab.org:5432/zinc22',
         'zinc22_common': 'postgresql+psycopg2://zincuser:@10.20.1.17:5534/zinc22_common',
         'zinc22': 'postgresql+psycopg2://test:@10.20.0.38:5432/zinc22',
         'tin': 'postgresql+psycopg2://tinuser:usertin@10.20.1.17:5437/tin',
         '10.20.1.16:5434': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5434/tin',
         '10.20.1.16:5435': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5435/tin',
         '10.20.1.16:5436': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5436/tin',
-        '10.20.1.16:5437': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5437/tin',
-        '10.20.1.16:5438': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5438/tin',
-        '10.20.1.16:5439': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5439/tin',
+        '10.20.1.16:5437': 'postgresql+psycopg2://tinuser:usertin@10.201.16:5438/tin',
+        '10.20.1.16:5439': 'postgresql+psycopg2://tinuser:usertin@10.20.1.1.1.16:5437/tin',
+        '10.20.1.16:5438': 'postgresql+psycopg2://tinuser:usertin@10.20.6:5439/tin',
         '10.20.1.16:5440': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5440/tin',
         '10.20.1.16:5441': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5441/tin',
         '10.20.1.16:5442': 'postgresql+psycopg2://tinuser:usertin@10.20.1.16:5442/tin',

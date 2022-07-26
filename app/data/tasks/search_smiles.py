@@ -24,9 +24,7 @@ def smiles_result():
         data = request.args.get("task")
         task = AsyncResult(data)
         data = task.get()
-        task = AsyncResult(data)
-        data = task.get()
-             
+       
         if len(data) == 0:
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
         return render_template('search/result_smiles.html', data22=data, data20=[])
@@ -45,10 +43,8 @@ class SearchSmiles(Resource):
             'adist': adist,
         }
                
-
-        #task = search.delay()
         task = search.delay(files) 
-      
+
         data = task.get()
         print(data)
         task = getSubstanceList.delay(data)
@@ -56,15 +52,7 @@ class SearchSmiles(Resource):
 
 def curlSearch(files): 
     task = search.delay(files)
-    print(task) 
     data = task.get()
-    task = getSubstanceList.delay(data)
-    
-    data = task.get()
-    task = AsyncResult(data)
-    data = task.get()
-    print(data)
-    
     return data
 
 @celery.task
