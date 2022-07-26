@@ -29,7 +29,7 @@ deploy-dev job:
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
        
-deploy job:
+deploy-live job:
     only:
         - master
     stage: deploy
