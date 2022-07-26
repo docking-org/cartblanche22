@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <style>
+        .mol {
+            opacity: 1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+             background-color: white;
+        }
+
+        .link {
+            padding: 10px;
+        }
+
+        .mol img {
+            width: 100%;
+            height: 15vh
+        }
+
+        .added {
+            {#border: 1px solid #5bc0de;#}
+            background-color: #9bd8eb;
+        }
+    </style>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
+        function get_progress(){
+            $.ajax({
+                url: "/search/update_progress?task="+params.task,
+                async: true
+            }).success(function(progress){
+                if(progress === 1){
+                    window.location = "/search/result_zincsearch?task="+params.task
+                }
+                progress = Math.round(progress * 100);
+                var bar = document.getElementById('progress');
+                bar.setAttribute("aria-valuenow", progress);
+                bar.style.width = progress+"%";
+                bar.innerHTML= progress+"%";
+            })
+            
+        }
+        $(document).ready(() => {
+            let progress = {{progress}} * 100;
+            console.log(progress);
+            var bar = document.getElementById('progress');
+            bar.setAttribute("aria-valuenow", progress);
+            bar.style.width = progress+"%";
+            bar.innerHTML= progress+"%";
+          
+            setInterval(get_progress, 2000);
+            
+        });
+       
+    </script>
+{% endblock %}
+{% block app_content %}
+    <br>
+    <div>
+        <h3>Search Progress</h3>
+    </div>
+    <div class="progress active">
+        <div id="progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+ 
+{% endblock %}

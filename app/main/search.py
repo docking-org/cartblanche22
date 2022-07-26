@@ -35,16 +35,9 @@ def search_view():
 @application.route('/search/search_byzincid', methods=["GET", "POST"])
 def search_byzincid():
     if request.method == "GET":
-        text = Markup('Warning: Certain ZINC IDs may give incorrect results when looked up. If your molecules fall into the following tranche ranges:<br>\
-            <b>H24P200 -> H24P230</b> <br>\
-            <b>H22P320 -> H22P390</b> <br>\
-            Please contact us to retrieve correct supplier codes/molecules.<br> <br>\
-            Additionally, if you are looking up compounds to order, double check that the structures returned by cartblanche match your docked structure before purchase.<br>\
-            To contact the cartblanche team, compose an email to one or all of the following recipients:<br>\
-            ben@tingle.org (in charge of database)<br>\
-            khtang015@gmail.com (in charge of database operations)<br>\
-            josecastanon4@gmail.com (in charge of website)<br>\
-            Please contact us with any questions or concerns!')
+        text = Markup('If you encounter molecule(s) that won\'t look up, <br> \
+                      contact ben@tingle.org, ccing khtang015@gmail.com and josecastanon4@gmail.com <br> <br>' \
+                      "For more information and updates, <a href=\"https://wiki.docking.org/index.php/Legacy_IDs_in_ZINC22\">check the docking wiki</a>.")
         
         flash(text)
         return render_template('search/search_byzincid.html')
@@ -163,14 +156,9 @@ def search_bysmiles():
 @application.route('/search/search_bysupplier', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
-        text = Markup('Warning: the supplier code search may not always give full results.<br>\
-            If you are unable to locate molecules from a given supplier code, please contact us. <br>\
-            <br>\
-            To contact the cartblanche team, compose an email to one or all of the following recipients:<br>\
-            ben@tingle.org (in charge of database)<br>\
-            khtang015@gmail.com (in charge of database operations)<br>\
-            josecastanon4@gmail.com (in charge of website)<br>\
-            Please contact us with any questions or concerns!')
+        text = Markup('If you encounter supplier code(s) that won\'t look up, <br> \
+                      contact ben@tingle.org, ccing khtang015@gmail.com and josecastanon4@gmail.com <br> <br>' \
+                      "For more information and updates, <a href=\"https://wiki.docking.org/index.php/Legacy_IDs_in_ZINC22\">check the docking wiki</a>.")
         
         flash(text)
         return render_template('search/search_bysupplier.html')
@@ -308,6 +296,7 @@ def searchZinc(identifier):
    
     # using celery zincid search here
     data, res, smile, prices = getZincData(identifier)
+    print(data)
     if data:
         return render_template('molecule/mol_index.html', data=data, prices=prices, 
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
@@ -317,20 +306,19 @@ def searchZinc(identifier):
 
 def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
-    result = task.get()
-    result = AsyncResult(result)
-    res = result.get()
-   
+    res = task.get()
+    
     if res:
         role = ''
         if current_user.is_authenticated and current_user.has_roles('ucsf'):
             role = 'ucsf'
         else:
             role = 'public'
-        data= res
+        data= res[0] 
+        print("here")
         print(data)
         
-        catalogs = data[0]['catalogs']
+        catalogs = data['catalogs']
         print(catalogs)
         prices = []
        
@@ -349,10 +337,10 @@ def getZincData(identifier):
             # else:
             #     pass
             #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-        smile = data[0]['smiles']
-        data[0]['zinc20']= False
-        data[0]['supplier']= []
-        return data[0], res, smile, prices
+        smile = data['smiles']
+        data['zinc20']= False
+        data['supplier']= []
+        return data, res, smile, prices
 
 @application.route('/sw')
 def sw():
