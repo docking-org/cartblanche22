@@ -1,24 +1,20 @@
 import io
 import hashlib
 import subprocess, tempfile, io, hashlib, psycopg2
-from urllib.parse import urlencode, urlparse, quote
+from urllib.parse import quote
 import time
 import requests
 import re
 import json
-
-import urllib3
-
-from app.helpers.validation import base62, get_compound_details, get_tin_partition, get_conn_string, base62_rev, get_sub_id, get_zinc_id, get_tranche, get_conn_string, get_tin_partition
-from flask import jsonify, current_app, request
+from flask import jsonify, request, redirect, render_template
 from flask_restful import Resource
-from app.main import application
-from config import Config
-from flask import render_template, request, jsonify, redirect
-
-from app.celery_worker import celery, flask_app, db
 from celery import chord, current_task
 from celery.result import AsyncResult
+
+from app.helpers.validation import get_compound_details, get_tin_partition, get_conn_string, get_sub_id, get_zinc_id, get_tranche, get_conn_string, get_tin_partition
+from app.main import application
+from config import Config
+from app.celery_worker import celery, flask_app, db
 from app.email_send import send_search_log
 
 client_configuration = {
