@@ -1,24 +1,20 @@
 import io
 import hashlib
 import subprocess, tempfile, io, hashlib, psycopg2
-from urllib.parse import urlencode, urlparse, quote
+from urllib.parse import quote
 import time
 import requests
 import re
 import json
-
-import urllib3
-
-from app.helpers.validation import base62, get_compound_details, get_tin_partition, get_conn_string, base62_rev, get_sub_id, get_zinc_id, get_tranche, get_conn_string, get_tin_partition
-from flask import jsonify, current_app, request
+from flask import jsonify, request, redirect, render_template
 from flask_restful import Resource
-from app.main import application
-from config import Config
-from flask import render_template, request, jsonify, redirect
-
-from app.celery_worker import celery, flask_app, db
 from celery import chord, current_task
 from celery.result import AsyncResult
+
+from app.helpers.validation import get_compound_details, get_tin_partition, get_conn_string, get_sub_id, get_zinc_id, get_tranche, get_conn_string, get_tin_partition
+from app.main import application
+from config import Config
+from app.celery_worker import celery, flask_app, db
 from app.email_send import send_search_log
 
 client_configuration = {
@@ -90,7 +86,7 @@ def search_result():
             
         if(len(list22) == 0 and len(list20) == 0):
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return render_template('search/result_zincsearch.html', data22=list22, data20=list20, missing22=missing)
+        return render_template('search/result.html', data22=list22, data20=list20, missing22=missing)
 
 @application.route('/search/result_suppliersearch', methods=['GET'])
 def search_result_supplier():
@@ -106,7 +102,7 @@ def search_result_supplier():
        
             if len(list22) == 0:
                 return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-            return render_template('search/result_supplier.html', data22=list22, data20=[], missing22=missing)
+            return render_template('search/result.html', data22=list22, data20=[], missing22=missing)
 
 class SearchJobSupplier(Resource):
     def post(self):
