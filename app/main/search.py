@@ -314,7 +314,7 @@ def getZincData(identifier):
             role = 'ucsf'
         else:
             role = 'public'
-        data= res[0] 
+        data= res["found"][0]
         print("here")
         print(data)
         
