@@ -11,6 +11,7 @@
     {{ super() }}
     <script>
         $(document).ready(() => {
+           
             $('#deleteItem').hide()
                 $('#addItem').hide()
             let inCart = shoppingCart.inCart('{{ data.zinc_id }}')
@@ -46,7 +47,10 @@
                 $('#deleteItem').hide()
                 $('#addItem').show()
             })
-
+            $('#data').DataTable({
+                order: [[4, 'asc']],
+                paging: false,
+            });
         });
 
 
@@ -211,17 +215,17 @@
 
 
     </div>
+    <br>
     <div class="row">
-        <table class="table table-striped table-condensed table-hover table-numeric">
+        <table id="data" class="table table-striped table-bordered table-condensed table-hover table-numeric">
             <thead>
-            <tr>
-                <th>Catalog Name</th>
-
-                <th>Supplier code</th>
-                <th>Pack</th>
-                <th>Ships within</th>
-                <th>Price (USD)</th>
-            </tr>
+                <tr>
+                    <th>Catalog Name</th>
+                    <th>Supplier code</th>
+                    <th>Pack</th>
+                    <th>Ships within</th>
+                    <th>Price (USD)</th>
+                </tr>
             </thead>
             <tbody>
             {% for p in prices %}
@@ -260,7 +264,7 @@
                         <td> {{ p.shipping }} </td>
                         <td> {{ p.price }} </td>
 
-                        <td>
+                        <!-- <td>
 
                             {#                        <button class="btn btn-info vendorBtn"#}
                             {#                                data-catalog="{{ p.category_name }}"#}
@@ -275,11 +279,12 @@
                             {#                            <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>#}
                             {#                            Add to cart#}
                             {#                        </button>#}
-                        </td>
+                        </td> -->
                     </tr>
                 {% endif %}
             {% endfor %}
             </tbody>
         </table>
+        <br>
     </div>
 {% endblock %}
