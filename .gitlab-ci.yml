@@ -1,8 +1,6 @@
 stages:
   - deploy-dev
-  - build 
-  - deploy
-
+  - deploy-live
 
 variables:
     CI_PROJECT_NAME: molecule-shopping-cart
@@ -30,15 +28,6 @@ deploy-dev job:
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
-
-build job:
-    only:
-        - master
-    stage: build
-    tags:
-        - cartblanche2
-    script:
-        - sudo docker image prune -a -f
        
 deploy job:
     only:
@@ -49,6 +38,7 @@ deploy job:
     tags:
         - cartblanche2
     script:
+        - sudo docker image prune -a -f
         - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop ${CI_PROJECT_NAME}
         - docker rm ${CI_PROJECT_NAME}
