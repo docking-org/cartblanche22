@@ -345,7 +345,8 @@ function newSearch(smiles) {
             '&tdn=' + search_state.tdn + '&tup=' + search_state.tup + '&rdn=' + search_state.rdn +
             '&rup=' + search_state.rup + '&ldn=' + search_state.ldn + '&lup=' + search_state.lup +
             '&maj=' + search_state.maj + '&min=' + search_state.min + '&sub=' + search_state.sub +
-            '&scores=' + search_state.scores, {withCredentials:true});
+            '&scores=' + search_state.scores, {withCredentials:true}
+        );
         $('#statusspan').html("Waiting...");
     } else {
         console.log("ERROR: Browser does not support server-sent events");
@@ -489,6 +490,7 @@ function init_table(table, url) {
         });
 
     } else {
+        console.log("here")
         dtable.ajax.url(url).load();
     }
     update_bounds();
