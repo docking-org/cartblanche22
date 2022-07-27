@@ -23,11 +23,11 @@ def smiles_result():
     if request.method == 'GET':
         data = request.args.get("task")
         task = AsyncResult(data)
-        data = task.get()
+        data = task.get()["found"]
        
         if len(data) == 0:
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return render_template('search/result_smiles.html', data22=data, data20=[])
+        return render_template('search/result_smiles.html', data22=data, data20=[], missing22=[])
 
 class SearchSmiles(Resource):
     def post(self):
