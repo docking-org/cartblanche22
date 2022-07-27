@@ -258,7 +258,6 @@ def vendorSearch(vendor_ids):
     result = {}
     t_start = time.time()
 
-
     # all configuration prepartion
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS['zinc22_common'])
     config_curs = config_conn.cursor()
@@ -607,37 +606,38 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None):
         for result in results:
             smiles          = result[0] or "_null_"
             sub_id          = result[1]
-            if tranches_internal:
-                tranche_id_orig = result[2]
-                tranche_name    = tranches_internal_rev[tranche_id_orig]
-            else:
-                tranche_name = result[2]
-                
-            supplier_codes   = result[3]
-            catalog        = result[4]
-            tranche_details = get_compound_details(smiles)
-            zinc_id = get_zinc_id(sub_id, tranche_name)
-            if not zinc_id in ids:
-                ids[zinc_id] = {
-                "zinc_id":zinc_id, 
-                "sub_id":sub_id, 
-                "smiles":smiles, 
-                "tranche":{
-                    "h_num": tranche_name[0:3],
-                    "logp": tranche_name[3:4],
-                    "mwt": tranche_name[4:5],
-                    "p_num": tranche_name[3:]
-                },
-                "supplier_code": [supplier_codes], 
-                "catalogs": [{"catalog_name": catalog}], 
-                "tranche_details": tranche_details
-                }
-            else:
-                if catalog:
-                    ids[zinc_id]["catalogs"].append({
-                        "catalog_name": catalog
-                    })
-                    ids[zinc_id]["supplier_code"].append(supplier_codes)
+            if smiles:  
+                if tranches_internal:
+                    tranche_id_orig = result[2]
+                    tranche_name    = tranches_internal_rev[tranche_id_orig]
+                else:
+                    tranche_name = result[2]
+                    
+                supplier_codes   = result[3]
+                catalog        = result[4]
+                tranche_details = get_compound_details(smiles)
+                zinc_id = get_zinc_id(sub_id, tranche_name)
+                if not zinc_id in ids:
+                    ids[zinc_id] = {
+                    "zinc_id":zinc_id, 
+                    "sub_id":sub_id, 
+                    "smiles":smiles, 
+                    "tranche":{
+                        "h_num": tranche_name[0:3],
+                        "logp": tranche_name[3:4],
+                        "mwt": tranche_name[4:5],
+                        "p_num": tranche_name[3:]
+                    },
+                    "supplier_code": [supplier_codes], 
+                    "catalogs": [{"catalog_name": catalog}], 
+                    "tranche_details": tranche_details
+                    }
+                else:
+                    if catalog:
+                        ids[zinc_id]["catalogs"].append({
+                            "catalog_name": catalog
+                        })
+                        ids[zinc_id]["supplier_code"].append(supplier_codes)
         results = search_curs.fetchmany(5000)
         
     output = list(ids.values())
