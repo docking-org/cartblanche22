@@ -11,21 +11,21 @@ from app.data.forms.tranchesForms import Download2DForm, Download3DForm
 
 def URIFormatter(hac, logp, format, add_url, charge, generation):
     if generation != '':
-        return "{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+        return "{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
     else:
          return "{}{}{}/{}{}{}.{}".format(base_url, add_url, hac, hac, logp, charge, format)
 
 def WyntonFormatter(hac, logp, format, add_url, charge, generation):
-    return "/wynton/group/bks/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+    return "/wynton/group/bks/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
     
 def BKSLabFormatter(hac, logp, format, add_url, charge, generation):
-    return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def AWSFormatter(hac, logp, format, add_url, charge, generation):
-    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def OCIFormatter(hac, logp, format, add_url, charge, generation):
-    return "oci://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "oci://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def DBFormatter(hac, logp, format, add_url, charge, generation):
     if generation != "":
