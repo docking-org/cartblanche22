@@ -26,221 +26,319 @@
 {% block scripts %}
 {{ super() }}
 <script>
-    let pageLimit = 50;
+    let pageLimit = 48;
     let currentPage = 0;
-    
+    let lastPage = 0;
    $(document).ready(() => {
+        let map22 = new Map();
+        let map20 = new Map();
+        let progressRequest = null;
+
         $(function () {
-          $('[data-toggle="popover"]').popover()
+            $('[data-toggle="popover"]').popover()
         })
-       let datas22 = {{ data22 | tojson }};
-       let missing22 = {{ missing22 | tojson }};
-       let datas20 = {{ data20 | tojson}};
-       
-       let lastPage = parseInt(datas22.length / pageLimit);
-       console.log(lastPage);
-   
-       if (datas22 == null){
-           datas22 = []
-       }
-       if (datas20 == null){
-           datas20 = []
-       }
-       let map22 = new Map();
-       let map20 = new Map();
-       addAddedClass();
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
 
-       function showTable(){
-        const template = 
-            {"<>":"div","class":"col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2","html": [
-                {"<>":"div", class:"mol", "html":[
-                    {"<>":"div", class:"link", "html":[
-                            {"<>":"a", href:"/searchZinc/${zinc_id}", "text":"${zinc_id}"
-                        }]
-                    },
-                    {"<>":"div", class:"mol-bottom zinc22", id:"${zinc_id}", "data-smiles":"${smiles}", "data-db":"zinc22", "data-supplier_code":"${supplier_code }", "data-catalogs":"${catalogs}",
-                        "html":[
-                            {"<>":"img", "src":"https://sw.docking.org/depict/svg?w=50&h=30h&smi=${smiles_url}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow"}]
-                    },
-                    ]
-                }]
-            };
+        function showTable(){
+            const template22 = 
+                {"<>":"div","class":"col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2","html": [
+                    {"<>":"div", class:"mol", "html":[
+                        {"<>":"div", class:"link", "html":[
+                                {"<>":"a", href:"/searchZinc/${zinc_id}", "text":"${zinc_id}"
+                            }]
+                        },
+                        {"<>":"div", class:"mol-bottom zinc22", id:"${zinc_id}", "data-smiles":"${smiles}", "data-db":"zinc22", "data-supplier_code":"${supplier_code }", "data-catalogs":"${catalogs}",
+                            "html":[
+                                {"<>":"img", "src":"https://sw.docking.org/depict/svg?w=50&h=30h&smi=${smiles_url}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow"}]
+                        },
+                        ]
+                    }]
+                };    
+            $('.data22').html(json2html.render(datas22.slice(pageLimit*currentPage,(pageLimit*currentPage)+pageLimit),template22));
 
-            $('.data22').html(json2html.render(datas22.slice(pageLimit*currentPage,(pageLimit*currentPage)+pageLimit),template));
-       }
+            const template20 = 
+                {"<>":"div","class":"col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2","html": [
+                    {"<>":"div", class:"mol", "html":[
+                        {"<>":"div", class:"link", "html":[
+                                {"<>":"a", href:"/searchZinc20/${zinc_id}", "text":"${zinc_id}"
+                            }]
+                        },
+                        {"<>":"div", class:"mol-bottom zinc20", id:"${zinc_id}", "data-smiles":"${smiles}", "data-db":"zinc20", "data-supplier_code":"${supplier_code }", "data-catalogs":"${catalogs}",
+                            "html":[
+                                {"<>":"img", "src":"https://sw.docking.org/depict/svg?w=50&h=30h&smi=${smiles_url}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow"}]
+                        },
+                        ]
+                    }]
+                };    
+            $('.data20').html(json2html.render(datas20.slice(pageLimit*currentPage,(pageLimit*currentPage)+pageLimit),template20));
 
-       showTable();
+            addAddedClass()
+            $('.mol-bottom').click((e) => {        
+                let cur = $(e.currentTarget);
+                let id = e.currentTarget.id;
+                let cur_data;
+                if (map22.has(id)){
+                    cur_data = map22.get(id)
+                }
+                else{
+                    cur_data = map20.get(id)
+                }
+                let db = cur.data('db')
+                let smiles = cur_data.smiles
+                let supplier_code = cur_data.supplier_code
+                let catalogs = cur_data.catalogs
+                if (cur.hasClass('added')) {
+                    cur.removeClass('added')
+                    shoppingCart.removeItemFromCart(id)
+                } else {
+                    cur.addClass('added')
+                    shoppingCart.addItemToCart(id, db, smiles, supplier_code, catalogs);
+                }
+            })
 
-       $('.mol-bottom').click((e) => {
-           
-           let cur = $(e.currentTarget);
-           let id = e.currentTarget.id;
-           let cur_data;
-           if (map22.has(id)){
-               cur_data = map22.get(id)
-           }
-           else{
-               cur_data = map20.get(id)
-           }
-           let db = cur.data('db')
-           let smiles = cur_data.smiles
-           let supplier_code = cur_data.supplier_code
-           let catalogs = cur_data.catalogs
-           if (cur.hasClass('added')) {
-               cur.removeClass('added')
-               shoppingCart.removeItemFromCart(id)
-           } else {
-               cur.addClass('added')
-               shoppingCart.addItemToCart(id, db, smiles, supplier_code, catalogs);
-           }
-       })
+        }
+        function insertAfter(newNode, existingNode) {
+            existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+        }
 
-       $('#addAll22').click(() => {
-           shoppingCart.addAllItem(datas22);
-           {#addAddedClass();#}
+        function changePage(num){
+            console.log(num)
+            currentPage = num;
+            var page_numbers = document.getElementById('page_numbers');
+            var init = document.getElementById('page-first');
+            
+            
+            $('.number').remove();
+            
+            for(let i = num + 2; i > num- 4; i --){
+                element = document.createElement("li");
+                if( (i >= 1) && (i < lastPage+1)){
+                    element.classList.add("page-item");
+                    element.classList.add("number");
+                    element.setAttribute("page-number", i);
+                    element.id = "pageNumber";
+                    if(i === num+1){
+                        element.classList.add("active");
+                    }
+                    button = document.createElement("a");
+                    button.classList.add("page-link");
+                    button.href = "#";
+                    button.innerHTML = i;
+
+                    element.appendChild(button);
+                    insertAfter(element, init);
+                }
+            }
+
+            $('#firstPage').click(() => {
+            changePage(0);
+            });
+            $('#lastPage').click(() => {
+                changePage(lastPage);
+            });
+            $('.number').click((e) => {
+                console.log(e.currentTarget)
+                changePage(parseInt(e.currentTarget.getAttribute("page-number"))-1);
+            });
+            
+
+    
+            showTable();
+        }
+
+        function addAddedClass(){
+            let count = 0;
+            
+            if (datas22.length > 0){
+                $('#zinc22-tab').click();
+            }
+            else if(datas20.length > 0){
+                $('#zinc20-tab').click();
+            }
+
+            if (datas22.length > 0){
+                var tab = document.getElementById('zinc22-tab');
+                tab.style.display = "block";
+                datas22.forEach(e => {
+                    
+                    map22.set(e.zinc_id, e)
+                    let inCart = shoppingCart.inCart(e.zinc_id)
+                    if (inCart) {
+                        count++;
+                        $('#' + e.zinc_id).addClass('added')
+                    }
+                    
+                });
+            }
+            if (datas20.length > 0){
+                var tab = document.getElementById('zinc20-tab');
+                tab.style.display = "block";
+                datas20.forEach(e => {
+                    map20.set(e.zinc_id, e)
+                    let inCart = shoppingCart.inCart(e.zinc_id)
+                    if (inCart) {
+                        count++;
+                        $('#' + e.zinc_id).addClass('added')
+                    }
+                })
+            }
+            
+            if (count > datas22.length / 2) {
+                $('#deleteAll22').show();
+                $('#addAll22').hide();
+            } else {
+                $('#addAll22').show();
+                $('#deleteAll22').hide();
+            }
+            if (count > datas20.length / 2) {
+                $('#deleteAll20').show();
+                $('#addAll20').hide();
+                
+            } else {
+                $('#addAll20').show();
+                $('#deleteAll20').hide();
+            }
+        };
+        
+
+        function get_progress(){
+            $.ajax({
+                url: "/search/progress?task="+params.task,
+                async: true
+            }).success(function(result){
+                console.log(result)
+                if(result.ready === 'true'){
+                    clearInterval(progressRequest);
+                    
+                    var bar = document.getElementById('search_progress');
+                    bar.style.display = "none";
+                    
+                    datas22 = result.data22;
+                    missing22 = result.missing22;
+                    datas20 = result.data20;
+
+                    lastPage = parseInt(datas22.length / pageLimit);
+                    document.getElementById("22resultcount").innerHTML = datas22.length + " results";
+                    document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
+                    document.getElementById("20resultcount").innerHTML = datas20.length + " results";
+                    console.log(lastPage);
+                    console.log(datas22);
+                    
+                    addAddedClass();
+                    changePage(0);  
+                  
+                }
+                else{
+                    progress = Math.round(result.progress*100);
+                    console.log(progress)
+                    var bar = document.getElementById('progress');
+                    bar.setAttribute("aria-valuenow", progress);
+                    bar.style.width = progress+"%";
+                    bar.innerHTML= progress+"%";
+                }
+            });            
+        }
+        let ready = {{ready}};
+        if(ready === true){
+            datas22 = {{ data22 | tojson }};
+            missing22 = {{missing22 | tojson}};
+            datas20 = {{ data20 | tojson}};
+            
+            
+            lastPage = parseInt(datas22.length / pageLimit);
+            document.getElementById("22resultcount").innerHTML = datas22.length + " results";
+            document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
+
+            document.getElementById("20resultcount").innerHTML = datas20.length + " results";
+            
+
+            if (datas22 == null){
+                datas22 = []
+            }
+            if (datas20 == null){
+                datas20 = []
+            }
+            
+            addAddedClass();
+            changePage(0);
+        }
+        else{
+            var bar = document.getElementById('search_progress');
+            bar.style.display = "block";
+            progressRequest = setInterval(get_progress, 500);     
+        }
+
+        $('#addAll22').click(() => {
+            shoppingCart.addAllItem(datas22);
             datas22.forEach(e => {
                 $('#' + e.zinc_id).addClass('added')
-           })
-           $('#addAll22').hide();
-           $('#deleteAll22').show();
-       });
-   
-       $('#deleteAll22').click(() => {
-           shoppingCart.deleteAllItem(datas22);
-           $('.added.zinc22').removeClass('added');
-           $('#addAll22').show();
-           $('#deleteAll22').hide();
-       });
+            })
+            $('#addAll22').hide();
+            $('#deleteAll22').show();
+        });
+
+        $('#deleteAll22').click(() => {
+            shoppingCart.deleteAllItem(datas22);
+            $('.added.zinc22').removeClass('added');
+            $('#addAll22').show();
+            $('#deleteAll22').hide();
+        });
+
         $('#addAll20').click(() => {
-           shoppingCart.addAllItem(datas20);
-           {#addAddedClass();#}
-             datas20.forEach(e => {
-                $('#' + e.zinc_id).addClass('added')
-           })
-           $('#addAll20').hide();
-           $('#deleteAll20').show();
-       });
-   
-       $('#deleteAll20').click(() => {
-           shoppingCart.deleteAllItem(datas20);
-           $('.added.zinc20').removeClass('added');
-           $('#addAll20').show();
-           $('#deleteAll20').hide();
-       });
+            shoppingCart.addAllItem(datas20);
+            datas20.forEach(e => {
+                    $('#' + e.zinc_id).addClass('added')
+            })
+            $('#addAll20').hide();
+            $('#deleteAll20').show();
+        });
 
-
-   
-       function changePage(){
-   
-       }
-   
-       function addAddedClass(){
-           let count = 0;
-           
-           if (datas22.length > 0){
-               $('#zinc22-tab').click();
-           }
-           else if(datas20.length > 0){
-               $('#zinc20-tab').click();
-           }
-   
-           if (datas22.length > 0){
-               datas22.forEach(e => {
-                   map22.set(e.zinc_id, e)
-                   let inCart = shoppingCart.inCart(e.zinc_id)
-                   if (inCart) {
-                       count++;
-                       $('#' + e.zinc_id).addClass('added')
-                   }
-                
-               });
-           }
-           if (datas20.length > 0){
-              
-   
-              datas20.forEach(e => {
-                   map20.set(e.zinc_id, e)
-                   let inCart = shoppingCart.inCart(e.zinc_id)
-                   if (inCart) {
-                       count++;
-                       $('#' + e.zinc_id).addClass('added')
-                   }
-               })
-           }
-         
-          
-           if (count > datas22.length / 2) {
-               $('#deleteAll22').show();
-               $('#addAll22').hide();
-           } else {
-               $('#addAll22').show();
-               $('#deleteAll22').hide();
-           }
-           if (count > datas20.length / 2) {
-               $('#deleteAll20').show();
-               $('#addAll20').hide();
-               
-           } else {
-               $('#addAll20').show();
-               $('#deleteAll20').hide();
-           }
-       };
-       
-       /* function update_progress() {
-           // send GET request to status URL
-   
-           $.ajax({
-               url: "/searchJob?task=bfcdd260-5056-4b3a-960f-9f9cd81ca8d8",
-               type: "get",
-           
-               success: function(response) {
-                   datas22 = response;
-               },
-               error: function(xhr) {
-                   //Do Something to handle error
-               }
-            });
-       } */
-
+        $('#deleteAll20').click(() => {
+            shoppingCart.deleteAllItem(datas20);
+            $('.added.zinc20').removeClass('added');
+            $('#addAll20').show();
+            $('#deleteAll20').hide();
+        });
    });
 </script>
 {% endblock %}
 {% block app_content %}
 <ul class="nav nav-pills nav-tabs" id="myTab" role="tablist">
-   {% if data22 %}
-   <li class="nav-item">
-      <a class="nav-link" id="zinc22-tab" data-toggle="tab" href="#zinc22" role="tab" aria-controls="zinc22" aria-selected="true">ZINC22 results</a>
-   </li>
-   {%  endif %}
-   {%  if data20 %}
-   <li class="nav-item">
-      <a class="nav-link" id="zinc20-tab" data-toggle="tab" href="#zinc20" role="tab" aria-controls="zinc20" aria-selected="false">ZINC20 results</a>
-   </li>
-   {%  endif %}
+    <li class="nav-item">
+        <a class="nav-link" id="zinc22-tab" data-toggle="tab" href="#zinc22" role="tab" aria-controls="zinc22" aria-selected="true" style="display:none;">ZINC22 results</a>
+    </li>
+ 
+    <li class="nav-item">
+        <a class="nav-link" id="zinc20-tab" data-toggle="tab" href="#zinc20" role="tab" aria-controls="zinc20" aria-selected="false" style="display:none;">ZINC20 results</a>
+    </li>   
 </ul>
 <div class="tab-content" id="myTabContent">
-{% if data22 %}
+    <div id="search_progress" style="display:none;">
+        <div>
+            <h3>Search Progress</h3>
+        </div>
+        <div class="progress active">
+            <div id="progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
+
    <div class="tab-pane fade active" id="zinc22" role="tabpanel" aria-labelledby="zinc22-tab">
       <div class="row">
-         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-1">
-            <br>
-            <button type="button" class="btn btn-primary" disabled>{{ data22|length }} results</button>
-         </div>
          <div class="col-md-3 col-xs-3 col-sm-3 col-lg-3">
             <br>
-            <button type="button" class="btn btn-outline-danger" data-toggle="popover" title="Not Found" data-content="{{missing22 | join('\n')}}">{{ missing22|length }} not found</button>
-            
+            <button type="button" class="btn btn-primary" id="22resultcount" disabled> </button>
+            <button type="button" class="btn btn-outline-danger" data-toggle="popover" title="Not Found" id="22missingcount" data-content="{{missing22}}"></button>
          </div>
          
-         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-5 float-right text-right">
+         
+         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4 float-right text-right">
             <nav aria-label="Page navigation example">
                <ul class="pagination">
-                  <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                  {% for i in range(4) %}
-                    <li class="page-item"><a class="page-link" href="#">{{i+1}}</a></li>
-                  {%endfor%}
+                  <li class="page-item" id="page-first"><a class="page-link" href="#">Previous</a></li>
                   <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                  <li class="page-ellipsis"><a class="page-link" href="#">Last</a></li>
+                  
                   <li class="page-last"><a class="page-link" href="#">Last</a></li>
                </ul>
             </nav>
@@ -267,34 +365,48 @@
       
    </div>
 </div>
-{% endif %}
-{% if data20 %}
-<div class="tab-pane fade" id="zinc20" role="tabpanel" aria-labelledby="zinc20-tab">
-   <div class="row">
-      <div class="col-md-6 col-xs-3 col-sm-3 col-lg-6">
-         <h3> {{ data20|length }} results</h3>
-      </div>
-      <div class="col-md-6 col-xs-9 col-sm-9 col-lg-6 float-right text-right">
-         <button type="button" class="btn btn-info" id="addAll20">Add all to cart</button>
-         <button type="button" class="btn btn-warning" id="deleteAll20">Remove all from cart</button>
-      </div>
-   </div>
-   <div class="row">
-      {% for data in data20 %}
-      <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2">
-         <div class="mol ">
-            <div class="link">
-               <a href='/searchZinc20/{{ data.zinc_id }}'>{{ data.zinc_id }}</a>
-            </div>
-            <div class="mol-bottom zinc20" id="{{ data.zinc_id }}" data-smiles="{{ data.smiles }}" data-db="zinc20"
-               data-supplier_code="{{ data.supplier_code }}" data-catalogs="{{ data.catalogs }}">
-               <img src="https://sw.docking.org/depict/svg?w=50&h=30h&smi={{ data.smiles | urlencode }}&qry=%q&cols=%c&cmap=%m&bgcolor=clear&hgstyle=outerglow">
-            </div>
+  <div class="tab-pane fade" id="zinc20" role="tabpanel" aria-labelledby="zinc20-tab">
+      <div class="row">
+   
+        <div class="col-md-3 col-xs-3 col-sm-3 col-lg-3">
+            <br>
+            <button type="button" class="btn btn-primary" id="20resultcount" disabled> </button>
+            
          </div>
-      </div>
-      {% endfor %}
-   </div>
+         
+         
+         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4 float-right text-right">
+            <nav aria-label="Page navigation example">
+               <ul class="pagination">
+                  <li class="page-item" id="page-first"><a class="page-link" href="#">Previous</a></li>
+                 
+               </ul>
+            </nav>
+         </div>
+         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-2 float-right">
+            <br>
+            <select class="form-control">
+                <option>50</option>
+                <option>100</option>
+                <option>250</option>
+                <option>500</option>
+                <option>All</option>
+            </select>
+         </div>
+    
+        <div class="col-md-6 col-xs-9 col-sm-9 col-lg-1 float-right text-right">
+            <br>
+            <button type="button" class="btn btn-info" id="addAll20">Add all to cart</button>
+            <button type="button" class="btn btn-warning" id="deleteAll20">Remove all from cart</button>
+        </div>
+        </div>
+
+  
+    <div class="row data20">
+      
+    </div>
+  </div>
 </div>
-{%  endif %}
+
 </div>
 {% endblock %}

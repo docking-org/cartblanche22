@@ -37,7 +37,7 @@
                 url: "/search/update_progress?task="+params.task,
                 async: true
             }).success(function(progress){
-                if(progress === 1){
+                if(progress === "1"){
                     window.location = "/search/result_zincsearch?task="+params.task
                 }
                 progress = Math.round(progress * 100);
