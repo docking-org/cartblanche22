@@ -117,6 +117,10 @@ let shoppingCart = (function () {
                 let supplier_codes = data.hasOwnProperty('supplier_code') ? data.supplier_code : [];
                 let smiles = data.hasOwnProperty('smiles' ) ? data.smiles : data.hitMappedSmiles;
                 let vendors = obj.getPossibleVendors(db, catalog, supplier_codes);
+                if(db === 'zinc20'){
+                    vendors = catalog;
+                }
+                
                 var item = new Item(data.zinc_id, db, smiles, vendors);
                 console.log('item created', item);
                 tempCart.push(item)

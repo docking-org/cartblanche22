@@ -6,15 +6,18 @@ import time
 import requests
 import re
 import json
-from flask import jsonify, request, redirect, render_template
+from flask import jsonify, request, redirect, render_template, make_response
 from flask_restful import Resource
 from celery import chord, current_task
 from celery.result import AsyncResult
+from flask_login import current_user
+from app.data.models.tin.catalog import CatalogModel
 
 from app.helpers.validation import get_compound_details, get_tin_partition, get_conn_string, get_sub_id, get_zinc_id, get_tranche, get_conn_string, get_tin_partition
 from app.main import application
 from config import Config
-from app.celery_worker import celery, flask_app, db
+from app.celery_worker import celery as current_celery, flask_app, db, celery
+
 from app.email_send import send_search_log
 
 client_configuration = {
@@ -28,81 +31,44 @@ def search_status():
     data = request.args.get("task")
     
     task = AsyncResult(data)
-    data = task.get()
-    data = data[1][1]
-  
-    total = len(data)
-    done = 0
-    for task in data:
-        res = AsyncResult(str(task))
-        if res.ready():
-            done +=1
-   
-    if done != 0:
-        if (done/total) == 1:
-            return redirect("/search/result?task="+request.args.get("task"), code=200)
-        return render_template('search/result_status.html', progress = round((done/total), 2))
+    if task.status == "PROGRESS":
+        return {'progress':(task.info['current']/task.info['projected']), 'data22':[], 'data20':[], 'missing22':[], 'ready':'false'}
     else:
-        return render_template('search/result_status.html', progress = 0)
-    
-@application.route('/search/update_progress', methods=['GET'])
-def update_progress():
-    data = request.args.get("task")
-    
-    task = AsyncResult(data)
+        list20, list22, missing = getResult(task)
+        #if(len(list22) == 0 and len(list20) == 0):
+                #return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
+        return {'data22':list22, 'data20':list20, 'missing22':missing, 'ready':'true', 'progress': '1'}
+
+
+def getResult(task):
     data = task.get()
-    
-   
-    total = len(data)
-    done = 0
-    for task in data:
-        res = AsyncResult(task)
-        if res.ready():
-            done +=1
- 
-    
-    if done != 0:
-        if (done/total) == 1:
-            return jsonify(1)
-        return jsonify(round((done/total),2))
-    else:
-        return jsonify(0)
-    
-@application.route('/search/result_zincsearch', methods=['GET'])
-def search_result():
-    if request.method == 'GET':
-        data = request.args.get("task")
         
-        task = AsyncResult(data)
-        data = task.get()
+    list20 = data[0]
+    list22 = data[1]["found"]
+    missing = data[1]["missing"][:-1]
+    
+    for entry in list22:
+        entry["smiles_url"] = quote(entry["smiles"])
+    for entry in list20:
+        entry["smiles_url"] = quote(entry["smiles"])
+    
+    return list20, list22, missing
 
-        list20 = data[0]
-        list22 = data[1]["found"]
-        missing = data[1]["missing"][:-1]
-        
-        for entry in list22:
-            print(entry["smiles"])
-            entry["smiles_url"] = quote(entry["smiles"])
-            
-        if(len(list22) == 0 and len(list20) == 0):
-            return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return render_template('search/result.html', data22=list22, data20=list20, missing22=missing)
 
-@application.route('/search/result_suppliersearch', methods=['GET'])
-def search_result_supplier():
+@application.route('/search/result', methods=['GET'])
+def search_result_zinc():
         if request.method == 'GET':
             data = request.args.get("task")
             task = AsyncResult(data)
-            list22 = task.get()['found']
-            missing = task.get()['missing']
-            print(missing)
-            for entry in list22:
-                print(entry["smiles"])
-                entry["smiles_url"] = quote(entry["smiles"])
        
-            if len(list22) == 0:
-                return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-            return render_template('search/result.html', data22=list22, data20=[], missing22=missing)
+            if task.status == "PROGRESS" or task.status == "PENDING":
+                return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false')
+            else:
+                list20, list22, missing = getResult(task)
+                
+                if(len(list22) == 0 and len(list20) == 0):
+                    return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
+                return render_template('search/result.html', data22=list22, data20=list20, missing22=missing, ready='true', progress='1')
 
 class SearchJobSupplier(Resource):
     def post(self):
@@ -123,7 +89,7 @@ class SearchJobSupplier(Resource):
             
     def curlSearch(data):
         try:
-            task = vendorSearch.delay(data)
+            task = vendorSearch.delay(codes)
         except Exception as e:
             print(e)
         return task
@@ -140,17 +106,18 @@ class SearchJobSubstance(Resource):
         
         zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
         print(zinc22, zinc20, discarded)
-        zinc20 = zinc20search(zinc20)
+        if len(zinc20) > 0:
+            zinc20 = zinc20search(zinc20)
+        else:
+            zinc20 = []
 
+        #have to pass zinc20 results to the new task since celery doesn't like making requests to zinc20
         try:
-            task = chord([search20.s(zinc20=zinc20), getSubstanceList.s(zinc22)])(mergeResults.s())
+            task = getSubstanceList.delay(zinc20, zinc22)
         except Exception as e:
             print("err", e)
         
-        if(len(ids) > 300):
-            return redirect('/search/progress?task={task}'.format(task = task.id))
-        else:
-            return redirect('/search/result_zincsearch?task={task}'.format(task = task.id))
+        return redirect('/search/result?task={task}'.format(task = task.id))
 
     def filter_zinc_ids(ids):
         zinc22 = []
@@ -202,39 +169,64 @@ def mergeResults(args):
 def zinc20search(zinc20):
     zinc20_response = None
     data20 = []
-    if len(zinc20) > 0:
-        zinc20_files = {
-            'zinc_id-in': zinc20,
-            'output_fields': "zinc_id supplier_code smiles substance_purchasable"
-        }
-        zinc20_response = requests.post("https://zinc20.docking.org/catitems.txt", data=zinc20_files)
-
-    if zinc20_response:
-        zinc20_data = {}
-        for line in zinc20_response.text.split('\n'):
-            temp = line.split('\t')
-            if len(temp) == 4:
-                identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
-                if identifier not in zinc20_data:
-                    zinc20_data[identifier] = {
-                        'identifier': identifier,
-                        'zinc_id': identifier,
-                        'smiles': smiles,
-                        'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
-                        'catalogs': supplier_code,
-                        'supplier_code': supplier_code,
-                        'db': 'zinc20'
-                    }
-                else:
-                    catalogs = zinc20_data[identifier]['catalogs_new']
-                    cat_found = False
-                    for c in catalogs:
-                        if c['supplier_code'] == supplier_code:
-                            cat_found = True
-                    if not cat_found:
-                        zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
-        data20 = list(zinc20_data.values())
-    return data20
+    zinc20_files = {
+            'zinc_id-in': [zinc20],
+            'output_fields': "zinc_id supplier_code smiles substance_purchasable catalog"
+    }
+ 
+    response = requests.post("https://zinc20.docking.org/catitems/subsets/for-sale.json", data=zinc20_files)
+    
+    print(response)
+    if response:
+        role = ''
+        if current_user.is_authenticated and current_user.has_roles('ucsf'):
+            role = 'ucsf'
+        else:
+            role = 'public'
+        data= json.loads(response.text)
+        
+        
+        
+        catalogs = []
+        supplierCodes= []
+        zincids={}
+    
+        for item in data:
+            result = {}
+            smile = item['smiles']
+            id = item['zinc_id']
+            if id not in zincids:    
+                zincids[id] = {}
+                item['catalog']['catalog_name'] = item['catalog']['short_name']
+                
+                catalogs = [item['catalog']]
+                supplierCode = item['supplier_code']
+                zincids[id]['smiles'] = smile
+                c = catalogs[0]  
+                zincids[id]['catalogs'] = [{
+                    'assigned': True,
+                    'cat_name': c['short_name'],
+                    'price': 240,
+                    'purchase': 1,
+                    'quantity': 10,
+                    'shipping': "6 weeks",
+                    'supplier_code': supplierCode,
+                    'unit': "mg"
+                }]
+       
+                zincids[id]['zinc_id'] = id
+                zincids[id]['tranche'] = 'here'
+                zincids[id]['db'] = 'zinc20'
+                zincids[id]['tranche_details'] = {}
+                zincids[id]['suppliers'] = [supplierCode]
+           
+               
+    results20 = []
+    
+    for id in zincids:
+        results20.append(zincids[id])              
+                    
+    return results20
 
 @celery.task( default_retry_delay=30,
     max_retries=15,
@@ -257,7 +249,7 @@ def mergeSubstanceResults(results):
 def vendorSearch(vendor_ids):
     result = {}
     t_start = time.time()
-
+    
     # all configuration prepartion
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS['zinc22_common'])
     config_curs = config_conn.cursor()
@@ -343,6 +335,7 @@ def vendorSearch(vendor_ids):
                 vendor, p_id = line.decode('utf-8').strip().split()
                 if p_id != p_id_prev and p_id_prev != None:
                     t_elapsed = time.time() - t_start
+                    current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':projected_size, 'time_elapsed':t_elapsed})
                     #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
                     search(p_id_prev, data_file, tf_inter, missing_file) # set our "missing" file as output
                     curr_size += projected_size
@@ -354,12 +347,14 @@ def vendorSearch(vendor_ids):
                 p_id_prev = p_id
             if projected_size > 0:
                 t_elapsed = time.time() - t_start
+                current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':projected_size, 'time_elapsed':t_elapsed})
                 #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
                 search(p_id_prev, data_file, tf_inter, missing_file)
                 data_file.seek(0)
                 data_file.truncate()
                 
         t_elapsed = time.time() - t_start
+        current_task.update_state(state='PROGRESS',meta={'current':total_length, 'projected':projected_size, 'time_elapsed':t_elapsed})
         #printProgressBar(total_length, total_length, prefix = "", suffix="done searching sb!", length=50, t_elapsed=t_elapsed)
         tf_inter.flush()
         
@@ -381,10 +376,11 @@ def vendorSearch(vendor_ids):
                     get_vendor_results_cat_id(data_file, search_curs, output_file)
                 except psycopg2.OperationalError as e:
                     print("failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database))
-                    for line in data_file:
-                        vendor, cat_content_id = line.strip().split()
-                        tokens = ["_null_", "_null_", "_null_", vendor, "_null_"]
-                        output_file.write('\t'.join(tokens) +'\n')
+                    # for line in data_file:
+                    #     print(line)
+                    #     vendor = line
+                    #     tokens = ["_null_", "_null_", "_null_", str(line), "_null_"]
+                    #     output_file.write('\t'.join(tokens) +'\n')
                 finally:
                     if search_conn: search_conn.close()
                     
@@ -423,9 +419,9 @@ def vendorSearch(vendor_ids):
         #printProgressBar(total_l
     
 @celery.task
-def getSubstanceList(zinc_ids, get_vendors=True):
+def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
     t_start = time.time()
-
+    current_task.update_state(state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
     # all configuration prepartion
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
     config_curs = config_conn.cursor()
@@ -501,6 +497,7 @@ def getSubstanceList(zinc_ids, get_vendors=True):
                 zinc_id, p_id = line.decode('utf-8').strip().split()
                 if p_id != p_id_prev and p_id_prev != None:
                     t_elapsed = time.time() - t_start
+                    current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':total_length, 'time_elapsed':t_elapsed})
                     #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
                     
                     search(p_id_prev, data_file, output_file, tranches_internal)
@@ -527,6 +524,7 @@ def getSubstanceList(zinc_ids, get_vendors=True):
                 p_id_prev = p_id
             if projected_size > 0:
                 t_elapsed = time.time() - t_start
+                current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':total_length, 'time_elapsed':t_elapsed})
                 #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
 
                 search(p_id_prev, data_file, output_file, tranches_internal)
@@ -543,7 +541,8 @@ def getSubstanceList(zinc_ids, get_vendors=True):
 
         missing_file.seek(0)
         result["missing"] = missing_file.read().split("\n")
-        return result
+        current_task.update_state(state='PROGRESS',meta={'current':total_length, 'projected':total_length, 'time_elapsed':t_elapsed})
+        return [zinc20,result]
         #printProgressBar(total_length, total_length, prefix = "", suffix="done searching sn!", length=50, t_elapsed=t_elapsed)
 
 def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
@@ -553,7 +552,7 @@ def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
     search_curs.execute("call get_some_substances_by_id('cb_sub_id_input', 'cb_sub_output')")
     search_curs.execute("select smiles, sub_id, tranche_id_orig from cb_sub_output")
 
-    parse_tin_results(search_curs, output_file, tranches_internal)
+    parse_tin_results(search_curs, output_file, tranches_internal, True)
 
 def get_vendor_results(data_file, search_curs, output_file, tranches_internal):
     search_curs.execute("create temporary table cb_sub_id_input (sub_id bigint, tranche_id_orig smallint)")
@@ -593,8 +592,7 @@ def get_vendor_results_cat_id(data_file, search_curs, output_file):
     
     parse_tin_results(search_curs, output_file)
 
-    
-def parse_tin_results(search_curs, output_file, tranches_internal= None):
+def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_only=False):
     output = []
     ids = {}
 
@@ -604,7 +602,7 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None):
     results = search_curs.fetchmany(5000)
     while len(results) > 0:
         for result in results:
-            smiles          = result[0] or "_null_"
+            smiles          = result[0]
             sub_id          = result[1]
             if smiles:  
                 if tranches_internal:
@@ -612,32 +610,38 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None):
                     tranche_name    = tranches_internal_rev[tranche_id_orig]
                 else:
                     tranche_name = result[2]
-                    
-                supplier_codes   = result[3]
-                catalog        = result[4]
-                tranche_details = get_compound_details(smiles)
                 zinc_id = get_zinc_id(sub_id, tranche_name)
-                if not zinc_id in ids:
-                    ids[zinc_id] = {
-                    "zinc_id":zinc_id, 
-                    "sub_id":sub_id, 
-                    "smiles":smiles, 
-                    "tranche":{
-                        "h_num": tranche_name[0:3],
-                        "logp": tranche_name[3:4],
-                        "mwt": tranche_name[4:5],
-                        "p_num": tranche_name[3:]
-                    },
-                    "supplier_code": [supplier_codes], 
-                    "catalogs": [{"catalog_name": catalog}], 
-                    "tranche_details": tranche_details
-                    }
+                if not smiles_only:
+                    supplier_codes   = result[3]
+                    catalog        = result[4]
+                    tranche_details = get_compound_details(smiles)
+                    
+                    if not zinc_id in ids:
+                        ids[zinc_id] = {
+                        "zinc_id":zinc_id, 
+                        "sub_id":sub_id, 
+                        "smiles":smiles, 
+                        "tranche":{
+                            "h_num": tranche_name[0:3],
+                            "logp": tranche_name[3:4],
+                            "mwt": tranche_name[4:5],
+                            "p_num": tranche_name[3:]
+                        },
+                        "supplier_code": [supplier_codes], 
+                        "catalogs": [{"catalog_name": catalog}], 
+                        "tranche_details": tranche_details
+                        }
+                    else:
+                        if catalog:
+                            ids[zinc_id]["catalogs"].append({
+                                "catalog_name": catalog
+                            })
+                            ids[zinc_id]["supplier_code"].append(supplier_codes)
                 else:
-                    if catalog:
-                        ids[zinc_id]["catalogs"].append({
-                            "catalog_name": catalog
-                        })
-                        ids[zinc_id]["supplier_code"].append(supplier_codes)
+                    ids[zinc_id] = {
+                        "zinc_id":zinc_id, 
+                        "smiles":smiles
+                    }
         results = search_curs.fetchmany(5000)
         
     output = list(ids.values())

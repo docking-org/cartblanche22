@@ -305,7 +305,7 @@ def searchZinc(identifier):
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
 
 def getZincData(identifier):
-    task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
+    task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[], [identifier]]) 
     res = task.get()
     
     if res:
@@ -314,7 +314,8 @@ def getZincData(identifier):
             role = 'ucsf'
         else:
             role = 'public'
-        data= res["found"][0]
+        
+        data= res[1]["found"][0]
         print("here")
         print(data)
         

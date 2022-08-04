@@ -25,6 +25,7 @@ import requests
 import random
 import re
 import pandas as pd
+
 from app.email_send import send_search_log
 
 # from app.formatters import (
