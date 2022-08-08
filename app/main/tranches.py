@@ -193,10 +193,13 @@ def tranches2dDownload():
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
     return response
 
+zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
+zinc22_common_conn = psycopg2.connect(zinc22_common_url)
+
 def get3dfiles(gen, tranche, charge):
-    zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
-    conn = psycopg2.connect(zinc22_common_url)
-    curs = conn.cursor()
+    #zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
+    #conn = psycopg2.connect(zinc22_common_url)
+    curs = zinc22_common_conn.cursor()
 
     curs.execute("select suffix from holdings_3d where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
     file_results = []
