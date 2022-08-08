@@ -225,7 +225,7 @@ def tranches3dDownload():
             charge = tranche[-1]
             prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
             for suffix in get3dfiles(generation, hac+logp, charge):
-                yield prefix + f"/{hac}{logp}-{charge}-{suffix}.{format}"
+                yield prefix + f"/{hac}{logp}-{charge}-{suffix}.{format}\n"
     
     def gen_all_rsyncs(tranches):
         for tranche in tranches:
@@ -233,7 +233,7 @@ def tranches3dDownload():
             temp = sorted(data_, key = util_func)
             res = [list(ele) for i, ele in groupby(temp, util_func)]
             for x in res:
-                yield RsyncDownloader(x, format)
+                yield RsyncDownloader(x, format) + '\n'
  
     tranches_iter = gen_all_tranches
 
