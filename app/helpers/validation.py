@@ -278,10 +278,8 @@ def get_conn_string(partition_host_port, db='tin', user='tinuser'):
     print(host)
     if host == os.uname()[1].split('.')[0]:
         host = "localhost"
-    host = host.split("-")
-    toNum  = "10.20."+ host[1]+"."+host[2]
-    
-    return "postgresql://{0}@{1}:{2}/{3}".format(user, toNum, port, db)
+
+    return "postgresql://{0}@{1}:{2}/{3}".format(user, host, port, db)
     #return Config.SQLALCHEMY_BINDS[toNum+":"+port].replace("/db","/"+db).replace("username", user)
 
 def get_tin_partition(zinc_id, tranche_map):

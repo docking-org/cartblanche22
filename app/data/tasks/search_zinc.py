@@ -22,7 +22,6 @@ from app.email_send import send_search_log
 
 client_configuration = {
         "mem_max_sort" : int(5.12e8), # in bytes
-        #"mem_max_cached_file" : int(2.56e8), # in bytes
         "mem_max_cached_file" : 0
 }
 
@@ -32,27 +31,30 @@ def search_status():
     
     task = AsyncResult(data)
     if task.status == "PROGRESS":
-        return {'progress':(task.info['current']/task.info['projected']), 'data22':[], 'data20':[], 'missing22':[], 'ready':'false'}
+        return {'progress':(task.info['current']/task.info['projected']), 'data22':[], 'data20':[], 'missing22':[], 'ready':'false', 'logs':''}
     else:
-        list20, list22, missing = getResult(task)
-        #if(len(list22) == 0 and len(list20) == 0):
-                #return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return {'data22':list22, 'data20':list20, 'missing22':missing, 'ready':'true', 'progress': '1'}
-
+        list20, list22, missing, logs = getResult(task)
+        if(len(list22) == 0 and len(list20) == 0):
+                return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
+        return {'data22':list22, 'data20':list20, 'missing22':missing, 'ready':'true', 'progress': '1', 'logs': logs}
 
 def getResult(task):
     data = task.get()
         
-    list20 = data[0]
-    list22 = data[1]["found"]
-    missing = data[1]["missing"][:-1]
+    if 'zinc20' in data:
+        list20 = data['zinc20']
+    else:
+        list20 = []
     
+    list22 = data['zinc22']["found"]
+    missing = data['zinc22']["missing"][:-1]
+    logs = data['zinc22']["logs"]
     for entry in list22:
         entry["smiles_url"] = quote(entry["smiles"])
     for entry in list20:
         entry["smiles_url"] = quote(entry["smiles"])
     
-    return list20, list22, missing
+    return list20, list22, missing, logs
 
 
 @application.route('/search/result', methods=['GET'])
@@ -62,13 +64,14 @@ def search_result_zinc():
             task = AsyncResult(data)
        
             if task.status == "PROGRESS" or task.status == "PENDING":
-                return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false')
+                return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false', logs='')
             else:
-                list20, list22, missing = getResult(task)
+                list20, list22, missing, logs = getResult(task)
+                
                 
                 if(len(list22) == 0 and len(list20) == 0):
                     return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-                return render_template('search/result.html', data22=list22, data20=list20, missing22=missing, ready='true', progress='1')
+                return render_template('search/result.html', data22=list22, data20=list20, missing22=missing, ready='true', progress='1', logs=logs)
 
 class SearchJobSupplier(Resource):
     def post(self):
@@ -78,21 +81,22 @@ class SearchJobSupplier(Resource):
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         codes = file + textDataList
         codes = [code for code in codes if code != '']
-        print(codes)
+ 
     
         try:
             task = vendorSearch.delay(codes)
         except Exception as e:
             print(e)
     
-        return redirect('/search/result_suppliersearch?task={}'.format(task))
+        return redirect('/search/result?task={}'.format(task))
             
     def curlSearch(data):
         try:
-            task = vendorSearch.delay(codes)
+            task = vendorSearch.delay(data)
+            return task
         except Exception as e:
             print(e)
-        return task
+        
 
 class SearchJobSubstance(Resource):
     def post(self):
@@ -104,8 +108,8 @@ class SearchJobSubstance(Resource):
         
         ids = textDataList + file
         
-        zinc22, zinc20, discarded = SearchJobSubstance.filter_zinc_ids(ids)
-        print(zinc22, zinc20, discarded)
+        zinc22, zinc20, discarded = filter_zinc_ids(ids)
+       
         if len(zinc20) > 0:
             zinc20 = zinc20search(zinc20)
         else:
@@ -119,48 +123,48 @@ class SearchJobSubstance(Resource):
         
         return redirect('/search/result?task={task}'.format(task = task.id))
 
-    def filter_zinc_ids(ids):
-        zinc22 = []
-        zinc20 = []
-        discarded = []
+def filter_zinc_ids(ids):
+    zinc22 = []
+    zinc20 = []
+    discarded = []
 
-        for identifier in ids:
-            if '-' in identifier:
-                def checkHasZinc(identifier):
-                    if identifier[0:4].upper() != 'ZINC':
-                        identifier_ = 'ZINC' + identifier
-                        return identifier_.replace('-', (16 - len(identifier_) + 1) * '0')
-                    
-                    return identifier.replace('-', (16 - len(identifier) + 1) * '0')
-                new_identifier = checkHasZinc(identifier)
-                print(new_identifier, identifier, len(new_identifier))
-                zinc22.append(new_identifier)
-                continue
-            
-            if identifier[0:1].upper() == 'C':
-                identifier = identifier.replace('C', 'ZINC')
-                print(identifier)
+    for identifier in ids:
+        if '-' in identifier:
+            def checkHasZinc(identifier):
+                if identifier[0:4].upper() != 'ZINC':
+                    identifier_ = 'ZINC' + identifier
+                    return identifier_.replace('-', (16 - len(identifier_) + 1) * '0')
                 
-            if identifier[4:6] == '00':
-                zinc20.append(identifier)
-                continue
+                return identifier.replace('-', (16 - len(identifier) + 1) * '0')
+            new_identifier = checkHasZinc(identifier)
+            print(new_identifier, identifier, len(new_identifier))
+            zinc22.append(new_identifier)
+            continue
+        
+        if identifier[0:1].upper() == 'C':
+            identifier = identifier.replace('C', 'ZINC')
+            print(identifier)
+            
+        if identifier[4:6] == '00':
+            zinc20.append(identifier)
+            continue
 
-            elif identifier.isnumeric():
-                id = 'ZINC' + ((12 - len(identifier)) * '0') + identifier
-                zinc20.append(id)
-                continue
+        elif identifier.isnumeric():
+            id = 'ZINC' + ((12 - len(identifier)) * '0') + identifier
+            zinc20.append(id)
+            continue
 
-            elif identifier[0:4].upper() == 'ZINC':
-                if(identifier[4:5].isalpha()):
-                    zinc22.append(identifier)
-                else:
-                    id = 'ZINC' + identifier.replace(identifier, (16 - len(identifier) + 1) * '0') + identifier[4:]
-                    print(id)
-                    zinc20.append(id)
-                continue
+        elif identifier[0:4].upper() == 'ZINC':
+            if(identifier[4:5].isalpha()):
+                zinc22.append(identifier)
             else:
-                discarded.append(identifier)
-        return zinc22, zinc20, discarded
+                id = 'ZINC' + identifier.replace(identifier, (16 - len(identifier) + 1) * '0') + identifier[4:]
+                print(id)
+                zinc20.append(id)
+            continue
+        else:
+            discarded.append(identifier)
+    return zinc22, zinc20, discarded
 
 @celery.task
 def mergeResults(args):
@@ -184,8 +188,6 @@ def zinc20search(zinc20):
         else:
             role = 'public'
         data= json.loads(response.text)
-        
-        
         
         catalogs = []
         supplierCodes= []
@@ -218,8 +220,7 @@ def zinc20search(zinc20):
                 zincids[id]['tranche'] = 'here'
                 zincids[id]['db'] = 'zinc20'
                 zincids[id]['tranche_details'] = {}
-                zincids[id]['suppliers'] = [supplierCode]
-           
+                zincids[id]['suppliers'] = [supplierCode]    
                
     results20 = []
     
@@ -249,7 +250,8 @@ def mergeSubstanceResults(results):
 def vendorSearch(vendor_ids):
     result = {}
     t_start = time.time()
-    
+    logs = []
+    current_task.update_state(state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
     # all configuration prepartion
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS['zinc22_common'])
     config_curs = config_conn.cursor()
@@ -316,12 +318,15 @@ def vendorSearch(vendor_ids):
                     data_file.flush()
                     data_file.seek(0)
                     search_database = get_conn_string(p_id, user='antimonyuser', db='antimony')
+                    logs.append("searching "+ search_database)
                     search_conn = psycopg2.connect(search_database, connect_timeout=1)
                     search_curs = search_conn.cursor()
                     # output fmt: VENDOR CAT_CONTENT_ID MACHINE_ID
                     get_vendor_results_antimony(data_file, search_curs, output_file, missing_file)
                 except psycopg2.OperationalError as e:
-                    print("failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database))
+                    message = "failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database)
+                    print(message)
+                    logs.append(message)
                     for line in data_file:
                         vendor = line.strip()
                         missing_file.write(vendor +'\n')
@@ -336,7 +341,7 @@ def vendorSearch(vendor_ids):
                 if p_id != p_id_prev and p_id_prev != None:
                     t_elapsed = time.time() - t_start
                     current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':projected_size, 'time_elapsed':t_elapsed})
-                    #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                    
                     search(p_id_prev, data_file, tf_inter, missing_file) # set our "missing" file as output
                     curr_size += projected_size
                     projected_size = 0
@@ -348,7 +353,7 @@ def vendorSearch(vendor_ids):
             if projected_size > 0:
                 t_elapsed = time.time() - t_start
                 current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':projected_size, 'time_elapsed':t_elapsed})
-                #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+        
                 search(p_id_prev, data_file, tf_inter, missing_file)
                 data_file.seek(0)
                 data_file.truncate()
@@ -370,12 +375,15 @@ def vendorSearch(vendor_ids):
                     data_file.flush()
                     data_file.seek(0)
                     search_database = get_conn_string(p_id)
+                    logs.append("searching "+ search_database)
                     search_conn = psycopg2.connect(search_database, connect_timeout=1)
                     search_curs = search_conn.cursor()
                     t_elapsed = time.time() - t_start
                     get_vendor_results_cat_id(data_file, search_curs, output_file)
                 except psycopg2.OperationalError as e:
-                    print("failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database))
+                    message = "failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database)
+                    print(message)
+                    logs.append(message)
                     # for line in data_file:
                     #     print(line)
                     #     vendor = line
@@ -392,7 +400,7 @@ def vendorSearch(vendor_ids):
                 if p_id != p_id_prev and p_id_prev != None:
                     t_elapsed = time.time() - t_start
                     p_id_prev = machine_id_map[int(p_id_prev)] # correct from number to actual database
-                    #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                    current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':total_length, 'time_elapsed':t_elapsed})
                     search(p_id_prev, data_file, output_file)
                     data_file.seek(0)
                     data_file.truncate()
@@ -403,24 +411,27 @@ def vendorSearch(vendor_ids):
                 p_id_prev = p_id
             if projected_size > 0:
                 p_id_prev = machine_id_map[int(p_id_prev)]
-                #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
+                current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':total_length, 'time_elapsed':t_elapsed})
                 search(p_id_prev, data_file, output_file)
     
         t_elapsed = time.time() - t_start
-        #printProgressBar(total_length, total_length, prefix = "", suffix="done searching sn!", length=50, t_elapsed=t_elapsed)
+        current_task.update_state(state='PROGRESS',meta={'current':total_length, 'projected':total_length, 'time_elapsed':t_elapsed})
         
         output_file.seek(0)
         result["found"] = []
+        
         for line in output_file.readlines():
             for line in json.loads(line):
                 result["found"].append(line)
-
-        return result
-        #printProgressBar(total_l
+        result["logs"] = logs
+        
+        return {'zinc22':result}
+    
     
 @celery.task
 def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
     t_start = time.time()
+    logs = []
     current_task.update_state(state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
     # all configuration prepartion
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
@@ -454,6 +465,7 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                 tf_input.write("{} {}\n".format(zinc_id, id_partition))
                 total_length += 1
             else:
+                print(zincid)
                 missing_file.write(zinc_id + "\n")    
         tf_input.flush()
         missing_file.flush()
@@ -469,6 +481,7 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                     data_file.seek(0)
                   
                     search_database = get_conn_string(p_id)
+                    logs.append("searching "+ search_database)
                     search_conn = psycopg2.connect(search_database, connect_timeout=1)
                     search_curs = search_conn.cursor()
                     t_elapsed = time.time() - t_start
@@ -478,14 +491,16 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                         get_smiles_results(data_file, search_curs, output_file, tranches_internal)
                         
                 except psycopg2.OperationalError as e:
-                    print("failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database))
+                    message = "failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database)
+                    print(message)
+                    logs.append(message)
                     tranches_internal_rev = {t[1] : t[0] for t in tranches_internal.items()}
                     for line in data_file:
                         sub_id, tranche_id_int = line.split()
                         sub_id = int(sub_id)
                         tranche = tranches_internal_rev[int(tranche_id_int)]
-                        tokens = ["_null_", get_zinc_id(sub_id, tranche), tranche] + (2 if get_vendors else 0) * ["_null_"]
-                        missing_file.write('\t'.join(tokens) +'\n')
+                        tokens = get_zinc_id(sub_id, tranche)
+                        missing_file.write(tokens +'\n')
                 finally:
                     if search_conn: search_conn.close()
             
@@ -498,8 +513,7 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                 if p_id != p_id_prev and p_id_prev != None:
                     t_elapsed = time.time() - t_start
                     current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':total_length, 'time_elapsed':t_elapsed})
-                    #printProgressBar(curr_size, total_length, prefix = "", suffix=p_id_prev, length=50, t_elapsed=t_elapsed, projected=projected_size)
-                    
+                
                     search(p_id_prev, data_file, output_file, tranches_internal)
                 
                     curr_size += projected_size
@@ -540,10 +554,13 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                 print()
 
         missing_file.seek(0)
+
         result["missing"] = missing_file.read().split("\n")
+        result["logs"] = logs
+        
         current_task.update_state(state='PROGRESS',meta={'current':total_length, 'projected':total_length, 'time_elapsed':t_elapsed})
-        return [zinc20,result]
-        #printProgressBar(total_length, total_length, prefix = "", suffix="done searching sn!", length=50, t_elapsed=t_elapsed)
+        return {'zinc20':zinc20,'zinc22':result}
+        
 
 def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
     search_curs.execute("create temporary table cb_sub_id_input (sub_id bigint, tranche_id_orig smallint)")

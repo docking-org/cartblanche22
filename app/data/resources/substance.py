@@ -13,6 +13,7 @@ from werkzeug.datastructures import FileStorage
 from app.helpers.validation import base10, get_all_tin_url, get_all_unique_tin_servers
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
 from flask import jsonify, current_app, request, make_response, redirect, Response,stream_with_context
+from app.data.tasks.search_zinc import filter_zinc_ids, zinc20search
 from collections import defaultdict
 import grequests
 import json
@@ -296,52 +297,6 @@ def progress(task, output_fields, file_type):
     
         
 class Substances(Resource):
-    def search(self, lines, output_fields, file_type):
-        maintasks = []
-        splitlist = list(chunks(lines, 10000))
-        for spl in splitlist:
-            task = send_task('app.data.tasks.search_zinc.getSubstanceList', [spl])
-            maintasks.append(task)
-        header = True
-        print(maintasks)
-        while len(maintasks) != 0:
-            time.sleep(5)
-            for maintask in maintasks:
-                task = AsyncResult(str(maintask))
-                
-                data = task.get()
-                data = data[0]
-                task = AsyncResult(data)
-                if(task.ready()):
-                    result = []
-                    print(maintask)
-                    maintasks.remove(maintask)
-                    data = task.get()
-                    
-                    for mol in data:
-                        newmol = {}
-                        for field in output_fields:
-                            newmol[field] = mol[field]
-                        result.append(newmol)
-                    
-                    if(file_type == "csv"):   
-                        res = pd.DataFrame(result)
-                        yield str(res.to_csv(encoding='utf-8', index=False, header=header))
-                        
-                    elif(file_type == "txt"):
-                        res = pd.DataFrame(result)
-                        yield str(res.to_csv(encoding='utf-8', index=False, sep=" ", header=header))
-                        
-                    else:
-                        if header:
-                            yield "["
-                        for mol in result:
-                            yield str(mol)+","
-                    header = False 
-        if(file_type == "json"):   
-            yield "]"
-        return 
-        
     def post(self, file_type=None):
         parser.add_argument('zinc_id-in', location='files', type=FileStorage, required=True)
         parser.add_argument('chunk', type=int)
@@ -353,29 +308,24 @@ class Substances(Resource):
         uploaded_file = args.get('zinc_id-in').stream.read().decode()
         output_fields = args.get('output_fields').split(',')
         lines = [x for x in re.split(r'\n|\r|(\r\n)', uploaded_file) if x!='' and x!= None]
+        zinc22, zinc20, discarded = filter_zinc_ids(lines)
+        zinc20 = zinc20search(zinc20)
+        task = send_task('app.data.tasks.search_zinc.getSubstanceList', [zinc20, zinc22])
+        task = AsyncResult(str(task))
+    
+        data = task.get() 
+        results = []
+        results += data['zinc20']
+        results += data['zinc22']['found']
         
-        result = []
-        
-        if len(lines) > 10000: 
-            return Response(stream_with_context(self.search(lines =lines, output_fields=output_fields,file_type=file_type)))
+        if(file_type == "csv"):
+            res = pd.DataFrame(results)
+            return res.to_csv(encoding='utf-8', index=False)
+        elif(file_type == "txt"):
+            res = pd.DataFrame(results)
+            return res.to_csv(encoding='utf-8', index=False, sep=" ")
         else:
-            task = send_task('app.data.tasks.search_zinc.getSubstanceList', [lines]) 
-            task = AsyncResult(str(task))
-                    
-            data = task.get()
-            data = data[0]
-            task = AsyncResult(data)
-            data = task.get()
-            print("here")
-            
-            if(file_type == "csv"):
-                res = pd.DataFrame(data)
-                return res.to_csv(encoding='utf-8', index=False)
-            elif(file_type == "txt"):
-                res = pd.DataFrame(data)
-                return res.to_csv(encoding='utf-8', index=False, sep=" ")
-            else:
-                return data
+            return results
     
 def chunks(lst, n):
     for i in range(0, len(lst), n):
