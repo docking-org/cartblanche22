@@ -46,7 +46,7 @@ class SearchSmiles(Resource):
 
         data = task.get()
         
-        task = getSubstanceList.delay(data)
+        task = getSubstanceList.delay([], data)
         return redirect(('search/result?task={task}'.format(task = task.id)))
 
 def curlSearch(files): 
