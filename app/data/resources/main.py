@@ -6,7 +6,6 @@ from celery.result import AsyncResult
 from celery.execute import send_task
 from flask_restful import Resource, reqparse
 from werkzeug.datastructures import FileStorage
-from app.data.resources.substance import SubstanceList
 from app.helpers.representations import OBJECT_MIMETYPE_TO_FORMATTER
 from flask import jsonify, redirect, current_app, request, make_response
 from flask_csv import send_csv
@@ -39,6 +38,14 @@ class Search(Resource):
         data, res, smile, prices = getZincData(zinc_id)
         for field in output_fields:
             result[field] = data[field]
+        print(result)
+        
+        if(file_type == "csv"):
+            res = pd.DataFrame([result])
+            return res.to_csv(encoding='utf-8', index=False)
+        elif(file_type == "txt"):
+            res = pd.DataFrame([result])
+            return res.to_csv(encoding='utf-8', index=False, sep=" ")
             
         return result
 

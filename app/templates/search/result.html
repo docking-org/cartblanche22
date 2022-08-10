@@ -21,6 +21,18 @@
    {#border: 1px solid #5bc0de;#}
    background-color: #9bd8eb;
    }
+   
+   .my-auto{
+    display: flex;
+    align-items: center; /* Vertical center alignment */
+    justify-content: center; /* Horizontal center alignment */
+   }
+
+   .pagination{
+    margin: 0px;
+   }
+
+
 </style>
 {% endblock %}
 {% block scripts %}
@@ -28,19 +40,40 @@
 <script>
     let pageLimit = 48;
     let currentPage = 0;
-    let lastPage = 0;
+    let lastPage = 100000;
+    function copyToClipboard(){
+            navigator.clipboard.writeText(missing22);
+    }
+
    $(document).ready(() => {
+        var bar = document.getElementById('progress');
+        bar.setAttribute("aria-valuenow", 100);
+        bar.style.width = "100%";
+        bar.innerHTML= "Processing...";
         let map22 = new Map();
         let map20 = new Map();
         let progressRequest = null;
 
-        $(function () {
-            $('[data-toggle="popover"]').popover()
-        })
+        $(function(){
+            $("[data-toggle=popover]").popover({
+                html : true,
+
+                content: function() {
+                    var content = $(this).attr("data-popover-content");
+                    return $(content).children(".popover-body").html();
+                },
+                title: function() {
+                    var title = $(this).attr("data-popover-content");
+                    return $(title).children(".popover-heading").html();
+                }
+            });
+        }); 
+
         const params = new Proxy(new URLSearchParams(window.location.search), {
             get: (searchParams, prop) => searchParams.get(prop),
         });
-
+        
+       
         function showTable(){
             const template22 = 
                 {"<>":"div","class":"col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2","html": [
@@ -74,7 +107,7 @@
                 };    
             $('.data20').html(json2html.render(datas20.slice(pageLimit*currentPage,(pageLimit*currentPage)+pageLimit),template20));
 
-            addAddedClass()
+            addAddedClass();
             $('.mol-bottom').click((e) => {        
                 let cur = $(e.currentTarget);
                 let id = e.currentTarget.id;
@@ -96,57 +129,74 @@
                     cur.addClass('added')
                     shoppingCart.addItemToCart(id, db, smiles, supplier_code, catalogs);
                 }
-            })
+            });
 
+            lastPage = parseInt(datas22.length / pageLimit);
+            if(lastPage === 0){
+                document.getElementById("pageSelector").style.display = "none";
+            }
+            else{
+                document.getElementById("pageSelector").style.display = "";
+            }
         }
+
         function insertAfter(newNode, existingNode) {
             existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
         }
 
+        $('select').change(function() {
+            pageLimit = this.value;
+            changePage(0);
+        });
+
         function changePage(num){
-            console.log(num)
             currentPage = num;
+
+            if(num >= lastPage){
+                currentPage = lastPage;
+            }
+            if(num < 0){
+                currentPage = 0;
+            }
+
+            
+            
             var page_numbers = document.getElementById('page_numbers');
-            var init = document.getElementById('page-first');
+            var init = document.getElementById('previousPage');
             
             
             $('.number').remove();
             
-            for(let i = num + 2; i > num- 4; i --){
+            for(let i = currentPage + 2; i > currentPage - 4; i --){
                 element = document.createElement("li");
-                if( (i >= 1) && (i < lastPage+1)){
+                console.log(i);
+              
+                if( (i >= 0) && (i < lastPage+1)){
+                    console.log("hi")
                     element.classList.add("page-item");
                     element.classList.add("number");
-                    element.setAttribute("page-number", i);
+                    element.setAttribute("page-number", i+1);
                     element.id = "pageNumber";
-                    if(i === num+1){
+                    if(i === currentPage){
                         element.classList.add("active");
                     }
                     button = document.createElement("a");
                     button.classList.add("page-link");
                     button.href = "#";
-                    button.innerHTML = i;
-
+                    button.innerHTML = i+1;
+                        
                     element.appendChild(button);
                     insertAfter(element, init);
                 }
             }
 
-            $('#firstPage').click(() => {
-            changePage(0);
-            });
-            $('#lastPage').click(() => {
-                changePage(lastPage);
-            });
             $('.number').click((e) => {
-                console.log(e.currentTarget)
                 changePage(parseInt(e.currentTarget.getAttribute("page-number"))-1);
             });
-            
 
-    
             showTable();
         }
+
 
         function addAddedClass(){
             let count = 0;
@@ -185,6 +235,7 @@
                 })
             }
             
+            
             if (count > datas22.length / 2) {
                 $('#deleteAll22').show();
                 $('#addAll22').hide();
@@ -201,7 +252,6 @@
                 $('#deleteAll20').hide();
             }
         };
-        
 
         function get_progress(){
             $.ajax({
@@ -218,16 +268,30 @@
                     datas22 = result.data22;
                     missing22 = result.missing22;
                     datas20 = result.data20;
+                    searchLogs = result.logs;
 
                     lastPage = parseInt(datas22.length / pageLimit);
-                    document.getElementById("22resultcount").innerHTML = datas22.length + " results";
-                    document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
+                    document.getElementById("22resultcount").innerHTML = datas22.length + " results"; 
                     document.getElementById("20resultcount").innerHTML = datas20.length + " results";
-                    console.log(lastPage);
-                    console.log(datas22);
-                    
+
+                    if (datas22 == null){
+                        datas22 = []
+                    }
+                    if (datas20 == null){
+                        datas20 = []
+                    }
+
+                    if(searchLogs.length !== 0){
+                        $('#searchLogs').html(searchLogs.join('\n'));
+                    }
+
+                    if(missing22.length !== 0){
+                        document.getElementById("22missingcount").style.display = "";
+                        document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
+                        $('#missing-list').html(missing22.join('\n'));
+                    }  
                     addAddedClass();
-                    changePage(0);  
+                    changePage(0);
                   
                 }
                 else{
@@ -240,25 +304,33 @@
                 }
             });            
         }
+        
         let ready = {{ready}};
         if(ready === true){
             datas22 = {{ data22 | tojson }};
             missing22 = {{missing22 | tojson}};
             datas20 = {{ data20 | tojson}};
-            
-            
-            lastPage = parseInt(datas22.length / pageLimit);
-            document.getElementById("22resultcount").innerHTML = datas22.length + " results";
-            document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
+            searchLogs = {{logs | tojson}};
 
+            document.getElementById("22resultcount").innerHTML = datas22.length + " results"; 
             document.getElementById("20resultcount").innerHTML = datas20.length + " results";
-            
 
             if (datas22 == null){
                 datas22 = []
             }
             if (datas20 == null){
                 datas20 = []
+            }
+            
+            if(searchLogs.length !== 0){
+                $('#searchLogs').html(searchLogs.join("\n"));
+            }
+            
+            if(missing22.length !== 0){
+                console.log(missing22)
+                document.getElementById("22missingcount").style.display = "";
+                document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
+                $('#missing-list').html(missing22.join('\n'));
             }
             
             addAddedClass();
@@ -269,6 +341,22 @@
             bar.style.display = "block";
             progressRequest = setInterval(get_progress, 500);     
         }
+
+        $('#firstPage').click(() => {
+            changePage(0);
+        });
+
+        $('#lastPage').click(() => {
+            changePage(lastPage);
+        });
+
+        $('#nextPage').click(() => {
+            changePage(currentPage+1);
+        });
+
+        $('#previousPage').click(() => {
+            changePage(currentPage-1);
+        });
 
         $('#addAll22').click(() => {
             shoppingCart.addAllItem(datas22);
@@ -304,60 +392,95 @@
    });
 </script>
 {% endblock %}
-{% block app_content %}
-<ul class="nav nav-pills nav-tabs" id="myTab" role="tablist">
-    <li class="nav-item">
-        <a class="nav-link" id="zinc22-tab" data-toggle="tab" href="#zinc22" role="tab" aria-controls="zinc22" aria-selected="true" style="display:none;">ZINC22 results</a>
-    </li>
- 
-    <li class="nav-item">
-        <a class="nav-link" id="zinc20-tab" data-toggle="tab" href="#zinc20" role="tab" aria-controls="zinc20" aria-selected="false" style="display:none;">ZINC20 results</a>
-    </li>   
+{% block search_results %}
+
+<div class="hidden" id="a1">
+  <div class="popover-heading">
+    Missing Results
+  </div>
+
+  <div class="popover-body">
+    <button class="btn btn-primary" onclick="copyToClipboard()">Copy to Clipboard</button>
+    <br>
+    <br>
+    <div id="missing-list" aria-describedby="Not found"></div>
+  </div>
+</div>
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link" style="display:none;" id="zinc22-tab" data-toggle="tab" href="#zinc22" role="tab" aria-controls="zinc22" aria-selected="true">ZINC22 results</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" style="display:none;" id="zinc20-tab" data-toggle="tab" href="#zinc20" role="tab" aria-controls="zinc20" aria-selected="false">ZINC20 results</a>
+  </li>
 </ul>
-<div class="tab-content" id="myTabContent">
+<br>
+<div class="tab-content " id="myTabContent">
     <div id="search_progress" style="display:none;">
         <div>
             <h3>Search Progress</h3>
         </div>
         <div class="progress active">
-            <div id="progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            <div id="progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="100" aria-valuemax="100">Processing.\.\.</div>
         </div>
     </div>
 
    <div class="tab-pane fade active" id="zinc22" role="tabpanel" aria-labelledby="zinc22-tab">
-      <div class="row">
-         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-3">
-            <br>
+      <div class="row h-100">
+         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4">
             <button type="button" class="btn btn-primary" id="22resultcount" disabled> </button>
-            <button type="button" class="btn btn-outline-danger" data-toggle="popover" title="Not Found" id="22missingcount" data-content="{{missing22}}"></button>
+            <button type="button" class="btn btn-outline-danger" data-placement="right" data-popover-content="#a1" data-toggle="popover" id="22missingcount" style="display:none;" ></button>
          </div>
-         
-         
+                 
          <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4 float-right text-right">
-            <nav aria-label="Page navigation example">
-               <ul class="pagination">
-                  <li class="page-item" id="page-first"><a class="page-link" href="#">Previous</a></li>
-                  <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            <div class="nav" aria-label="Page navigation">
+               <ul class="pagination" id="pageSelector">
+                 <li class="page-item" id="firstPage">
+                    <a class="page-link" href="#" aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                    </a>   
+                  </li>
+                  <li class="page-item" id="previousPage" >
+                    <a class="page-link" href="#" aria-label="Last">
+                        <span aria-hidden="true"><</span>
+                        <span class="sr-only">Next</span>
+                    </a>  
+                  </li>
+                  <li class="page-item" id="nextPage" >
+                    <a class="page-link" href="#" aria-label="Last">
+                        <span aria-hidden="true">></span>
+                        <span class="sr-only">Next</span>
+                    </a>  
+                  </li>
                   
-                  <li class="page-last"><a class="page-link" href="#">Last</a></li>
+                  <li id ="lastPage" class="page-last">
+                    <a class="page-link" href="#" aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Last</span>
+                    </a>  
+                  </li>
                </ul>
-            </nav>
+            </div>
          </div>
          <div class="col-md-3 col-xs-3 col-sm-3 col-lg-2 float-right">
-            <br>
-            <select class="form-control">
+            <div class="row">
+                
+            <div class="col-md-3 col-xs-3 col-sm-3 col-lg-12 my-auto">Show:&nbsp;
+                <select id="page-limit" style="width: 40%;" class="form-control">
                 <option>50</option>
                 <option>100</option>
                 <option>250</option>
                 <option>500</option>
-                <option>All</option>
-            </select>
+                </select></div>
+            </div>
          </div>
       
-      <div class="col-md-6 col-xs-9 col-sm-9 col-lg-1 float-right text-right">
-        <br>
-         <button type="button" class="btn btn-info" id="addAll22">Add all to cart</button>
-         <button type="button" class="btn btn-warning" id="deleteAll22">Remove all from cart</button>
+      <div class="col-md-6 col-xs-9 col-sm-9 col-lg-2 float-right text-right">
+         
+         <button type="button" class="btn btn-info" id="addAll22">add all results to cart</button>
+         <button type="button" class="btn btn-warning" id="deleteAll22">remove all results from cart</button>
       </div>
    </div>
    <br>
@@ -366,47 +489,86 @@
    </div>
 </div>
   <div class="tab-pane fade" id="zinc20" role="tabpanel" aria-labelledby="zinc20-tab">
-      <div class="row">
-   
-        <div class="col-md-3 col-xs-3 col-sm-3 col-lg-3">
-            <br>
+    <div class="row h-100">
+         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4">
             <button type="button" class="btn btn-primary" id="20resultcount" disabled> </button>
-            
          </div>
-         
-         
-         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4 float-right text-right">
-            <nav aria-label="Page navigation example">
-               <ul class="pagination">
-                  <li class="page-item" id="page-first"><a class="page-link" href="#">Previous</a></li>
                  
+         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4 float-right text-right">
+            <div class="nav" aria-label="Page navigation">
+               <ul class="pagination" id="pageSelector">
+                 <li class="page-item" id="firstPage">
+                    <a class="page-link" href="#" aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                    </a>   
+                  </li>
+                  <li class="page-item" id="previousPage" >
+                    <a class="page-link" href="#" aria-label="Last">
+                        <span aria-hidden="true"><</span>
+                        <span class="sr-only">Next</span>
+                    </a>  
+                  </li>
+                  <li class="page-item" id="nextPage" >
+                    <a class="page-link" href="#" aria-label="Last">
+                        <span aria-hidden="true">></span>
+                        <span class="sr-only">Next</span>
+                    </a>  
+                  </li>
+                  
+                  <li id ="lastPage" class="page-last">
+                    <a class="page-link" href="#" aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Last</span>
+                    </a>  
+                  </li>
                </ul>
-            </nav>
+            </div>
          </div>
          <div class="col-md-3 col-xs-3 col-sm-3 col-lg-2 float-right">
-            <br>
-            <select class="form-control">
+            <div class="row">
+                
+            <div class="col-md-3 col-xs-3 col-sm-3 col-lg-12 my-auto">Show:&nbsp;
+                <select id="page-limit" style="width: 40%;" class="form-control">
                 <option>50</option>
                 <option>100</option>
                 <option>250</option>
                 <option>500</option>
-                <option>All</option>
-            </select>
+                </select></div>
+            </div>
          </div>
-    
-        <div class="col-md-6 col-xs-9 col-sm-9 col-lg-1 float-right text-right">
-            <br>
-            <button type="button" class="btn btn-info" id="addAll20">Add all to cart</button>
-            <button type="button" class="btn btn-warning" id="deleteAll20">Remove all from cart</button>
-        </div>
-        </div>
-
-  
+         <div class="col-md-6 col-xs-9 col-sm-9 col-lg-2 float-right text-right">
+         <button type="button" class="btn btn-info" id="addAll20">add all results to cart</button>
+         <button type="button" class="btn btn-warning" id="deleteAll20">remove all results from cart</button>
+      </div>
+    </div>
+   
+    <br>
     <div class="row data20">
       
     </div>
   </div>
 </div>
-
 </div>
+
+{%  if request.access_route[-1][0:3] == '10.' or  request.access_route[-1][0:8] == '169.230.' or request.access_route[-1][0:8] == '128.218.' %}                                
+    <div class="container fixed-bottom">
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Search Logs
+                    </a>
+                </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                <div class="panel-body">
+                    <textarea id="searchLogs" class="form-control" type="text" placeholder="Sea…" readonly></textarea>
+                </div>
+                </div>
+            </div>                            
+        </div>
+    </div>
+{%  endif %}
+
 {% endblock %}

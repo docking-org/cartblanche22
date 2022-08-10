@@ -28,7 +28,12 @@
     <script>
          $(document).ready(() => {
             setDefaultPrices();
-        })
+
+            $('#testData').click((e) => {
+                e.preventDefault();
+                $('#supplierTextarea').val("s_240690__16499450__15795350\ns_240690__16499450__17311340\ns_22__9598818__14482412\n");
+            });
+        });
     </script>
 {% endblock %}
 {% block app_content %}
@@ -41,11 +46,7 @@
                 <form id="data" method="post" enctype="multipart/form-data" action="/searchJobSupplier">
                     <div class="form-group">
                         <label for="supplierTextarea">One code per Line</label>
-                        <p>Test Data:<br>
-                            s_240690__16499450__15795350 <br>
-                            s_240690__16499450__17311340 <br>
-                            s_22__9598818__14482412 <br>
-                        </p>
+                        
                         <textarea id="supplierTextarea" class="form-control" rows="6" cols="20"
                                   placeholder="Supplier Codes" name="supplierTextarea"></textarea>
                     </div>
@@ -56,6 +57,7 @@
                                 class="form-control" accept=".txt">
                     </div>
                     <button id="searchSupplierBtn" type="submit" class="btn btn-info">Search</button>
+                    <button id="testData" class="btn btn-secondary">Load Test Data</button>
                 </form>
             </div>
         </div>
