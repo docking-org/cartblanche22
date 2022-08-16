@@ -344,7 +344,13 @@ def getZincData(identifier):
 
 @application.route('/sw')
 def sw():
-    return render_template('search/sw.html')
+    valid = False
+    print(current_user.roles)
+    if current_user.has_roles('public'):
+        valid = True
+
+    
+    return render_template('search/sw.html', valid = valid)
 
 
 @application.route('/swp')
