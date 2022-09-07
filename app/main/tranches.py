@@ -2,7 +2,7 @@ from inspect import trace
 import psycopg2
 from config import Config
 from itertools import groupby
-from flask import render_template, request, Response
+from flask import render_template, request, Response, stream_with_context
 from app.main import application
 import json
 from app.data.models.tranche import TrancheModel
@@ -11,21 +11,21 @@ from app.data.forms.tranchesForms import Download2DForm, Download3DForm
 
 def URIFormatter(hac, logp, format, add_url, charge, generation):
     if generation != '':
-        return "{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+        return "{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
     else:
          return "{}{}{}/{}{}{}.{}".format(base_url, add_url, hac, hac, logp, charge, format)
 
 def WyntonFormatter(hac, logp, format, add_url, charge, generation):
-    return "/wynton/group/bks/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+    return "/wynton/group/bks/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
     
 def BKSLabFormatter(hac, logp, format, add_url, charge, generation):
-    return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def AWSFormatter(hac, logp, format, add_url, charge, generation):
-    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def OCIFormatter(hac, logp, format, add_url, charge, generation):
-    return "oci://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "oci://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def DBFormatter(hac, logp, format, add_url, charge, generation):
     if generation != "":
@@ -193,10 +193,13 @@ def tranches2dDownload():
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
     return response
 
+zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
+zinc22_common_conn = psycopg2.connect(zinc22_common_url)
+
 def get3dfiles(gen, tranche, charge):
-    zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
-    conn = psycopg2.connect(zinc22_common_url)
-    curs = conn.cursor()
+    #zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
+    #conn = psycopg2.connect(zinc22_common_url)
+    curs = zinc22_common_conn.cursor()
 
     curs.execute("select suffix from holdings_3d where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
     file_results = []
@@ -209,40 +212,38 @@ def get3dfiles(gen, tranche, charge):
 @application.route('/tranches/3d/download', methods=['POST'])
 def tranches3dDownload():
     formData = Download3DForm(request.values)
-    data_ = formData.tranches.data.split()
+    tranches_data = formData.tranches.data.split()
     format = formData.format.data
     using = formData.using.data
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
     add_url_3D = 'zinc22/3d/'
 
-    data_ = sorted(data_)
+    tranches_data = sorted(tranches_data)
 
-    def gen_tranches(tranche):
-        print(tranche)
-        hac = tranche[1:4]
-        logp = tranche[4:8]
-        generation = tranche[0:1]
-        charge = tranche[-1]
-        prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
-        res = []
-        for suffix in get3dfiles(generation, hac+logp, charge):
-            res.append(prefix + f"/{hac}{logp}-{charge}-{suffix}.{format}")
-        return res
+    def gen_all_tranches(tranches):
+        for tranche in tranches:
+            hac = tranche[1:4]
+            logp = tranche[4:8]
+            generation = tranche[0:1]
+            charge = tranche[-1]
+            prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
+            for suffix in get3dfiles(generation, hac+logp, charge):
+                yield prefix + f"/{hac}{logp}-{charge}-{suffix}.{format}\n"
+    
+    def gen_all_rsyncs(tranches):
+        for tranche in tranches:
+            util_func = lambda x: x[0]
+            temp = sorted(data_, key = util_func)
+            res = [list(ele) for i, ele in groupby(temp, util_func)]
+            for x in res:
+                yield RsyncDownloader(x, format) + '\n'
  
+    tranches_iter = gen_all_tranches
+
     if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
-        util_func = lambda x: x[0]
-        temp = sorted(data_, key = util_func)
-        res = [list(ele) for i, ele in groupby(temp, util_func)]
-        arr = [RsyncDownloader(x, format) for x in res]
-        data = '\n'.join(list(arr))
-    else:
-        arr = []
-	
-    for d in data_:
-        arr.extend(gen_tranches(d))
-        data = '\n'.join(list(arr))
+        tranches_iter = gen_all_rsyncs
         
     download_filename = 'ZINC22-downloader-3D-{}.{}'.format(format, using)
-    response = Response(data, mimetype=mimetype)
+    response = Response(stream_with_context(tranches_iter(tranches_data)), mimetype=mimetype)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
     return response
