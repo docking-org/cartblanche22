@@ -14,7 +14,6 @@ from app.main import application
 
 import requests
 from app.data.models.default_prices import DefaultPrices
-from app.data.resources.substance import Substance, SubstanceList
 from flask_login import current_user
 import urllib.parse
 import re
@@ -32,7 +31,7 @@ def search_view():
     return response.json()
 
 
-@application.route('/search/search_byzincid', methods=["GET", "POST"])
+@application.route('/search/byzincid', methods=["GET", "POST"])
 def search_byzincid():
     if request.method == "GET":
         text = Markup('If you encounter molecule(s) that won\'t look up, <br> \
@@ -124,7 +123,7 @@ def search_byzincid():
                                header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
 
 
-@application.route('/search/search_bysmiles', methods=["GET", "POST"])
+@application.route('/search/bysmiles', methods=["GET", "POST"])
 def search_bysmiles():
     if request.method == "GET":
         return render_template('search/search_bysmiles.html')
@@ -153,7 +152,7 @@ def search_bysmiles():
                                header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
 
 
-@application.route('/search/search_bysupplier', methods=["GET", "POST"])
+@application.route('/search/bysupplier', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
         text = Markup('If you encounter supplier code(s) that won\'t look up, <br> \
@@ -305,7 +304,7 @@ def searchZinc(identifier):
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
 
 def getZincData(identifier):
-    task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[identifier]]) 
+    task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[], [identifier]]) 
     res = task.get()
     
     if res:
@@ -314,7 +313,8 @@ def getZincData(identifier):
             role = 'ucsf'
         else:
             role = 'public'
-        data= res["found"][0]
+        
+        data= res['zinc22']["found"][0]
         print("here")
         print(data)
         

@@ -289,7 +289,9 @@
         <div id="res-panel">
             <div id="res-head">
                 Results
+                {%  if request.access_route[-1][0:3] == '10.' or  request.access_route[-1][0:8] == '169.230.' or request.access_route[-1][0:8] == '128.218.' %}
                 <button id="ucsfbutton" class="btn-info">UCSF</button>
+                {% endif %}
                 <button title="Download Results" id="export-button" onclick="export_results();">
                     <i class="fa fa-download fa-x" aria-hidden="true"></i>
                 </button>
