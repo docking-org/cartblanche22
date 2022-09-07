@@ -154,10 +154,10 @@ class CatalogContents(Resource):
         uploaded_file = args.get('supplier_code-in').stream.read().decode("latin-1")
         lines = [x for x in uploaded_file.split('\n') if x]
         task = SearchJobSupplier.curlSearch(lines)
-        antimony_task = AsyncResult(task)
-        tinsearch_task = AsyncResult(antimony_task.get())
-        results = tinsearch_task.get()
+        results = task.get()
         
+        del results['zinc22']['logs']
+                
         if(file_type == "csv"):
                 res = pd.DataFrame(results)
                 return res.to_csv(encoding='utf-8', index=False)

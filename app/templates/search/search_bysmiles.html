@@ -10,11 +10,16 @@
     <script>
          $(document).ready(() => {
              setDefaultPrices();
+
+             $('#testData').click((e) => {
+                e.preventDefault();
+                $('#smilesTextarea').val("C1CCC(-C2NNCNN2)CC1\nC1CCC(C2CNNC2)C1\nC1=CC=CC=C1C2=CC=CC=C2\n");
+            });
         })
+        
     </script>
 {% endblock %}
 {% block app_content %}
-
     <div class="row" id="smilesSearchInput">
         <div class="panel panel-info">
             <div class="panel-heading">Search by Smiles</div>
@@ -23,11 +28,6 @@
                 <form id="data" method="post" enctype="multipart/form-data" action="/searchSmiles">
                     <div class="form-group">
                         <label for="smilesTextarea">One Smiles per Line</label>
-                        <p>Test Data:
-                            <br>C1CCC(-C2NNCNN2)CC1
-                            <br>C1CCC(C2CNNC2)C1
-                            <br> C1=CC=CC=C1C2=CC=CC=C2
-                        </p>
                         <textarea id="smilesTextarea" class="form-control" rows="6" cols="20"
                                   placeholder="Smiles" name="smilesTextarea"></textarea>
                     </div>
@@ -59,6 +59,7 @@
                         </option>
 
                     </select>
+                    &nbsp;
                     <label for="adistformat">anon dist:</label>
                     <select name="adist" class="btn btn-info" id="adistformat">
                         <option value="0" id="adist-0" selected>
@@ -81,7 +82,10 @@
                         </option>
 
                     </select>
+                    <br>
+                    <br>
                     <button id="searchSmilesBtn2" type="submit" class="btn btn-info">Search</button>
+                    <button id="testData" class="btn btn-secondary">Load Test Data</button>
                 </form>
             </div>
         </div>

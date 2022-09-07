@@ -47,7 +47,7 @@ function checkHg(smiles, modal, table, db) {
 }
 
 function showHg(data, modal, table) {
-    modal.modal('show');
+    
     table.DataTable({
         destroy: true,
         "language": {

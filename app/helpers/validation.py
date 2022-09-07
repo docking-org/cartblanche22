@@ -267,15 +267,18 @@ def get_zinc_id(sub_id, tranche_name):
 def get_tranche(zinc_id):
     hac = base62_rev(zinc_id[4])
     lgp = base62_rev(zinc_id[5])
-    tranche = "H{:>02d}{}".format(hac, logp_range[lgp])
-    return tranche
+    try:
+        tranche = "H{:>02d}{}".format(hac, logp_range[lgp])
+        return tranche
+    except:
+        return "fake"
 
 def get_conn_string(partition_host_port, db='tin', user='tinuser'):
     host, port = partition_host_port.split(':')
+    print(host)
     if host == os.uname()[1].split('.')[0]:
         host = "localhost"
-    
-    toNum  = "10.20."+ host[1]+"."+host[2]
+
     return "postgresql://{0}@{1}:{2}/{3}".format(user, host, port, db)
     #return Config.SQLALCHEMY_BINDS[toNum+":"+port].replace("/db","/"+db).replace("username", user)
 

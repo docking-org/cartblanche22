@@ -27,7 +27,7 @@ def smiles_result():
        
         if len(data) == 0:
             return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return render_template('search/result_smiles.html', data22=data, data20=[], missing22=[])
+        return render_template('search/result.html', data22=data, data20=[], missing22=[])
 
 class SearchSmiles(Resource):
     def post(self):
@@ -42,13 +42,12 @@ class SearchSmiles(Resource):
             'dist': dist,
             'adist': adist,
         }
-               
         task = search.delay(files) 
 
         data = task.get()
-        print(data)
-        task = getSubstanceList.delay(data)
-        return redirect(('search/result_smiles?task={task}'.format(task = task.id)))
+        
+        task = getSubstanceList.delay([], data)
+        return redirect(('search/result?task={task}'.format(task = task.id)))
 
 def curlSearch(files): 
     task = search.delay(files)

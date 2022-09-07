@@ -432,8 +432,9 @@ function stopStreaming() {
 function init_table(table, url) {
     if (!dtable) {
         $('#splash').css('display', 'none');
-        var columns = [{
-            "title": "Compound (<input type='checkbox' name='optColEdits' onchange='toggle_color()'>Color, <input type='checkbox' name='optAlign' onchange='toggle_align()'>Align)",
+        var columns = [
+            {
+            "title": "<span class='glyphicon glyphicon-shopping-cart'/>&nbsp&nbsp&nbsp&nbsp&nbsp  Compound (<input type='checkbox' name='optColEdits' onchange='toggle_color()'>Color, <input type='checkbox' name='optAlign' onchange='toggle_align()'>Align)",
             "name": "alignment",
             "class": "compound",
             "sortable": false,
@@ -446,12 +447,12 @@ function init_table(table, url) {
             "width": "65px",
             "sortable": true
         }].concat(get_score_columns()).concat([{
-            "title": "Anon Distance",
+            "title": "Anon <br> Distance",
             "name": "topodist",
             "width": "65px",
             "sortable": true
         }, {
-            "title": "Unlabelled MCES",
+            "title": "Unlabelled <br> MCES",
             "name": "mces",
             "width": "50px",
             "sortable": true
@@ -464,7 +465,7 @@ function init_table(table, url) {
             filter: true,
             "ajax": {
                 "url": url,
-                "type": 'GET',
+                "type": 'GET'
             },
             "dom": 'rtpi',
             "scrollX": true,
@@ -490,7 +491,6 @@ function init_table(table, url) {
         });
 
     } else {
-        console.log("here")
         dtable.ajax.url(url).load();
     }
     update_bounds();
@@ -560,8 +560,8 @@ function flex_renderer(data, type, row) {
 
 function hit_renderer(data, type, row) {
     var table = $("<table class='compound_cell'></table>");
-    var img = $('<img width="150px" height="90px" />');
-    let button = $('<button class="add">Add to Cart</button>')
+    var img = $('<img width="100px" height="90px" />');
+    let button = $('<input type="checkbox" style="width:25px" />')
     var color = $('input[name="optColEdits"]').prop('checked');
     var align = $('input[name="optAlign"]').prop('checked');
     var base_url = config.WebApp.DepictionUrl;
@@ -591,36 +591,38 @@ function hit_renderer(data, type, row) {
         .replace("%c", encodeURIComponent(cols))
         .replace("%m", encodeURIComponent(cmap))
         .replace("%w", 50).replace("%h", 30);
+
+    var id = datasets[search_state.db].prefix + data.id;
     img.attr('src', sw_server + depict_url.substring(1) + '&' + $.param(extra));
     img.attr('onmouseenter', 'show_imgpop(this);');
     img.attr('onmouseleave', 'hide_imgpop();');
+    img.attr('onclick', 'vava(this);');
     img.attr('ondragstart', 'drag_img(event, "' + data.hitSmiles + '");');
     var div = $("<div></div>");
-    var id = datasets[search_state.db].prefix + data.id;
     var href = datasets[search_state.db].url.replace("%s", data.id);
     button.attr('id', id);
     button.attr('data-identifier', id);
-    button.attr('data-db', search_state.db);
     button.attr('data-hg', false);
-    button.attr('data-smile', hsmi)
+    button.attr('data-db', search_state.db_name);
     button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
+    button.attr('data-smile', data.hitSmiles.split(" ")[0])
     button.attr('onclick', 'toggleCart(this)');
     button.attr('class', 'btn btn-info');
-    let cart = JSON.parse(localStorage.getItem('cart'))
+  //   let cart = JSON.parse(localStorage.getItem('cart'))
   //   if(cart==null){
   //   cart = []
   // }
-  //   let items = []
-  //   for (i = 0; i < cart.length; i++) {
-  //       items.push(cart[i].identifier)
-  //   }
-  //   if (items.includes(id)) {
-  //       button.html('Remove')
-  //       button.attr('class', 'btn btn-danger')
-  //   }
-     if(shoppingCart.inCart(id)){
-                button.html('Remove')
-        button.attr('class', 'btn btn-danger')
+    // let items = []
+    // for (i = 0; i < cart.length; i++) {
+    //     items.push(cart[i].identifier)
+    // }
+    // if (items.includes(id)) {
+    //     button.html('Remove')
+    //     button.attr('class', 'btn btn-danger')
+    // }
+    if(shoppingCart.inCart(id)){
+        button.attr('checked',true);
+        button.attr('class', 'btn btn-danger');
 
     }
     if (href) {
@@ -639,9 +641,9 @@ function hit_renderer(data, type, row) {
         .append('<br/><b>MF:</b> ' + data.mf);
     $props.css('font-size', 'smaller');
     div.append($props);
-    var row = $('<tr></tr>');
-    row.append($("<td style='width: 50px; margin:50px;'></td>").append(button));
-    row.append($("<td style='width: 150px;'></td>").append(img));
+    var row = $('<tr onclick="trToggle(this)"></tr>');
+    row.append($("<td style='width: 2px; margin:auto;'></td>").append(button));
+    row.append($("<td style='width: 100px; '></td>").append(img));
     row.append($("<td style='line-height: 100%;'></td>").append(div));
     table.append(row);
 
