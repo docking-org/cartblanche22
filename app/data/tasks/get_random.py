@@ -56,16 +56,15 @@ def getRandom(count, file_type = None, timeout=10):
     
     while total < count:
         for i in range(count):
-            url = random.choices(population, distribution)[0]
-            if db_map.get(url):
-                db_map[url] += 1
-            else:
-                db_map[url] = 1
+        url = random.choices(population, distribution)[0]
+        if db_map.get(url):
+            db_map[url] += 1
+        else:
+            db_map[url] = 1
             
         for url in db_map:
             limit = db_map[url]
             try:
-                url = random.choices(population, distribution)[0]
                 dbcount+=1
                 print(url)
                 tstart = time.time()
@@ -89,7 +88,7 @@ def getRandom(count, file_type = None, timeout=10):
             except:
                 print()
         
-        count = count-total
+        count = total - count
         
     print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))
     results = []         
@@ -111,6 +110,8 @@ def getRandom(count, file_type = None, timeout=10):
             molecule['SMILES'] = i[1]
             
             results.append(molecule)
+            
+    random.shuffle(results)
     
     if(file_type == "csv"):
         res = pd.DataFrame(results)
