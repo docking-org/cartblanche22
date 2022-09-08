@@ -47,13 +47,21 @@ def getRandom(count, file_type = None, timeout=10):
     
     total = 0
     result = []
-    limit = 1
+    
     dbcount = 0
-
+    
     population, distribution = getDistribution()    
+    db_map = {}
     
+    for i in range(count):
+        url = random.choices(population, distribution)[0]
+        if db_map.get(url):
+            db_map[url] += 1
+        else:
+            db_map[url] = 1
     
-    while total < int(count):
+    for url in db_map:
+        limit = db_map[url]
         try:
             url = random.choices(population, distribution)[0]
             dbcount+=1
