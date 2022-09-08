@@ -8,6 +8,7 @@
             $('#exampleModalLabel').html('Please wait...')
             e.preventDefault();
             var formData = new FormData();
+            let subset = $('#subset').val()
             let amountformat = $('#amountformat').val()
             let format = $('#format').val()
             console.log(format,amountformat)
@@ -17,7 +18,7 @@
                 cache: false,
                 contentType: false,
                 processData: false,
-                data: [amountformat, format],
+                data: [subset, amountformat, format],
                 type: 'POST',
                 success: function (response) {
                     if (format == 'json') {
@@ -52,6 +53,17 @@
             <div class="panel-body">
                 <form id='data' action="" method="POST" class="form-inline">
                     <div class="form-group">
+                        <label for="fname">Subset:</label>
+                        <select name="subset" class="btn btn-info" id="subset">
+                            <option value="none" id="subset-none" selected>
+                                None
+                            </option>
+                            <option value="lead-like" id="subset-lead-like" >
+                                Lead-like
+                            </option>
+                        </select>
+                        <br><br>
+
                         <label for="fname">Number of molecules:</label>
                         <input name="amount" class="form-control" id="amountformat" />
 
