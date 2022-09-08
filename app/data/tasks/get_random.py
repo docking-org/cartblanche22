@@ -47,14 +47,14 @@ def getRandom(count, file_type = None, timeout=10):
     
     total = 0
     result = []
-    count = int(count)
+    to_pull = int(count)
     dbcount = 0
     
     population, distribution = getDistribution()    
     results = []       
-    while count > 0:
+    while to_pull > 0:
         db_map = {}
-        for i in range(count):
+        for i in range(to_pull):
             url = random.choices(population, distribution)[0]
             if db_map.get(url):
                 db_map[url] += 1
@@ -103,7 +103,7 @@ def getRandom(count, file_type = None, timeout=10):
                 
                 results.append(molecule)
                 
-        count = count - total
+        to_pull = to_pull - total
                 
     print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))      
     random.shuffle(results)
