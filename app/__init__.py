@@ -91,6 +91,7 @@ def create_app(config_class=Config):
     api.add_resource(Search, '/search.<file_type>')
     api.add_resource(SearchJobSubstance, '/searchJobSubstance')
     api.add_resource(SearchJobSupplier, '/searchJobSupplier')
+
     api.add_resource(SearchSmiles, '/searchSmiles')
     api.add_resource(Substance, '/substance')
     api.add_resource(Substances, '/substances.<file_type>')
