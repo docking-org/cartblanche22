@@ -81,10 +81,14 @@ def getRandom(count, file_type = None, timeout=10):
             print(res)
             result.append(res)
             total += len(res)
+            if(total >= count):
+                break
             conn.close()
         except:
             print()
-
+    if total < count:
+        getRandom(count - total, file_type)
+        
     print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))
     results = []         
     
