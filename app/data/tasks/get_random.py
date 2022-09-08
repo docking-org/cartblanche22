@@ -51,16 +51,15 @@ def getRandom(count, file_type = None, timeout=10):
     dbcount = 0
     
     population, distribution = getDistribution()    
-    db_map = {}
-    
-    
-    while total < count:
+    results = []       
+    while count > 0:
+        db_map = {}
         for i in range(count):
-        url = random.choices(population, distribution)[0]
-        if db_map.get(url):
-            db_map[url] += 1
-        else:
-            db_map[url] = 1
+            url = random.choices(population, distribution)[0]
+            if db_map.get(url):
+                db_map[url] += 1
+            else:
+                db_map[url] = 1
             
         for url in db_map:
             limit = db_map[url]
@@ -82,35 +81,31 @@ def getRandom(count, file_type = None, timeout=10):
                 print(res)
                 result.append(res)
                 total += len(res)
-                if(total >= count):
-                    break
                 conn.close()
             except:
                 print()
         
-        count = total - count
+        for dbresult in result:
+            for i in dbresult:
+                molecule= {}
+                tranche = i[7]
+                if(tranche):
+                    sub = base62(int(i[0]))
+                    h = base62(int(tranche[1:3]))
+                    p = base62(logp_range[tranche[3:]])
+                    molecule['tranche'] = tranche
         
-    print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))
-    results = []         
-    
-    for dbresult in result:
-        for i in dbresult:
-            molecule= {}
-            tranche = i[7]
-            if(tranche):
-                sub = base62(int(i[0]))
-                h = base62(int(tranche[1:3]))
-                p = base62(logp_range[tranche[3:]])
-                molecule['tranche'] = tranche
-    
-            else:
-                molecule['tranche'] = "None"
-            sub = (10 - len(sub)) * "0" + sub
-            molecule['zincid'] = "ZINC" + h + p + sub
-            molecule['SMILES'] = i[1]
-            
-            results.append(molecule)
-            
+                else:
+                    molecule['tranche'] = "None"
+                sub = (10 - len(sub)) * "0" + sub
+                molecule['zincid'] = "ZINC" + h + p + sub
+                molecule['SMILES'] = i[1]
+                
+                results.append(molecule)
+                
+        count = count - total
+                
+    print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))      
     random.shuffle(results)
     
     if(file_type == "csv"):
