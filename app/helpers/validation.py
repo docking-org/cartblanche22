@@ -275,7 +275,7 @@ def get_tranche(zinc_id):
 
 def get_conn_string(partition_host_port, db='tin', user='tinuser'):
     host, port = partition_host_port.split(':')
-    print(host)
+    
     if host == os.uname()[1].split('.')[0]:
         host = "localhost"
 
