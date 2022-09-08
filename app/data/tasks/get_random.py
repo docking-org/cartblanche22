@@ -28,20 +28,25 @@ class GetRandomMolecules(Resource):
     def post(self, file_type=None):
         if not request.form:
             data= request.data.decode().split(',')
-            count = data[0]
-            file_type = data[1]
+            print(data)
+            subset = data[0]
+            count = data[1]
+            file_type = data[2]
         else:
             count = request.form['count']
         result = []
      
-        result = getRandom(count, file_type)
+        if subset == "none":
+            subset = None
+    
+        result = getRandom(subset, count, file_type)
             
         
         return result
 
 
 @celery.task
-def getRandom(count, file_type = None, timeout=10):
+def getRandom(subset, count, file_type = None, timeout=10):
     logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
     logp_range={e:i for i, e in enumerate(logp_range)}
     
@@ -50,7 +55,7 @@ def getRandom(count, file_type = None, timeout=10):
     to_pull = int(count)
     dbcount = 0
     
-    population, distribution = getDistribution()    
+    population, distribution = getDistribution(subset)    
     results = []       
     while to_pull > 0:
         db_map = {}
@@ -75,6 +80,7 @@ def getRandom(count, file_type = None, timeout=10):
                 print(max)
                 curs.execute(
                     ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
+                
                 )
                 
                 res = curs.fetchall()
@@ -120,8 +126,11 @@ def getRandom(count, file_type = None, timeout=10):
 #  tstart = time.time()
 #     conn = psycopg2.connect(dsn, connect_timeout=timeout)
 #     curs = conn.cursor()
-def getDistribution():
+subsets = {
+    "lead-like": [(17, 25), 350]
+}
 
+def getDistribution(subset=None):
     db.choose_tenant("tin")
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
     config_curs = config_conn.cursor()
@@ -129,20 +138,34 @@ def getDistribution():
     tranche_map = {}
     db_map = {}
     for result in config_curs.fetchall():
+        print(result)
         tranche = result[0]
-        host = result[1]
-        port = result[2]
-        db_ = get_conn_string(':'.join([host, str(port)]))
         
-        if not db_map.get(db_):
-            db_map[db_] = [tranche]
+        if subset:
+            h = int(tranche[1:3])
+            p = int(tranche[4:])
+            if h >= subsets[subset][0][0] and h <= subsets[subset][0][1] and p <= subsets[subset][1]:
+                host = result[1]
+                port = result[2]
+                db_ = get_conn_string(':'.join([host, str(port)]))
+                
+                if not db_map.get(db_):
+                    db_map[db_] = [tranche]
+                else:
+                    db_map[db_].append(tranche)
         else:
-            db_map[db_].append(tranche)
+            host = result[1]
+            port = result[2]
+            db_ = get_conn_string(':'.join([host, str(port)]))
+            
+            if not db_map.get(db_):
+                db_map[db_] = [tranche]
+            else:
+                db_map[db_].append(tranche)
     
     tranches = TrancheModel.query.filter_by(charge='-').all()
     size_map = {}
     for i in tranches:
- 
         size_map[i.h_num + i.p_num] = i.sum
     
     db_size_map = {}
