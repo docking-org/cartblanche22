@@ -47,47 +47,49 @@ def getRandom(count, file_type = None, timeout=10):
     
     total = 0
     result = []
-    
+    count = int(count)
     dbcount = 0
     
     population, distribution = getDistribution()    
     db_map = {}
     
-    for i in range(int(count)):
-        url = random.choices(population, distribution)[0]
-        if db_map.get(url):
-            db_map[url] += 1
-        else:
-            db_map[url] = 1
     
-    for url in db_map:
-        limit = db_map[url]
-        try:
+    while total < count:
+        for i in range(count):
             url = random.choices(population, distribution)[0]
-            dbcount+=1
-            print(url)
-            tstart = time.time()
+            if db_map.get(url):
+                db_map[url] += 1
+            else:
+                db_map[url] = 1
             
-            conn = psycopg2.connect(url, connect_timeout=timeout)
-            curs = conn.cursor()
-            curs.execute('select max(sub_id) from substance;')
-            max = curs.fetchone()[0]
-            print(max)
-            curs.execute(
-                ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
-            )
-            
-            res = curs.fetchall()
-            print(res)
-            result.append(res)
-            total += len(res)
-            if(total >= count):
-                break
-            conn.close()
-        except:
-            print()
-    if total < count:
-        getRandom(count - total, file_type)
+        for url in db_map:
+            limit = db_map[url]
+            try:
+                url = random.choices(population, distribution)[0]
+                dbcount+=1
+                print(url)
+                tstart = time.time()
+                
+                conn = psycopg2.connect(url, connect_timeout=timeout)
+                curs = conn.cursor()
+                curs.execute('select max(sub_id) from substance;')
+                max = curs.fetchone()[0]
+                print(max)
+                curs.execute(
+                    ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
+                )
+                
+                res = curs.fetchall()
+                print(res)
+                result.append(res)
+                total += len(res)
+                if(total >= count):
+                    break
+                conn.close()
+            except:
+                print()
+        
+        count = count-total
         
     print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))
     results = []         
