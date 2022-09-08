@@ -56,7 +56,6 @@ def getResult(task):
     
     return list20, list22, missing, logs
 
-
 @application.route('/search/result', methods=['GET'])
 def search_result_zinc():
         if request.method == 'GET':
@@ -64,10 +63,10 @@ def search_result_zinc():
             task = AsyncResult(data)
        
             if task.status == "PROGRESS" or task.status == "PENDING":
+                
                 return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false', logs='')
             else:
-                list20, list22, missing, logs = getResult(task)
-                
+                list20, list22, missing, logs = getResult(task)       
                 
                 if(len(list22) == 0 and len(list20) == 0):
                     return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
@@ -81,7 +80,6 @@ class SearchJobSupplier(Resource):
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         codes = file + textDataList
         codes = [code for code in codes if code != '']
- 
     
         try:
             task = vendorSearch.delay(codes)
@@ -429,7 +427,7 @@ def vendorSearch(vendor_ids):
     
     
 @celery.task
-def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
+def getSubstanceList(zinc20, zinc_ids, get_vendors=False):
     t_start = time.time()
     logs = []
     current_task.update_state(state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
@@ -617,6 +615,8 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
         tranches_internal_rev = { t[1] : t[0] for t in tranches_internal.items() }
         
     results = search_curs.fetchmany(5000)
+    print(results)
+    print("here")
     while len(results) > 0:
         for result in results:
             smiles          = result[0]

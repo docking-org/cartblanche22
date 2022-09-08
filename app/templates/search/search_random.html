@@ -52,34 +52,12 @@
             <div class="panel-body">
                 <form id='data' action="" method="POST" class="form-inline">
                     <div class="form-group">
+                        <label for="fname">Number of molecules:</label>
+                        <input name="amount" class="form-control" id="amountformat" />
 
-                        <select name="amount" class="btn btn-info" id="amountformat">
-                            <option value="100" id="amount-100" selected>
-                                100
-                            </option>
-                            <option value="500" id="amount-500">
-                                500
-                            </option>
-                            <option value="1000" id="amount-1000">
-                                1000
-                            </option>
-                            <option value="5000" id="amount-5000">
-                                5000
-                            </option>
-                            <option value="10000" id="amount-10000">
-                                10000
-                            </option>
-                            {#                           <option value="50000" id="amount-50000" >#}
-                            {#                                           50000#}
-                            {#                                        </option>#}
-                            {#                            <option value="100000" id="amount-100000" >#}
-                            {#                                           100000#}
-                            {#                                        </option>#}
-                            {#                           <option value="500000" id="amount-500000" >#}
-                            {#                                           500000#}
-                            {#                                        </option>#}
-
-                        </select>
+                        <br><br>
+                        <label for="fname">Output Format:</label>
+                        
                         <select name="format" class="btn btn-info" id="format">
                             <option value="txt" id="format-txt" selected>
                                 .txt
@@ -91,6 +69,8 @@
                                 .json
                             </option>
                         </select>
+                        <br>
+                        <br>
                         <button class="btn btn-primary" type="submit">
                             <i class="glyphicon glyphicon-download-alt"></i>
                             Download
