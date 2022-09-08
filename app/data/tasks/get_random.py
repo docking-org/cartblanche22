@@ -53,7 +53,7 @@ def getRandom(count, file_type = None, timeout=10):
     population, distribution = getDistribution()    
     db_map = {}
     
-    for i in range(count):
+    for i in range(int(count)):
         url = random.choices(population, distribution)[0]
         if db_map.get(url):
             db_map[url] += 1
