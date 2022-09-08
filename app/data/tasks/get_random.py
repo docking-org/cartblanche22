@@ -54,25 +54,28 @@ def getRandom(count, file_type = None, timeout=10):
     
     
     while total < int(count):
-        url = random.choices(population, distribution)[0]
-        dbcount+=1
-        print(url)
-        tstart = time.time()
-        
-        conn = psycopg2.connect(url, connect_timeout=timeout)
-        curs = conn.cursor()
-        curs.execute('select max(sub_id) from substance;')
-        max = curs.fetchone()[0]
-        print(max)
-        curs.execute(
-            ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
-        )
-        
-        res = curs.fetchall()
-        print(res)
-        result.append(res)
-        total += len(res)
-        conn.close()
+        try:
+            url = random.choices(population, distribution)[0]
+            dbcount+=1
+            print(url)
+            tstart = time.time()
+            
+            conn = psycopg2.connect(url, connect_timeout=timeout)
+            curs = conn.cursor()
+            curs.execute('select max(sub_id) from substance;')
+            max = curs.fetchone()[0]
+            print(max)
+            curs.execute(
+                ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
+            )
+            
+            res = curs.fetchall()
+            print(res)
+            result.append(res)
+            total += len(res)
+            conn.close()
+        except:
+            print()
 
     print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))
     results = []         
