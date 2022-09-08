@@ -100,12 +100,12 @@ def getRandom(count, file_type = None, timeout=10):
                 sub = (10 - len(sub)) * "0" + sub
                 molecule['zincid'] = "ZINC" + h + p + sub
                 molecule['SMILES'] = i[1]
+                if len(results) < int(count):
+                    results.append(molecule)
                 
-                results.append(molecule)
+        to_pull = to_pull - len(results)
                 
-        to_pull = to_pull - total
-                
-    print(("retrieved {count} results across {dbcount} databases").format(count = total, dbcount= dbcount))      
+    print(("retrieved {count} results across {dbcount} databases").format(count = len(results), dbcount= dbcount))      
     random.shuffle(results)
     
     if(file_type == "csv"):
