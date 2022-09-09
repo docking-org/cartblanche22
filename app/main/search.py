@@ -1,3 +1,4 @@
+from unicodedata import category
 from gevent import monkey
 from celery.execute import send_task
 from celery.result import AsyncResult
@@ -320,13 +321,15 @@ def getZincData(identifier):
         prices = []
         if data.get('catalogs'):
             catalogs = data['catalogs']
-            print(catalogs)
-       
        
             for i in range(len(catalogs)):
                 c = catalogs[i]
                 s = c['catalog_name'].lower()
-                prices.append(DefaultPrices.query.filter_by(short_name=s, organization=role).first())
+               
+                price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
+                if price:
+                    prices.append(price)
+   
                 # if 'mcule' in s:
                 #     prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
                 # elif 'wuxi' in s or 'w' in s:
