@@ -23,6 +23,7 @@
             $('#addItem').show()
             $('#deleteItem').hide()
         }
+        
         let supplier_codes = JSON.parse('{{data.supplier_code|tojson}}')
         let catalogs = JSON.parse('{{ data.catalogs|tojson }}')
         let identifier = JSON.parse('{{ identifier|tojson }}')
