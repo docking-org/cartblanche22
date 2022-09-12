@@ -40,19 +40,18 @@
 
     <div class="row" id="supplierSearchInput">
         <div class="panel panel-info">
-            <div class="panel-heading">Search by Supplier Codes</div>
+            <div class="panel-heading">Search by Supplier Codes, one code per line</div>
             <div class="panel-body">
 
                 <form id="data" method="post" enctype="multipart/form-data" action="/searchJobSupplier">
                     <div class="form-group">
-                        <label for="supplierTextarea">One code per Line</label>
+                      
                         
                         <textarea id="supplierTextarea" class="form-control" rows="6" cols="20"
                                   placeholder="Supplier Codes" name="supplierTextarea"></textarea>
                     </div>
-                    <h5>OR Upload a File</h5>
                     <div class="form-group">
-                        <label for="supplierfile">Select a file (.txt only):</label>
+                        <label for="supplierfile">OR Upload a File (.txt only):</label>
                         <input type="file" id="supplierfile" name = "supplierfile"
                                 class="form-control" accept=".txt">
                     </div>
