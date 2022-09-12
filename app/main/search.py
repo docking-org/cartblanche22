@@ -1,3 +1,4 @@
+from unicodedata import category
 from gevent import monkey
 from celery.execute import send_task
 from celery.result import AsyncResult
@@ -317,26 +318,29 @@ def getZincData(identifier):
         data= res['zinc22']["found"][0]
         print("here")
         print(data)
-        
-        catalogs = data['catalogs']
-        print(catalogs)
         prices = []
+        if data.get('catalogs'):
+            catalogs = data['catalogs']
        
-        for i in range(len(catalogs)):
-            c = catalogs[i]
-            s = c['catalog_name'].lower()
-            prices.append(DefaultPrices.query.filter_by(short_name=s, organization=role).first())
-            # if 'mcule' in s:
-            #     prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-            # elif 'wuxi' in s or 'w' in s:
-            #     prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
-            # elif 's' in s:
-            #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
-            # elif 'm' in s:
-            #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
-            # else:
-            #     pass
-            #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+            for i in range(len(catalogs)):
+                c = catalogs[i]
+                s = c['catalog_name'].lower()
+               
+                price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
+                if price:
+                    prices.append(price)
+   
+                # if 'mcule' in s:
+                #     prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+                # elif 'wuxi' in s or 'w' in s:
+                #     prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
+                # elif 's' in s:
+                #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
+                # elif 'm' in s:
+                #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
+                # else:
+                #     pass
+                #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
         smile = data['smiles']
         data['zinc20']= False
         data['supplier']= []
