@@ -116,10 +116,10 @@ def getRandom(subset, count, file_type = None, timeout=10):
     
     if(file_type == "csv"):
         res = pd.DataFrame(results)
-        return res.to_csv(encoding='utf-8', index=False, cols=['SMILES','zincid','tranche'])
+        return res.to_csv(encoding='utf-8', index=False, columns=['SMILES','zincid','tranche'])
     elif(file_type == "txt"):
         res = pd.DataFrame(results)
-        return res.to_csv(encoding='utf-8', index=False, sep="\t", cols=['SMILES','zincid','tranche'])
+        return res.to_csv(encoding='utf-8', index=False, sep="\t", columns=['SMILES','zincid','tranche'])
         
     return results
             
