@@ -158,8 +158,6 @@
             if(num < 0){
                 currentPage = 0;
             }
-
-            
             
             var page_numbers = document.getElementById('page_numbers');
             var init = document.getElementById('previousPage');
@@ -256,53 +254,60 @@
         function get_progress(){
             $.ajax({
                 url: "/search/progress?task="+params.task,
-                async: true
-            }).success(function(result){
-                console.log(result)
-                if(result.ready === 'true'){
-                    clearInterval(progressRequest);
-                    
-                    var bar = document.getElementById('search_progress');
-                    bar.style.display = "none";
-                    
-                    datas22 = result.data22;
-                    missing22 = result.missing22;
-                    datas20 = result.data20;
-                    searchLogs = result.logs;
-
-                    lastPage = parseInt(datas22.length / pageLimit);
-                    document.getElementById("22resultcount").innerHTML = datas22.length + " results"; 
-                    document.getElementById("20resultcount").innerHTML = datas20.length + " results";
-
-                    if (datas22 == null){
-                        datas22 = []
+                async: true,
+                statusCode: {
+                    404: function() {
+                        location.reload();
                     }
-                    if (datas20 == null){
-                        datas20 = []
-                    }
+                },
+                success : function(result){
+                            console.log(result)
+                            if(result.ready === 'true'){
+                                clearInterval(progressRequest);
+                                
+                                var bar = document.getElementById('search_progress');
+                                bar.style.display = "none";
+                                
+                                datas22 = result.data22;
+                                missing22 = result.missing22;
+                                datas20 = result.data20;
+                                searchLogs = result.logs;
 
-                    if(searchLogs.length !== 0){
-                        $('#searchLogs').html(searchLogs.join('\n'));
-                    }
+                                lastPage = parseInt(datas22.length / pageLimit);
+                                document.getElementById("22resultcount").innerHTML = datas22.length + " results"; 
+                                document.getElementById("20resultcount").innerHTML = datas20.length + " results";
 
-                    if(missing22.length !== 0){
-                        document.getElementById("22missingcount").style.display = "";
-                        document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
-                        $('#missing-list').html(missing22.join('\n'));
-                    }  
-                    addAddedClass();
-                    changePage(0);
-                  
+                                if (datas22 == null){
+                                    datas22 = []
+                                }
+                                if (datas20 == null){
+                                    datas20 = []
+                                }
+
+                                if(searchLogs.length !== 0){
+                                    $('#searchLogs').html(searchLogs.join('\n'));
+                                }
+
+                                if(missing22.length !== 0){
+                                    document.getElementById("22missingcount").style.display = "";
+                                    document.getElementById("22missingcount").innerHTML = missing22.length + " not found";
+                                    $('#missing-list').html(missing22.join('\n'));
+                                }  
+                                addAddedClass();
+                                changePage(0);
+                            
+                            }
+                            else{
+                                progress = Math.round(result.progress*100);
+                                console.log(progress)
+                                var bar = document.getElementById('progress');
+                                bar.setAttribute("aria-valuenow", progress);
+                                bar.style.width = progress+"%";
+                                bar.innerHTML= progress+"%";
+                            }
+               
                 }
-                else{
-                    progress = Math.round(result.progress*100);
-                    console.log(progress)
-                    var bar = document.getElementById('progress');
-                    bar.setAttribute("aria-valuenow", progress);
-                    bar.style.width = progress+"%";
-                    bar.innerHTML= progress+"%";
-                }
-            });            
+             });            
         }
         
         let ready = {{ready}};

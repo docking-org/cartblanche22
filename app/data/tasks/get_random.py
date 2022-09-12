@@ -116,16 +116,13 @@ def getRandom(subset, count, file_type = None, timeout=10):
     
     if(file_type == "csv"):
         res = pd.DataFrame(results)
-        return res.to_csv(encoding='utf-8', index=False)
+        return res.to_csv(encoding='utf-8', index=False, columns=['SMILES','zincid','tranche'])
     elif(file_type == "txt"):
         res = pd.DataFrame(results)
-        return res.to_csv(encoding='utf-8', index=False, sep=" ")
+        return res.to_csv(encoding='utf-8', index=False, sep="\t", columns=['SMILES','zincid','tranche'])
         
     return results
             
-#  tstart = time.time()
-#     conn = psycopg2.connect(dsn, connect_timeout=timeout)
-#     curs = conn.cursor()
 subsets = {
     "lead-like": [(17, 25), 350]
 }
@@ -137,6 +134,7 @@ def getDistribution(subset=None):
     config_curs.execute("select tranche, host, port from tranche_mappings")
     tranche_map = {}
     db_map = {}
+    
     for result in config_curs.fetchall():
         print(result)
         tranche = result[0]
