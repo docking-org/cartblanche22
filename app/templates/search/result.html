@@ -169,10 +169,10 @@
             
             for(let i = currentPage + 2; i > currentPage - 4; i --){
                 element = document.createElement("li");
-                console.log(i);
+             
               
                 if( (i >= 0) && (i < lastPage+1)){
-                    console.log("hi")
+              
                     element.classList.add("page-item");
                     element.classList.add("number");
                     element.setAttribute("page-number", i+1);

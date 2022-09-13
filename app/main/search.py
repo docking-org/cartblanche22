@@ -296,7 +296,7 @@ def searchZinc(identifier):
    
     # using celery zincid search here
     data, res, smile, prices = getZincData(identifier)
-    print(data)
+    
     if data:
         return render_template('molecule/mol_index.html', data=data, prices=prices, 
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
@@ -341,7 +341,12 @@ def getZincData(identifier):
                 # else:
                 #     pass
                 #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-        smile = data['smiles']
+        
+        smile = data['smiles'].encode('ascii')
+        smile = smile.replace(b'\x01', b'\\1')
+        smile = smile.decode()
+        data['smiles'] = smile
+        
         data['zinc20']= False
         data['supplier']= []
         return data, res, smile, prices
