@@ -40,19 +40,18 @@
 
     <div class="row" id="zincSearchInput2">
         <div class="panel panel-info">
-            <div class="panel-heading">Search by ZINC identifier</div>
+            <div class="panel-heading">Search by ZINC identifier, one per line</div>
             <div class="panel-body">
 
                 <form id="data" method="post" enctype="multipart/form-data" action="/searchJobSubstance">
                     <div class="form-group">
-                        <label for="myTextarea">One Identifier per Line</label>
+                  
                         
                         <textarea id="myTextarea" class="form-control" rows="6" cols="20"
                                   placeholder="ZINC IDs" name="myTextarea"></textarea>
                     </div>
-                    <h5>OR Upload a File</h5>
                     <div class="form-group">
-                        <label for="zincfile">Select a file (.txt only):</label>
+                        <label for="zincfile">OR Upload a File (.txt only):</label>
                         <input type="file" id="zincfile" name = "zincfile"
                                 class="form-control" accept=".txt">
                     </div>
@@ -67,8 +66,8 @@
     </div>
     <div class="row" id="desc">
     <p>You can get result with different formats.
-            If you want to specify output fields, you can add output_fields. Below example it will return only smiles, zinc_id. If output_fields not specified
-            it returns with all possible fields. Please note that there are always tranche and zinc_id fields by default.
+            If you want to specify output fields, you can add output_fields. The example below returns only smiles, zinc_id by default. If output_fields are not specified
+            , all possible fields are returned. Please note that there are always smiles and zinc_id fields by default.
             </p>
         <h4>CURL commands for searching single ZincID</h4>
         <p>Example:
