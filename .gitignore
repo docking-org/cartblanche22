@@ -53,7 +53,7 @@ nosetests.xml
 coverage.xml
 *,cover
 
-
+dump.rdb
 
 # Translations
 *.mo

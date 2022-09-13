@@ -35,8 +35,7 @@ def search_view():
 @application.route('/search/byzincid', methods=["GET", "POST"])
 def search_byzincid():
     if request.method == "GET":
-        text = Markup('If you encounter molecule(s) that won\'t look up, <br> \
-                      contact ben@tingle.org, ccing khtang015@gmail.com and josecastanon4@gmail.com <br> <br>' \
+        text = Markup('Please contact jjiteam@googlegroups.com with molecules that won\'t look up. ' \
                       "For more information and updates, <a href=\"https://wiki.docking.org/index.php/Legacy_IDs_in_ZINC22\">check the docking wiki</a>.")
         
         flash(text)
@@ -156,8 +155,7 @@ def search_bysmiles():
 @application.route('/search/bysupplier', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
-        text = Markup('If you encounter supplier code(s) that won\'t look up, <br> \
-                      contact ben@tingle.org, ccing khtang015@gmail.com and josecastanon4@gmail.com <br> <br>' \
+        text = Markup('Please contact jjiteam@googlegroups.com with molecules that won\'t look up. ' \
                       "For more information and updates, <a href=\"https://wiki.docking.org/index.php/Legacy_IDs_in_ZINC22\">check the docking wiki</a>.")
         
         flash(text)
@@ -296,7 +294,7 @@ def searchZinc(identifier):
    
     # using celery zincid search here
     data, res, smile, prices = getZincData(identifier)
-    print(data)
+    
     if data:
         return render_template('molecule/mol_index.html', data=data, prices=prices, 
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
@@ -315,21 +313,27 @@ def getZincData(identifier):
         else:
             role = 'public'
         
-        data= res['zinc22']["found"][0]
         print("here")
-        print(data)
+        print(res)
+        data= res['zinc22']["found"][0]
+        
+        
+        
         prices = []
+        
         if data.get('catalogs'):
             catalogs = data['catalogs']
-       
+           
             for i in range(len(catalogs)):
                 c = catalogs[i]
+                
                 s = c['catalog_name'].lower()
                
                 price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
+                print(price)
                 if price:
                     prices.append(price)
-   
+
                 # if 'mcule' in s:
                 #     prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
                 # elif 'wuxi' in s or 'w' in s:
@@ -341,7 +345,12 @@ def getZincData(identifier):
                 # else:
                 #     pass
                 #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-        smile = data['smiles']
+        
+        smile = data['smiles'].encode('ascii')
+        smile = smile.replace(b'\x01', b'\\1')
+        smile = smile.decode()
+        data['smiles'] = smile
+        
         data['zinc20']= False
         data['supplier']= []
         return data, res, smile, prices
