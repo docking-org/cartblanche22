@@ -62,8 +62,7 @@ def search_result_zinc():
             data = request.args.get("task")
             task = AsyncResult(data)
        
-            if task.status == "PROGRESS" or task.status == "PENDING":
-                
+            if task.status == "PROGRESS" or task.status == "PENDING" and task.info:
                 return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false', logs='')
             else:
                 list20, list22, missing, logs = getResult(task)       
@@ -617,11 +616,11 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
         tranches_internal_rev = { t[1] : t[0] for t in tranches_internal.items() }
         
     results = search_curs.fetchmany(5000)
-    print(results)
-    print("here")
+
     while len(results) > 0:
         for result in results:
-            smiles          = result[0]
+            print(result)
+            smiles          = result[0].encode('ascii').replace(b'\x01', b'\\1').decode()
             sub_id          = result[1]
             if smiles:  
                 if tranches_internal:

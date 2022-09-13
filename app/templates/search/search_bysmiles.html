@@ -22,18 +22,17 @@
 {% block app_content %}
     <div class="row" id="smilesSearchInput">
         <div class="panel panel-info">
-            <div class="panel-heading">Search by Smiles</div>
+            <div class="panel-heading">Search by Smiles, one per line</div>
             <div class="panel-body">
 
                 <form id="data" method="post" enctype="multipart/form-data" action="/searchSmiles">
                     <div class="form-group">
-                        <label for="smilesTextarea">One Smiles per Line</label>
                         <textarea id="smilesTextarea" class="form-control" rows="6" cols="20"
                                   placeholder="Smiles" name="smilesTextarea"></textarea>
                     </div>
-                    <h5>OR Upload a File</h5>
+                    
                     <div class="form-group">
-                        <label for="smilesfile">Select a file (.txt only):</label>
+                        <label for="smilesfile">OR Upload a file (.txt only):</label>
                         <input type="file" id="smilesfile" name = "smilesfile"
                                 class="form-control" accept=".txt">
                     </div>

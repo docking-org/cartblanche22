@@ -189,9 +189,22 @@ def scale_logp_value(logp):
         logp = 10 * int(10 * logp)
     return logp
 
+def cvt(ustring):
+    l = []
+    for uc in ustring:
+        l.append(chr(ord(uc) & 0xFF)) # low order byte
+        l.append(chr((ord(uc) >> 8) & 0xFF)) # high order byte
+    return ''.join(l)
+
 
 def get_compound_details(smiles):
+    smiles = smiles.encode('ascii')
+    smiles = smiles.replace(b'\x01', b'\\1')
+    smiles = smiles.decode()
+    
     m = MolFromSmiles(smiles)
+  
+    print("hiii")
     heavyAtoms = round(m.GetNumHeavyAtoms(), 3)
     mwt = round(MolWt(m), 3)
     logp = round(MolLogP(m), 3)
