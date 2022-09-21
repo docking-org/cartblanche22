@@ -620,7 +620,8 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
     while len(results) > 0:
         for result in results:
             print(result)
-            smiles          = result[0].encode('ascii').replace(b'\x01', b'\\1').decode()
+            #                 fix NoneType issue here
+            smiles          =(result[0] or '').encode('ascii').replace(b'\x01', b'\\1').decode()
             sub_id          = result[1]
             if smiles:  
                 if tranches_internal:
