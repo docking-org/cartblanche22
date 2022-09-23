@@ -204,7 +204,7 @@ def get_compound_details(smiles):
     
     m = MolFromSmiles(smiles)
   
-    print("hiii")
+ 
     heavyAtoms = round(m.GetNumHeavyAtoms(), 3)
     mwt = round(MolWt(m), 3)
     logp = round(MolLogP(m), 3)

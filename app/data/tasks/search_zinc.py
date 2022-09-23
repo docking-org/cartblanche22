@@ -556,8 +556,8 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
         result["logs"] = logs
         
         current_task.update_state(state='PROGRESS',meta={'current':total_length, 'projected':total_length, 'time_elapsed':t_elapsed})
-        print("here")
-        print(result['found'])
+
+      
         return {'zinc20':zinc20,'zinc22':result}
         
 
