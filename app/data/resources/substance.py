@@ -309,7 +309,10 @@ class Substances(Resource):
         output_fields = args.get('output_fields').split(',')
         lines = [x for x in re.split(r'\n|\r|(\r\n)', uploaded_file) if x!='' and x!= None]
         zinc22, zinc20, discarded = filter_zinc_ids(lines)
-        zinc20 = zinc20search(zinc20)
+        if len(zinc20) > 0:
+            zinc20 = zinc20search(zinc20)
+        else: 
+            zinc20 = []
         task = send_task('app.data.tasks.search_zinc.getSubstanceList', [zinc20, zinc22])
         task = AsyncResult(str(task))
     
@@ -317,15 +320,22 @@ class Substances(Resource):
         results = []
         results += data['zinc20']
         results += data['zinc22']['found']
-        
+    
+        data = []
+        if 'output_fields' in args and args.get('output_fields'):
+                output_fields = args.get('output_fields').replace(" ", "").split(",")
+                print(output_fields)
+                for i in results: 
+                    data.append({str(output_field):i[output_field] for output_field in output_fields})
+        print(data)
         if(file_type == "csv"):
-            res = pd.DataFrame(results)
+            res = pd.DataFrame(data)
             return res.to_csv(encoding='utf-8', index=False)
         elif(file_type == "txt"):
-            res = pd.DataFrame(results)
+            res = pd.DataFrame(data)
             return res.to_csv(encoding='utf-8', index=False, sep=" ")
         else:
-            return results
+            return data
     
 def chunks(lst, n):
     for i in range(0, len(lst), n):
