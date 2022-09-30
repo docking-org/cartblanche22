@@ -52,6 +52,9 @@ class SearchSmiles(Resource):
 def curlSearch(files): 
     task = search.delay(files)
     data = task.get()
+    task = getSubstanceList.delay([], data)
+    print(task)
+    data = task.get()
     return data
 
 @celery.task

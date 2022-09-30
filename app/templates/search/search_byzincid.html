@@ -143,56 +143,7 @@
         by default. If output_fields are not specified
         , all possible fields are returned. Please note that there are always smiles and zinc_id fields by default.
     </p>
-    /* <h4>CURL commands for searching single ZincID</h4>
-    <p>Example:
-        <code>curl https://cartblanche22.docking.org/search.txt -F zinc_id=ZINCms000002NiP3 -F output_fields='smiles,zinc_id'</code>
 
-    </p>
-    <table class="table table-bordered">
-        <tr>
-            <th class="col-md-4">Description</th>
-            <th class="col-md-5">Attributes</th>
-            <th class="col-md-3">Possible fields</th>
-        </tr>
-        <tr>
-            <td>To specify return format</td>
-            <td><code>curl https://cartblanche22.docking.org/search<i>.txt</i></code></td>
-            <td>
-                <ul>
-                    <li>.txt</li>
-                    <li>.csv</li>
-                    <li>.json</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td>To add search value</td>
-            <td> <code>-F zinc_id=<i>ZINCms000002NiP3</i></code></td>
-            <td>Any single zinc identifier</td>
-        </tr>
-        <tr>
-            <td>To specify output field
-                <br>
-
-                <small>If it doesn't defined, search will return all possible fields</small>
-            </td>
-            <td>
-                <code>-F output_fields=<i>'smiles,zinc_id'</i></code>
-            </td>
-            <td>
-                <ul>
-                    <li>catalogs</li>
-                    <li>smiles</li>
-                    <li>sub_id</li>
-                    <li>supplier_code</li>
-                    <li>tranche</li>
-                    <li>tranche_details</li>
-                    <li>zinc_id</li>
-                </ul>
-            </td>
-        </tr>
-
-    </table> */
     <h4>CURL commands for searching multiple ZincIDs</h4>
     <p>Example: <code>curl https://cartblanche22.docking.org/substances.txt -F
             zinc_id-in=@test.txt -F output_fields='smiles,zinc_id'
