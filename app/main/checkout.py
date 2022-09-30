@@ -1,6 +1,7 @@
 from flask import redirect, jsonify, request, url_for, session, render_template
 from app.main import application
 from flask_login import login_required, current_user
+from config import Config
 from app.main.punchout import processPunchoutOrder
 # from app.data.models.items import Items
 # from app.data.models.vendors import Vendors
@@ -33,4 +34,4 @@ def punchoutCheckout():
 
 @application.route("/directCheckout")
 def directCheckout():
-    return render_template('checkout/directCheckout.html')
+    return render_template('checkout/directCheckout.html', GOOGLE_API_KEY=Config.GOOGLE_API_KEY, GOOGLE_CLIENT_ID=Config.GOOGLE_CLIENT_ID )
