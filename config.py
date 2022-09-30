@@ -7,7 +7,7 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 class Config(object):
-        SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+        SECRET_KEY = os.environ.get('SECRET_KEY')
         SECURITY_PASSWORD_SALT = os.getenv("nemeltdavs")
         
         ZINC_SMALL_WORLD_SERVER = os.getenv('ZINC_SMALL_WORLD_SERVER') or "http://swp.docking.org"    
@@ -26,7 +26,8 @@ class Config(object):
 
         CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
         CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND') or 'redis://0.0.0.0:6379/0'
-        
+        GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+        GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
         SQLALCHEMY_BINDS = {
             # Server Database
             'zinc22_common': os.getenv('COMMON_DATABASE'),
