@@ -140,7 +140,7 @@ def filter_zinc_ids(ids):
         
         if identifier[0:1].upper() == 'C':
             identifier = identifier.replace('C', 'ZINC')
-            print(identifier)
+            
             
         if identifier[4:6] == '00':
             zinc20.append(identifier)
@@ -152,15 +152,15 @@ def filter_zinc_ids(ids):
             continue
 
         elif identifier[0:4].upper() == 'ZINC':
-            if(identifier[4:5].isalpha()):
+            if(identifier[4:5].isalnum()):
                 zinc22.append(identifier)
             else:
                 id = 'ZINC' + identifier.replace(identifier, (16 - len(identifier) + 1) * '0') + identifier[4:]
-                print(id)
                 zinc20.append(id)
             continue
         else:
             discarded.append(identifier)
+
     return zinc22, zinc20, discarded
 
 @celery.task
@@ -462,7 +462,6 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                 tf_input.write("{} {}\n".format(zinc_id, id_partition))
                 total_length += 1
             else:
-                print(zincid)
                 missing_file.write(zinc_id + "\n")    
         tf_input.flush()
         missing_file.flush()
@@ -620,10 +619,9 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
     while len(results) > 0:
         for result in results:
             print(result)
-            #                 fix NoneType issue here
-            smiles          =(result[0] or '').encode('ascii').replace(b'\x01', b'\\1').decode()
-            sub_id          = result[1]
-            if smiles:  
+            if result[0]:  
+                smiles          = result[0].encode('ascii').replace(b'\x01', b'\\1').decode()
+                sub_id          = result[1]
                 if tranches_internal:
                     tranche_id_orig = result[2]
                     tranche_name    = tranches_internal_rev[tranche_id_orig]
@@ -647,13 +645,14 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
                             "p_num": tranche_name[3:]
                         },
                         "supplier_code": [supplier_codes], 
-                        "catalogs": [{"catalog_name": catalog}], 
+                        "catalogs": [{"catalog_name": catalog, "supplier_code": supplier_codes}], 
                         "tranche_details": tranche_details
                         }
                     else:
                         if catalog:
                             ids[zinc_id]["catalogs"].append({
-                                "catalog_name": catalog
+                                "catalog_name": catalog,
+                                "supplier_code": supplier_codes
                             })
                             ids[zinc_id]["supplier_code"].append(supplier_codes)
                 else:
