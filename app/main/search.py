@@ -1,3 +1,4 @@
+from traceback import print_tb
 from unicodedata import category
 from gevent import monkey
 from celery.execute import send_task
@@ -315,10 +316,7 @@ def getZincData(identifier):
   
         data= res['zinc22']["found"][0]
         
-        
-        
         prices = []
-        
         if data.get('catalogs'):
             catalogs = data['catalogs']
            
@@ -326,10 +324,15 @@ def getZincData(identifier):
                 c = catalogs[i]
                 
                 s = c['catalog_name'].lower()
-               
+                code = c['supplier_code']
+                
                 price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
-                print(price)
+             
                 if price:
+                    print(s)
+                    print(code)
+             
+                    price.supplier_code = code
                     prices.append(price)
 
                 # if 'mcule' in s:
@@ -351,6 +354,7 @@ def getZincData(identifier):
         
         data['zinc20']= False
         data['supplier']= []
+        
         return data, res, smile, prices
 
 @application.route('/sw')

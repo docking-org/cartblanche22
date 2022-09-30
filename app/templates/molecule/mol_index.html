@@ -222,8 +222,8 @@
             <tr>
                 <td>{{ p.category_name }}</td>
                 <td><a target="_blank"
-                        href="https://zinc20.docking.org/substances/{{ data.supplier_code[loop.index0] }}">{{
-                        data.supplier_code[loop.index0] }} </a>
+                        href="https://zinc20.docking.org/substances/{{ p.supplier_code}}">{{
+                        p.supplier_code }} </a>
                 </td>
                 <td></td>
                 <td></td>
@@ -242,7 +242,7 @@
             {% else %}
             <tr>
                 <td>{{ p.category_name }}</td>
-                <td>{{ data.supplier_code[loop.index0] }} </td>
+                <td>{{ p.supplier_code }} </td>
                 <td> {{ p.quantity }} {{ p.unit }}</td>
                 <td> {{ p.shipping }} </td>
                 <td> {{ p.price }} </td>
