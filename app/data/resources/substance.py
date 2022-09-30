@@ -252,6 +252,7 @@ class Substance(Resource):
 
         if data:
             data.append({'search_info': search_info})
+            
             return jsonify(data)
 
         return {'message': 'Not found', 'search_info': search_info}, 404
