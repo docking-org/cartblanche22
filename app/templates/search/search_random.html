@@ -1,126 +1,128 @@
 {% extends 'base.html' %}
 {% block scripts %}
-    {{ super() }}
-    <script>
-        $("form#data").submit(function (e) {
-            $('#exampleModal').modal('show');
-            $('#spinnerbody').html("<i class='fa fa-spinner fa-pulse fa-x fa-fw'></i>We are working on it...")
-            $('#exampleModalLabel').html('Please wait...')
-            e.preventDefault();
-            var formData = new FormData();
-            let subset = $('#subset').val()
-            let amountformat = $('#amountformat').val()
-            let format = $('#format').val()
-            console.log(format,amountformat)
-            formData.append('count', amountformat);
-            $.ajax({
-                url: '/substance/random.' + format,
-                cache: false,
-                contentType: false,
-                processData: false,
-                data: [subset, amountformat, format],
-                type: 'POST',
-                success: function (response) {
-                    if (format == 'json') {
-                        var blob = new Blob([JSON.stringify(response)], {
-                            type: 'application/json',
-                        });
-                    } else {
-                        blob = new Blob([(response)], {type: 'text/' + format})
-                    }
-                    saveAs(blob, "random" + amountformat + '.' + format)
-                    $('#exampleModal').modal('hide');
-                },
-                statusCode: {
-                    404: function (responseObject, textStatus, jqXHR) {
-                        $('#exampleModalLabel').html("Failed")
-                        $('#spinnerbody').html("Error occured. Error code: " + error.status);
-                    },
-                },
-                error: function (error) {
-                    $('#exampleModalLabel').html("Failed")
-                    $('#spinnerbody').html("Error occured. Error code: " + error.status)
+{{ super() }}
+<script>
+    $("form#data").submit(function (e) {
+        $('#exampleModal').modal('show');
+        $('#spinnerbody').html("<i class='fa fa-spinner fa-pulse fa-x fa-fw'></i>We are working on it...")
+        $('#exampleModalLabel').html('Please wait...')
+        e.preventDefault();
+        var formData = new FormData();
+        let subset = $('#subset').val()
+        let amountformat = $('#amountformat').val()
+        let format = $('#format').val()
+        console.log(format, amountformat)
+        formData.append('count', amountformat);
+        formData.append('format', format);
+        formData.append('subset', subset);
+        $.ajax({
+            url: '/substance/random.' + format,
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            type: 'POST',
+            success: function (response) {
+                if (format == 'json') {
+                    var blob = new Blob([JSON.stringify(response)], {
+                        type: 'application/json',
+                    });
+                } else {
+                    blob = new Blob([(response)], { type: 'text/' + format })
                 }
-            });
+                saveAs(blob, "random" + amountformat + '.' + format)
+                $('#exampleModal').modal('hide');
+            },
+            statusCode: {
+                404: function (responseObject, textStatus, jqXHR) {
+                    $('#exampleModalLabel').html("Failed")
+                    $('#spinnerbody').html("Error occured. Error code: " + error.status);
+                },
+            },
+            error: function (error) {
+                $('#exampleModalLabel').html("Failed")
+                $('#spinnerbody').html("Error occured. Error code: " + error.status)
+            }
         });
-    </script>
+    });
+</script>
 {% endblock %}
 {% block app_content %}
-    <h3>Download random molecules</h3>
-    <div class="row">
-        <div class="panel panel-info">
-            <div class="panel-heading">Download</div>
-            <div class="panel-body">
-                <form id='data' action="" method="POST" class="form-inline">
-                    <div class="form-group">
-                        <label for="fname">Subset:</label>
-                        <select name="subset" class="btn btn-info" id="subset">
-                            <option value="none" id="subset-none" selected>
-                                None
-                            </option>
-                            <option value="lead-like" id="subset-lead-like" >
-                                Lead-like
-                            </option>
-                        </select>
-                        <br><br>
+<h3>Download random molecules</h3>
+<div class="row">
+    <div class="panel panel-info">
+        <div class="panel-heading">Download</div>
+        <div class="panel-body">
+            <form id='data' action="" method="POST" class="form-inline">
+                <div class="form-group">
+                    <label for="fname">Subset:</label>
+                    <select name="subset" class="btn btn-info" id="subset">
+                        <option value="none" id="subset-none" selected>
+                            None
+                        </option>
+                        <option value="lead-like" id="subset-lead-like">
+                            Lead-like
+                        </option>
+                    </select>
+                    <br><br>
 
-                        <label for="fname">Number of molecules:</label>
-                        <input name="amount" class="form-control" id="amountformat" />
+                    <label for="fname">Number of molecules:</label>
+                    <input name="amount" class="form-control" id="amountformat" />
 
-                        <br><br>
-                        <label for="fname">Output Format:</label>
-                        
-                        <select name="format" class="btn btn-info" id="format">
-                            <option value="txt" id="format-txt" selected>
-                                .txt
-                            </option>
-                            <option value="csv" id="format-csv">
-                                .csv
-                            </option>
-                            <option value="json" id="format-json">
-                                .json
-                            </option>
-                        </select>
-                        <br>
-                        <br>
-                        <button class="btn btn-primary" type="submit">
-                            <i class="glyphicon glyphicon-download-alt"></i>
-                            Download
-                        </button>
-                    </div>
-                </form>
-            </div>
+                    <br><br>
+                    <label for="fname">Output Format:</label>
+
+                    <select name="format" class="btn btn-info" id="format">
+                        <option value="txt" id="format-txt" selected>
+                            .txt
+                        </option>
+                        <option value="csv" id="format-csv">
+                            .csv
+                        </option>
+                        <option value="json" id="format-json">
+                            .json
+                        </option>
+                    </select>
+                    <br>
+                    <br>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="glyphicon glyphicon-download-alt"></i>
+                        Download
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="row">
-        <h4>CURL commands for downloading random smiles</h4>
-        <p>Below curl command returns a json, txt or csv file with all possible fields.
-        </p>
-        <p>to get .txt file: <code>
+</div>
+<div class="row">
+    <h4>CURL commands for downloading random smiles</h4>
+    <p>Below curl command returns a json, txt or csv file with all possible fields.
+    </p>
+    <p>to get .txt file: <code>
             curl https://cartblanche22.docking.org/substance/random.txt -F count=100
         </code></p>
-        <p>to get .json file: <code>
+    <p>to get .json file: <code>
             curl https://cartblanche22.docking.org/substance/random.json -F count=100
         </code></p>
-        <p>to get .csv file: <code>
+    <p>to get .csv file: <code>
             curl https://cartblanche22.docking.org/substance/random.csv -F count=100
         </code></p>
 
-    </div>
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h3 id="spinnerbody"><i class="fa fa-spinner fa-pulse fa-x fa-fw"></i> Searching...</h3>
-                </div>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h3 id="spinnerbody"><i class="fa fa-spinner fa-pulse fa-x fa-fw"></i> Searching...</h3>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

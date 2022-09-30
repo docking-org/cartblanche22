@@ -24,6 +24,16 @@ deploy-dev job:
                      -v /nfs/db4/smallworld-java:/export/db4/smallworld-java
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
+                     -e CELERY_BROKER_URL=${CELERY_BROKER_URL} 
+                     -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND} 
+                     -e COMMON_DATABASE=${COMMON_DATABASE} 
+                     -e MAIL_PASSWORD=${MAIL_PASSWORD} 
+                     -e MAIL_SERVER=${MAIL_SERVER} 
+                     -e MAIL_USERNAME=${MAIL_USERNAME} 
+                     -e SECRET_KEY=${SECRET_KEY} 
+                     -e TIN_DATABASE=${TIN_DATABASE} 
+                     -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER} 
+                     -e ZINC22_DATABASE=${ZINC22_DATABASE} 
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
        
 deploy-live job:
@@ -46,4 +56,14 @@ deploy-live job:
                      -v /export/db4/smallworld-java:/export/db4/smallworld-java
                      -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
                      -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
+                     -e CELERY_BROKER_URL=${CELERY_BROKER_URL} 
+                     -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND} 
+                     -e COMMON_DATABASE=${COMMON_DATABASE} 
+                     -e MAIL_PASSWORD=${MAIL_PASSWORD} 
+                     -e MAIL_SERVER=${MAIL_SERVER} 
+                     -e MAIL_USERNAME=${MAIL_USERNAME} 
+                     -e SECRET_KEY=${SECRET_KEY} 
+                     -e TIN_DATABASE=${TIN_DATABASE} 
+                     -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER} 
+                     -e ZINC22_DATABASE=${ZINC22_DATABASE} 
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}

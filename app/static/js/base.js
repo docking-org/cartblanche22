@@ -116,8 +116,12 @@ let shoppingCart = (function () {
                 let catalog = data.hasOwnProperty('catalogs') ? data.catalogs : [];
                 let supplier_codes = data.hasOwnProperty('supplier_code') ? data.supplier_code : [];
                 let smiles = data.hasOwnProperty('smiles' ) ? data.smiles : data.hitMappedSmiles;
-                let vendors = obj.getPossibleVendors(db, catalog, supplier_codes);
-                if(db === 'zinc20'){
+
+                let vendors;
+                if(db !== 'zinc20'){
+                    vendors = obj.getPossibleVendors(db, catalog, supplier_codes);
+                }
+                else{
                     vendors = catalog;
                 }
                 

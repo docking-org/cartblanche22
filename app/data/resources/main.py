@@ -381,7 +381,7 @@ class Smiles(Resource):
         
         #smileSearch = send_task('app.data.tasks.search_smiles.curlSearch', [files]) 
         data = curlSearch(files=files)
-     
+        data = data['zinc22']['found']
         if(file_type == "csv"):
             res = pd.DataFrame(data)
             return res.to_csv(encoding='utf-8', index=False)

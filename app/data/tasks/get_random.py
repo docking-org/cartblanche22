@@ -26,30 +26,18 @@ import psycopg2
 
 class GetRandomMolecules(Resource):
     def post(self, file_type=None):
-        if not request.form['count']:
-            data= request.data.decode().split(',')
-            print(data)
-            subset = data[0]
-            count = data[1]
-            file_type = data[2]
+        count = request.form['count']
+        if request.form.get('subset'):
+            subset = request.form['subset']
         else:
-            print
-            count = request.form['count']
-            if request.form.get('subset'):
-                subset = request.form['subset']
-            else:
-                subset = None
-            print(count)
-            print(subset)
-            
+            subset = None
+        
         result = []
-     
+        print("here")
         if subset == "none":
             subset = None
     
         result = getRandom(subset, count, file_type)
-            
-        
         return result
 
 
