@@ -1,6 +1,7 @@
 from traceback import print_tb
 from unicodedata import category
 from gevent import monkey
+from app.helpers.validation import get_basic_tranche, get_compound_details
 from celery.execute import send_task
 from celery.result import AsyncResult
 import socket
@@ -254,6 +255,7 @@ def searchZinc20(identifier):
                 max = item['substance_purchasable']
         result['smiles'] = smile
         c = catalogs[0]  
+        
         result['supplier'] = [{
             'assigned': True,
             'cat_name': c['name'],
@@ -265,10 +267,9 @@ def searchZinc20(identifier):
             'unit': "mg"
         }]
         result['catalogs'] = catalogs
-        result['tranche'] = 'here'
+        result['tranche'] = get_basic_tranche(smile)
         result['zinc20'] = true
-        result['tranche_details'] = {}
-        result['tranche_details']['inchi_key'] = data[0]['inchikey']
+        result['tranche_details'] = get_compound_details(smile)
         result['supplier_code'] = supplierCodes
         
         
@@ -277,8 +278,10 @@ def searchZinc20(identifier):
                 'short_name': c['short_name'],
                 'unit' :'10mg',
                 'price': '10.0',
-                'shipping': '6 weeks'
+                'shipping': '6 weeks',
+                'supplier_code': supplierCodes[0]
         }]
+        
           
        
         return render_template('molecule/mol_index.html', data=result, prices=prices,
