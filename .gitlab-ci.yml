@@ -24,9 +24,9 @@ deploy-dev job:
                 -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
                 -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
                 -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-                -e SMALLWORLD_MAP_PATH:${SMALLWORLD_MAP_PATH}
-                -e SMALLWORLD_JAR_PATH:${SMALLWORLD_JAR_PATH}
-                -e SWDIR:${SWDIR}
+                -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
+                -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
+                -e SWDIR=${SWDIR}
                 -e CELERY_BROKER_URL=${CELERY_BROKER_URL} 
                 -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND} 
                 -e COMMON_DATABASE=${COMMON_DATABASE} 
@@ -59,9 +59,9 @@ deploy-live job:
                      -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
                      -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
                      -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-                     -e SMALLWORLD_MAP_PATH:${SMALLWORLD_MAP_PATH}
-                     -e SMALLWORLD_JAR_PATH:${SMALLWORLD_JAR_PATH}
-                     -e SWDIR:${SWDIR}
+                     -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
+                     -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
+                     -e SWDIR=${SWDIR}
                      -e CELERY_BROKER_URL=${CELERY_BROKER_URL} 
                      -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND} 
                      -e COMMON_DATABASE=${COMMON_DATABASE} 
