@@ -16,6 +16,7 @@ from celery import group, chord
 from celery.result import AsyncResult
 from app.email_send import send_search_log
 from app.data.tasks.search_zinc import getSubstanceList
+from config import Config
 
 
 @application.route('/search/result_smiles', methods=['GET'])
@@ -73,8 +74,7 @@ def search(args, file_type=None):
         print(smilelist)
         tmp.write(smilelist.encode())
         tmp.flush()
-        res = subprocess.Popen("SWDIR=/nfs/db3/private_smallworld_4th_gen/ java -jar /export/db4/smallworld-java/sw.jar " \
-                            "sim -db /nfs/db3/private_smallworld_4th_gen/maps/zinc22-All.smi.anon.map -v -n0 -d {adist} -lup 0 -ldn 0 " \
+        res = subprocess.Popen(Config.SMALLWORLD_PATH + " -v -n0 -d {adist} -lup 0 -ldn 0 " \
                             "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles} | grep '={dist}'".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
         out, err = res.communicate()
         result = out.decode().split('\n')
