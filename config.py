@@ -23,7 +23,9 @@ class Config(object):
         ADMINS = [os.getenv('MAIL_USERNAME')]
 
         CELERY_IMPORTS = ("app.data.tasks.search_zinc", "app.data.tasks.search_smiles", "app.data.tasks.get_random" )
-        SMALLWORLD_PATH = os.getenv("SMALLWORLD_PATH")
+        SMALLWORLD_JAR_PATH = os.getenv("SMALLWORLD_JAR_PATH")
+        SMALLWORLD_MAP_PATH = os.getenv("SMALLWORLD_MAP_PATH")
+        SWDIR = os.getenv("SWDIR")
         CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
         CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND') or 'redis://0.0.0.0:6379/0'
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')

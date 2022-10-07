@@ -18,7 +18,6 @@ from app.email_send import send_search_log
 from app.data.tasks.search_zinc import getSubstanceList
 from config import Config
 
-
 @application.route('/search/result_smiles', methods=['GET'])
 def smiles_result():
     if request.method == 'GET':
@@ -74,7 +73,8 @@ def search(args, file_type=None):
         print(smilelist)
         tmp.write(smilelist.encode())
         tmp.flush()
-        res = subprocess.Popen(Config.SMALLWORLD_PATH + " -v -n0 -d {adist} -lup 0 -ldn 0 " \
+        res = subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
+                            "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v -n0 -d {adist} -lup 0 -ldn 0 " \
                             "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles} | grep '={dist}'".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
         out, err = res.communicate()
         result = out.decode().split('\n')
