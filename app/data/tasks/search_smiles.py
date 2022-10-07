@@ -64,8 +64,8 @@ def formatIds(args):
 @celery.task
 def search(args, file_type=None):   
     smilelist = args['smiles-in']
-    dist = 4 if args['dist'] > 4 else args['dist'] 
-    adist = 4 if args['adist'] > 4 else args['adist'] 
+    dist = '2' if int(args['dist']) > 2 else args['dist'] 
+    adist = '2' if int(args['adist']) > 2 else args['adist'] 
     
     result = []
 
