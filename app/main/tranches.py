@@ -11,21 +11,21 @@ from app.data.forms.tranchesForms import Download2DForm, Download3DForm
 
 def URIFormatter(hac, logp, format, add_url, charge, generation):
     if generation != '':
-        return "{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+        return "{base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
     else:
          return "{}{}{}/{}{}{}.{}".format(base_url, add_url, hac, hac, logp, charge, format)
 
 def WyntonFormatter(hac, logp, format, add_url, charge, generation):
-    return "/wynton/group/bks/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
+    return "/wynton/group/bks/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)
     
 def BKSLabFormatter(hac, logp, format, add_url, charge, generation):
-    return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def AWSFormatter(hac, logp, format, add_url, charge, generation):
-    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def OCIFormatter(hac, logp, format, add_url, charge, generation):
-    return "oci://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}/a".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idrvm4tkz2a8/b/ZINC/o//zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def DBFormatter(hac, logp, format, add_url, charge, generation):
     if generation != "":
@@ -201,11 +201,12 @@ def get3dfiles(gen, tranche, charge):
     #conn = psycopg2.connect(zinc22_common_url)
     curs = zinc22_common_conn.cursor()
 
-    curs.execute("select suffix from holdings_3d where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
+    curs.execute("select extra, suffix from holdings_3d_new where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
     file_results = []
     for r in curs.fetchall():
-        suffix = r[0]
-        file_results.append(suffix)
+        extra  = r[0]
+        suffix = r[1]
+        file_results.append((extra, suffix))
     return file_results
 
 
@@ -227,8 +228,8 @@ def tranches3dDownload():
             generation = tranche[0:1]
             charge = tranche[-1]
             prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
-            for suffix in get3dfiles(generation, hac+logp, charge):
-                yield prefix + f"/{hac}{logp}-{charge}-{suffix}.{format}\n"
+            for extra, suffix in get3dfiles(generation, hac+logp, charge):
+                yield prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{format}\n"
     
     def gen_all_rsyncs(tranches):
         for tranche in tranches:
