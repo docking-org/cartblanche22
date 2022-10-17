@@ -214,10 +214,12 @@ def get3dfiles(gen, tranche, charge):
 def tranches3dDownload():
     formData = Download3DForm(request.values)
     tranches_data = formData.tranches.data.split()
-    format = formData.format.data
+    dformat = formData.format.data
     using = formData.using.data
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
     add_url_3D = 'zinc22/3d/'
+
+    dformat = dformat.split()
 
     tranches_data = sorted(tranches_data)
 
@@ -227,9 +229,9 @@ def tranches3dDownload():
             logp = tranche[4:8]
             generation = tranche[0:1]
             charge = tranche[-1]
-            prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, format, add_url_3D, charge, generation)
+            prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, dformat, add_url_3D, charge, generation)
             for extra, suffix in get3dfiles(generation, hac+logp, charge):
-                yield prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{format}\n"
+                yield prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{dformat}\n"
     
     def gen_all_rsyncs(tranches):
         for tranche in tranches:
@@ -237,14 +239,14 @@ def tranches3dDownload():
             temp = sorted(data_, key = util_func)
             res = [list(ele) for i, ele in groupby(temp, util_func)]
             for x in res:
-                yield RsyncDownloader(x, format) + '\n'
+                yield RsyncDownloader(x, dformat) + '\n'
  
     tranches_iter = gen_all_tranches
 
     if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
         tranches_iter = gen_all_rsyncs
         
-    download_filename = 'ZINC22-downloader-3D-{}.{}'.format(format, using)
+    download_filename = 'ZINC22-downloader-3D-{}.{}'.format(dformat, using)
     response = Response(stream_with_context(tranches_iter(tranches_data)), mimetype=mimetype)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
     return response
