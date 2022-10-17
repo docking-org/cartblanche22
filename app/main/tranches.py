@@ -219,7 +219,7 @@ def tranches3dDownload():
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
     add_url_3D = 'zinc22/3d/'
 
-    dformat = dformat.split()
+    dformat = dformat.strip()
 
     tranches_data = sorted(tranches_data)
 
@@ -231,6 +231,8 @@ def tranches3dDownload():
             charge = tranche[-1]
             prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, dformat, add_url_3D, charge, generation)
             for extra, suffix in get3dfiles(generation, hac+logp, charge):
+                suffix = suffix.strip()
+                extra = extra.strip()
                 yield prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{dformat}\n"
     
     def gen_all_rsyncs(tranches):
