@@ -32,10 +32,14 @@ session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
 class Search(Resource):
     def getDataByID(self, args, file_type=None):
         zinc_id = args.get('zinc_id')
-        output_fields = args.get('output_fields').split(',')
+        
         
         result = {}
         data, res, smile, prices = getZincData(zinc_id)
+        
+        output_fields = args.get('output_fields')
+        output_fields = output_fields.split(',') if output_fields else list(data.keys())
+        
         for field in output_fields:
             result[field] = data[field]
         print(result)

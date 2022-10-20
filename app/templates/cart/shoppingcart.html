@@ -183,17 +183,17 @@
                         type: 'POST',
                         success: function (response) {
                             console.log('got response for ', cart[c].identifier)
-                            console.log(response.items[0])
+                            console.log(response.items)
                         },
 
                         error: function (error) {
                             {#console.log('calling zinc api from smile search', error)#}
                         },
                         complete: function (data) {
-                            console.log('data', data.responseJSON.items[0])
-                            if (data.status != 404 && data.responseJSON.items[0] != undefined) {
-                                let suppliers = data.responseJSON.items[0].supplier_code
-                                let catalogs = data.responseJSON.items[0].catalogs
+                            console.log('data', data.responseJSON.items)
+                            if (data.status != 404 && data.responseJSON.items != undefined) {
+                                let suppliers = data.responseJSON.items.supplier_code
+                                let catalogs = data.responseJSON.items.catalogs
                                 shoppingCart.assignvendors(cart[c].identifier, suppliers, catalogs)
                             }
                         },
@@ -223,14 +223,13 @@
                     error: function (error) {
                     },
                     complete: function (data) {
-                        if (data.status != 404 && data.responseJSON.items[0] != undefined) {
-                            let suppliers = data.responseJSON.items[0].supplier_code
-                            let catalogs = data.responseJSON.items[0].catalogs
+                        if (data.status != 404 && data.responseJSON.items != undefined) {
+                            let suppliers = data.responseJSON.items.supplier_code
+                            let catalogs = data.responseJSON.items.catalogs
                             shoppingCart.assignvendors(cart[c].identifier, suppliers, catalogs)
                         }
                     },
                 });
-
             }
             $(document).ajaxStop(function () {
                 $('#loadingModal').modal('hide');

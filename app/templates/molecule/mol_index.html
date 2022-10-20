@@ -228,16 +228,7 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>
-
-                    {# <button class="btn btn-info vendorBtn" #} {# data-catalog="{{ p.category_name }}" #} {#
-                        data-price="{{ p.price }}" #} {# data-quantity="{{ p.quantity }}" #} {# data-unit="{{ p.unit }}"
-                        #} {# data-shipping="{{ p.shipping }}" #} {# data-id="{{ data.zinc_id }}" #} {# data-db="zinc22"
-                        #} {# data-smile=" {{ data.smiles }}" #} {# onclick="toggleVendor(this)">#}
-                        {# <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>#}
-                        {# Add to cart#}
-                        {# </button>#}
-                </td>
+                
             </tr>
             {% else %}
             <tr>
@@ -246,23 +237,6 @@
                 <td> {{ p.quantity }} {{ p.unit }}</td>
                 <td> {{ p.shipping }} </td>
                 <td> {{ p.price }} </td>
-
-                <!-- <td>
-
-                            {#                        <button class="btn btn-info vendorBtn"#}
-                            {#                                data-catalog="{{ p.category_name }}"#}
-                            {#                                data-price="{{ p.price }}"#}
-                            {#                                data-quantity="{{ p.quantity }}"#}
-                            {#                                data-unit="{{ p.unit }}"#}
-                            {#                                data-shipping="{{ p.shipping }}"#}
-                            {#                                data-id="{{ data.zinc_id }}"#}
-                            {#                                data-db = "zinc22"#}
-                            {#                                data-smile =" {{ data.smiles }}"#}
-                            {#                                onclick="toggleVendor(this)">#}
-                            {#                            <span class="glyphicon glyphicon-shopping-cart" style="font-size:16px"></span>#}
-                            {#                            Add to cart#}
-                            {#                        </button>#}
-                        </td> -->
             </tr>
             {% endif %}
             {% endfor %}

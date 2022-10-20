@@ -33,6 +33,13 @@
             toggle_scoring();
             db_maps($('#dbsel'), maps);
             toggle_scoring();
+
+            var input = document.getElementById("smiles-in");
+            input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                refresh();
+            }   
         })
     </script>
     <script type="text/javascript">

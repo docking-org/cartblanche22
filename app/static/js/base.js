@@ -118,6 +118,7 @@ let shoppingCart = (function () {
                 let smiles = data.hasOwnProperty('smiles' ) ? data.smiles : data.hitMappedSmiles;
 
                 let vendors;
+                
                 if(db !== 'zinc20'){
                     vendors = obj.getPossibleVendors(db, catalog, supplier_codes);
                 }
@@ -160,6 +161,7 @@ let shoppingCart = (function () {
                 return;
             }
             let vendors;
+
             if(db !== 'zinc20'){
                 vendors = obj.getPossibleVendors(db, catalog, supplier);
             }

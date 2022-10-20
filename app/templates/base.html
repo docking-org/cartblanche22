@@ -151,11 +151,18 @@
                             </ul>
                         </li>
                     {% endif %}
-                    <li>
-                        <a href="{{ url_for('main.arthor') }}" data-toggle="tooltip" data-placement="bottom"
-                           title="Arthor : Search by substructure or pattern (SMARTS)">Substructure
-                        </a>
-                    </li>
+                    <li class="dropdown" >
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle">
+                                Patterns
+                                <span
+                                        class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('main.arthor') }}">Public</a></li>
+                                <li><a href="{{ url_for('main.arthorp') }}">Private</a></li>
+                            </ul>
+                        </li>
+                    
+                    
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle"> Lookup <span
                             class="caret"></span></a>
                         <ul class="dropdown-menu">

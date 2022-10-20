@@ -25,13 +25,13 @@ var fromSmiInput = false;
 $(document).ready(function () {
 
 
-	// $.get(swp_server + '/search/config', function (res) {
-	// 	config = res;
-	// 	if (!config.WebApp.SearchAsYouDraw)
-	// 		$('.swopt').removeClass('searchasyoudraw');
-	// 	add_scoretype_selection(config);
-	// 	toggle_scoring();
-	// });
+    // $.get(swp_server + '/search/config', function (res) {
+    // 	config = res;
+    // 	if (!config.WebApp.SearchAsYouDraw)
+    // 		$('.swopt').removeClass('searchasyoudraw');
+    // 	add_scoretype_selection(config);
+    // 	toggle_scoring();
+    // });
 });
 
 
@@ -103,11 +103,11 @@ function toggle_align() {
 /* Db Info */
 function db_maps(select, data) {
     for (var key in data) {
-            datasets[key] = data[key];
-            if (data[key].enabled === true && data[key].status === 'Available') {
-                select.append('<option value=' + key + '>' + data[key].name + '</option>');
-            }
+        datasets[key] = data[key];
+        if (data[key].enabled === true && data[key].status === 'Available') {
+            select.append('<option value=' + key + '>' + data[key].name + '</option>');
         }
+    }
     // $.get('https://cors-anywhere.herokuapp.com/' + swp_server + '/search/maps', function (data) {
     //
     // });
@@ -347,7 +347,7 @@ function newSearch(smiles) {
             '&tdn=' + search_state.tdn + '&tup=' + search_state.tup + '&rdn=' + search_state.rdn +
             '&rup=' + search_state.rup + '&ldn=' + search_state.ldn + '&lup=' + search_state.lup +
             '&maj=' + search_state.maj + '&min=' + search_state.min + '&sub=' + search_state.sub +
-            '&scores=' + search_state.scores, {withCredentials:true});
+            '&scores=' + search_state.scores, { withCredentials: true });
         $('#statusspan').html("Waiting...");
     } else {
         console.log("ERROR: Browser does not support server-sent events");
@@ -607,19 +607,19 @@ function hit_renderer(data, type, row) {
     button.attr('onclick', 'toggleCart(this)');
     button.attr('class', 'btn btn-info');
     let cart = JSON.parse(localStorage.getItem('cart'))
-  //   if(cart==null){
-  //   cart = []
-  // }
-  //   let items = []
-  //   for (i = 0; i < cart.length; i++) {
-  //       items.push(cart[i].identifier)
-  //   }
-  //   if (items.includes(id)) {
-  //       button.html('Remove')
-  //       button.attr('class', 'btn btn-danger')
-  //   }
-     if(shoppingCart.inCart(id)){
-                button.html('Remove')
+    //   if(cart==null){
+    //   cart = []
+    // }
+    //   let items = []
+    //   for (i = 0; i < cart.length; i++) {
+    //       items.push(cart[i].identifier)
+    //   }
+    //   if (items.includes(id)) {
+    //       button.html('Remove')
+    //       button.attr('class', 'btn btn-danger')
+    //   }
+    if (shoppingCart.inCart(id)) {
+        button.html('Remove')
         button.attr('class', 'btn btn-danger')
 
     }
@@ -629,7 +629,7 @@ function hit_renderer(data, type, row) {
         //div.append("<b><a target='_blank' href='http://zinc15.docking.org/substances/"+id+"'>" + id + "</a></b>");
         var checkZinc = id.toString()
         if (checkZinc.substring(0, 4) == 'ZINC') {
-            div.append("<b><a target='_blank' href='https://zinc15.docking.org/substances/" + id + "'>" + id + "</a></b>");
+            div.append("<b><a target='_blank' href='/searchZinc/" + id + "'>" + id + "</a></b>");
         } else {
             div.append("<b>" + id + "</b>");
         }

@@ -223,6 +223,27 @@ def search_smiles_vendor():
 
 @application.route('/searchZinc20/<identifier>')
 def searchZinc20(identifier):
+    data, res, smile, prices = getZinc20Data(identifier)
+     
+    if data:    
+        return render_template('molecule/mol_index.html', data=data, prices=prices,
+                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
+    else:
+        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
+
+@application.route('/searchZinc/<identifier>')
+def searchZinc(identifier):
+    data, res, smile, prices = getZincData(identifier)
+    
+    if data:
+        return render_template('molecule/mol_index.html', data=data, prices=prices, 
+                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
+    else:
+        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
+        
+def getZinc20Data(identifier):
     zinc20_files = {
             'zinc_id-in': [identifier],
             'output_fields': "zinc_id supplier_code smiles substance_purchasable catalog inchikey"
@@ -281,30 +302,7 @@ def searchZinc20(identifier):
                 'shipping': '6 weeks',
                 'supplier_code': supplierCodes[0]
         }]
-        
-          
-       
-        return render_template('molecule/mol_index.html', data=result, prices=prices,
-                               smile=urllib.parse.quote(smile), response=response, identifier=identifier, zinc20_stock='zinc20_stock')
-    else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
-                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
-
-@application.route('/searchZinc/<identifier>')
-def searchZinc(identifier):
-    # files = {
-    #     'zinc_id-in': [identifier]
-    # }
-   
-    # using celery zincid search here
-    data, res, smile, prices = getZincData(identifier)
-    
-    if data:
-        return render_template('molecule/mol_index.html', data=data, prices=prices, 
-                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
-    else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
-                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
+        return result, result, smile, prices
 
 def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[], [identifier]]) 
@@ -331,24 +329,17 @@ def getZincData(identifier):
                 
                 price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
              
-                if price:
-                    print(s)
-                    print(code)
-             
+                if price:    
                     price.supplier_code = code
                     prices.append(price)
 
-                # if 'mcule' in s:
-                #     prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
-                # elif 'wuxi' in s or 'w' in s:
-                #     prices.append(DefaultPrices.query.filter_by(category_name='wuxi', organization=role).first())
-                # elif 's' in s:
-                #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_S', organization=role).first())
-                # elif 'm' in s:
-                #     prices.append(DefaultPrices.query.filter_by(category_name='Enamine_M', organization=role).first())
-                # else:
-                #     pass
-                #     # prices.append(DefaultPrices.query.filter_by(category_name='mcule', organization=role).first())
+        #Some of the zinc22 mols are missing vendor data. In that case, use the Zinc20 results as backup.
+        if(len(prices) >= 1):
+            for price in prices:
+                if 'ZINC' not in price.supplier_code:
+                    break
+                else:
+                    return getZinc20Data(code)
         
         smile = data['smiles'].encode('ascii')
         smile = smile.replace(b'\x01', b'\\1')
@@ -394,3 +385,8 @@ def swc():
 @application.route('/arthor')
 def arthor():
     return render_template('search/arthor.html')
+
+@application.route('/arthorp')
+def arthorp():
+    return render_template('search/arthorp.html')
+
