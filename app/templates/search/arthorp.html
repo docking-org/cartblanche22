@@ -78,6 +78,7 @@
                                 .attr('onclick', 'setTable(this)')
                                 .attr('value', e.displayName).append(e.displayName);
                             if (i == 0)
+                                setTable($item);
                                 $item.addClass("selected");
                             $list.append($item);
                         });
