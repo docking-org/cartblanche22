@@ -138,7 +138,8 @@
                         </li>
                     {% else %}
                         <li class="dropdown" >
-                            <a href="#" data-toggle="dropdown" class="dropdown-toggle">
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle"  data-toggle="tooltip" data-placement="bottom"
+                               title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
                                 Similarity
                                 <span
                                         class="caret"></span></a>
@@ -151,11 +152,32 @@
                             </ul>
                         </li>
                     {% endif %}
-                    <li>
-                        <a href="{{ url_for('main.arthor') }}" data-toggle="tooltip" data-placement="bottom"
-                           title="Arthor : Search by substructure or pattern (SMARTS)">Substructure
-                        </a>
-                    </li>
+                    {% if current_user.is_anonymous %}
+                        <li>
+                            <a href="{{ url_for('main.arthor') }}" class="test"
+                               data-toggle="tooltip" data-placement="bottom"
+                               title="Arthor : Search by substructure or pattern (SMARTS)">
+                                Patterns
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="dropdown" >
+                            <li class="dropdown" >
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle" data-toggle="tooltip" data-placement="bottom"
+                               title="Arthor : Search by substructure or pattern (SMARTS)">
+                                Patterns
+                                <span
+                                        class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('main.arthor') }}">Public</a></li>
+                                <li><a href="{{ url_for('main.arthorp') }}">Private</a></li>
+                            </ul>
+                        </li>
+                        </li>
+                    {% endif %}
+                   
+                    
+                    
                     <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle"> Lookup <span
                             class="caret"></span></a>
                         <ul class="dropdown-menu">
@@ -290,7 +312,7 @@
         {% block tranchebrowser %}{% endblock %}
         {# application content needs to be provided in the app_content block #}
     </div>
-
+    <br>
     <footer>
         <p><a href="{{ url_for("main.about") }}">Acknowledgements</a> Roger Sayle. Nextmovesoftware.com Arthor.
             Smallworld.<a

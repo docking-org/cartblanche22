@@ -307,7 +307,7 @@ class Substances(Resource):
         args = parser.parse_args()
 
         uploaded_file = args.get('zinc_id-in').stream.read().decode()
-        output_fields = args.get('output_fields').split(',')
+        
         lines = [x for x in re.split(r'\n|\r|(\r\n)', uploaded_file) if x!='' and x!= None]
         zinc22, zinc20, discarded = filter_zinc_ids(lines)
         if len(zinc20) > 0:
@@ -321,14 +321,13 @@ class Substances(Resource):
         results = []
         results += data['zinc20']
         results += data['zinc22']['found']
-    
+        
         data = []
-        if 'output_fields' in args and args.get('output_fields'):
-                output_fields = args.get('output_fields').replace(" ", "").split(",")
-                print(output_fields)
-                for i in results: 
-                    data.append({str(output_field):i[output_field] for output_field in output_fields})
-        print(data)
+        output_fields = args.get('output_fields')
+        output_fields = output_fields.split(',') if output_fields else list(results[0].keys())
+        for i in results: 
+            data.append({str(output_field):i[output_field] for output_field in output_fields})
+        
         if(file_type == "csv"):
             res = pd.DataFrame(data)
             return res.to_csv(encoding='utf-8', index=False)

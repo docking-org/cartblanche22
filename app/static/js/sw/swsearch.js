@@ -19,14 +19,14 @@ var fromSmiInput = false;
 /* Configuration and options */
 $(document).ready(function () {
 
-	console.log("config working")
-	$.get(sw_server + '/search/config', function (res) {
-		config = res;
-		if (!config.WebApp.SearchAsYouDraw)
-			$('.swopt').removeClass('searchasyoudraw');
-		add_scoretype_selection(config);
-		toggle_scoring();
-	});
+    console.log("config working")
+    $.get(sw_server + '/search/config', function (res) {
+        config = res;
+        if (!config.WebApp.SearchAsYouDraw)
+            $('.swopt').removeClass('searchasyoudraw');
+        add_scoretype_selection(config);
+        toggle_scoring();
+    });
 });
 
 function norm_score_name(x) {
@@ -94,14 +94,14 @@ function toggle_align() {
 }
 /* Db Info */
 function db_maps(select) {
-	$.get(sw_server + '/search/maps', function (data) {
-		for (var key in data) {
-			datasets[key] = data[key];
-			if (data[key].enabled === true && data[key].status === 'Available') {
-				select.append('<option value=' + key + '>' + data[key].name + '</option>');
-			}
-		}
-	});
+    $.get(sw_server + '/search/maps', function (data) {
+        for (var key in data) {
+            datasets[key] = data[key];
+            if (data[key].enabled === true && data[key].status === 'Available') {
+                select.append('<option value=' + key + '>' + data[key].name + '</option>');
+            }
+        }
+    });
 }
 /* Range Sliders */
 function install_range_slider(param, limit) {
@@ -301,7 +301,7 @@ function refresh() {
 function molChanged(smiles) {
     console.log('molchanged')
     if (config.WebApp.SearchAsYouDraw) {
-                newSearch(smiles);
+        newSearch(smiles);
         //adding hg database check
         //checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)
     }
@@ -421,29 +421,29 @@ function init_table(table, url) {
         $('#splash').css('display', 'none');
         var columns = [
             {
-            "title": "<span class='glyphicon glyphicon-shopping-cart'/>&nbsp&nbsp&nbsp&nbsp&nbsp  Compound (<input type='checkbox' name='optColEdits' onchange='toggle_color()'>Color, <input type='checkbox' name='optAlign' onchange='toggle_align()'>Align)",
-            "name": "alignment",
-            "class": "compound",
-            "sortable": false,
-            "type": "html",
-            "width": "350px",
-            "render": hit_renderer,
-        }, {
-            "title": "Distance",
-            "name": "dist",
-            "width": "65px",
-            "sortable": true
-        }].concat(get_score_columns()).concat([{
-            "title": "Anon <br> Distance",
-            "name": "topodist",
-            "width": "65px",
-            "sortable": true
-        }, {
-            "title": "Unlabelled <br> MCES",
-            "name": "mces",
-            "width": "50px",
-            "sortable": true
-        }]).concat(distance_cols);
+                "title": "<span class='glyphicon glyphicon-shopping-cart'/>&nbsp&nbsp&nbsp&nbsp&nbsp  Compound (<input type='checkbox' name='optColEdits' onchange='toggle_color()'>Color, <input type='checkbox' name='optAlign' onchange='toggle_align()'>Align)",
+                "name": "alignment",
+                "class": "compound",
+                "sortable": false,
+                "type": "html",
+                "width": "350px",
+                "render": hit_renderer,
+            }, {
+                "title": "Distance",
+                "name": "dist",
+                "width": "65px",
+                "sortable": true
+            }].concat(get_score_columns()).concat([{
+                "title": "Anon <br> Distance",
+                "name": "topodist",
+                "width": "65px",
+                "sortable": true
+            }, {
+                "title": "Unlabelled <br> MCES",
+                "name": "mces",
+                "width": "50px",
+                "sortable": true
+            }]).concat(distance_cols);
         dtable = table.DataTable({
             "columns": columns,
             destroy: true,
@@ -595,10 +595,10 @@ function hit_renderer(data, type, row) {
     button.attr('data-smile', data.hitSmiles.split(" ")[0])
     button.attr('onclick', 'toggleCart(this)');
     button.attr('class', 'btn btn-info');
-  //   let cart = JSON.parse(localStorage.getItem('cart'))
-  //   if(cart==null){
-  //   cart = []
-  // }
+    //   let cart = JSON.parse(localStorage.getItem('cart'))
+    //   if(cart==null){
+    //   cart = []
+    // }
     // let items = []
     // for (i = 0; i < cart.length; i++) {
     //     items.push(cart[i].identifier)
@@ -607,8 +607,8 @@ function hit_renderer(data, type, row) {
     //     button.html('Remove')
     //     button.attr('class', 'btn btn-danger')
     // }
-    if(shoppingCart.inCart(id)){
-        button.attr('checked',true);
+    if (shoppingCart.inCart(id)) {
+        button.attr('checked', true);
         button.attr('class', 'btn btn-danger');
 
     }
@@ -618,7 +618,7 @@ function hit_renderer(data, type, row) {
         //div.append("<b><a target='_blank' href='http://zinc15.docking.org/substances/"+id+"'>" + id + "</a></b>");
         var checkZinc = id.toString()
         if (checkZinc.substring(0, 4) == 'ZINC') {
-            div.append("<b><a target='_blank' href='https://zinc15.docking.org/substances/" + id + "'>" + id + "</a></b>");
+            div.append("<b><a target='_blank' href='/searchZinc/" + id + "'>" + id + "</a></b>");
         } else {
             div.append("<b>" + id + "</b>");
         }

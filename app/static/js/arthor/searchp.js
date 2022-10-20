@@ -31,9 +31,11 @@ $(document).ready(function () {
 });
 
 function updateTotal(request) {
-    $.ajax({
+    $.get({
         url: arthor.url + '/dt/' + arthor.table + '/search',
-        type: "GET",
+        xhrFields: {
+            withCredentials: true
+        },
         data: {
             query: request.query,
             type: request.type,
@@ -71,6 +73,9 @@ function fetchPage(request) {
     $.ajax({
         url: arthor.url + '/dt/' + arthor.table + '/search',
         type: "GET",
+        xhrFields: {
+            withCredentials: true
+        },
         data: {
             query: arthor.query,
             type: arthor.type,

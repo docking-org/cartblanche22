@@ -20,25 +20,24 @@ deploy-dev job:
         - docker stop redis
         - docker rm redis
         - docker run --net cartblanche --name redis -d redis
-        - docker run -d --restart unless-stopped --net cartblanche -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
-                -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
-                -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
-                -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-                -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
-                -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
-                -e SWDIR=${SWDIR}
-                -e CELERY_BROKER_URL=${CELERY_BROKER_URL} 
-                -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND} 
-                -e COMMON_DATABASE=${COMMON_DATABASE} 
-                -e MAIL_PASSWORD=${MAIL_PASSWORD} 
-                -e MAIL_SERVER=${MAIL_SERVER} 
-                -e MAIL_USERNAME=${MAIL_USERNAME} 
-                -e SECRET_KEY=${SECRET_KEY} 
-                -e TIN_DATABASE=${TIN_DATABASE} 
-                -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER} 
-                -e ZINC22_DATABASE=${ZINC22_DATABASE} 
-                --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
-    
+        - docker run --net cartblanche -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
+                     -v /nfs/db4/smallworld-java:/export/db4/smallworld-java
+                     -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
+                     -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
+                     -e CELERY_BROKER_URL=${CELERY_BROKER_URL} 
+                     -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND} 
+                     -e COMMON_DATABASE=${COMMON_DATABASE} 
+                     -e MAIL_PASSWORD=${MAIL_PASSWORD} 
+                     -e MAIL_SERVER=${MAIL_SERVER} 
+                     -e MAIL_USERNAME=${MAIL_USERNAME} 
+                     -e SECRET_KEY=${SECRET_KEY} 
+                     -e TIN_DATABASE=${TIN_DATABASE} 
+                     -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER} 
+                     -e ZINC22_DATABASE=${ZINC22_DATABASE} 
+                     -e GOOGLE_API_KEY=${GOOGLE_API_KEY} 
+                     -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} 
+                     --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+       
 deploy-live job:
     only:
         - master
@@ -55,13 +54,10 @@ deploy-live job:
         - docker stop redis
         - docker rm redis
         - docker run --net cartblanche --name redis -d redis
-        - docker run -d --restart unless-stopped --net cartblanche -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
-                     -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
-                     -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
-                     -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-                     -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
-                     -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
-                     -e SWDIR=${SWDIR}
+        - docker run --net cartblanche -v /nfs/db2/smallworld_anon_21Q4:/nfs/db3/private_smallworld_4th_gen/anon
+                     -v /export/db4/smallworld-java:/export/db4/smallworld-java
+                     -v /nfs/db3/private_smallworld_4th_gen/smallworld.cfg:/nfs/db3/private_smallworld_4th_gen/smallworld.cfg
+                     -v /nfs/db3/private_smallworld_4th_gen/maps:/nfs/db3/private_smallworld_4th_gen/maps
                      -e CELERY_BROKER_URL=${CELERY_BROKER_URL} 
                      -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND} 
                      -e COMMON_DATABASE=${COMMON_DATABASE} 
@@ -72,4 +68,6 @@ deploy-live job:
                      -e TIN_DATABASE=${TIN_DATABASE} 
                      -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER} 
                      -e ZINC22_DATABASE=${ZINC22_DATABASE} 
+                     -e GOOGLE_API_KEY=${GOOGLE_API_KEY} 
+                     -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} 
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}

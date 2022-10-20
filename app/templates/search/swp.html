@@ -1,62 +1,72 @@
 {% extends 'base.html' %}
 {% block metas %}
-    <meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
+<meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
 {% endblock %}
 {% block styles %}
-    {{ super() }}
-    <link rel="stylesheet" type="text/css" href="../static/css/sw/sw.css">
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="../static/css/sw/sw.css">
 {% endblock %}
 {% block scripts %}
-    {{ super() }}
-    <script src="../static/js/jsme/jsme.nocache.js"></script>
-    <script src="../static/js/custom/cart.js"></script>
-    <script src="../static/js/custom/hg.js"></script>
-    <script src="../static/js/sw/swpsearch.js"></script>
-    <script src="../static/js/sw/sketcher.js"></script>
-    <script type="text/javascript">
+{{ super() }}
+<script src="../static/js/jsme/jsme.nocache.js"></script>
+<script src="../static/js/custom/cart.js"></script>
+<script src="../static/js/custom/hg.js"></script>
+<script src="../static/js/sw/swpsearch.js"></script>
+<script src="../static/js/sw/sketcher.js"></script>
+<script type="text/javascript">
 
-        $(document).ready(function () {
+    
+
+    $(document).ready(function () {
+        $('#content').width($('#content').parent().width() - 450);
+        $(window).resize(function () {
             $('#content').width($('#content').parent().width() - 450);
-            $(window).resize(function () {
-                $('#content').width($('#content').parent().width() - 450);
-                if (dtable) {
-                    resize();
-                }
-            });
-            db_maps($('#dbsel'));
-            toggle_scoring();
-            $('#ucsfbutton').click(() =>{
-                $('#exampleModalLong').modal('show');
-            })
-            config = {{config|safe}};
-            maps = {{maps|safe}};
-            if (!config.WebApp.SearchAsYouDraw)
-                $('.swopt').removeClass('searchasyoudraw');
-            add_scoretype_selection(config);
-            toggle_scoring();
-            db_maps($('#dbsel'), maps);
-            toggle_scoring();
+            if (dtable) {
+                resize();
+            }
+        });
+        db_maps($('#dbsel'));
+        toggle_scoring();
+        $('#ucsfbutton').click(() => {
+            $('#exampleModalLong').modal('show');
         })
-    </script>
-    <script type="text/javascript">
-        install_range_slider('dist', 25);
-        install_range_slider('topodist', 25);
-        install_range_slider('tup');
-        install_range_slider('tdn');
-        install_range_slider('rup');
-        install_range_slider('rdn');
-        install_range_slider('lup');
-        install_range_slider('ldn');
-        install_range_slider('maj');
-        install_range_slider('min');
-        install_range_slider('sub');
-        install_range_slider('hyb');
+        config = {{ config | safe }};
+    
+        maps = {{ maps | safe }};
+        if (!config.WebApp.SearchAsYouDraw)
+            $('.swopt').removeClass('searchasyoudraw');
+        add_scoretype_selection(config);
+        toggle_scoring();
+        db_maps($('#dbsel'), maps);
+        toggle_scoring();
+        var input = document.getElementById("smiles-in");
+        input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            refresh();
+        }   
+    });
+    });
+</script>
+<script type="text/javascript">
+    install_range_slider('dist', 25);
+    install_range_slider('topodist', 25);
+    install_range_slider('tup');
+    install_range_slider('tdn');
+    install_range_slider('rup');
+    install_range_slider('rdn');
+    install_range_slider('lup');
+    install_range_slider('ldn');
+    install_range_slider('maj');
+    install_range_slider('min');
+    install_range_slider('sub');
+    install_range_slider('hyb');
 
-    </script>
+</script>
 
 {% endblock %}
 {% block app_content %}
-    
+
 <div id="content">
 
     <div id="nav">
@@ -64,12 +74,12 @@
         <div class="panel panel-info" id="section-head">
 
 
-{#                                <div class="panel-heading">#}
+            {# <div class="panel-heading">#}
 
-{#                                    Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated#}
-{#                                    Tanimoto#}
-{#                                    coefficient#}
-{#                                </div>#}
+                {# Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated#}
+                {# Tanimoto#}
+                {# coefficient#}
+                {# </div>#}
 
 
         </div>
@@ -85,7 +95,7 @@
                 <td class="spacer"></td>
                 <td colspan="2" style="padding-right: 20px;">
                     <input id="smiles-in" onkeyup="load_smiles(this)"
-                           style="width: 100%; text-align: left; font-family: Monospace;">
+                        style="width: 100%; text-align: left; font-family: Monospace;">
                 </td>
             </tr>
             <tr>
@@ -111,7 +121,7 @@
                 </td>
                 <td>
                     <input name="optAdv" type="checkbox" checked
-                           onchange="$('#advPanel').css('display', $(this).prop('checked') ? 'block' : 'none'); update_visible_columns();">
+                        onchange="$('#advPanel').css('display', $(this).prop('checked') ? 'block' : 'none'); update_visible_columns();">
                     Advanced
                 </td>
             </tr>
@@ -121,7 +131,7 @@
                 <td></td>
                 <td>
                     <button class="search" onclick="refresh()">Search <i class="fa fa-search"
-                                                                         aria-hidden="true"></i></button>
+                            aria-hidden="true"></i></button>
                 </td>
             </tr>
 
@@ -138,144 +148,120 @@
                     <th>Distance</th>
                     <td class="spacer"></td>
                     <td colspan="4">
-                        <input class="edit_input" onchange="update_bound('dist')" name="distlb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                        <input class="edit_input" onchange="update_bound('dist')" name="distlb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
                         <div id="distslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('dist')" name="distub" type="number"
-                               value="10"
-                               min="0" max="99" step="1" maxlength="2">
+                        <input class="edit_input" onchange="update_bound('dist')" name="distub" type="number" value="10"
+                            min="0" max="99" step="1" maxlength="2">
                     </td>
                 </tr>
                 <tr>
                     <th>Anon Distance</th>
                     <td class="spacer"></td>
                     <td colspan="4">
-                        <input class="edit_input" onchange="update_bound('topodist')" name="topodistlb"
-                               type="number"
-                               value="0" min="0" max="99" step="1" maxlength="2">
+                        <input class="edit_input" onchange="update_bound('topodist')" name="topodistlb" type="number"
+                            value="0" min="0" max="99" step="1" maxlength="2">
                         <div id="topodistslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('topodist')" name="topodistub"
-                               type="number"
-                               value="4" min="0" max="99" step="1" maxlength="2">
+                        <input class="edit_input" onchange="update_bound('topodist')" name="topodistub" type="number"
+                            value="4" min="0" max="99" step="1" maxlength="2">
                     </td>
                 </tr>
                 <tr>
                     <th>Terminal</th>
                     <td class="spacer"></td>
-                    <td><input class="edit_input" onchange="update_bound('tup')" name="tuplb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('tup')" name="tuplb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="tupslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('tup')" name="tupub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Up
+                        <input class="edit_input" onchange="update_bound('tup')" name="tupub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Up
                     </td>
                     <td>&nbsp;&nbsp;</td>
-                    <td><input class="edit_input" onchange="update_bound('tdn')" name="tdnlb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('tdn')" name="tdnlb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="tdnslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('tdn')" name="tdnub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Down
+                        <input class="edit_input" onchange="update_bound('tdn')" name="tdnub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Down
                     </td>
                 </tr>
                 <tr>
                     <th>Ring</th>
                     <td class="spacer"></td>
-                    <td><input class="edit_input" onchange="update_bound('rup')" name="ruplb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('rup')" name="ruplb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="rupslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('rup')" name="rupub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Up
+                        <input class="edit_input" onchange="update_bound('rup')" name="rupub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Up
                     </td>
                     <td></td>
-                    <td><input class="edit_input" onchange="update_bound('rdn')" name="rdnlb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('rdn')" name="rdnlb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="rdnslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('rdn')" name="rdnub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Down
+                        <input class="edit_input" onchange="update_bound('rdn')" name="rdnub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Down
                     </td>
                 </tr>
                 <tr>
                     <th>Linker</th>
                     <td class="spacer"></td>
-                    <td><input class="edit_input" onchange="update_bound('lup')" name="luplb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('lup')" name="luplb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="lupslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('lup')" name="lupub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Up
+                        <input class="edit_input" onchange="update_bound('lup')" name="lupub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Up
                     </td>
                     <td></td>
-                    <td><input class="edit_input" onchange="update_bound('ldn')" name="ldnlb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('ldn')" name="ldnlb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="ldnslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('ldn')" name="ldnub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Down
+                        <input class="edit_input" onchange="update_bound('ldn')" name="ldnub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Down
                     </td>
                 </tr>
                 <tr>
                     <th>Mutation</th>
                     <td class="spacer"></td>
-                    <td><input class="edit_input" onchange="update_bound('maj')" name="majlb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('maj')" name="majlb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="majslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('maj')" name="majub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Major
+                        <input class="edit_input" onchange="update_bound('maj')" name="majub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Major
                     </td>
                     <td></td>
-                    <td><input class="edit_input" onchange="update_bound('min')" name="minlb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('min')" name="minlb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="minslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('min')" name="minub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2"> Minor
+                        <input class="edit_input" onchange="update_bound('min')" name="minub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2"> Minor
                     </td>
                 </tr>
                 <tr>
                     <th>Substitution</th>
                     <td class="spacer"></td>
-                    <td><input class="edit_input" onchange="update_bound('sub')" name="sublb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('sub')" name="sublb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="subslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('sub')" name="subub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2">
+                        <input class="edit_input" onchange="update_bound('sub')" name="subub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2">
                     </td>
                 </tr>
                 <tr>
                     <th>Hybridisation</th>
                     <td class="spacer"></td>
-                    <td><input class="edit_input" onchange="update_bound('hyb')" name="hyblb" type="number"
-                               value="0"
-                               min="0" max="99" step="1" maxlength="2">
+                    <td><input class="edit_input" onchange="update_bound('hyb')" name="hyblb" type="number" value="0"
+                            min="0" max="99" step="1" maxlength="2">
 
                         <div id="hybslider" class="dual_range"></div>
-                        <input class="edit_input" onchange="update_bound('hyb')" name="hybub" type="number"
-                               value="4"
-                               min="0" max="99" step="1" maxlength="2">
+                        <input class="edit_input" onchange="update_bound('hyb')" name="hybub" type="number" value="4"
+                            min="0" max="99" step="1" maxlength="2">
                     </td>
                 </tr>
             </table>
@@ -323,7 +309,7 @@
 
 
 <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
-     aria-hidden="true">
+    aria-hidden="true">
     <div class="modal-dialog modal-xl modal-lg modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -336,12 +322,12 @@
             <div class="modal-body">
                 <table id="hgData" style="width:100%;">
                     <thead style="width:100%;">
-                    <tr style="width:100%;">
-                        <th>Incart</th>
-                        <th>Image</th>
-                        <th>Identifier</th>
-                        <th>Smile</th>
-                    </tr>
+                        <tr style="width:100%;">
+                            <th>Incart</th>
+                            <th>Image</th>
+                            <th>Identifier</th>
+                            <th>Smile</th>
+                        </tr>
                     </thead>
                 </table>
             </div>
