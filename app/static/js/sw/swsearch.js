@@ -303,7 +303,7 @@ function molChanged(smiles) {
     if (config.WebApp.SearchAsYouDraw) {
         newSearch(smiles);
         //adding hg database check
-        //checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)
+        checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)
     }
 }
 
