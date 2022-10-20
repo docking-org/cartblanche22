@@ -77,3 +77,6 @@ migrations
 migrationsPsql
 app.db
 requirementsTest.txt
+dump.rdb
+.sqlite
+.vscode
