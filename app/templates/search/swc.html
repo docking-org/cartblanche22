@@ -25,6 +25,9 @@
             });
             db_maps($('#dbsel'));
             toggle_scoring();
+            $('#ucsfbutton').click(() => {
+                $('#exampleModalLong').modal('show');
+            });
             config = {{config|safe}};
             maps = {{maps|safe}};
             if (!config.WebApp.SearchAsYouDraw)
