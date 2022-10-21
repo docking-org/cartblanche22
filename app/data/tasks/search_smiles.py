@@ -79,7 +79,7 @@ def search(args, file_type=None):
         out, err = res.communicate()
         result = out.decode().split('\n')
         with open("/home/cartblanche22/smilesoutput.txt", mode="w+") as file:
-            file.writelines(out)
+            file.writelines(out.decode())
     hits = []
     for line in result:
         if 'ZINC' in line:
