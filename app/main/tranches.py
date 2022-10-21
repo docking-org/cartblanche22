@@ -238,16 +238,16 @@ def tranches3dDownload():
     def gen_all_rsyncs(tranches):
         for tranche in tranches:
             util_func = lambda x: x[0]
-            temp = sorted(data_, key = util_func)
+            temp = sorted(tranche, key = util_func)
             res = [list(ele) for i, ele in groupby(temp, util_func)]
             for x in res:
                 yield RsyncDownloader(x, dformat) + '\n'
  
-    tranches_iter = gen_all_tranches
-
     if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
         tranches_iter = gen_all_rsyncs
-        
+    else:
+        tranches_iter = gen_all_tranches
+
     download_filename = 'ZINC22-downloader-3D-{}.{}'.format(dformat, using)
     response = Response(stream_with_context(tranches_iter(tranches_data)), mimetype=mimetype)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
