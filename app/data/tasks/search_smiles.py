@@ -78,7 +78,7 @@ def search(args, file_type=None):
                             "-tup 0 -tdn 0 -rup 0 -rdn 0 -score AtomAlignment:SMILES {smiles} ".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
         out, err = res.communicate()
         result = out.decode().split('\n')
-        with open("smilesoutput") as file:
+        with open("/home/cartblanche22/smilesoutput.txt", mode="w+") as file:
             file.writelines(result)
     hits = []
     for line in result:
