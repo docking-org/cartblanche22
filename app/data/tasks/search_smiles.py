@@ -74,12 +74,12 @@ def search(args, file_type=None):
         tmp.write(smilelist.encode())
         tmp.flush()
         res = subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
-                            "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v -n 10000 -d {adist}" \
+                            "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v -n 100000 -d {adist}" \
                             " -score AtomAlignment:SMILES {smiles} | grep '=[0-{dist}] ' ".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
         out, err = res.communicate()
         result = out.decode().split('\n')
-        with open("/home/cartblanche22/smilesoutput.txt", mode="w+") as file:
-            file.writelines(out.decode())
+        # with open("/home/cartblanche22/smilesoutput.txt", mode="w+") as file:
+        #     file.writelines(out.decode())
     hits = []
     for line in result:
         if 'ZINC' in line:
