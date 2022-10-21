@@ -63,6 +63,7 @@ def PowerShellDownloader(hac, logp, format, add_url, charge, generation):
                                                 
 def RsyncDownloader(tranches, format):
     st = "mkdir zinc-22{generation} \npushd zinc-22{generation}\n".format(generation = tranches[0][0:1])
+    print(tranches)
     for tranche in tranches:
         hac = tranche[1:4]
         logp = tranche[4:8]
