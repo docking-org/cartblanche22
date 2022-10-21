@@ -229,7 +229,7 @@ def searchZinc20(identifier):
         return render_template('molecule/mol_index.html', data=data, prices=prices,
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+        return render_template('errors/search404.html', lines=[identifier], href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
 
 @application.route('/searchZinc/<identifier>')
@@ -240,7 +240,7 @@ def searchZinc(identifier):
         return render_template('molecule/mol_index.html', data=data, prices=prices, 
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+        return render_template('errors/search404.html', lines=[identifier], href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
         
 def getZinc20Data(identifier):
@@ -314,42 +314,45 @@ def getZincData(identifier):
             role = 'ucsf'
         else:
             role = 'public'
-  
-        data= res['zinc22']["found"][0]
-        
-        prices = []
-        if data.get('catalogs'):
-            catalogs = data['catalogs']
-           
-            for i in range(len(catalogs)):
-                c = catalogs[i]
+   
+        try:
+            data = res['zinc22']["found"][0]
+            
+            prices = []
+            if data.get('catalogs'):
+                catalogs = data['catalogs']
+            
+                for i in range(len(catalogs)):
+                    c = catalogs[i]
+                    
+                    s = c['catalog_name'].lower()
+                    code = c['supplier_code']
+                    
+                    price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
                 
-                s = c['catalog_name'].lower()
-                code = c['supplier_code']
-                
-                price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
-             
-                if price:    
-                    price.supplier_code = code
-                    prices.append(price)
+                    if price:    
+                        price.supplier_code = code
+                        prices.append(price)
 
-        #Some of the zinc22 mols are missing vendor data. In that case, use the Zinc20 results as backup.
-        if(len(prices) >= 1):
-            for price in prices:
-                if 'ZINC' not in price.supplier_code:
-                    break
-                else:
-                    return getZinc20Data(code)
-        
-        smile = data['smiles'].encode('ascii')
-        smile = smile.replace(b'\x01', b'\\1')
-        smile = smile.decode()
-        data['smiles'] = smile
-        
-        data['zinc20']= False
-        data['supplier']= []
-        
-        return data, res, smile, prices
+            #Some of the zinc22 mols are missing vendor data. In that case, use the Zinc20 results as backup.
+            if(len(prices) >= 1):
+                for price in prices:
+                    if 'ZINC' not in price.supplier_code:
+                        break
+                    else:
+                        return getZinc20Data(code)
+            
+            smile = data['smiles'].encode('ascii')
+            smile = smile.replace(b'\x01', b'\\1')
+            smile = smile.decode()
+            data['smiles'] = smile
+            
+            data['zinc20']= False
+            data['supplier']= []
+            
+            return data, res, smile, prices
+        except:
+            return None, None, None, None
 
 @application.route('/sw')
 def sw():
