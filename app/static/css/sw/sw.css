@@ -79,6 +79,7 @@ html, body {
 	border: none;
 	color: #444;
 	overflow-y: auto;
+	overflow-x: hidden;
 }
 #cleared {
 	clear: both;
@@ -177,6 +178,8 @@ button.search i.fa:hover {
 }
 #swscore {
 	font-size: 9pt;
+	border-spacing: 6px;
+    border-collapse: inherit;
 }
 #swscore th {
 	text-align: right;

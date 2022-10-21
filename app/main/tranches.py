@@ -44,7 +44,7 @@ def CurlDownloader(hac, logp, format, add_url, charge, generation):
 
 def WgetDownloader(hac, logp, format, add_url, charge, generation):
     if generation != '':
-        return "wget -nH -r -l7 -np -A '*-{charge}-*{format}' {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/". \
+        return "wget -nH -r -l7 -np -A '*-{charge}-*{format}' {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, generation=generation)
     else:
         return "mkdir -pv {hac} && wget {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} -O {hac}/{hac}{logp}{charge}.{format}". \
@@ -68,9 +68,7 @@ def RsyncDownloader(tranches, format):
         logp = tranche[4:8]
         generation = tranche[0:1]
         charge = tranche[-1]
-        st+= "rsync -Larv --include='*/' --include='zinc-22{generation}/{hac}/{hac}{logp}/[a-z]/' "\
-        "--include='[a-z]/{hac}{logp}-{charge}-*{format}' --exclude='*' --verbose " \
-        "rsync://files.docking.org/ZINC22-3D . \n" .\
+        st+= "rsync -Larv --include='*/' --include='zinc-22{generation}/{hac}/{hac}{logp}/[a-z]/' --include='[a-z]/{hac}{logp}-{charge}-*{format}' --exclude='*' --verbose rsync://files.docking.org/ZINC22-3D . \n". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, charge=charge, generation=generation)
     st+= "popd"
     return st
@@ -238,16 +236,16 @@ def tranches3dDownload():
     def gen_all_rsyncs(tranches):
         for tranche in tranches:
             util_func = lambda x: x[0]
-            temp = sorted(data_, key = util_func)
+            temp = sorted(tranche, key = util_func)
             res = [list(ele) for i, ele in groupby(temp, util_func)]
             for x in res:
                 yield RsyncDownloader(x, dformat) + '\n'
  
-    tranches_iter = gen_all_tranches
-
     if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
         tranches_iter = gen_all_rsyncs
-        
+    else:
+        tranches_iter = gen_all_tranches
+
     download_filename = 'ZINC22-downloader-3D-{}.{}'.format(dformat, using)
     response = Response(stream_with_context(tranches_iter(tranches_data)), mimetype=mimetype)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
