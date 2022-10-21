@@ -68,9 +68,7 @@ def RsyncDownloader(tranches, format):
         logp = tranche[4:8]
         generation = tranche[0:1]
         charge = tranche[-1]
-        st+= "rsync -Larv --include='*/' --include='zinc-22{generation}/{hac}/{hac}{logp}/[a-z]/' "\
-        "--include='[a-z]/{hac}{logp}-{charge}-*{format}' --exclude='*' --verbose " \
-        "rsync://files.docking.org/ZINC22-3D . \n". \
+        st+= "rsync -Larv --include='*/' --include='zinc-22{generation}/{hac}/{hac}{logp}/[a-z]/' --include='[a-z]/{hac}{logp}-{charge}-*{format}' --exclude='*' --verbose rsync://files.docking.org/ZINC22-3D . \n". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, charge=charge, generation=generation)
     st+= "popd"
     return st
