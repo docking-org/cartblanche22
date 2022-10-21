@@ -44,7 +44,7 @@ def CurlDownloader(hac, logp, format, add_url, charge, generation):
 
 def WgetDownloader(hac, logp, format, add_url, charge, generation):
     if generation != '':
-        return "wget -nH -r -l7 -np -A '*-{charge}-*{format}' {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/". \
+        return "wget -nH -r -l7 -np -A '*-{charge}-*{format}' {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, generation=generation)
     else:
         return "mkdir -pv {hac} && wget {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} -O {hac}/{hac}{logp}{charge}.{format}". \
