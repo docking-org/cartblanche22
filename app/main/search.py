@@ -240,7 +240,7 @@ def searchZinc(identifier):
         return render_template('molecule/mol_index.html', data=data, prices=prices, 
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
+        return render_template('errors/search404.html', lines=[identifier], href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
         
 def getZinc20Data(identifier):
