@@ -79,6 +79,7 @@ html, body {
 	border: none;
 	color: #444;
 	overflow-y: auto;
+	overflow-x: hidden;
 }
 #cleared {
 	clear: both;
