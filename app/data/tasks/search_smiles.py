@@ -75,7 +75,7 @@ def search(args, file_type=None):
         tmp.flush()
         res = subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
                             "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v -n0 -d {adist}" \
-                            " -score AtomAlignment:SMILES {smiles} | grep '=[0-{dist}]' ".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
+                            " -score AtomAlignment:SMILES {smiles} | grep '=[0-{dist}] ' ".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
         out, err = res.communicate()
         result = out.decode().split('\n')
         with open("/home/cartblanche22/smilesoutput.txt", mode="w+") as file:
