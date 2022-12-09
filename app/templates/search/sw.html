@@ -2,11 +2,15 @@
 {% block metas %}
     <meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
 {% endblock %}
+{% block title %}
+    Smallworld - Cartblanche22
+{% endblock %}
 {% block scripts %}
     {{ super() }}
+    <script src="{{ url_for('static', filename = 'js/sw/swsearch.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/jsme/jsme.nocache.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/sw/sketcher.js') }}"></script>
-    <script src="{{ url_for('static', filename = 'js/sw/swsearch.js') }}"></script>
+   
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -23,20 +27,14 @@
             $('#ucsfbutton').click(() =>{
                 $('#exampleModalLong').modal('show');
             })
+            
 
-            var input = document.getElementById("smiles-in");
-            input.addEventListener("keypress", function(event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    refresh();
-                }   
-            });
         });
     </script>
     <script type="text/javascript">
         install_range_slider('dist', 25);
         install_range_slider('topodist', 25);
-        install_range_slider('tup');
+        install_range_slider('tup'); 
         install_range_slider('tdn');
         install_range_slider('rup');
         install_range_slider('rdn');
@@ -88,7 +86,7 @@
                     <th>Identifier</th>
                     <td class="spacer"></td>
                     <td colspan="2" style="padding-right: 20px;">
-                        <input id="smiles-in" onkeyup="load_smiles(this)"
+                        <input id="smiles-in" {% if smiles %}value={{smiles}} {% endif %} onkeyup="load_smiles(this)"
                                style="width: 100%; text-align: left; font-family: Monospace;">
                     </td>
                 </tr>

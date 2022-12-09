@@ -300,7 +300,7 @@ function refresh() {
 
 function molChanged(smiles) {
     console.log('molchanged')
-    if (config.WebApp.SearchAsYouDraw) {
+    if (config.WebApp !== undefined) {
         newSearch(smiles);
         //adding hg database check
         checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)

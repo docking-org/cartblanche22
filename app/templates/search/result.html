@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block title %}
+    Search Results - Cartblanche22
+{% endblock %}
 {% block styles %}
 {{ super() }}
 <style>
@@ -79,7 +82,7 @@
                 {"<>":"div","class":"col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2","html": [
                     {"<>":"div", class:"mol", "html":[
                         {"<>":"div", class:"link", "html":[
-                                {"<>":"a", href:"/searchZinc/${zinc_id}", "text":"${zinc_id}"
+                                {"<>":"a", href:"/substance/${zinc_id}", "text":"${zinc_id}"
                             }]
                         },
                         {"<>":"div", class:"mol-bottom zinc22", id:"${zinc_id}", "data-smiles":"${smiles}", "data-db":"zinc22", "data-supplier_code":"${supplier_code }", "data-catalogs":"${catalogs}",
@@ -95,7 +98,7 @@
                 {"<>":"div","class":"col-xs-6 col-sm-4 col-md-3 col-lg-2 col-xl-2","html": [
                     {"<>":"div", class:"mol", "html":[
                         {"<>":"div", class:"link", "html":[
-                                {"<>":"a", href:"/searchZinc20/${zinc_id}", "text":"${zinc_id}"
+                                {"<>":"a", href:"/substance/${zinc_id}", "text":"${zinc_id}"
                             }]
                         },
                         {"<>":"div", class:"mol-bottom zinc20", id:"${zinc_id}", "data-smiles":"${smiles}", "data-db":"zinc20", "data-supplier_code":"${supplier_code }", "data-catalogs":"${catalogs}",
@@ -397,6 +400,7 @@
    });
 </script>
 {% endblock %}
+
 {% block search_results %}
 
 <div class="hidden" id="a1">

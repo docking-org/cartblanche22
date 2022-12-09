@@ -2,13 +2,15 @@ var sketcher = 'jsme'; // jsme marvinjs
 
 var jsmeApplet = null;
 var marvinjs = null;
-var fromSmiInput = false;
+var fromSmiInput = true;
 
 function jsmeOnLoad() {
-	console.log('jsmeOnLoad')
+	console.log('jsmeOnLoad');
+	
 	if (sketcher == "jsme") {
 		jsmeApplet = new JSApplet.JSME("sketcher", "420px", "500px", {
-			"options": "newlook"
+			"options": "newlook",
+			"smiles": document.getElementById("smiles-in").value   
 		});
 		jsmeApplet.setAfterStructureModifiedCallback(function (event) {
 			var smiles = event.src.smiles();
@@ -20,6 +22,7 @@ function jsmeOnLoad() {
 			}
 		});
 	}
+	
 }
 
 function set_smiles(callback) {

@@ -35,7 +35,7 @@ $(document).ready(function (e) {
 function jsmeOnLoad() {
   if (sketcher == "jsme") {
     jsmeApplet = new JSApplet.JSME("sketcher", "420px", "500px", {
-      "options": "newlook,nocanonize"
+      "options": "newlook,nocanonize",
     });
     jsmeApplet.setAfterStructureModifiedCallback(function (event) {
       var smiles = event.src.smiles();
