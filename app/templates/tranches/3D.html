@@ -282,6 +282,7 @@
         'big-n-greasy': [[41, 500], [25, 30]]
     };
 
+
     let charges = {
         "J": true,
         "K": true,
@@ -305,12 +306,14 @@
         "Q": "Q +3",
         "R": "R +4"
     }
-
+    
 
 
     $(document).ready(function () {
         let data = {{ cell3D| safe
     }};
+
+    
     let cols = new Array(62).fill(true);
     let rows = new Array(61).fill(true);
     localStorage.setItem('3d', JSON.stringify(data));
@@ -423,7 +426,7 @@
             }
             else {
                 arr[i][id].chosen = cols[id]
-                { #arr[i][id].tranches.forEach((x) => x.chosen = arr[i][id].chosen)# }
+          
             }
         }
         localStorage.setItem('3d', JSON.stringify(arr));
@@ -442,7 +445,7 @@
             }
             else {
                 arr[id][i].chosen = rows[id]
-                { #arr[id][i].tranches.forEach((x) => x.chosen = arr[id][i].chosen)# }
+         
             }
         }
         localStorage.setItem('3d', JSON.stringify(arr));
@@ -459,7 +462,7 @@
         }
         else {
             arr[row][col].chosen = !arr[row][col].chosen
-            { #arr[row][col].tranches.forEach((x) => x.chosen = arr[row][col].chosen)# }
+          
         }
         localStorage.setItem('3d', JSON.stringify(arr));
         renderTrancheTable();
