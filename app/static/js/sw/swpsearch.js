@@ -638,7 +638,7 @@ function hit_renderer(data, type, row) {
         //div.append("<b><a target='_blank' href='http://zinc15.docking.org/substances/"+id+"'>" + id + "</a></b>");
         var checkZinc = id.toString()
         if (checkZinc.substring(0, 4) == 'ZINC') {
-            div.append("<b><a target='_blank' href='/searchZinc/" + id + "'>" + id + "</a></b>");
+            div.append("<b><a target='_blank' href='/substance/" + id + "'>" + id + "</a></b>");
         } else {
             div.append("<b>" + id + "</b>");
         }

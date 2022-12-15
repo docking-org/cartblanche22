@@ -89,8 +89,8 @@ function Arthor(url) {
   this.setTable = function (table) {
     var changed = this.table !== table;
     this.table = table;
-    if (changed && arthor.config.WebApp.SearchAsYouDraw){
-            this.notify();
+    if (changed && arthor.config.WebApp.SearchAsYouDraw) {
+      this.notify();
     }
   };
 
@@ -124,5 +124,4 @@ function Arthor(url) {
 }
 
 /* Site specific */
-
-var arthor = new Arthor('https://arthor.docking.org/');
+var arthor = new Arthor(arthor_url);

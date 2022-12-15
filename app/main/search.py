@@ -242,20 +242,28 @@ def is_zinc22(identifier):
     else:
         return None
 
-@application.route('/substance/<identifier>')
+@application.route('/substance/<identifier>', methods=["GET", "POST"])
 def search_substance(identifier):
+    
     if is_zinc22(identifier):
         data, res, smile, prices = getZincData(identifier)
     else:
         data, res, smile, prices = getZinc20Data(identifier)    
      
     data['zinc_id'] = identifier
-    if data:    
-        return render_template('molecule/mol_index.html', data=data, prices=prices,
-                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
-    else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
-                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404    
+    
+    
+    if request.method == "GET":
+        if data:        
+            return render_template('molecule/mol_index.html', data=data, prices=prices,
+                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
+            
+        else:
+            return render_template('errors/search404.html', lines=files, href='/search/zincid',
+                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404    
+    elif request.method == "POST":
+        
+        return {"data":data}
 
 
 @application.route('/searchZinc20/<identifier>')
@@ -307,7 +315,7 @@ def getZinc20Data(identifier):
         max = 0
         for item in data:
             item['catalog']['catalog_name'] = item['catalog']['short_name']
-            cat = CatalogModel.query.filter_by(short_name = item['catalog']['short_name']).first()
+            
             if item['substance_purchasable'] > max:
                 catalogs = [item['catalog']]
                 supplierCodes = [item['supplier_code']]
@@ -327,7 +335,7 @@ def getZinc20Data(identifier):
         }]
         result['catalogs'] = catalogs
         result['tranche'] = get_basic_tranche(smile)
-        result['zinc20'] = true
+        result['zinc20'] = True
         result['tranche_details'] = get_compound_details(smile)
         result['supplier_code'] = supplierCodes
         
@@ -424,9 +432,9 @@ def swc():
 
 @application.route('/arthor')
 def arthor():
-    return render_template('search/arthor.html')
+    return render_template('search/arthor.html', arthor_url = "https://arthor.docking.org")
 
 @application.route('/arthorp')
 def arthorp():
-    return render_template('search/arthorp.html')
+    return render_template('search/arthor.html', arthor_url = "https://arthorp.docking.org")
 
