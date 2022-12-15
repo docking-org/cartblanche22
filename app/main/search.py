@@ -34,7 +34,7 @@ def search_view():
     return response.json()
 
 
-@application.route('/search/byzincid', methods=["GET", "POST"])
+@application.route('/search/zincid', methods=["GET", "POST"])
 def search_byzincid():
     if request.method == "GET":
         text = Markup('Please contact jjiteam@googlegroups.com with molecules that won\'t look up. ' \
@@ -125,7 +125,7 @@ def search_byzincid():
                                header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
 
 
-@application.route('/search/bysmiles', methods=["GET", "POST"])
+@application.route('/search/smiles', methods=["GET", "POST"])
 def search_bysmiles():
     if request.method == "GET":
         return render_template('search/search_bysmiles.html')
@@ -154,7 +154,7 @@ def search_bysmiles():
                                header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
 
 
-@application.route('/search/bysupplier', methods=["GET", "POST"])
+@application.route('/search/supplier', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
         text = Markup('Please contact jjiteam@googlegroups.com with molecules that won\'t look up. ' \
@@ -221,15 +221,61 @@ def search_smiles():
 def search_smiles_vendor():
     return render_template('search/search_smiles_vendor.html')
 
+def is_zinc22(identifier):
+    if '-' in identifier:
+            return True
+        
+    if identifier[0:1].upper() == 'C':
+        identifier = identifier.replace('C', 'ZINC')
+            
+    if identifier[4:6] == '00':
+        return False
+        
+    elif identifier.isnumeric():
+        return False        
+
+    elif identifier[0:4].upper() == 'ZINC':
+        if(identifier[4:5].isalnum()):
+            return True
+        else:
+            return False
+    else:
+        return None
+
+@application.route('/substance/<identifier>', methods=["GET", "POST"])
+def search_substance(identifier):
+    
+    if is_zinc22(identifier):
+        data, res, smile, prices = getZincData(identifier)
+    else:
+        data, res, smile, prices = getZinc20Data(identifier)    
+     
+    data['zinc_id'] = identifier
+    
+    
+    if request.method == "GET":
+        if data:        
+            return render_template('molecule/mol_index.html', data=data, prices=prices,
+                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
+            
+        else:
+            return render_template('errors/search404.html', lines=files, href='/search/zincid',
+                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404    
+    elif request.method == "POST":
+        
+        return {"data":data}
+
+
 @application.route('/searchZinc20/<identifier>')
 def searchZinc20(identifier):
     data, res, smile, prices = getZinc20Data(identifier)
-     
+    data['zinc_id'] = identifier
+
     if data:    
         return render_template('molecule/mol_index.html', data=data, prices=prices,
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
-        return render_template('errors/search404.html', lines=[identifier], href='/search/zincid',
+        return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
 
 @application.route('/searchZinc/<identifier>')
@@ -240,7 +286,7 @@ def searchZinc(identifier):
         return render_template('molecule/mol_index.html', data=data, prices=prices, 
                                smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
     else:
-        return render_template('errors/search404.html', lines=[identifier], href='/search/zincid',
+        return render_template('errors/search404.html', lines=files, href='/search/zincid',
                                header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
         
 def getZinc20Data(identifier):
@@ -269,7 +315,7 @@ def getZinc20Data(identifier):
         max = 0
         for item in data:
             item['catalog']['catalog_name'] = item['catalog']['short_name']
-            cat = CatalogModel.query.filter_by(short_name = item['catalog']['short_name']).first()
+            
             if item['substance_purchasable'] > max:
                 catalogs = [item['catalog']]
                 supplierCodes = [item['supplier_code']]
@@ -289,7 +335,7 @@ def getZinc20Data(identifier):
         }]
         result['catalogs'] = catalogs
         result['tranche'] = get_basic_tranche(smile)
-        result['zinc20'] = true
+        result['zinc20'] = True
         result['tranche_details'] = get_compound_details(smile)
         result['supplier_code'] = supplierCodes
         
@@ -314,49 +360,48 @@ def getZincData(identifier):
             role = 'ucsf'
         else:
             role = 'public'
-   
-        try:
-            data = res['zinc22']["found"][0]
-            
-            prices = []
-            if data.get('catalogs'):
-                catalogs = data['catalogs']
-            
-                for i in range(len(catalogs)):
-                    c = catalogs[i]
-                    
-                    s = c['catalog_name'].lower()
-                    code = c['supplier_code']
-                    
-                    price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
+  
+        data= res['zinc22']["found"][0]
+        
+        prices = []
+        if data.get('catalogs'):
+            catalogs = data['catalogs']
+           
+            for i in range(len(catalogs)):
+                c = catalogs[i]
                 
-                    if price:    
-                        price.supplier_code = code
-                        prices.append(price)
+                s = c['catalog_name'].lower()
+                code = c['supplier_code']
+                
+                price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
+             
+                if price:    
+                    price.supplier_code = code
+                    prices.append(price)
 
-            #Some of the zinc22 mols are missing vendor data. In that case, use the Zinc20 results as backup.
-            if(len(prices) >= 1):
-                for price in prices:
-                    if 'ZINC' not in price.supplier_code:
-                        break
-                    else:
-                        return getZinc20Data(code)
-            
-            smile = data['smiles'].encode('ascii')
-            smile = smile.replace(b'\x01', b'\\1')
-            smile = smile.decode()
-            data['smiles'] = smile
-            
-            data['zinc20']= False
-            data['supplier']= []
-            
-            return data, res, smile, prices
-        except:
-            return None, None, None, None
+        #Some of the zinc22 mols are missing vendor data. In that case, use the Zinc20 results as backup.
+        if(len(prices) >= 1):
+            for price in prices:
+                if 'ZINC' not in price.supplier_code:
+                    break
+                else:
+                    return getZinc20Data(code)
+        
+        smile = data['smiles'].encode('ascii')
+        smile = smile.replace(b'\x01', b'\\1')
+        smile = smile.decode()
+        data['smiles'] = smile
+        
+        data['zinc20']= False
+        data['supplier']= []
+        
+        return data, res, smile, prices
 
 @application.route('/sw')
 def sw():
-    return render_template('search/sw.html')
+    smiles = request.args.get('smiles')
+    print(smiles)
+    return render_template('search/sw.html', smiles=smiles)
 
 
 @application.route('/swp')
@@ -387,9 +432,9 @@ def swc():
 
 @application.route('/arthor')
 def arthor():
-    return render_template('search/arthor.html')
+    return render_template('search/arthor.html', arthor_url = "https://arthor.docking.org")
 
 @application.route('/arthorp')
 def arthorp():
-    return render_template('search/arthorp.html')
+    return render_template('search/arthor.html', arthor_url = "https://arthorp.docking.org")
 

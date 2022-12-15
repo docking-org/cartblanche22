@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block title %}
+Random Molecule Search - Cartblanche22
+{% endblock %}
 {% block scripts %}
 {{ super() }}
 <script>
@@ -94,20 +97,59 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <h4>CURL commands for downloading random smiles</h4>
-    <p>Below curl command returns a json, txt or csv file with all possible fields.
-    </p>
-    <p>to get .txt file: <code>
-            curl https://cartblanche22.docking.org/substance/random.txt -F count=100
-        </code></p>
-    <p>to get .json file: <code>
-            curl https://cartblanche22.docking.org/substance/random.json -F count=100
-        </code></p>
-    <p>to get .csv file: <code>
-            curl https://cartblanche22.docking.org/substance/random.csv -F count=100
-        </code></p>
 
+
+<div class="row" id="desc">
+    <h4>CURL commands for dowloading random molecules</h4>
+    <p>Example:
+        <code> curl https://cartblanche22.docking.org/substance/random.txt -F count=100 -F subset='lead-like'</code>
+    </p>
+    <table class="table table-bordered">
+        <tr>
+            <th class="col-md-4">Description</th>
+            <th class="col-md-5">Attributes</th>
+            <th class="col-md-3">Possible fields</th>
+        </tr>
+        <tr>
+            <td>To specify return format</td>
+            <td><code>curl https://cartblanche22.docking.org/substances<i>.txt</i></code></td>
+            <td>
+                <ul>
+                    <li>.txt</li>
+                    <li>.csv</li>
+                    <li>.json</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>To specify the number of molecules returned</td>
+            <td> <code>-F count=100<i></i></code></td>
+            <td>
+                <ul>
+                    <li>Any integer < 300,000</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>To specify subset
+                <br>
+
+                <small>If no subset is defined, the batch will be retrieved from all available molecules.</small>
+            </td>
+            <td>
+                <code>-F subset=<i>'lead-like'</i></code>
+            </td>
+            <td>
+                <ul>
+                    <li>lead-like</li>
+                </ul>
+            </td>
+        </tr>
+
+    </table>
+    <p>If you want to learn more about search, please go to <a href="http://wiki.docking.org/index.php/Zinc22:Searching"
+            target="_blank"> Zinc22 documentation on wiki
+            page</a></p>
 </div>
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">

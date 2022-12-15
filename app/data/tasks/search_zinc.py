@@ -25,6 +25,8 @@ client_configuration = {
         "mem_max_cached_file" : 0
 }
 
+
+
 @application.route('/search/progress', methods=['GET'])
 def search_status():
     data = request.args.get("task")

@@ -143,7 +143,7 @@ def tranches2d():
         unfilteredSize += i.sum
 
     return render_template('tranches/2D.html', tranches=tranches, axes=axes,
-                           cell2DNew=json.dumps(cell2DNew),
+                           cell2D=json.dumps(cell2DNew),
                            ticks=ticks, unfilteredSize=unfilteredSize)
 
 

@@ -147,4 +147,4 @@ function Arthor(url) {
 
 /* Site specific */
 
-var arthor = new Arthor('https://arthorp.docking.org');
+var arthor = new Arthor("{{ arthor_url}}");

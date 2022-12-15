@@ -132,7 +132,6 @@ def getDistribution(subset=None):
     db_map = {}
     
     for result in config_curs.fetchall():
-        print(result)
         tranche = result[0]
         
         if subset:

@@ -252,7 +252,14 @@ function smiles_renderer(data, type, row) {
     } catch (err) {
         console.log(err);
     }
-    let button = $('<button type="button" class="btn btn-info">Add to Cart</button>')
+    let button;
+    if (shoppingCart.inCart(id)) {
+        button = $("<span class='glyphicon glyphicon-shopping-cart'></span> &nbsp <input type='checkbox' checked></input>")
+    }
+    else {
+        button = $("<span class='glyphicon glyphicon-shopping-cart'></span> &nbsp <input type='checkbox'></input>")
+    }
+
     button.attr('data-smile', smile);
     button.attr('id', id);
     button.attr('data-identifier', id);
@@ -260,23 +267,8 @@ function smiles_renderer(data, type, row) {
     button.attr('data-hg', false);
     button.attr('data-img', depict_url);
     button.attr('onclick', 'toggleCart(this)');
-    let cart = JSON.parse(localStorage.getItem('cart'))
-    // if(cart==null){
-    //   cart = []
-    // }
-    // let items = []
-    // for (i = 0; i < cart.length; i++) {
-    //   items.push(cart[i].identifier)
-    // }
-    // if (items.includes(id)) {
-    //   button.html('Remove')
-    //   button.attr('class', 'btn btn-danger')
-    // }
-    if (shoppingCart.inCart(id)) {
-        button.html('Remove');
-        button.attr('class', 'btn btn-danger');
 
-    }
+
 
     var row = $('<tr></tr>');
     row.append($("<td></td>").append(button))

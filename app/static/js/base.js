@@ -52,19 +52,25 @@ let shoppingCart = (function () {
     obj.getCart = function () {
         return cart;
     };
+
+
     obj.saveShoppingCart = function (cart_) {
         cart = cart_;
         saveCart();
     };
 
     obj.getPossibleVendors = function (db, catalog, supplier_codes) {
+
         console.log('getPossibleVendors', catalog, supplier_codes);
         let vendors = [];
         let minPrice = Number.MAX_VALUE;
         let minPriceIndex = 0;
         let curIndex = 0;
-        
+
         if (db === 'zinc22' && catalog !== null) {
+
+
+
             for (let s = 0; s < catalog.length; s++) {
                 console.log(catalog[s])
                 let short_name = catalog[s].catalog_name.toLowerCase();
@@ -81,7 +87,7 @@ let shoppingCart = (function () {
                         def_price = default_prices[short_name];
                     }
                 }
-                if ((def_price !== undefined) && (def_price!== null) ){
+                if ((def_price !== undefined) && (def_price !== null)) {
                     let assigned = false;
                     let purchase = 0;
                     console.log(def_price)
@@ -89,7 +95,7 @@ let shoppingCart = (function () {
                         minPriceIndex = curIndex;
                     }
                     let vendor = new Supplier(def_price.cat_name, supplier_codes[s], def_price.price, purchase,
-                                              def_price.quantity, def_price.unit, def_price.shipping, assigned);
+                        def_price.quantity, def_price.unit, def_price.shipping, assigned);
                     vendors.push(vendor);
                     curIndex++;
                 }
@@ -105,27 +111,27 @@ let shoppingCart = (function () {
     obj.addAllItem = function (datas) {
         console.log('from addAll button ', datas.length);
         let tempCart = []
-        for(let i = 0; i < datas.length; i++){
+        for (let i = 0; i < datas.length; i++) {
             let data = datas[i];
-            if(cart.length >= size){
+            if (cart.length >= size) {
                 alert('shopping cart size limit : ' + size);
                 break;
             }
-            if(!obj.inCart(data.zinc_id)){
+            if (!obj.inCart(data.zinc_id)) {
                 let db = data.hasOwnProperty('db') ? data.db : 'zinc22';
                 let catalog = data.hasOwnProperty('catalogs') ? data.catalogs : [];
                 let supplier_codes = data.hasOwnProperty('supplier_code') ? data.supplier_code : [];
-                let smiles = data.hasOwnProperty('smiles' ) ? data.smiles : data.hitMappedSmiles;
+                let smiles = data.hasOwnProperty('smiles') ? data.smiles : data.hitMappedSmiles;
 
                 let vendors;
-                
-                if(db !== 'zinc20'){
+
+                if (db !== 'zinc20') {
                     vendors = obj.getPossibleVendors(db, catalog, supplier_codes);
                 }
-                else{
+                else {
                     vendors = catalog;
                 }
-                
+
                 var item = new Item(data.zinc_id, db, smiles, vendors);
                 console.log('item created', item);
                 tempCart.push(item)
@@ -139,10 +145,10 @@ let shoppingCart = (function () {
     obj.deleteAllItem = function (datas) {
         console.log('from addAll button ', datas.length);
         let ids = [];
-        for(let i = 0; i < datas.length; i++){
+        for (let i = 0; i < datas.length; i++) {
             let data = datas[i];
             let item_index = obj.getItemIndexFromCart(data.zinc_id);
-            if(item_index !== -1){
+            if (item_index !== -1) {
                 ids.push(data.zinc_id);
                 cart.splice(item_index, 1);
             }
@@ -154,7 +160,7 @@ let shoppingCart = (function () {
         obj.writeToDb('/deleteMultItem', 'DELETE', ids);
     };
 
-    obj.addItemToCart = function (identifier, db, smile, supplier=null, catalog = null) {
+    obj.addItemToCart = function (identifier, db, smile, supplier = null, catalog = null) {
         if (cart.length < size) {
             let item_index = obj.getItemIndexFromCart(identifier);
             if (item_index !== -1) {
@@ -162,20 +168,46 @@ let shoppingCart = (function () {
             }
             let vendors;
 
-            if(db !== 'zinc20'){
+            if (supplier === null || catalog === null) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/substance/' + identifier,
+                    async: false,
+                    success: function (data) {
+                        console.log(data);
+
+                        catalog = data.data.catalogs;
+                        supplier = data.data.supplier_code;
+
+                        if (data.data.zinc20 === false) {
+                            db = 'zinc22';
+                        }
+                        else {
+                            db = 'zinc20';
+                            catalog = data.data.supplier;
+                        }
+                    }
+                })
+            }
+
+            console.log(catalog)
+
+
+
+            if (db !== 'zinc20') {
                 vendors = obj.getPossibleVendors(db, catalog, supplier);
             }
-            else{
+            else {
                 vendors = catalog;
             }
-            
+
             console.log("about to addItemToCart:", identifier, db, smile, vendors);
             var item = new Item(identifier, db, smile, vendors);
             cart.push(item);
             obj.writeToDb('/addItem', 'POST', item);
             saveCart();
         }
-        else{
+        else {
             alert('shopping cart size limit : ' + size);
         }
     };
@@ -400,7 +432,7 @@ let shoppingCart = (function () {
                 url: url,
                 type: method,
                 data: JSON.stringify(
-                    {'data': data,}
+                    { 'data': data, }
                 ),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",

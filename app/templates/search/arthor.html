@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
-
+{% block title %}
+    Arthor - Cartblanche22
+{% endblock %}
 
 <title>Arthor</title>
 {% block metas %}
@@ -19,6 +21,9 @@
 
 {% block scripts %}
     {{ super() }}
+    <script>
+        const arthor_url = '{{ arthor_url }}';
+    </script>
     <script src="https://kit.fontawesome.com/3ae3f80648.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="../static/js/arthor/smi.min.js"></script>
     {#<script type="text/javascript" src="../static/js/arthor/datatables.min.js"></script>#}

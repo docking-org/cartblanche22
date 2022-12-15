@@ -110,6 +110,9 @@
     });
 </script>
 {% endblock %}
+{% block title %}
+Search By ZincID - Cartblanche22
+{% endblock %}
 {% block app_content %}
 
 <div class="row" id="zincSearchInput2">
@@ -138,10 +141,10 @@
     </div>
 </div>
 <div class="row" id="desc">
-    <p>You can get result with different formats.
-        If you want to specify output fields, you can add output_fields. The example below returns only smiles, zinc_id
-        by default. If output_fields are not specified
-        , all possible fields are returned. Please note that there are always smiles and zinc_id fields by default.
+    <p>Results can be formatted to the desired file format.
+        The example below returns only smiles, zinc_id
+        by default. If output_fields are not specified, all available molecule data is returned. The zinc_id and smiles
+        output fields will be returned by default unless otherwise specified.
     </p>
 
     <h4>CURL commands for searching multiple ZincIDs</h4>
@@ -174,7 +177,7 @@
             <td>To specify output fields
                 <br>
 
-                <small>If it doesn't defined, search will return all possible fields</small>
+                <small>If no fields are defined, search will return all possible fields</small>
             </td>
             <td>
                 <code>-F output_fields=<i>'smiles,zinc_id'</i></code>

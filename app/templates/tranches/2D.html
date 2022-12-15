@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block title %}
+2D Tranche Browser - Cartblanche22
+{% endblock %}
 {% block styles %}
 {{ super() }}
 <style>
@@ -206,20 +209,44 @@
         overflow-y: auto;
     }
 </style>
+
 {% endblock %}
 {% block scripts %}
 {{ super() }}
 <script>
+    $(".cell").hover(function () {
+        var attr = $(this).attr('data-col');
+        $('.v-guide[data-id=' + attr + "]").css("background-color", "gray");
+        $(this).siblings('th').css("background-color", "gray");
+
+    }, function () {
+        var attr = $(this).attr('data-col');
+        $('.v-guide[data-id=' + attr + "]").css("background-color", "white");
+        $(this).siblings('th').css("background-color", "white");
+    }
+    );
+</script>
+<script>
     let numberToggle = true;
+
+    // shards (H04-H09) to P340
+    // fragments (H10-H16) to P340
+    // flagments H15 H16 H17 H18 H19  to P340
+    // small leads H17 H18 H19 to P340
+    // medium leads H20 H21 H22 to P340
+    // big leads H23 H24 H25 to P340
+    // lugs H26 H27 H28 H29 to P390
+    // drug-like  H04 to H27  to P490
+    // big-n-greasy  H25 H26 H27 H28 H29  P350 to P900
     let predefined = {
         'all': [[0, 61], [0, 62]],
         'none': [[0, 0], [0, 0]],
         'shards': [[0, 41], [4, 10]],
-        'fragments': [[0, 41], [10, 17]],
+        'fragments': [[0, 41], [7, 16]],
         'flagments': [[0, 41], [15, 20]],
-        'lead-like': [[0, 41], [17, 26]],
+        'lead-like': [[0, 41], [16, 26]],
         'goldilocks': [[16, 36], [18, 24]],
-        'small-leads': [[0, 41], [17, 20]],
+        'small-leads': [[0, 41], [16, 20]],
         'medium-leads': [[0, 41], [20, 23]],
         'big-leads': [[0, 41], [23, 26]],
         'lugs': [[0, 46], [26, 30]],
@@ -227,26 +254,33 @@
         'big-n-greasy': [[41, 500], [25, 30]]
     };
 
+
+
+
+
+
     $(document).ready(function () {
-        console.log("2D")
-        let data = {{ cell2DNew | safe
+        let data = {{ cell2D| safe
     }};
     let cols = new Array(62).fill(true);
     let rows = new Array(61).fill(true);
-    localStorage.setItem('twoD', JSON.stringify(data));
-    localStorage.setItem('cols', JSON.stringify(cols));
-    localStorage.setItem('rows', JSON.stringify(rows));
+    localStorage.setItem('2d', JSON.stringify(data));
+    localStorage.setItem('cols2d', JSON.stringify(cols));
+    localStorage.setItem('rows2d', JSON.stringify(rows));
     var t = document.getElementById("numberToggle");
     numberToggles(t);
     renderTrancheTable();
+
+            
         });
 
     function renderTrancheTable() {
-        arr = JSON.parse(localStorage.getItem('twoD'))
+
+        arr = JSON.parse(localStorage.getItem('2d'));
         let rowSize = new Array(61).fill(0);
         let colSize = new Array(62).fill(0);
         let totalSize = 0
-        let log_total = Math.log({{ unfilteredSize }})
+        let log_total = Math.log({{ unfilteredSize }});
     let trancheCount = 0
     for (let i = 0; i < 61; i++) {
         for (let j = 0; j < 62; j++) {
@@ -261,9 +295,15 @@
             td.css('background-color', '#' + color.toString(16).repeat(3));
             cell.css('color', color > 105 ? '#333' : '#ccc');
             if (tranche.chosen === true) {
+                if (!tranche.size) {
+                    tranche.size = 0
+                }
+
                 let val = parseInt(tranche.size)
+
                 rowSize[i] += val
                 colSize[j] += val
+
                 totalSize += val
                 cell.css('opacity', 1)
                 trancheCount += 1
@@ -284,49 +324,56 @@
 
     function colToggle(obj) {
         let id = obj.getAttribute('data-id')
-        let arr = JSON.parse(localStorage.getItem('twoD'))
-        let cols = JSON.parse(localStorage.getItem('cols'))
+        let arr = JSON.parse(localStorage.getItem('2d'))
+        let cols = JSON.parse(localStorage.getItem('cols2d'))
         cols[id] = !cols[id]
         $(obj.target).css('opacity', 1 ? cols[id] : 0.1)
         for (let i = 0; i < 61; i++) {
             if (arr[i][id].size === 0) {
                 arr[i][id].chosen = false
-            } else {
+            }
+            else {
                 arr[i][id].chosen = cols[id]
+
             }
         }
-        localStorage.setItem('twoD', JSON.stringify(arr));
-        localStorage.setItem('cols', JSON.stringify(cols));
+        localStorage.setItem('2d', JSON.stringify(arr));
+        localStorage.setItem('cols2d', JSON.stringify(cols));
         renderTrancheTable();
     }
 
     function rowToggle(obj) {
         let id = obj.getAttribute('data-id')
-        let arr = JSON.parse(localStorage.getItem('twoD'))
-        let rows = JSON.parse(localStorage.getItem('rows'))
+        let arr = JSON.parse(localStorage.getItem('2d'))
+        let rows = JSON.parse(localStorage.getItem('rows2d'))
         rows[id] = !rows[id]
         for (let i = 0; i < 62; i++) {
             if (arr[id][i].size === 0) {
                 arr[id][i].chosen = false
-            } else {
+            }
+            else {
+
                 arr[id][i].chosen = rows[id]
             }
         }
-        localStorage.setItem('twoD', JSON.stringify(arr));
-        localStorage.setItem('rows', JSON.stringify(rows));
+        localStorage.setItem('2d', JSON.stringify(arr));
+        localStorage.setItem('rows2d', JSON.stringify(rows));
+
         renderTrancheTable();
     }
 
     function cellToggle(obj) {
         let row = obj.getAttribute('data-row')
         let col = obj.getAttribute('data-col')
-        let arr = JSON.parse(localStorage.getItem('twoD'))
+        let arr = JSON.parse(localStorage.getItem('2d'))
         if (arr[row][col].size === 0) {
             arr[row][col].chosen = false
-        } else {
-            arr[row][col].chosen = !arr[row][col].chosen
         }
-        localStorage.setItem('twoD', JSON.stringify(arr));
+        else {
+            arr[row][col].chosen = !arr[row][col].chosen
+
+        }
+        localStorage.setItem('2d', JSON.stringify(arr));
         renderTrancheTable();
     }
 
@@ -350,10 +397,11 @@
     }
 
     function setPredefined(s) {
-        let arr = JSON.parse(localStorage.getItem('twoD'))
+        let arr = JSON.parse(localStorage.getItem('2d'))
         let p = predefined[s]
+
         for (let i = 0; i < 61; i++) {
-            for (let j = 0; j < 30; j++) {
+            for (let j = 0; j < 62; j++) {
                 if (p[0][0] <= i && i < p[0][1] && p[1][0] <= j && j < p[1][1] && arr[i][j].size != 0) {
                     arr[i][j].chosen = true
                 } else {
@@ -361,15 +409,14 @@
                 }
             }
         }
-        localStorage.setItem('twoD', JSON.stringify(arr));
+        localStorage.setItem('2d', JSON.stringify(arr));
         renderTrancheTable();
     }
 
+
+
     function trancheDownloadModalClicked() {
-        let arr = JSON.parse(localStorage.getItem('twoD'))
-        let temp = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-            'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
-            'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        let arr = JSON.parse(localStorage.getItem('2d'))
         let col = ['H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
             'H16', 'H17',
             'H18', 'H19', 'H20', 'H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28', 'H29', 'H30', 'H31', 'H32', 'H33',
@@ -380,17 +427,19 @@
             'P230', 'P240', 'P250', 'P260', 'P270', 'P280', 'P290', 'P300', 'P310', 'P320', 'P330', 'P340', 'P350', 'P360',
             'P370', 'P380', 'P390', 'P400', 'P410', 'P420', 'P430', 'P440', 'P450', 'P460', 'P470', 'P480', 'P490', 'P500', 'P600',
             'P700', 'P800', 'P900']
-        let st = ''
+        let st = '';
         for (let i = 0; i < 61; i++) {
-            for (let j = 0; j < 30; j++) {
+            for (let j = 0; j < 62; j++) {
                 if (arr[i][j].chosen) {
-                    st = st + col[j] + row[i] + ' '
+                    st = st + col[j] + row[i] + ' ';
                 }
             }
         }
         $('#selected-tranches').html(st)
 
     }
+
+
 </script>
 {% endblock %}
 {% block tranchebrowser %}
@@ -431,6 +480,11 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <h4 class="pull-left">Method</h4>
+                            </div>
+                        </div>
                         <div class="btn-toolbar">
                             <div class="btn-group pull-right">
                                 <button class="btn btn-primary" type="submit">
@@ -439,20 +493,22 @@
                                 </button>
                             </div>
                             <div class="form-group">
+
                                 <select name="format" class="btn btn-info" id="downloadFormat">
-                                    <option value="smi.gz" id="format-smi" selected>
+                                    <option value="smi.tgz" id="format-smi" selected>
                                         SMILES (*.smi)
                                     </option>
+
                                 </select>
 
                                 <select name="using" class="btn btn-info" id="downloadUsing">
-                                    <option value="uri" id="using-url">
-                                        URLs
+                                    <option value="uri" id="using-uri">
+                                        URIs
                                     </option>
                                     <option id="using-database_index" value="database_index">DOCK Database Index
                                     </option>
                                     <option value="curl" id="using-curl">
-                                        cURL
+                                        CURL
                                     </option>
                                     <option value="wget" id="using-wget">
                                         WGET
@@ -473,11 +529,13 @@
 </div>
 <div class="row">
     <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12 top-bar" style="background-color: white; border: 1px solid #ccc; text-align: center;
-             text-justify: auto; color: black;font-weight: bold;
-            ">
+                 text-justify: auto; color: black;font-weight: bold;
+                ">
 
 
         <div class="row">
+
+
             <div class="pull-right top-button">
                 <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal"
                     onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i></button>
@@ -507,11 +565,11 @@
                     </ul>
                 </div>
             </div>
+
             <div class="pull-right top-button">
                 <label class="switch">
                     <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
-                    <span class="slider round" data-toggle="tooltip"
-                        title="Toggle full and condensed molecule counts"></span>
+                    <span class="slider round"></span>
                 </label>
             </div>
 
@@ -529,7 +587,7 @@
 
 <div class="row">
     <div class="col-sm-1 col-xs-1" style="background-color: white; height:74vh;  color:black; border-left: 1px solid #ccc;
-             border-right:1px solid #ccc;width: 2em; font-weight: bold;">
+                 border-right:1px solid #ccc;width: 2em; font-weight: bold;">
         <p class="title-text" style="transform: rotate(-90deg); top: 21em; position: sticky;">LogP</p>
     </div>
     <div style="background-color: grey; border-bottom: 1px solid #ccc">
@@ -597,9 +655,9 @@
                         <th>
                             <div>
                                 <!-- <span>
-                                        {{ axes[2][col] }}<br>{{ axes[0][col] }}
-                                    </span>
-                                    <br/> -->
+                                            {{ axes[2][col] }}<br>{{ axes[0][col] }}
+                                        </span>
+                                        <br/> -->
                                 <span id="col-sum-{{ col }}">
                                     sum {{ axes[0][col] }}
                                 </span>

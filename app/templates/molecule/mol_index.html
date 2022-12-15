@@ -7,6 +7,9 @@
     }
 </style>
 {% endblock %}
+{% block title %}
+{{ data.zinc_id }} - Cartblanche22
+{% endblock %}
 {% block scripts %}
 {{ super() }}
 <script>
@@ -23,7 +26,7 @@
             $('#addItem').show()
             $('#deleteItem').hide()
         }
-        
+
         let supplier_codes = JSON.parse('{{data.supplier_code|tojson}}')
         let catalogs = JSON.parse('{{ data.catalogs|tojson }}')
         let identifier = JSON.parse('{{ identifier|tojson }}')
@@ -100,20 +103,20 @@
             <table class="table table-striped table-condensed table-hover table-numeric">
                 <thead>
                     <tr>
-                        <th><abbr title="Molecular Weight">Mwt</abbr></th>
-                        <th><abbr title="Partition Coefficient">logP</abbr></th>
                         <th>Tranche</th>
                         <th>Heavy Atoms</th>
-                        {# <th>Download</th>#}
+                        <th><abbr title="Partition Coefficient">logP</abbr></th>
+                        <th><abbr title="Molecular Weight">Mwt</abbr></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         {% if data.tranche %}
-                        <td>{{ data.tranche_details.mwt }}</td>
-                        <td>{{ data.tranche_details.logp }} ({{ data.tranche.logp }})</td>
                         <td>{{ data.tranche.h_num }}{{ data.tranche.p_num }}</td>
                         <td>{{ data.tranche_details.heavyAtoms }} [{{ data.tranche.mwt }}]</td>
+                        <td>{{ data.tranche_details.logp }} ({{ data.tranche.logp }})</td>
+                        <td>{{ data.tranche_details.mwt }}</td>
+
                         {% else %}
                         <td></td>
                         <td></td>
@@ -125,7 +128,7 @@
             </table>
         </div>
         <div class="row collapse-inputgroups">
-            <div class="input-group input-sm">
+            <div class="input-group input-sm" style="margin:3px">
                 <label for="substance-smiles-field" id="substance-smiles-field-label" class="input-group-addon"
                     title="Click to copy to clipboard">SMILES</label>
                 <input type="text" class="form-control" id="substance-smiles-field" readonly="" value={{ data.smiles }}>
@@ -137,7 +140,7 @@
                 </span>
             </div>
 
-            <div class="input-group input-sm">
+            <div class="input-group input-sm" style="margin:3px">
                 <label for="scaffold-inchi-field" id="scaffold-inchi-field-label" class="input-group-addon"
                     title="Click to copy to clipboard">InChI</label>
                 {% if data.tranche %}
@@ -154,7 +157,7 @@
                         {# </button>#}
                     {# </span>#}
             </div>
-            <div class="input-group input-sm">
+            <div class="input-group input-sm" style="margin:3px">
                 <label for="scaffold-inchikey-field" id="scaffold-inchikey-field-label" class="input-group-addon"
                     title="Click to copy to clipboard">InChI Key</label>
                 {% if data.tranche %}
@@ -169,6 +172,7 @@
                         {# <span class="glyphicon glyphicon-copy"></span>#}
                         {# <span class="sr-only">Copy</span></button>#}
                     {# </span>#}
+
             </div>
         </div>
 
@@ -182,8 +186,11 @@
             {# <div class="caption text-center">#}
                 {# <a href="">Draw</a>#}
                 {# </div>#}
+            <a href="/sw?smiles={{data.smiles}}"><button id='draw' class="btn btn-outline-info">Find
+                    Similar</button></a>
             <button id='addItem' class="btn btn-info" style="display:none;">Add to Cart</button>
             <button id='deleteItem' class="btn btn-danger" style="display:none;">Remove from Cart</button>
+
         </div>
 
         {# <table class="table table-striped table-condensed table-hover table-numeric">#}
@@ -205,6 +212,7 @@
 
 </div>
 <br>
+
 <div class="row">
     <table id="data" class="table table-striped table-bordered table-condensed table-hover table-numeric">
         <thead>
@@ -213,7 +221,9 @@
                 <th>Supplier code</th>
                 <th>Pack</th>
                 <th>Ships within</th>
-                <th>Price (USD)</th>
+                <th data-toggle="tooltip"
+                    title="All prices listed below are estimated. Please check with vendors directly to confirm the price.">
+                    Price (USD) *</th>
             </tr>
         </thead>
         <tbody>
@@ -221,14 +231,13 @@
             {% if p.category_name == 'zinc20-stock' %}
             <tr>
                 <td>{{ p.category_name }}</td>
-                <td><a target="_blank"
-                        href="https://zinc20.docking.org/substances/{{ p.supplier_code}}">{{
+                <td><a target="_blank" href="https://zinc20.docking.org/substances/{{ p.supplier_code}}">{{
                         p.supplier_code }} </a>
                 </td>
                 <td></td>
                 <td></td>
                 <td></td>
-                
+
             </tr>
             {% else %}
             <tr>
@@ -243,5 +252,6 @@
         </tbody>
     </table>
     <br>
+
 </div>
 {% endblock %}
