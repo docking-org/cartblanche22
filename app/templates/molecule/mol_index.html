@@ -29,8 +29,8 @@
 
         let supplier_codes = JSON.parse('{{data.supplier_code|tojson}}')
         let catalogs = JSON.parse('{{ data.catalogs|tojson }}')
-        let identifier = JSON.parse('{{ identifier|tojson }}')
-        let smiles = JSON.parse('{{ data.smiles|tojson }}')
+        let identifier = '{{ identifier }}'
+        let smiles = "{{ data.smiles }}";
         console.log(supplier_codes);
         console.log(catalogs);
         $('#addItem').on('click', () => {

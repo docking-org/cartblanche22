@@ -45,6 +45,28 @@ let shoppingCart = (function () {
             localStorage.setItem('pageLoaded', false);
         }
     }
+    
+    function is_zinc22(identifier) {
+        if (identifier.indexOf('-') != -1) {
+            return true;
+        }
+        if (identifier.substring(0, 1).toUpperCase() == 'C') {
+            identifier = identifier.replace('C', 'ZINC');
+        }
+        if (identifier.substring(4, 6) == '00') {
+            return false;
+        } else if (Number.isInteger(identifier)) {
+            return false;
+        } else if (identifier.substring(0, 4).toUpperCase() == 'ZINC') {
+            if (identifier.substring(4, 5).match(/^[0-9a-z]+$/)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return null;
+        }
+    }
 
     loadCart();
     // Public methods and properties
@@ -188,15 +210,11 @@ let shoppingCart = (function () {
                     },
                     error: function (data) {
                         // not found in tin
-                        alert("No data found for: " + identifier);
-                        missing = true;
+                        alert("No purchasing information found for: " + identifier+ "\nMolecule will be added to cart without purchasing information.");
                     }
                 })
             }
-            if (missing) {
-                return false;
-            }
-
+            
             if (db !== 'zinc20') {
                 vendors = obj.getPossibleVendors(db, catalog, supplier);
             }
@@ -204,9 +222,8 @@ let shoppingCart = (function () {
                 vendors = catalog;
             }
 
-            if (vendors.length === 0) {
-                alert("No vendors available for this molecule");
-                return false;
+            if(!db){
+                is_zinc22(identifier) ? db = 'zinc22': db = 'zinc20';
             }
 
             console.log("about to addItemToCart:", identifier, db, smile, vendors);
