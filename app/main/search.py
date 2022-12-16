@@ -11,7 +11,7 @@ reload(socket)
 from app.data.models.vendors import Vendors
 from sqlalchemy.sql.expression import true
 from app.data.models.tin.catalog import CatalogModel
-from flask import render_template, request, json, jsonify, flash, Markup
+from flask import render_template, request, json, jsonify, flash, Markup, abort
 from app.main import application
 
 
@@ -42,116 +42,13 @@ def search_byzincid():
         
         flash(text)
         return render_template('search/search_byzincid.html')
-    elif request.method == "POST":
-        data = request.form['myTextarea']
-        file = request.files['zincfile'].read().decode("utf-8")
-        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        fileDataList = file.split('\n')
-        zinc22 = []
-        zinc20 = []
-        discarded = []
-        zinc22_response, zinc20_response = None, None
-        data22_json, data22 = None, None
-        data20_json, data20 = None, None
-        for identifier in textDataList + fileDataList:
-            if '-' in identifier:
-                def checkHasZinc(identifier):
-                    if identifier[0:4].upper() != 'ZINC':
-                        identifier_ = 'ZINC' + identifier
-                        return identifier_.replace('-', (16 - len(identifier_) + 1) * '0')
-                    return identifier.replace('-', (16 - len(identifier) + 1) * '0')
-                new_identifier = checkHasZinc(identifier)
-                print(new_identifier, identifier, len(new_identifier))
-                zinc22.append(new_identifier)
-                continue
-            if identifier.isnumeric() or identifier[4:6] == '00':
-                zinc20.append(identifier)
-                continue
-            elif identifier[0:4].upper() == 'ZINC':
-                zinc22.append(identifier)
-                continue
-            else:
-                discarded.append(identifier)
-        if len(zinc22) > 0:
-            files = {
-                'zinc_id-in': ','.join(zinc22)
-            }
-            url = "https://cartblanche22.docking.org/sublist"
-        
-            print(zinc22)
-            
-            zinc22_response = requests.post(url, data=files)
-        if len(zinc20) > 0:
-            zinc20_files = {
-                'zinc_id-in': zinc20,
-                'output_fields': "zinc_id supplier_code smiles substance_purchasable"
-            }
-            zinc20_response = requests.post("https://zinc15.docking.org/catitems.txt", data=zinc20_files)
-        if zinc22_response:
-            zinc22_result = zinc22_response.json()
-            if 'items' in zinc22_result:
-                data22 = zinc22_result['items']
-        if zinc20_response:
-            zinc20_data = {}
-            for line in zinc20_response.text.split('\n'):
-                temp = line.split('\t')
-                if len(temp) == 4:
-                    identifier, supplier_code, smiles, purchasibility = temp[0], temp[1], temp[2], temp[3]
-                    if identifier not in zinc20_data:
-                        zinc20_data[identifier] = {
-                            'identifier': identifier,
-                            'zinc_id': identifier,
-                            'smiles': smiles,
-                            'catalogs_new': [{'supplier_code': supplier_code, 'purchasibility': purchasibility}],
-                            'catalogs': supplier_code,
-                            'supplier_code': supplier_code,
-                            'db': 'zinc20'
-                        }
-                    else:
-                        catalogs = zinc20_data[identifier]['catalogs_new']
-                        cat_found = False
-                        for c in catalogs:
-                            if c['supplier_code'] == supplier_code:
-                                cat_found = True
-                        if not cat_found:
-                            zinc20_data[identifier]['catalogs_new'].append({'supplier_code': supplier_code, 'purchasibility': purchasibility})
-            data20 = list(zinc20_data.values())
-        if data20 or data22:
-            print(data20)
-            return render_template('search/result_zincsearch.html', data22_json=json.dumps(data22), data22=data22,
-                                   data20_json=json.dumps(data20), data20=data20)
-        else:
-            return render_template('errors/search404.html', lines=files, href='/search/search_byzincid',
-                               header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
+
 
 
 @application.route('/search/smiles', methods=["GET", "POST"])
 def search_bysmiles():
     if request.method == "GET":
         return render_template('search/search_bysmiles.html')
-    elif request.method == "POST":
-        data = request.form['smilesTextarea']
-        file = request.files['smilesfile'].read().decode("utf-8")
-        dist = request.form['dist']
-        adist = request.form['adist']
-        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        fileDataList = file.split('\n')
-        files = {
-            'smiles-in': ','.join(textDataList + fileDataList),
-            'dist': dist,
-            'adist': adist,
-        }
-        # url = "https://cartblanche22.docking.org/smilelist"
-        url = "http://localhost:5000/smilelist"
-        response = requests.post(url, data=files)
-        print(response)
-        if response:
-            print(response.json())
-            smiles_result = response.json()
-            return render_template('search/result_smiles.html', data_json=json.dumps(smiles_result), data=smiles_result)
-        else:
-            return render_template('errors/search404.html', lines=files, href='/search/search_bysmiles',
-                               header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
 
 
 @application.route('/search/supplier', methods=["GET", "POST"])
@@ -162,39 +59,6 @@ def search_bysupplier():
         
         flash(text)
         return render_template('search/search_bysupplier.html')
-    elif request.method == "POST":
-        data = request.form['supplierTextarea']
-        file = request.files['supplierfile'].read().decode("utf-8")
-        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
-        # fileDataList = [x for x in re.split(' |, |,|\n,|\r, |\r\n', file) if x!='']
-        fileDataList = file.split('\n')
-        print('fileDataList', fileDataList)
-        print('textDataList', textDataList)
-        files = {
-            'supplier_code-in': ','.join(textDataList + fileDataList),
-        }
-        url = "https://cartblanche22.docking.org/catlist"
-        # url = 'https://{}/catlist'.format(request.host)
-        response = requests.post(url, data=files)
-        print(response)
-        if response:
-            print(response.json())
-            supplier_result = response.json()
-            found_molecules = []
-            waited_servers =[]
-            for s in supplier_result['items']:
-                if 'error' not in s:
-                    found_molecules.append(s)
-                else:
-                    temparr = s['elapsed_time'].split(' ')
-                    time = float(temparr[-2])
-                    if time >= 1:
-                        waited_servers.append(s)
-            return render_template('search/result_supplier.html', data_json=json.dumps(found_molecules),
-                                   data=found_molecules, servers=waited_servers)
-        else:
-            return render_template('errors/search404.html', lines=files, href='/search/search_bysupplier',
-                               header="We didn't find those molecules from Zinc22 database. Click here to return"), 404
 
 
 @application.route('/search/zincid')
@@ -244,50 +108,28 @@ def is_zinc22(identifier):
 
 @application.route('/substance/<identifier>', methods=["GET", "POST"])
 def search_substance(identifier):
-    
+
     if is_zinc22(identifier):
-        data, res, smile, prices = getZincData(identifier)
+        data, res, smile, prices, logs = getZincData(identifier)
     else:
-        data, res, smile, prices = getZinc20Data(identifier)    
-     
-    data['zinc_id'] = identifier
+        data, res, smile, prices, logs= getZinc20Data(identifier)    
     
+    if data:        
+            data['zinc_id'] = identifier
     
     if request.method == "GET":
         if data:        
             return render_template('molecule/mol_index.html', data=data, prices=prices,
                                 smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
-            
         else:
-            return render_template('errors/search404.html', lines=files, href='/search/zincid',
+            return render_template('errors/search404.html', lines=data, logs = logs, href='/search/zincid',
                                 header="We didn't find this molecule from Zinc22 database. Click here to return"), 404    
     elif request.method == "POST":
-        
-        return {"data":data}
+        if data:
+            return {"data":data}
+        else:
+            abort(404)
 
-
-@application.route('/searchZinc20/<identifier>')
-def searchZinc20(identifier):
-    data, res, smile, prices = getZinc20Data(identifier)
-    data['zinc_id'] = identifier
-
-    if data:    
-        return render_template('molecule/mol_index.html', data=data, prices=prices,
-                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
-    else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
-                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
-
-@application.route('/searchZinc/<identifier>')
-def searchZinc(identifier):
-    data, res, smile, prices = getZincData(identifier)
-    
-    if data:
-        return render_template('molecule/mol_index.html', data=data, prices=prices, 
-                               smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
-    else:
-        return render_template('errors/search404.html', lines=files, href='/search/zincid',
-                               header="We didn't find this molecule from Zinc22 database. Click here to return"), 404
         
 def getZinc20Data(identifier):
     zinc20_files = {
@@ -304,6 +146,7 @@ def getZinc20Data(identifier):
             role = 'ucsf'
         else:
             role = 'public'
+            
         data= json.loads(response.text)
         
         
@@ -348,7 +191,10 @@ def getZinc20Data(identifier):
                 'shipping': '6 weeks',
                 'supplier_code': supplierCodes[0]
         }]
-        return result, result, smile, prices
+        return result, result, smile, prices, []
+    
+    else:
+        return None, None, None, None, []
 
 def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[], [identifier]]) 
@@ -360,7 +206,11 @@ def getZincData(identifier):
             role = 'ucsf'
         else:
             role = 'public'
-  
+
+        logs = res['zinc22']["logs"]
+        
+        if len(res['zinc22']["found"]) == 0:
+            return None, None, None, None,  res['zinc22']["logs"]
         data= res['zinc22']["found"][0]
         
         prices = []
@@ -395,7 +245,7 @@ def getZincData(identifier):
         data['zinc20']= False
         data['supplier']= []
         
-        return data, res, smile, prices
+        return data, res, smile, prices, logs
 
 @application.route('/sw')
 def sw():

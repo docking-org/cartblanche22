@@ -63,14 +63,14 @@ def search_result_zinc():
         if request.method == 'GET':
             data = request.args.get("task")
             task = AsyncResult(data)
-       
+
             if task.status == "PROGRESS" or task.status == "PENDING" and task.info:
                 return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false', logs='')
             else:
                 list20, list22, missing, logs = getResult(task)       
                 
                 if(len(list22) == 0 and len(list20) == 0):
-                    return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
+                    return render_template('errors/search404.html', href='/search/search_byzincid', logs = logs, header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
                 return render_template('search/result.html', data22=list22, data20=list20, missing22=missing, ready='true', progress='1', logs=logs)
 
 class SearchJobSupplier(Resource):

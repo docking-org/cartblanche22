@@ -26,7 +26,11 @@ function Arthor(url) {
   this.tables = {};
   this.listeners = [];
 
-  this.configPromise = $.get(this.url + '/config').then((function (arthor) {
+  this.configPromise = $.get({
+    url: this.url + '/config',
+    xhrFields: { withCredentials: (arthor_url.includes("arthorp") ? true : false) }
+  }
+  ).then((function (arthor) {
     return function (response) {
       arthor.config = response;
       return response;
@@ -47,7 +51,10 @@ function Arthor(url) {
 
   this.getTables = function () {
     var larthor = this;
-    return $.get(this.url + "/dt/data")
+    return $.get({
+      url: this.url + "/dt/data",
+      xhrFields: { withCredentials: (arthor_url.includes("arthorp") ? true : false) }
+    })
       .done(function (res) {
         for (var i = 0; i < res.length; i++) {
           larthor.tables[res[i].displayName] = res[i];
@@ -56,7 +63,12 @@ function Arthor(url) {
   };
 
   this.meminfo = function (table) {
-    return $.get(this.url + "/dt/" + encodeURIComponent(table) + "/data")
+    return $.get(
+      {
+        url: this.url + "/dt/" + encodeURIComponent(table) + "/data",
+        xhrFields: { withCredentials: (arthor_url.includes("arthorp") ? true : false) }
+      }
+    )
       .then(function (r) {
         return r.memInfo;
       });
@@ -66,6 +78,7 @@ function Arthor(url) {
     var baseurl = this.url + "/dt/" + encodeURIComponent(table)
     return $.ajax({
       url: baseurl + '/data?' + $.param({ idxtouch: itype }),
+      xhrFields: { withCredentials: (arthor_url.includes("arthorp") ? true : false) },
       type: 'PUT'
     });
   };
@@ -74,6 +87,7 @@ function Arthor(url) {
     var baseurl = this.url + "/dt/" + encodeURIComponent(table)
     return $.ajax({
       url: baseurl + '/data?' + $.param({ idxevict: itype }),
+      xhrFields: { withCredentials: (arthor_url.includes("arthorp") ? true : false) },
       type: 'PUT'
     });
   };

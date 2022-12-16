@@ -34,6 +34,7 @@ function updateTotal(request) {
     $.ajax({
         url: arthor.url + '/dt/' + arthor.table + '/search',
         type: "GET",
+        xhrFields: { withCredentials: (arthor_url.includes("arthorp") ? true : false) },
         data: {
             query: request.query,
             type: request.type,
@@ -71,6 +72,7 @@ function fetchPage(request) {
     $.ajax({
         url: arthor.url + '/dt/' + arthor.table + '/search',
         type: "GET",
+        xhrFields: { withCredentials: (arthor_url.includes("arthorp") ? true : false) },
         data: {
             query: arthor.query,
             type: arthor.type,
@@ -253,11 +255,12 @@ function smiles_renderer(data, type, row) {
         console.log(err);
     }
     let button;
+
     if (shoppingCart.inCart(id)) {
-        button = $("<span class='glyphicon glyphicon-shopping-cart'></span> &nbsp <input type='checkbox' checked></input>")
+        button = $("<span class='glyphicon glyphicon-shopping-cart'></span> &nbsp <input type='checkbox' id=" + id + " checked></input>")
     }
     else {
-        button = $("<span class='glyphicon glyphicon-shopping-cart'></span> &nbsp <input type='checkbox'></input>")
+        button = $("<span class='glyphicon glyphicon-shopping-cart'></span> &nbsp <input type='checkbox' id=" + id + "></input>")
     }
 
     button.attr('data-smile', smile);

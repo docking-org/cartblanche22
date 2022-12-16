@@ -1,7 +1,7 @@
 from app.data.tasks.search_smiles import search, curlSearch
 
 from app.celery_worker import celery, flask_app, db
-from app.main.search import getZincData, searchZinc
+from app.main.search import getZincData
 from celery.result import AsyncResult
 from celery.execute import send_task
 from flask_restful import Resource, reqparse

@@ -129,7 +129,7 @@ function resolve_structure(input) {
 
 function load_smiles(input) {
   console.log('load smiles')
-  if (fromSmiInput) return;
+  
   var smi = $(input).val();
   var url = 'https://sw.docking.org/util/smi2mol?smi=%s'
 

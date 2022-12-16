@@ -10,6 +10,32 @@
     <br>
     <br>
     <p><a href="{{ url_for('main.cartblanche') }}">Return to main page</a></p>
+    
+    
+    {%  if request.access_route[-1][0:3] == '10.' or  request.access_route[-1][0:8] == '169.230.' or request.access_route[-1][0:8] == '128.218.' or request.access_route[0] == '127.0.0.1'%}                                
+    <div class="container fixed-bottom">
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Search Logs
+                    </a>
+                </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                <div class="panel-body">
+                    <textarea id="searchLogs" class="form-control" type="text" readonly>
+                        {% for log in logs %}
+                         {{log}}
+                        {% endfor %}
+                    </textarea>
+                </div>
+                </div>
+            </div>                            
+        </div>
     </div>
+{%  endif %}
+    </div>
+
 
 {% endblock %}

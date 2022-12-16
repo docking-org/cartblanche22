@@ -54,7 +54,6 @@ function toggleCart(btn) {
 
     if (shoppingCart.inCart(identifier)) {
         shoppingCart.removeItemFromCart(identifier);
-
     }
     else {
         // $(btn).prop('disabled', true)
@@ -68,7 +67,12 @@ function toggleCart(btn) {
         item.db = db
         item.img = img
         item.supplier = []
-        shoppingCart.addItemToCart(identifier, db, smile);
+        if (shoppingCart.addItemToCart(identifier, db, smile) === false) {
+
+            $("input[id=" + identifier + "]").attr("checked", false);
+            $("#deleteItem").attr("style", "display: none;");
+            $("#addItem").attr("style", "display: inline-block");
+        }
         if (hg) {
             setTimeout(function () {
                 shoppingCart.addVendorToCart(identifier, db, smile, 'HG', 'HG', 10, 'mg', 0, '0', 1, true);

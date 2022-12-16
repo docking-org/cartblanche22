@@ -45,6 +45,28 @@ let shoppingCart = (function () {
             localStorage.setItem('pageLoaded', false);
         }
     }
+    
+    function is_zinc22(identifier) {
+        if (identifier.indexOf('-') != -1) {
+            return true;
+        }
+        if (identifier.substring(0, 1).toUpperCase() == 'C') {
+            identifier = identifier.replace('C', 'ZINC');
+        }
+        if (identifier.substring(4, 6) == '00') {
+            return false;
+        } else if (Number.isInteger(identifier)) {
+            return false;
+        } else if (identifier.substring(0, 4).toUpperCase() == 'ZINC') {
+            if (identifier.substring(4, 5).match(/^[0-9a-z]+$/)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return null;
+        }
+    }
 
     loadCart();
     // Public methods and properties
@@ -167,6 +189,7 @@ let shoppingCart = (function () {
                 return;
             }
             let vendors;
+            let missing = false;
 
             if (supplier === null || catalog === null) {
                 $.ajax({
@@ -174,31 +197,33 @@ let shoppingCart = (function () {
                     url: '/substance/' + identifier,
                     async: false,
                     success: function (data) {
-                        console.log(data);
-
-                        catalog = data.data.catalogs;
                         supplier = data.data.supplier_code;
 
                         if (data.data.zinc20 === false) {
                             db = 'zinc22';
+                            catalog =   data.data.catalogs;
                         }
                         else {
                             db = 'zinc20';
                             catalog = data.data.supplier;
                         }
+                    },
+                    error: function (data) {
+                        // not found in tin
+                        alert("No purchasing information found for: " + identifier+ "\nMolecule will be added to cart without purchasing information.");
                     }
                 })
             }
-
-            console.log(catalog)
-
-
-
+            
             if (db !== 'zinc20') {
                 vendors = obj.getPossibleVendors(db, catalog, supplier);
             }
             else {
                 vendors = catalog;
+            }
+
+            if(!db){
+                is_zinc22(identifier) ? db = 'zinc22': db = 'zinc20';
             }
 
             console.log("about to addItemToCart:", identifier, db, smile, vendors);
