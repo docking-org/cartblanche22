@@ -11,7 +11,7 @@ reload(socket)
 from app.data.models.vendors import Vendors
 from sqlalchemy.sql.expression import true
 from app.data.models.tin.catalog import CatalogModel
-from flask import render_template, request, json, jsonify, flash, Markup
+from flask import render_template, request, json, jsonify, flash, Markup, abort
 from app.main import application
 
 
@@ -264,8 +264,10 @@ def search_substance(identifier):
             return render_template('errors/search404.html', lines=data, logs = logs, href='/search/zincid',
                                 header="We didn't find this molecule from Zinc22 database. Click here to return"), 404    
     elif request.method == "POST":
-       
-        return {"data":data}
+        if data:
+            return {"data":data}
+        else:
+            abort(404)
 
 
 @application.route('/searchZinc20/<identifier>')
@@ -352,6 +354,9 @@ def getZinc20Data(identifier):
                 'supplier_code': supplierCodes[0]
         }]
         return result, result, smile, prices, []
+    
+    else:
+        return None, None, None, None, []
 
 def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[], [identifier]]) 

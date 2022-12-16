@@ -175,12 +175,11 @@ let shoppingCart = (function () {
                     url: '/substance/' + identifier,
                     async: false,
                     success: function (data) {
-
-                        catalog = data.data.catalogs;
                         supplier = data.data.supplier_code;
 
                         if (data.data.zinc20 === false) {
                             db = 'zinc22';
+                            catalog =   data.data.catalogs;
                         }
                         else {
                             db = 'zinc20';
