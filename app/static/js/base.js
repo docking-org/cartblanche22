@@ -222,9 +222,9 @@ let shoppingCart = (function () {
                 vendors = catalog;
             }
 
-            if(!db){
-                is_zinc22(identifier) ? db = 'zinc22': db = 'zinc20';
-            }
+         
+            is_zinc22(identifier) ? db = 'zinc22': db = 'zinc20';
+         
 
             console.log("about to addItemToCart:", identifier, db, smile, vendors);
             var item = new Item(identifier, db, smile, vendors);
