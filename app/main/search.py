@@ -306,6 +306,7 @@ def getZinc20Data(identifier):
             role = 'ucsf'
         else:
             role = 'public'
+            
         data= json.loads(response.text)
         
         
@@ -350,7 +351,7 @@ def getZinc20Data(identifier):
                 'shipping': '6 weeks',
                 'supplier_code': supplierCodes[0]
         }]
-        return result, result, smile, prices
+        return result, result, smile, prices, []
 
 def getZincData(identifier):
     task = send_task('app.data.tasks.search_zinc.getSubstanceList', [[], [identifier]]) 
