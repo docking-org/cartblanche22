@@ -167,6 +167,7 @@ let shoppingCart = (function () {
                 return;
             }
             let vendors;
+            let missing = false;
 
             if (supplier === null || catalog === null) {
                 $.ajax({
@@ -174,7 +175,6 @@ let shoppingCart = (function () {
                     url: '/substance/' + identifier,
                     async: false,
                     success: function (data) {
-                        console.log(data);
 
                         catalog = data.data.catalogs;
                         supplier = data.data.supplier_code;
@@ -186,19 +186,28 @@ let shoppingCart = (function () {
                             db = 'zinc20';
                             catalog = data.data.supplier;
                         }
+                    },
+                    error: function (data) {
+                        // not found in tin
+                        alert("No data found for: " + identifier);
+                        missing = true;
                     }
                 })
             }
-
-            console.log(catalog)
-
-
+            if (missing) {
+                return false;
+            }
 
             if (db !== 'zinc20') {
                 vendors = obj.getPossibleVendors(db, catalog, supplier);
             }
             else {
                 vendors = catalog;
+            }
+
+            if (vendors.length === 0) {
+                alert("No vendors available for this molecule");
+                return false;
             }
 
             console.log("about to addItemToCart:", identifier, db, smile, vendors);

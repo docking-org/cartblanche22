@@ -246,23 +246,23 @@ def is_zinc22(identifier):
 def search_substance(identifier):
     
     if is_zinc22(identifier):
-        data, res, smile, prices = getZincData(identifier)
+        data, res, smile, prices, logs = getZincData(identifier)
     else:
         data, res, smile, prices = getZinc20Data(identifier)    
-     
-    data['zinc_id'] = identifier
     
     
     if request.method == "GET":
         if data:        
+            data['zinc_id'] = identifier
             return render_template('molecule/mol_index.html', data=data, prices=prices,
                                 smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
             
         else:
-            return render_template('errors/search404.html', lines=files, href='/search/zincid',
+            print(logs)
+            return render_template('errors/search404.html', lines=data, logs = logs, href='/search/zincid',
                                 header="We didn't find this molecule from Zinc22 database. Click here to return"), 404    
     elif request.method == "POST":
-        
+        data['zinc_id'] = identifier
         return {"data":data}
 
 
@@ -280,7 +280,7 @@ def searchZinc20(identifier):
 
 @application.route('/searchZinc/<identifier>')
 def searchZinc(identifier):
-    data, res, smile, prices = getZincData(identifier)
+    data, res, smile, prices, logs = getZincData(identifier)
     
     if data:
         return render_template('molecule/mol_index.html', data=data, prices=prices, 
@@ -360,7 +360,9 @@ def getZincData(identifier):
             role = 'ucsf'
         else:
             role = 'public'
-  
+
+        if len(res['zinc22']["found"]) == 0:
+            return None, None, None, None,  res['zinc22']["logs"]
         data= res['zinc22']["found"][0]
         
         prices = []
@@ -395,7 +397,7 @@ def getZincData(identifier):
         data['zinc20']= False
         data['supplier']= []
         
-        return data, res, smile, prices
+        return data, res, smile, prices, logs
 
 @application.route('/sw')
 def sw():
