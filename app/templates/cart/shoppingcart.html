@@ -154,7 +154,7 @@
         });
         $('#checkout').on('click', () => {
             if(shoppingCart.getCart().length == 0){
-                alert('Cart is empty')
+                alert('The cart is empty. Checkout not possible.')
                 return;
             }
             console.log('checkout button clicked')
