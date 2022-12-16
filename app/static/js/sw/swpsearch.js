@@ -472,7 +472,10 @@ function init_table(table, url) {
             filter: true,
             "ajax": {
                 "url": url,
-                "type": 'GET'
+                "type": 'GET',
+                error: function (xhr, error, code) {
+                    console.log(xhr, code);
+                }
             },
             "dom": 'rtpi',
             "scrollX": true,
