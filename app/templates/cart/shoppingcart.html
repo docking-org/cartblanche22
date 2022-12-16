@@ -153,6 +153,10 @@
             });
         });
         $('#checkout').on('click', () => {
+            if(shoppingCart.getCart().length == 0){
+                alert('Cart is empty')
+                return;
+            }
             console.log('checkout button clicked')
             let cart = JSON.parse(localStorage.getItem('cart'))
             let total = $('#total').html()
@@ -236,7 +240,9 @@
                 location.reload();
 
             });
-
+            if (cart.length === 0) {
+                $('#loadingModal').modal('hide');
+            }
 
         });
 
