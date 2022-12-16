@@ -250,10 +250,12 @@ def search_substance(identifier):
     else:
         data, res, smile, prices = getZinc20Data(identifier)    
     
+    if data:        
+            data['zinc_id'] = identifier
     
     if request.method == "GET":
         if data:        
-            data['zinc_id'] = identifier
+        
             return render_template('molecule/mol_index.html', data=data, prices=prices,
                                 smile=urllib.parse.quote(smile), response=res, identifier=identifier, zinc20_stock='zinc20_stock')
             
@@ -262,7 +264,7 @@ def search_substance(identifier):
             return render_template('errors/search404.html', lines=data, logs = logs, href='/search/zincid',
                                 header="We didn't find this molecule from Zinc22 database. Click here to return"), 404    
     elif request.method == "POST":
-        data['zinc_id'] = identifier
+       
         return {"data":data}
 
 
