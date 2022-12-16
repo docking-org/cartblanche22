@@ -363,6 +363,8 @@ def getZincData(identifier):
         else:
             role = 'public'
 
+        logs = res['zinc22']["logs"]
+        
         if len(res['zinc22']["found"]) == 0:
             return None, None, None, None,  res['zinc22']["logs"]
         data= res['zinc22']["found"][0]
