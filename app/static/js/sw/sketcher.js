@@ -13,16 +13,17 @@ function jsmeOnLoad() {
 			"smiles": document.getElementById("smiles-in").value
 		});
 		jsmeApplet.setCallBack("AfterStructureModified", (function (event) {
-
 			var smiles = event.src.smiles();
 
+			$('#smiles-in').val(smiles);
 			molChanged(smiles);
-			if (!fromSmiInput) {
-				$('#smiles-in').val(smiles);
-			}
-
 		}));
 
+		jsmeApplet.setCallBack("AfterPaste", (function (event) {
+			var smiles = event.src.smiles();
+			$('#smiles-in').val(smiles);
+			molChanged(smiles);
+		}));
 	}
 
 }
@@ -30,11 +31,11 @@ function jsmeOnLoad() {
 function set_smiles(callback) {
 
 	if (sketcher == 'jsme') {
-		fromSmiInput = true;
+
 		if (jsmeApplet) {
 			callback(jsmeApplet.smiles());
 		}
-		fromSmiInput = false;
+
 	} else if (sketcher == 'marvinjs') {
 		if (!marvinjs)
 			return;
@@ -46,10 +47,10 @@ function set_smiles(callback) {
 						var smiles = res.smi;
 
 						callback(smiles);
-						if (!fromSmiInput) {
-							$('#smiles-in').val(smiles);
-						}
-						fromSmiInput = false;
+
+						$('#smiles-in').val(smiles);
+
+
 					});
 			}, function (error) {
 				alert("Molecule export failed:" + error);
@@ -73,14 +74,13 @@ function load_smiles(input) {
 			if (res) {
 				molChanged(smi);
 				if (sketcher == 'jsme') {
-					fromSmiInput = true;
+
 					jsmeApplet.readMolFile(res);
-					fromSmiInput = false;
 				}
 				else if (sketcher == 'marvinjs') {
-					fromSmiInput = true;
+
 					marvinjs.importStructure("mol", res);
-					fromSmiInput = false;
+
 				}
 			}
 		});

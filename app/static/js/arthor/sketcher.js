@@ -47,10 +47,16 @@ function jsmeOnLoad() {
         sketchCallback(smiles);
 
       prevTextInput = null;
-      console.log('changing here')
+
       $('#smiles-in').val(smiles);
 
     });
+
+    jsmeApplet.setCallBack("AfterPaste", (function (event) {
+      var smiles = event.src.smiles();
+      $('#smiles-in').val(smiles);
+      sketchCallback(smiles);
+    }));
   }
 }
 

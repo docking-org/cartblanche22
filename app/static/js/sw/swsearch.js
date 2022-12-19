@@ -98,7 +98,6 @@ function toggle_align() {
 function db_maps(select, data) {
     for (var key in data) {
         datasets[key] = data[key];
-        console.log(data[key])
         if (data[key].enabled === true && data[key].status === 'Available') {
             //default db
             if (data[key].name === "ZINC20-ForSale-22Q1-1.6B") {
