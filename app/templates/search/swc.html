@@ -31,8 +31,8 @@
             $('#ucsfbutton').click(() => {
                 $('#exampleModalLong').modal('show');
             });
-            config = {{config|safe}};
-            maps = {{maps|safe}};
+            var config = {{config|safe}};
+            var maps = {{maps|safe}};
             if (!config.WebApp.SearchAsYouDraw)
                 $('.swopt').removeClass('searchasyoudraw');
             add_scoretype_selection(config);

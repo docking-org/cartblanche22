@@ -6,30 +6,34 @@ var fromSmiInput = true;
 
 function jsmeOnLoad() {
 	console.log('jsmeOnLoad');
-	
+
 	if (sketcher == "jsme") {
 		jsmeApplet = new JSApplet.JSME("sketcher", "420px", "500px", {
 			"options": "newlook",
-			"smiles": document.getElementById("smiles-in").value   
+			"smiles": document.getElementById("smiles-in").value
 		});
-		jsmeApplet.setAfterStructureModifiedCallback(function (event) {
+		jsmeApplet.setCallBack("AfterStructureModified", (function (event) {
+
 			var smiles = event.src.smiles();
-			if (smiles === "")
-				return;
+
 			molChanged(smiles);
 			if (!fromSmiInput) {
 				$('#smiles-in').val(smiles);
 			}
-		});
+
+		}));
+
 	}
-	
+
 }
 
 function set_smiles(callback) {
+
 	if (sketcher == 'jsme') {
 		fromSmiInput = true;
-		if (jsmeApplet)
+		if (jsmeApplet) {
 			callback(jsmeApplet.smiles());
+		}
 		fromSmiInput = false;
 	} else if (sketcher == 'marvinjs') {
 		if (!marvinjs)
@@ -40,8 +44,7 @@ function set_smiles(callback) {
 					{ molfile: molfile },
 					function (res) {
 						var smiles = res.smi;
-						if (smiles === "")
-							return;
+
 						callback(smiles);
 						if (!fromSmiInput) {
 							$('#smiles-in').val(smiles);
@@ -59,7 +62,7 @@ function installSmallWorldCallback(marvinjs) {
 }
 
 function load_smiles(input) {
-	if (fromSmiInput) return;
+
 	var smi = $(input).val();
 	var url = config.WebApp.ResolverUrl;
 	url = 'https://sw.docking.org/' + url.substring(2)
@@ -68,6 +71,7 @@ function load_smiles(input) {
 		function (res) {
 			console.log(url)
 			if (res) {
+				molChanged(smi);
 				if (sketcher == 'jsme') {
 					fromSmiInput = true;
 					jsmeApplet.readMolFile(res);

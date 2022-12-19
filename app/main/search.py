@@ -22,6 +22,7 @@ import urllib.parse
 import re
 
 base_url = "https://cartblanche22.docking.org/"
+sw_server = 'https://sw.docking.org'
 swp_server = 'https://swp.docking.org'
 swc_server = 'https://swc.docking.org'
 
@@ -249,9 +250,17 @@ def getZincData(identifier):
 
 @application.route('/sw')
 def sw():
+    try:
+        config = requests.get(sw_server + '/search/config').json()
+    except:
+        return render_template('errors/500.html')
+    try:
+        maps = requests.get(sw_server + '/search/maps').json()
+    except:
+        return render_template('errors/500.html')
     smiles = request.args.get('smiles')
     print(smiles)
-    return render_template('search/sw.html', smiles=smiles)
+    return render_template('search/sw.html', config=json.dumps(config), maps=json.dumps(maps), sw_server = sw_server, withCredentials = False)
 
 
 @application.route('/swp')
@@ -259,12 +268,12 @@ def swp():
     try:
         config = requests.get(swp_server + '/search/config', auth=('gpcr', 'xtal')).json()
     except:
-        return render_template('errors/500.html')
+        return render_template('errors/403.html')
     try:
         maps = requests.get(swp_server + '/search/maps', auth=('gpcr', 'xtal')).json()
     except:
-        return render_template('errors/500.html')
-    return render_template('search/swp.html', config=json.dumps(config), maps=json.dumps(maps))
+        return render_template('errors/403.html')
+    return render_template('search/sw.html', config=json.dumps(config), maps=json.dumps(maps), sw_server = swp_server, withCredentials = True)
 
 
 @application.route('/swc')
@@ -277,7 +286,7 @@ def swc():
         maps = requests.get(swc_server + '/search/maps', auth=('big', 'fat secret')).json()
     except:
         return render_template('errors/403.html')
-    return render_template('search/swc.html', config=json.dumps(config), maps=json.dumps(maps))
+    return render_template('search/sw.html', config=json.dumps(config), maps=json.dumps(maps), sw_server = swc_server, withCredentials = True)
 
 
 @application.route('/arthor')

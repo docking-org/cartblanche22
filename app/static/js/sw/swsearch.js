@@ -1,6 +1,5 @@
-var sw_server;
-sw_server = 'https://sw.docking.org'; // nm debug deployment
-var config = {}
+var smallworld_url = "https://sw.docking.org";
+// var config = {};
 var source = false;
 var distance_cols = $.map("tdn,tup,rdn,rup,ldn,lup,mut,maj,min,hyb,sub".split(","), function (e) {
     return {
@@ -16,18 +15,19 @@ var datasets = {};
 var dtable = null;
 var search_state = null;
 var fromSmiInput = false;
-/* Configuration and options */
+
 $(document).ready(function () {
 
-    console.log("config working")
-    $.get(sw_server + '/search/config', function (res) {
-        config = res;
-        if (!config.WebApp.SearchAsYouDraw)
-            $('.swopt').removeClass('searchasyoudraw');
-        add_scoretype_selection(config);
-        toggle_scoring();
-    });
+
+    // $.get(swp_server + '/search/config', function (res) {
+    // 	config = res;
+    // 	if (!config.WebApp.SearchAsYouDraw)
+    // 		$('.swopt').removeClass('searchasyoudraw');
+    // 	add_scoretype_selection(config);
+    // 	toggle_scoring();
+    // });
 });
+
 
 function norm_score_name(x) {
     return x.replace(new RegExp(' ', 'g'), '_').toLowerCase();
@@ -70,6 +70,7 @@ function get_score_columns() {
     });
     return cols;
 }
+
 /* Util */
 function toggle_scoring() {
     if (dtable) {
@@ -92,17 +93,32 @@ function toggle_align() {
     var $optAlign = $('input[name=optAlign]');
     redraw();
 }
+
 /* Db Info */
-function db_maps(select) {
-    $.get(sw_server + '/search/maps', function (data) {
-        for (var key in data) {
-            datasets[key] = data[key];
-            if (data[key].enabled === true && data[key].status === 'Available') {
+function db_maps(select, data) {
+    for (var key in data) {
+        datasets[key] = data[key];
+        console.log(data[key])
+        if (data[key].enabled === true && data[key].status === 'Available') {
+            //default db
+            if (data[key].name === "ZINC20-ForSale-22Q1-1.6B") {
+
+                select.append('<option value=' + key + ' selected>' + data[key].name + '</option>');
+            }
+            else if (data[key].name === "zinc22-All") {
+                select.append('<option value=' + key + ' selected>' + data[key].name + '</option>');
+            }
+            else {
                 select.append('<option value=' + key + '>' + data[key].name + '</option>');
             }
+
         }
-    });
+    }
+    // $.get('https://cors-anywhere.herokuapp.com/' + swp_server + '/search/maps', function (data) {
+    //
+    // });
 }
+
 /* Range Sliders */
 function install_range_slider(param, limit) {
     if (!limit) {
@@ -186,10 +202,12 @@ function update_visible_columns() {
     dtable.column("lup:name").visible(optAdvanced);
     dtable.column("topodist:name").visible(optAdvanced);
 }
+
 // Update the bound on a search parameter
 function update_bound(param, nodraw) {
     update_bound_range(param, $("input[name='" + param + "lb']").val(), $("input[name='" + param + "ub']").val(), nodraw);
 }
+
 // Update the bound on a search parameter specifying the new range
 // apply the bounds as a filter on the table column, If the upper bound
 // exceeds that of the current search state a new search is started
@@ -293,31 +311,27 @@ function set_mode_sw_skel() {
     set_range('maj', 0, 0, false);
     set_range('min', 0, 0, false);
 }
+
 /* Search Control */
 function refresh() {
     set_smiles(newSearch)
 }
 
 function molChanged(smiles) {
-    console.log('molchanged')
-    if (config.WebApp !== undefined) {
+    if (config.WebApp.SearchAsYouDraw)
         newSearch(smiles);
-        //adding hg database check
-        checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db_name)
-    }
+    //adding hg database check
+    checkHg(smiles, $('#exampleModalLong'), $('#hgData'), search_state.db)
 }
 
-
 function newSearch(smiles) {
-    if (!smiles)
-        return;
+
     if (!!window.EventSource) {
         stopStreaming();
         // Store the search parameters
         search_state = {
             smi: smiles,
             db: $("select[name='db'] option:selected").val(),
-            db_name: $("select[name='db'] option:selected").html(),
             dist: $("input[name='distub']").val(),
             topodist: $("input[name='topodistub']").val(),
             tdn: $("input[name='tdnub']").val(),
@@ -333,7 +347,13 @@ function newSearch(smiles) {
                 return e.name
             }).join(",")
         };
-        source = new EventSource(sw_server + '/search/submit?smi=' + encodeURIComponent(search_state.smi) + '&db=' + encodeURIComponent(search_state.db) + '&dist=' + search_state.topodist + '&tdn=' + search_state.tdn + '&tup=' + search_state.tup + '&rdn=' + search_state.rdn + '&rup=' + search_state.rup + '&ldn=' + search_state.ldn + '&lup=' + search_state.lup + '&maj=' + search_state.maj + '&min=' + search_state.min + '&sub=' + search_state.sub + '&scores=' + search_state.scores);
+        source = new EventSource(sw_server + '/search/submit?smi=' + encodeURIComponent(search_state.smi) +
+            '&db=' + encodeURIComponent(search_state.db) + '&dist=' + search_state.topodist +
+            '&tdn=' + search_state.tdn + '&tup=' + search_state.tup + '&rdn=' + search_state.rdn +
+            '&rup=' + search_state.rup + '&ldn=' + search_state.ldn + '&lup=' + search_state.lup +
+            '&maj=' + search_state.maj + '&min=' + search_state.min + '&sub=' + search_state.sub +
+            '&scores=' + search_state.scores, { withCredentials: private }
+        );
         $('#statusspan').html("Waiting...");
     } else {
         console.log("ERROR: Browser does not support server-sent events");
@@ -351,7 +371,12 @@ function newSearch(smiles) {
             if (d.status === "FIRST") {
                 // console.log(d);
                 $('#statusspan').html("Searching... (" + format_search_stats(d) + ")");
-                var url = sw_server + '/search/view/?hlid=' + d.hlid;
+                if (private) {
+                    var url = '/search/view?hlid=' + d.hlid;
+                }
+                else {
+                    var url = 'https://sw.docking.org/search/view?hlid=' + d.hlid;
+                }
                 init_table($('#results'), url);
                 $('.dataTables_scrollBody').css('background', 'repeating-linear-gradient(45deg, #edeeff, #edeeff 10px, #fff 10px, #fff 20px)');
             } else if (d.status === "MORE") {
@@ -453,9 +478,6 @@ function init_table(table, url) {
             "ajax": {
                 "url": url,
                 "type": 'GET',
-                error: function (xhr, error, code) {
-                    console.log(xhr, code);
-                }
             },
             "dom": 'rtpi',
             "scrollX": true,
@@ -495,7 +517,7 @@ function hide_imgpop() {
 function show_imgpop(img) {
     var popup = $('#imgpop');
     popup.empty();
-    popup.append('<img width="300px" height="180px"  src="' + img.src + '"/>');
+    popup.append('<img width="300px" height="180px" src="' + img.src + '"/>');
     var offset = $(img).offset();
     popup.css('left', offset.left + 160 + 'px');
     popup.css('top', offset.top - 50 + 'px');
@@ -526,7 +548,7 @@ function export_results() {
             params['columns[' + idx + '][search][value]'] = this.search();
         }
     });
-    window.open(sw_server + '/search/export?' + $.param(params));
+    window.open(swp_server + '/search/export?' + $.param(params));
 }
 
 /* Column Rendering */
@@ -583,7 +605,7 @@ function hit_renderer(data, type, row) {
         .replace("%w", 50).replace("%h", 30);
 
     var id = datasets[search_state.db].prefix + data.id;
-    img.attr('src', sw_server + depict_url.substring(1) + '&' + $.param(extra));
+    img.attr('src', smallworld_url + depict_url.substring(1) + '&' + $.param(extra));
     img.attr('onmouseenter', 'show_imgpop(this);');
     img.attr('onmouseleave', 'hide_imgpop();');
     img.attr('onclick', 'vava(this);');
@@ -594,7 +616,7 @@ function hit_renderer(data, type, row) {
     button.attr('data-identifier', id);
     button.attr('data-hg', false);
     button.attr('data-db', search_state.db_name);
-    button.attr('data-img', sw_server + depict_url.substring(1) + '&' + $.param(extra));
+    button.attr('data-img', smallworld_url + depict_url.substring(1) + '&' + $.param(extra));
     button.attr('data-smile', data.hitSmiles.split(" ")[0])
     button.attr('onclick', 'toggleCart(this)');
     button.attr('class', 'btn btn-info');
@@ -638,14 +660,4 @@ function hit_renderer(data, type, row) {
     table.append(row);
 
     return $('<div>').append(table).html();
-}
-function trToggle(tr) {
-    // console.log(tr.rowIndex)
-    // $(tr).css('background-color', 'red')
-    // console.log('working')
-}
-function vava(d) {
-    console.log('caca')
-    console.log(d)
-    d.css('background-color', 'red')
 }

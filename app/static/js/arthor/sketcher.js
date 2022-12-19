@@ -36,20 +36,20 @@ function jsmeOnLoad() {
   if (sketcher == "jsme") {
     jsmeApplet = new JSApplet.JSME("sketcher", "420px", "500px", {
       "options": "newlook,nocanonize",
+      "smiles": ""
     });
     jsmeApplet.setAfterStructureModifiedCallback(function (event) {
       var smiles = event.src.smiles();
       if (localStorage)
         localStorage.molfile = event.src.molFile();
-      if (smiles === "")
-        return;
+
       if (sketchCallback)
         sketchCallback(smiles);
-      if (!fromSmiInput) {
-        prevTextInput = null;
-        console.log('changing here')
-        $('#smiles-in').val(smiles);
-      }
+
+      prevTextInput = null;
+      console.log('changing here')
+      $('#smiles-in').val(smiles);
+
     });
   }
 }
@@ -64,15 +64,15 @@ function set_smiles(callback) {
       .then(function (molfile) {
         $.get(sw_server + '/util/mol2smi',
           { molfile: molfile },
+
           function (res) {
             var smiles = res.smi;
-            if (smiles === "")
-              return;
-            callback(smiles);
-            if (!fromSmiInput) {
-              $('#smiles-in').val(smiles);
 
-            }
+            callback(smiles);
+
+            $('#smiles-in').val(smiles);
+
+
             fromSmiInput = false;
           });
       }, function (error) {
@@ -82,7 +82,7 @@ function set_smiles(callback) {
 }
 
 function set_structure(molfile) {
-  if (fromSmiInput) return;
+
   if (!molfile) {
     if (sketcher == 'jsme') {
       if (jsmeApplet) {
@@ -107,7 +107,6 @@ function set_structure(molfile) {
 }
 
 function resolve_structure(input) {
-  if (fromSmiInput) return;
 
   var smi = $(input).val();
   if (smi === prevTextInput)
@@ -129,7 +128,7 @@ function resolve_structure(input) {
 
 function load_smiles(input) {
   console.log('load smiles')
-  
+
   var smi = $(input).val();
   var url = 'https://sw.docking.org/util/smi2mol?smi=%s'
 
@@ -141,6 +140,7 @@ function load_smiles(input) {
         if (sketcher == 'jsme') {
           fromSmiInput = true;
           jsmeApplet.readMolFile(res);
+          sketchCallback(smi);
           fromSmiInput = false;
         } else if (sketcher == 'marvinjs') {
           fromSmiInput = true;
