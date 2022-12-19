@@ -2,7 +2,7 @@ function checkHg(smiles, modal, table, db) {
     $.ajax({
         url: "https://zinc21.docking.org/substances.txt",
         dataType: 'text',
-        data: {"ecfp4_fp-tanimoto-40": smiles},
+        data: { "ecfp4_fp-tanimoto-40": smiles },
         success: function (data) {
             if (data.length > 0) {
                 let res = data.split('\n')
@@ -20,11 +20,11 @@ function checkHg(smiles, modal, table, db) {
                         let bg = 'bgcolor=clear&hgstyle=outerglow'
                         t['img'] = depict_url + '&' + bg
                         // let cart = JSON.parse(localStorage.getItem('cart'))
-                        if(shoppingCart.inCart(temp[0])){
+                        if (shoppingCart.inCart(temp[0])) {
                             t['val'] = 'Remove';
                             t['class'] = 'btn btn-danger';
                         }
-                    else{
+                        else {
                             t['val'] = 'Add to Cart';
                             t['class'] = 'btn btn-info';
                         }
@@ -47,13 +47,13 @@ function checkHg(smiles, modal, table, db) {
 }
 
 function showHg(data, modal, table) {
-    
+
     table.DataTable({
         destroy: true,
         "language": {
             "emptyTable": "No similar molecule in HG database"
         },
-         "scrollX": true,
+        "scrollX": true,
         "scrollY": "450px",
         "paging": false,
         "ordering": false,
@@ -62,32 +62,32 @@ function showHg(data, modal, table) {
         columns: [
             {
                 "mData": function (data) {
-                        return  "<button data-hg='true' class='"+ data.class + "'" + "data-img ='"+data.img+"'"+
-                            "data-smile ='"+data.smiles+"'"+
-                            "data-db ='"+data.db+"'"+
-                            "data-identifier ='"+data.identifier+"'"+
-                            "onclick ='"+'toggleCart(this)'+"'"+
-                            ">" + data.val + "</button>"
-                    }
+                    return "<button data-hg='true' class='" + data.class + "'" + "data-img ='" + data.img + "'" +
+                        "data-smile ='" + data.smiles + "'" +
+                        "data-db ='" + data.db + "'" +
+                        "data-identifier ='" + data.identifier + "'" +
+                        "onclick ='" + 'toggleCart(this)' + "'" +
+                        ">" + data.val + "</button>"
+                }
             },
             {
                 "mData": function (data) {
-                        return "<img src ='" + data.img +"' width='150px' height='90px' />"
-                    }
+                    return "<img src ='" + data.img + "' width='150px' height='90px' />"
+                }
             },
 
-                {
-                    "mData": function (data) {
-                        return data.identifier;
-                    }
-                },
-                {
-                    "mData": function (data) {
-                        return data.smiles;
-                    }
-                },
+            {
+                "mData": function (data) {
+                    return data.identifier;
+                }
+            },
+            {
+                "mData": function (data) {
+                    return data.smiles;
+                }
+            },
 
-            ],
+        ],
     }).columns.adjust();
 
 }
