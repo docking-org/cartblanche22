@@ -11,7 +11,7 @@ reload(socket)
 from app.data.models.vendors import Vendors
 from sqlalchemy.sql.expression import true
 from app.data.models.tin.catalog import CatalogModel
-from flask import render_template, request, json, jsonify, flash, Markup, abort
+from flask import render_template, request, json, jsonify, flash, Markup, abort, redirect
 from app.main import application
 
 
@@ -106,6 +106,10 @@ def is_zinc22(identifier):
             return False
     else:
         return None
+
+@application.route('/searchZinc/<identifier>')
+def searchZinc(identifier):
+    return redirect('/substance/'+identifier, code = 302)
 
 @application.route('/substance/<identifier>', methods=["GET", "POST"])
 def search_substance(identifier):
