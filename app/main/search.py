@@ -111,9 +111,62 @@ def is_zinc22(identifier):
 def searchZinc(identifier):
     return redirect('/substance/'+identifier, code = 302)
 
+@application.route('/substance/purchasability/<identifier>', methods=["POST"])
+# retrieve the purchasability of a molecule
+def search_substance_purchasability(identifier):
+    result = {}
+    org = 'public'
+    if current_user.is_authenticated and current_user.has_roles('ucsf'):
+        org = 'ucsf'
+    
+    dataset = identify_dataset(identifier)
+    price = DefaultPrices.query.filter_by(category_name=dataset, organization=org).first()
+    
+    # if not part of sw datasets, check if it is a zinc id
+    if not price:
+        if is_zinc22(identifier):
+            data, res, smile, prices, logs = getZincData(identifier)
+        else:
+            data, res, smile, prices, logs= getZinc20Data(identifier)    
+        
+        if data:        
+                data['zinc_id'] = identifier
+                data['zinc'] = True
+                result = data
+        else:
+            abort(404)
+    else:
+        print("hiii")
+        result['supplier_code'] = price.category_name
+        result['supplier'] = [{
+            'assigned': True,
+            'cat_name': price.category_name,
+            'price': price.price,
+            'purchase': 1,
+            'quantity': price.quantity,
+            'shipping': price.shipping,
+            'supplier_code': price.short_name,
+            'unit': price.unit
+        }]
+            
+    return {"data":result }
+    
+
+#a regex to identify the dataset of a molecule
+dataset_regex = {
+    "Enamine_M": "m_.*|Z[0-9]{9}|PV-[0-9]{12}",
+    "Enamine_S": "s_.*",
+}
+
+def identify_dataset(identifier):
+    for regex in dataset_regex:
+        if re.match(dataset_regex[regex], identifier):
+            return regex    
+
+
+
 @application.route('/substance/<identifier>', methods=["GET", "POST"])
 def search_substance(identifier):
-
     if is_zinc22(identifier):
         data, res, smile, prices, logs = getZincData(identifier)
     else:
@@ -136,6 +189,7 @@ def search_substance(identifier):
             abort(404)
 
         
+# this is default zinc20 data
 def getZinc20Data(identifier):
     zinc20_files = {
             'zinc_id-in': [identifier],
