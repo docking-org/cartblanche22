@@ -45,7 +45,7 @@ let shoppingCart = (function () {
             localStorage.setItem('pageLoaded', false);
         }
     }
-    
+
     function is_zinc22(identifier) {
         if (identifier.indexOf('-') != -1) {
             return true;
@@ -90,9 +90,6 @@ let shoppingCart = (function () {
         let curIndex = 0;
 
         if (db === 'zinc22' && catalog !== null) {
-
-
-
             for (let s = 0; s < catalog.length; s++) {
                 console.log(catalog[s])
                 let short_name = catalog[s].catalog_name.toLowerCase();
@@ -183,59 +180,89 @@ let shoppingCart = (function () {
     };
 
     obj.addItemToCart = function (identifier, db, smile, supplier = null, catalog = null) {
+
         if (cart.length < size) {
             let item_index = obj.getItemIndexFromCart(identifier);
             if (item_index !== -1) {
                 return;
             }
             let vendors;
-            let missing = false;
-
             if (supplier === null || catalog === null) {
-                $.ajax({
-                    type: 'POST',
-                    url: '/substance/' + identifier,
-                    async: false,
-                    success: function (data) {
-                        supplier = data.data.supplier_code;
-
-                        if (data.data.zinc20 === false) {
-                            db = 'zinc22';
-                            catalog =   data.data.catalogs;
-                        }
-                        else {
-                            db = 'zinc20';
-                            catalog = data.data.supplier;
-                        }
-                    },
-                    error: function (data) {
-                        // not found in tin
-                        alert("No purchasing information found for: " + identifier+ "\nMolecule will be added to cart without purchasing information.");
-                    }
-                })
-            }
-            
-            if (db !== 'zinc20') {
-                vendors = obj.getPossibleVendors(db, catalog, supplier);
-            }
-            else {
+                const res = getPurchasability(identifier, db);
+                db = res.db;
+                supplier = res.supplier;
+                catalog = res.catalog;
                 vendors = catalog;
             }
 
-         
-            is_zinc22(identifier) ? db = 'zinc22': db = 'zinc20';
-         
+            if (db === 'zinc22') {
+                vendors = obj.getPossibleVendors(db, catalog, supplier);
+            }
+
 
             console.log("about to addItemToCart:", identifier, db, smile, vendors);
             var item = new Item(identifier, db, smile, vendors);
             cart.push(item);
             obj.writeToDb('/addItem', 'POST', item);
             saveCart();
+
         }
-        else {
-            alert('shopping cart size limit : ' + size);
-        }
-    };
+
+    }
+    // obj.addItemToCart = function (identifier, db, smile, supplier = null, catalog = null) {
+    //     if (cart.length < size) {
+    //         let item_index = obj.getItemIndexFromCart(identifier);
+    //         if (item_index !== -1) {
+    //             return;
+    //         }
+    //         let vendors;
+    //         let missing = false;
+
+    //         if (supplier === null || catalog === null) {
+    //             $.ajax({
+    //                 type: 'POST',
+    //                 url: '/substance/' + identifier,
+    //                 async: false,
+    //                 success: function (data) {
+    //                     supplier = data.data.supplier_code;
+
+    //                     if (data.data.zinc20 === false) {
+    //                         db = 'zinc22';
+    //                         catalog =   data.data.catalogs;
+    //                     }
+    //                     else {
+    //                         db = 'zinc20';
+    //                         catalog = data.data.supplier;
+    //                     }
+    //                 },
+    //                 error: function (data) {
+    //                     // not found in tin
+    //                     alert("No purchasing information found for: " + identifier+ "\nMolecule will be added to cart without purchasing information.");
+    //                 }
+    //             })
+    //         }
+
+    //         if (db !== 'zinc20') {
+    //             vendors = obj.getPossibleVendors(db, catalog, supplier);
+    //         }
+    //         else {
+    //             vendors = catalog;
+    //         }
+
+
+    //         is_zinc22(identifier) ? db = 'zinc22': db = 'zinc20';
+
+
+    //         console.log("about to addItemToCart:", identifier, db, smile, vendors);
+    //         var item = new Item(identifier, db, smile, vendors);
+    //         cart.push(item);
+    //         obj.writeToDb('/addItem', 'POST', item);
+    //         saveCart();
+    //     }
+    //     else {
+    //         alert('shopping cart size limit : ' + size);
+    //     }
+    // };
 
     obj.addVendorToCart = function (identifier, db, smile, cat_name, supplier_code, quantity, unit, price, shipping, purchase, assigned = false) {
         let sup = new Supplier(cat_name, supplier_code, price, purchase, quantity, unit, shipping, assigned);

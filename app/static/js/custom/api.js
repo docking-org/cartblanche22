@@ -125,6 +125,38 @@ function updatePurchaseAmount(data, new_purchase) {
     return data;
 }
 
+function getPurchasability(identifier, db = null,) {
+    let res = {};
+    $.ajax({
+        type: 'POST',
+        url: '/substance/purchasability/' + identifier,
+        async: false,
+        success: function (data) {
+            supplier = data.data.supplier_code;
+
+            if (data.data.zinc20 === false) {
+                db = 'zinc22';
+                catalog = data.data.catalogs;
+            }
+            else {
+                if (!db) {
+                    db = 'zinc20';
+                }
+                catalog = data.data.supplier;
+            }
+            res = { supplier: supplier, catalog: catalog, db: db };
+
+        },
+        error: function (data) {
+            alert("No purchasing information found for: " + identifier + "\nMolecule will be added to cart without purchasing information.");
+            res = { supplier: null, catalog: null, db: null };
+        }
+    })
+    return res;
+
+
+}
+
 function addVendorToCart(identifier, db, img, vendor) {
     console.log
     data = {

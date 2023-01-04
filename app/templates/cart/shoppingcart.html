@@ -54,7 +54,12 @@
                     },
                     {
                         "mData": function (data) {
-                            return "<a href='/substance/" + data.identifier + "'><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
+                            if(data.identifier.includes('ZINC')){
+                                return "<a href='/substance/" + data.identifier + "'><p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p></a>";
+                            }
+                            else{
+                                return "<p id='identifier'>" + data.identifier + "<br/>" + data.db + "</p>";
+                            }
                         }
                     },
                     {

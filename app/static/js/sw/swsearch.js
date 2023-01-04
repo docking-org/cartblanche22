@@ -614,7 +614,7 @@ function hit_renderer(data, type, row) {
     button.attr('id', id);
     button.attr('data-identifier', id);
     button.attr('data-hg', false);
-    button.attr('data-db', search_state.db_name);
+    button.attr('data-db', search_state.db.split(".smi")[0]);
     button.attr('data-img', smallworld_url + depict_url.substring(1) + '&' + $.param(extra));
     button.attr('data-smile', data.hitSmiles.split(" ")[0])
     button.attr('onclick', 'toggleCart(this)');
@@ -652,7 +652,7 @@ function hit_renderer(data, type, row) {
         .append('<br/><b>MF:</b> ' + data.mf);
     $props.css('font-size', 'smaller');
     div.append($props);
-    var row = $('<tr onclick="trToggle(this)"></tr>');
+    var row = $('<tr onclick=""></tr>');
     row.append($("<td style='width: 2px; margin:auto;'></td>").append(button));
     row.append($("<td style='width: 100px; '></td>").append(img));
     row.append($("<td style='line-height: 100%;'></td>").append(div));

@@ -67,6 +67,7 @@ function toggleCart(btn) {
         item.db = db
         item.img = img
         item.supplier = []
+
         if (shoppingCart.addItemToCart(identifier, db, smile) === false) {
 
             $("input[id=" + identifier + "]").attr("checked", false);

@@ -101,7 +101,7 @@ def getRandom(subset, count, file_type = None, timeout=10):
                     molecule['tranche'] = "None"
                 sub = (10 - len(sub)) * "0" + sub
                 molecule['zincid'] = "ZINC" + h + p + sub
-                molecule['SMILES'] = i[1]
+                molecule['SMILES'] = i[1].encode('ascii').replace(b'\x01', b'\\1').decode()
                 if len(results) < int(count):
                     results.append(molecule)
                 
