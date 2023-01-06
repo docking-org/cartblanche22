@@ -111,6 +111,7 @@ def getRandom(subset, count, file_type = None, timeout=10):
     random.shuffle(results)
     
     if(file_type == "csv"):
+        
         res = pd.DataFrame(results)
         return res.to_csv(encoding='utf-8', index=False, columns=['SMILES','zincid','tranche'])
     elif(file_type == "txt"):

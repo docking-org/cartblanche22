@@ -26,6 +26,7 @@ import requests
 import random
 import re
 import pandas as pd
+from app.formatters.format import formatZincResultCSV
 
 from app.email_send import send_search_log
 
@@ -329,10 +330,14 @@ class Substances(Resource):
             data.append({str(output_field):i[output_field] for output_field in output_fields})
         
         if(file_type == "csv"):
+            data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
-            return res.to_csv(encoding='utf-8', index=False)
+            
+            return res.to_csv(encoding='utf-8', index=False, sep=",")
         elif(file_type == "txt"):
+            data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
+            
             return res.to_csv(encoding='utf-8', index=False, sep=" ")
         else:
             return data
