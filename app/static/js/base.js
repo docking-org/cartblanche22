@@ -199,7 +199,9 @@ let shoppingCart = (function () {
                 vendors = obj.getPossibleVendors(db, catalog, supplier);
             }
 
-
+            if (db === null){
+                return false;
+            }
             console.log("about to addItemToCart:", identifier, db, smile, vendors);
             var item = new Item(identifier, db, smile, vendors);
             cart.push(item);
@@ -360,13 +362,16 @@ let shoppingCart = (function () {
     obj.countCart = function () { // -> return total count
         var totalCount = 0;
         for (let i = 0; i < cart.length; i++) {
+
             let suppliers = cart[i].supplier;
-            if (suppliers.length > 0) {
-                for (let s = 0; s < suppliers.length; s++) {
-                    totalCount += parseInt(suppliers[s].purchase);
+            if(suppliers){
+                if (suppliers.length > 0) {
+                    for (let s = 0; s < suppliers.length; s++) {
+                        totalCount += parseInt(suppliers[s].purchase);
+                    }
+                } else {
+                    totalCount += 1;
                 }
-            } else {
-                totalCount += 1;
             }
 
         }
@@ -390,6 +395,7 @@ let shoppingCart = (function () {
         console.log(cart);
         for (let i = 0; i < cart.length; i++) {
             let it = cart[i];
+            if(it.supplier){
             if (it.supplier.length == 0) {
                 let temp = {};
                 temp.img = it.img;
@@ -435,6 +441,7 @@ let shoppingCart = (function () {
                         cartCopy.push(temp);
                     }
                 }
+            }
             }
         }
         return cartCopy;
