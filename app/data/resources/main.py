@@ -20,7 +20,7 @@ from requests import Session
 from requests_futures.sessions import FuturesSession
 from datetime import datetime
 import pandas as pd
-
+from app.formatters.format import formatZincResultCSV
 parser = reqparse.RequestParser()
 session = FuturesSession(executor=ProcessPoolExecutor(max_workers=10),
                          session=Session())
@@ -387,9 +387,11 @@ class Smiles(Resource):
         data = curlSearch(files=files)
         data = data['zinc22']['found']
         if(file_type == "csv"):
+            data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
             return res.to_csv(encoding='utf-8', index=False)
         elif(file_type == "txt"):
+            data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
             return res.to_csv(encoding='utf-8', index=False, sep=" ")
         

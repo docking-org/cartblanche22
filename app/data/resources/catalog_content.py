@@ -17,6 +17,7 @@ from datetime import datetime
 import itertools
 from app.email_send import send_search_log
 import pandas as pd
+from app.formatters.format import formatZincResultCSV
 
 parser = reqparse.RequestParser()
 
@@ -159,9 +160,11 @@ class CatalogContents(Resource):
         del results['zinc22']['logs']
                 
         if(file_type == "csv"):
+                results = formatZincResultCSV(results['zinc22']['found'])
                 res = pd.DataFrame(results)
                 return res.to_csv(encoding='utf-8', index=False)
         elif(file_type == "txt"):
+                results = formatZincResultCSV(results['zinc22']['found'])
                 res = pd.DataFrame(results)
                 return res.to_csv(encoding='utf-8', index=False, sep=" ")
 
