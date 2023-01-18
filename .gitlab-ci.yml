@@ -79,7 +79,6 @@ deploy-live job:
                      -e ZINC22_DATABASE=${ZINC22_DATABASE} 
                      -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
                      -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-                     
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
 
 deploy-backup job:
