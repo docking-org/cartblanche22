@@ -16,6 +16,10 @@ RUN apt-get install -y vim
 RUN apt-get install -y rabbitmq-server
 
 ADD app app
+ADD boot-test.sh
+
+ARG BOOT_SCRIPT=$BOOT_SCRIPT
 RUN chmod +x boot.sh
+RUN chmod +x boot-test.sh
 EXPOSE 5000
-ENTRYPOINT ["./boot.sh"]
+ENTRYPOINT "$BOOT_SCRIPT"
