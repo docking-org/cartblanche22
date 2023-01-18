@@ -95,7 +95,6 @@ deploy-backup job:
         - docker rm ${CI_PROJECT_NAME}
         - docker stop redis
         - docker rm redis
-        - docker run --net cartblanche --name redis -d redis
         - docker run -d --restart unless-stopped --net cartblanche -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
                      -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
                      -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
