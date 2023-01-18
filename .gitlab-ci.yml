@@ -14,7 +14,8 @@ deploy-dev job:
         - cartblanche-dev
     script:
         - docker image prune -a -f
-        - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
+        - docker build --build-arg BOOT_SCRIPT=boot-test
+            -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop ${CI_PROJECT_NAME} || true
         - docker rm ${CI_PROJECT_NAME} || true
         - docker stop redis || true
@@ -39,7 +40,6 @@ deploy-dev job:
                 -e ZINC22_DATABASE=${ZINC22_DATABASE} 
                 -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
                 -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-                -e BOOT_SCRIPT="boot-test.sh"
                 --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
     
 deploy-live job:
@@ -53,7 +53,8 @@ deploy-live job:
         - n-9-22
     script:
         - sudo docker image prune -a -f
-        - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
+        - docker build --build-arg BOOT_SCRIPT=boot
+            -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop ${CI_PROJECT_NAME} || true
         - docker rm ${CI_PROJECT_NAME} || true
         - docker stop redis || true
@@ -78,7 +79,7 @@ deploy-live job:
                      -e ZINC22_DATABASE=${ZINC22_DATABASE} 
                      -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
                      -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-                     -e BOOT_SCRIPT="boot.sh"
+                     
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
 
 deploy-backup job:
@@ -92,7 +93,8 @@ deploy-backup job:
         - n-9-38
     script:
         - docker image prune -a -f
-        - docker build -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
+        - docker build --build-arg BOOT_SCRIPT=boot-test
+            -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
         - docker stop ${CI_PROJECT_NAME}  || true
         - docker rm ${CI_PROJECT_NAME}  || true
         - docker run -d --restart unless-stopped -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
@@ -114,5 +116,4 @@ deploy-backup job:
                      -e ZINC22_DATABASE=${ZINC22_DATABASE} 
                      -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
                      -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-                     -e BOOT_SCRIPT="boot-test.sh"
                      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}

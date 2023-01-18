@@ -19,7 +19,9 @@ ADD app app
 ADD boot-test.sh ./
 
 ARG BOOT_SCRIPT=$BOOT_SCRIPT
+ENV BOOT_SCRIPT=$BOOT_SCRIPT
+
 RUN chmod +x boot.sh
 RUN chmod +x boot-test.sh
 EXPOSE 5000
-ENTRYPOINT "$BOOT_SCRIPT"
+ENTRYPOINT "./$BOOT_SCRIPT.sh"
