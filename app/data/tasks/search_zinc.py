@@ -512,8 +512,6 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                         missing_file.write(tokens +'\n')
                 finally:
                     if search_conn: search_conn.close()
-                finally:
-                    if search_conn: search_conn.close()
             
             p_id_prev = None
             projected_size = 0
