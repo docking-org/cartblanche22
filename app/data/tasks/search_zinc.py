@@ -499,6 +499,19 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                         tranche = tranches_internal_rev[int(tranche_id_int)]
                         tokens = get_zinc_id(sub_id, tranche)
                         missing_file.write(tokens +'\n')
+                except :
+                    message = "An error occurred while searching {}.".format(search_database)
+                    print(message)
+                    logs.append(message)
+                    tranches_internal_rev = {t[1] : t[0] for t in tranches_internal.items()}
+                    for line in data_file:
+                        sub_id, tranche_id_int = line.split()
+                        sub_id = int(sub_id)
+                        tranche = tranches_internal_rev[int(tranche_id_int)]
+                        tokens = get_zinc_id(sub_id, tranche)
+                        missing_file.write(tokens +'\n')
+                finally:
+                    if search_conn: search_conn.close()
                 finally:
                     if search_conn: search_conn.close()
             
