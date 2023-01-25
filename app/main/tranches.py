@@ -240,7 +240,8 @@ def tranches3dDownload():
             temp = sorted(tranche, key = util_func)
             res = [list(ele) for i, ele in groupby(temp, util_func)]
             for x in res:
-                yield RsyncDownloader(x, dformat) + '\n'
+                for y in x:
+                    yield RsyncDownloader(y, dformat) + '\n'
  
     if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
         tranches_iter = gen_all_rsyncs
