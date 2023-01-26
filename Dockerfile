@@ -24,4 +24,5 @@ ENV BOOT_SCRIPT=$BOOT_SCRIPT
 RUN chmod +x boot.sh
 RUN chmod +x boot-test.sh
 EXPOSE 5000
+EXPOSE 5555
 ENTRYPOINT "./$BOOT_SCRIPT.sh"
