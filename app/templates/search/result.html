@@ -438,12 +438,12 @@
 
    <div class="tab-pane fade active" id="zinc22" role="tabpanel" aria-labelledby="zinc22-tab">
       <div class="row h-100">
-         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4">
+         <div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
             <button type="button" class="btn btn-primary" id="22resultcount" disabled> </button>
             <button type="button" class="btn btn-outline-danger" data-placement="right" data-popover-content="#a1" data-toggle="popover" id="22missingcount" style="display:none;" ></button>
          </div>
                  
-         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-4 float-right text-right">
+         <div class="col-md-4 col-xs-4 col-sm-4 col-lg-4 float-right text-right">
             <div class="nav" aria-label="Page navigation">
                <ul class="pagination" id="pageSelector">
                  <li class="page-item" id="firstPage">
@@ -474,23 +474,33 @@
                </ul>
             </div>
          </div>
-         <div class="col-md-3 col-xs-3 col-sm-3 col-lg-2 float-right">
-            <div class="row">
-                
-            <div class="col-md-3 col-xs-3 col-sm-3 col-lg-12 my-auto">Show:&nbsp;
-                <select id="page-limit" style="width: 40%;" class="form-control">
-                <option>50</option>
-                <option>100</option>
-                <option>250</option>
-                <option>500</option>
-                </select></div>
-            </div>
+         <div class="col-md-2 col-xs-2 col-sm-2 col-lg-2 float-right my-auto">
+            Show&nbsp;
+            <select id="page-limit" style="width: 50%;" class="form-control">
+            <option>50</option>
+            <option>100</option>
+            <option>250</option>
+            <option>500</option>
+            </select>
+            
          </div>
-      
-      <div class="col-md-6 col-xs-9 col-sm-9 col-lg-2 float-right text-right">
          
-         <button type="button" class="btn btn-info" id="addAll22">add all results to cart</button>
-         <button type="button" class="btn btn-warning" id="deleteAll22">remove all results from cart</button>
+            
+            <div class="col-md-2 col-xs-2 col-sm-2 col-lg-2 float-right text-right my-auto">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="download-results" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-download"></i>
+            
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="download-results">
+                <li><a href="/search/result.json?task={{task}}" download="results.json">json</a></li>
+                <li><a href="/search/result.csv?task={{task}}" download="results.csv">csv</a></li>
+                <li><a href="/search/result.txt?task={{task}}" download="results.txt">txt</a></li>
+                </ul>
+                &nbsp;
+              
+                <button type="button" class="btn btn-info" id="addAll22">add all to cart</button>
+                <button type="button" class="btn btn-warning" id="deleteAll22">remove all from cart</button>
+            </div>
       </div>
    </div>
    <br>

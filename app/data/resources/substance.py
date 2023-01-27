@@ -287,11 +287,11 @@ def progress(task, output_fields, file_type):
             
             if(file_type == "csv"):
                 res = pd.DataFrame(result)
-                return str(res.to_csv(encoding='utf-8', index=False))
+                return str(res.to_csv(encoding='utf-8', index=False), line_terminator='\n')
                 
             elif(file_type == "txt"):
                 res = pd.DataFrame(result)
-                return str(res.to_csv(encoding='utf-8', index=False, sep=" "))
+                return str(res.to_csv(encoding='utf-8', index=False, sep=" "), line_terminator='\n')
                 
             else:
                 return str(res)
@@ -333,12 +333,12 @@ class Substances(Resource):
             data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
             
-            return res.to_csv(encoding='utf-8', index=False, sep=",")
+            return res.to_csv(encoding='utf-8', index=False, sep=",", line_terminator='\n')
         elif(file_type == "txt"):
             data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
             
-            return res.to_csv(encoding='utf-8', index=False, sep=" ")
+            return res.to_csv(encoding='utf-8', index=False, sep=" ", line_terminator='\n')
         else:
             return data
     

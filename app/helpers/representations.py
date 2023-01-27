@@ -404,7 +404,7 @@ class CsvOutputBuffer(ObjectFormatter, BufferedOutput):
         'header': True,
         'joiner': ';',
     }
-    CSV_OPTIONS = ('delimiter', 'lineterminator', 'quotechar', 'quoting')
+    CSV_OPTIONS = ('delimiter', 'line_terminator', 'quotechar', 'quoting')
 
     def __init__(self, fields, options=None, extractor=extract_fields, **buffer_args):
         ObjectFormatter.__init__(self, fields=fields, extractor=extractor)
@@ -435,7 +435,7 @@ class CsvOutputBuffer(ObjectFormatter, BufferedOutput):
         for field, value in list(data.items()):
             if isinstance(value, str):
                 value = value.replace(self.options['delimiter'], '')
-                value = value.replace(self.options['lineterminator'], '')
+                value = value.replace(self.options['line_terminator'], '')
                 value = value or self.options['joiner'] or ' '
                 data[field] = value
         return data
@@ -459,7 +459,7 @@ class CsvFormatter(CsvOutputBuffer):
 class TxtFormatter(CsvOutputBuffer):
     OPTIONS = {
         'delimiter': '\t',
-        'lineterminator': '\n',
+        'line_terminator': '\n',
         'quotechar': '',
         'header': False,
         'quoting': csv.QUOTE_NONE,
