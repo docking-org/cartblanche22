@@ -103,7 +103,21 @@ function set_structure(molfile) {
   }
   if (sketcher == 'jsme') {
     fromSmiInput = true;
+    ;
     jsmeApplet.readMolFile(molfile);
+    $.get('https://sw.docking.org/util/mol2smi',
+          { molfile: molfile },
+
+          function (res) {
+            var smiles = res.smi;
+
+            
+
+            $('#smiles-in').val(smiles);
+
+
+          });
+
     fromSmiInput = false;
   } else if (sketcher == 'marvinjs') {
     fromSmiInput = true;
@@ -124,6 +138,7 @@ function resolve_structure(input) {
   url = url.replace("%s", encodeURIComponent(smi));
   $.get(url).then(function (molfile) {
     if (molfile)
+    
       set_structure(molfile);
   })
     .fail(function (fail) {
@@ -146,6 +161,7 @@ function load_smiles(input) {
         if (sketcher == 'jsme') {
           fromSmiInput = true;
           jsmeApplet.readMolFile(res);
+         
           sketchCallback(smi);
           fromSmiInput = false;
         } else if (sketcher == 'marvinjs') {
