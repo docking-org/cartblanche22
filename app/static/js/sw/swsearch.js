@@ -547,7 +547,7 @@ function export_results() {
             params['columns[' + idx + '][search][value]'] = this.search();
         }
     });
-    window.open(swp_server + '/search/export?' + $.param(params));
+    window.open(sw_server + '/search/export?' + $.param(params));
 }
 
 /* Column Rendering */
