@@ -104,7 +104,7 @@
 # class TxtFormatter(CsvOutputBuffer):
 #     OPTIONS = {
 #         'delimiter': '\t',
-#         'lineterminator': '\n',
+#         'line_terminator': '\n',
 #     }
 #
 #

@@ -9,6 +9,12 @@ body {
 .dl-inline > dd {
 	display: inline;
 }
+
+#searchLogs{
+	min-width: 100%;
+	max-width: 100%;
+}
+
 #section-head {
 	/* margin:           10px 10px 10px 10px;
 	height:           28px;

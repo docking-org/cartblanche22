@@ -1,6 +1,5 @@
 {% extends 'bootstrap/base.html' %}
 {% block html_attribs %} lang="en"{% endblock %}
-{#{% import "bootstrap/google.html" as google %}#}
 
 {% block metas %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,7 +51,6 @@
 
 {% block scripts %}
     {{ super() }}
-    {#{{google.uanalytics('UA-10800222-14')}}#}
     <script src="{{ url_for('static', filename = 'js/datatables.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/jquery-ui.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/custom/cart.js') }}"></script>

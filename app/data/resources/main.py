@@ -46,10 +46,10 @@ class Search(Resource):
         
         if(file_type == "csv"):
             res = pd.DataFrame([result])
-            return res.to_csv(encoding='utf-8', index=False)
+            return res.to_csv(encoding='utf-8', index=False, line_terminator='\n')
         elif(file_type == "txt"):
             res = pd.DataFrame([result])
-            return res.to_csv(encoding='utf-8', index=False, sep=" ")
+            return res.to_csv(encoding='utf-8', index=False, sep=" ", line_terminator='\n')
             
         return result
 
@@ -389,11 +389,11 @@ class Smiles(Resource):
         if(file_type == "csv"):
             data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
-            return res.to_csv(encoding='utf-8', index=False)
+            return res.to_csv(encoding='utf-8', index=False, line_terminator='\n')
         elif(file_type == "txt"):
             data = formatZincResultCSV(data)
             res = pd.DataFrame(data)
-            return res.to_csv(encoding='utf-8', index=False, sep=" ")
+            return res.to_csv(encoding='utf-8', index=False, sep=" ", line_terminator='\n')
         
         return data
 

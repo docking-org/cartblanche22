@@ -162,10 +162,10 @@ class CatalogContents(Resource):
         if(file_type == "csv"):
                 results = formatZincResultCSV(results['zinc22']['found'])
                 res = pd.DataFrame(results)
-                return res.to_csv(encoding='utf-8', index=False)
+                return res.to_csv(encoding='utf-8', index=False, line_terminator='\n')
         elif(file_type == "txt"):
                 results = formatZincResultCSV(results['zinc22']['found'])
                 res = pd.DataFrame(results)
-                return res.to_csv(encoding='utf-8', index=False, sep=" ")
+                return res.to_csv(encoding='utf-8', index=False, sep=" ", line_terminator='\n')
 
         return results

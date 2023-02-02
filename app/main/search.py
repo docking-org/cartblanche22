@@ -52,7 +52,7 @@ def search_bysmiles():
         return render_template('search/search_bysmiles.html')
 
 
-@application.route('/search/supplier', methods=["GET", "POST"])
+@application.route('/search/catitems', methods=["GET", "POST"])
 def search_bysupplier():
     if request.method == "GET":
         text = Markup('Please contact jjiteam@googlegroups.com with molecules that won\'t look up. ' \
@@ -72,7 +72,7 @@ def search_random():
     return render_template('search/search_random.html')
 
 
-@application.route('/search/suppliercode')
+@application.route('/search/catitems')
 def search_suppliercode():
     return render_template('search/search_suppliercode.html')
 

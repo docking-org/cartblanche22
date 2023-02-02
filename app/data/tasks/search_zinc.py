@@ -12,7 +12,8 @@ from celery import chord, current_task
 from celery.result import AsyncResult
 from flask_login import current_user
 from app.data.models.tin.catalog import CatalogModel
-
+import pandas as pd 
+from app.formatters.format import formatZincResultCSV
 from app.helpers.validation import get_compound_details, get_tin_partition, get_conn_string, get_sub_id, get_zinc_id, get_tranche, get_conn_string, get_tin_partition
 from app.main import application
 from config import Config
@@ -38,7 +39,7 @@ def search_status():
         list20, list22, missing, logs = getResult(task)
         if(len(list22) == 0 and len(list20) == 0):
                 return render_template('errors/search404.html', href='/search/search_byzincid', header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-        return {'data22':list22, 'data20':list20, 'missing22':missing, 'ready':'true', 'progress': '1', 'logs': logs}
+        return {'data22':list22, 'data20':list20, 'missing22':missing, 'ready':'true', 'progress': '1', 'logs': logs, 'task': data}
 
 def getResult(task):
     data = task.get()
@@ -58,20 +59,37 @@ def getResult(task):
     
     return list20, list22, missing, logs
 
+@application.route('/search/result.<file_type>', methods=['GET'])
 @application.route('/search/result', methods=['GET'])
-def search_result_zinc():
-        if request.method == 'GET':
-            data = request.args.get("task")
-            task = AsyncResult(data)
+def search_result_zinc(file_type = None):
+    if request.method == 'GET':
+        data = request.args.get("task")
+        task = AsyncResult(data)
 
-            if task.status == "PROGRESS" or task.status == "PENDING" and task.info:
-                return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false', logs='')
+            
+        if task.status == "PROGRESS" or task.status == "PENDING" and task.info:
+            return render_template('search/result.html', progress=(task.info['current']/task.info['projected']), data22=[], data20=[], missing22=[], ready='false', logs='',task = data)
+        else:
+            list20, list22, missing, logs = getResult(task)    
+            results = list22+list20
+                    
+            if file_type:
+                if(file_type == "csv"):
+                    results = formatZincResultCSV(results)
+                    res = pd.DataFrame(results)
+                    return res.to_csv(encoding='utf-8', index=False, line_terminator='\n')
+                elif(file_type == "txt"):
+                        results = formatZincResultCSV(results)
+                        res = pd.DataFrame(results)
+                        return res.to_csv(encoding='utf-8', index=False, sep=" ", line_terminator='\n')
+
+                return jsonify(results)   
             else:
-                list20, list22, missing, logs = getResult(task)       
-                
                 if(len(list22) == 0 and len(list20) == 0):
                     return render_template('errors/search404.html', href='/search/search_byzincid', logs = logs, header="We didn't find those molecules in the Zinc22 database. Click here to return"), 404
-                return render_template('search/result.html', data22=list22, data20=list20, missing22=missing, ready='true', progress='1', logs=logs)
+                return render_template('search/result.html', data22=list22, data20=list20, missing22=missing, ready='true', progress='1', logs=logs, task = data)
+        
+        
 
 class SearchJobSupplier(Resource):
     def post(self):
@@ -490,6 +508,17 @@ def getSubstanceList(zinc20, zinc_ids, get_vendors=True):
                         
                 except psycopg2.OperationalError as e:
                     message = "failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database)
+                    print(message)
+                    logs.append(message)
+                    tranches_internal_rev = {t[1] : t[0] for t in tranches_internal.items()}
+                    for line in data_file:
+                        sub_id, tranche_id_int = line.split()
+                        sub_id = int(sub_id)
+                        tranche = tranches_internal_rev[int(tranche_id_int)]
+                        tokens = get_zinc_id(sub_id, tranche)
+                        missing_file.write(tokens +'\n')
+                except :
+                    message = "An error occurred while searching {}.".format(search_database)
                     print(message)
                     logs.append(message)
                     tranches_internal_rev = {t[1] : t[0] for t in tranches_internal.items()}

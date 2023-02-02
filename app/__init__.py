@@ -100,8 +100,8 @@ def create_app(config_class=Config):
         '/sublist.<file_type>',
     ]
     api.add_resource(SubstanceList, *sublist_routes)
-    api.add_resource(CatalogContent, '/catalog')
-    api.add_resource(CatalogContents, '/catalogs.<file_type>')
+    api.add_resource(CatalogContent, '/catitems')
+    api.add_resource(CatalogContents, '/catitems.<file_type>')
     api.add_resource(CatalogContentList, '/catlist')
     api.add_resource(Tranches, '/tranches.<file_type>')
     api.add_resource(Smiles, '/smiles.<file_type>')
