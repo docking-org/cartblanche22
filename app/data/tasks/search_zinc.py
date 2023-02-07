@@ -639,6 +639,7 @@ def get_vendor_results_cat_id(data_file, search_curs, output_file):
     parse_tin_results(search_curs, output_file)
 
 def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_only=False):
+    digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     output = []
     ids = {}
 
@@ -668,11 +669,11 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
                         ids[zinc_id] = {
                         "zinc_id":zinc_id, 
                         "sub_id":sub_id, 
-                        "smiles":smiles, 
+                        "smiles":smiles,
                         "tranche":{
                             "h_num": tranche_name[0:3],
-                            "logp": tranche_name[3:4],
-                            "mwt": tranche_name[4:5],
+                            "logp": tranche_details['logp'] ,
+                            "mwt": digits[int(tranche_details['h_num'][1:3])],
                             "p_num": tranche_name[3:]
                         },
                         "supplier_code": [supplier_codes], 
