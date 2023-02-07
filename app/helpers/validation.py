@@ -206,8 +206,10 @@ def get_compound_details(smiles):
   
  
     heavyAtoms = round(m.GetNumHeavyAtoms(), 3)
-    mwt = round(MolWt(m), 3)
-    logp = round(MolLogP(m), 3)
+    tranche = get_basic_tranche(smiles)
+   
+    mwt = digits[int(tranche['h_num'][1:3])]
+    logp = tranche['logp']
     inchi = MolToInchi(m)
     inchi_key = MolToInchiKey(m)
     details = {
