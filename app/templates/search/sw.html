@@ -50,6 +50,16 @@
         db_maps($('#dbsel'), maps);
         toggle_scoring();
         var input = document.getElementById("smiles-in");
+        
+        //set input value to window query string smiles
+        var urlParams = new URLSearchParams(window.location.search);
+        var smiles = urlParams.get('smiles');
+        if (smiles) {
+            input.value = smiles;
+            load_smiles(input);
+        }
+        
+
         input.addEventListener("keypress", function(event) {
         if (event.key === "Enter") {
             event.preventDefault();
@@ -104,7 +114,7 @@
                 <th>Identifier</th>
                 <td class="spacer"></td>
                 <td colspan="2" style="padding-right: 20px;">
-                    <input id="smiles-in" onkeyup="load_smiles(this)"
+                    <input id="smiles-in" onkeyup="load_smiles(this)" 
                         style="width: 100%; text-align: left; font-family: Monospace;">
                 </td>
             </tr>
