@@ -303,11 +303,13 @@
                             }
                             else{
                                 progress = Math.round(result.progress*100);
-                                console.log(progress)
-                                var bar = document.getElementById('progress');
-                                bar.setAttribute("aria-valuenow", progress);
-                                bar.style.width = progress+"%";
-                                bar.innerHTML= progress+"%";
+                                
+                                if(progress > 0){
+                                    var bar = document.getElementById('progress');
+                                    bar.setAttribute("aria-valuenow", progress);
+                                    bar.style.width = progress+"%";
+                                    bar.innerHTML= progress+"%";
+                                }   
                             }
                
                 }
