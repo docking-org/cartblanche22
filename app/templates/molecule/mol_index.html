@@ -114,7 +114,7 @@
                     <tr>
                         {% if data.tranche %}
                         <td>{{ data.tranche.h_num }}{{ data.tranche.p_num }}</td>
-                        <td>{{ data.tranche_details.heavyAtoms }} [{{ data.tranche.mwt }}]</td>
+                        <td>{{ data.tranche_details.heavyAtoms }} ({{ data.tranche.mwt }})</td>
                         <td>{{ data.tranche_details.logp }} ({{ data.tranche.logp }})</td>
                         <td>{{ data.tranche_details.mwt }}</td>
 
@@ -243,7 +243,9 @@
             {% else %}
             <tr>
                 <td>{{ p.category_name }}</td>
-                <td>{{ p.supplier_code }} </td>
+                <td data-toggle="tooltip"
+                title="Search ZINC22 Using Supplier Code"><a target="_blank" href="/searchJobSupplier?supplier={{p.supplier_code}}">{{
+                    p.supplier_code }} </a></td>
                 <td> {{ p.quantity }} {{ p.unit }}</td>
                 <td> {{ p.shipping }} </td>
                 <td> {{ p.price }} </td>

@@ -106,6 +106,20 @@ class SearchJobSupplier(Resource):
             print(e)
     
         return redirect('/search/result?task={}'.format(task))
+    
+    def get(self):
+        data = request.args.get('supplier')
+        
+        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
+        codes = textDataList
+        codes = [code for code in codes if code != '']
+    
+        try:
+            task = vendorSearch.delay(codes)
+        except Exception as e:
+            print(e)
+    
+        return redirect('/search/result?task={}'.format(task))
             
     def curlSearch(data):
         try:
@@ -671,8 +685,8 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
                         "smiles":smiles, 
                         "tranche":{
                             "h_num": tranche_name[0:3],
-                            "logp": tranche_name[3:4],
-                            "mwt": tranche_name[4:5],
+                            "logp": zinc_id[5:6],
+                            "mwt": zinc_id[4:5],
                             "p_num": tranche_name[3:]
                         },
                         "supplier_code": [supplier_codes], 
