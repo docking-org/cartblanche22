@@ -106,6 +106,20 @@ class SearchJobSupplier(Resource):
             print(e)
     
         return redirect('/search/result?task={}'.format(task))
+    
+    def get(self):
+        data = request.args.get('supplier')
+        
+        textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
+        codes = textDataList
+        codes = [code for code in codes if code != '']
+    
+        try:
+            task = vendorSearch.delay(codes)
+        except Exception as e:
+            print(e)
+    
+        return redirect('/search/result?task={}'.format(task))
             
     def curlSearch(data):
         try:
