@@ -671,8 +671,8 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
                         "smiles":smiles, 
                         "tranche":{
                             "h_num": tranche_name[0:3],
-                            "logp": tranche_name[3:4],
-                            "mwt": tranche_name[4:5],
+                            "logp": zinc_id[5:6],
+                            "mwt": zinc_id[4:5],
                             "p_num": tranche_name[3:]
                         },
                         "supplier_code": [supplier_codes], 
