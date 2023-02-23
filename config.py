@@ -37,3 +37,9 @@ class Config(object):
             'zinc22': os.getenv('ZINC22_DATABASE'),
             'tin': os.getenv('TIN_DATABASE'),
         }
+
+        DOWNLOAD_PASS_2D = os.getenv('DOWNLOAD_PASS_2D')
+        DOWNLOAD_USERNAME_2D = os.getenv('DOWNLOAD_USERNAME_2D')
+
+
+        
