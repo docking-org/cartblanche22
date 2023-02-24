@@ -290,8 +290,11 @@ def getZincData(identifier):
                 s = c['catalog_name'].lower()
                 code = c['supplier_code']
 
-                price = DefaultPrices.query.filter_by(
-                    short_name=s, organization=role).first()
+                price = None
+                if identify_dataset(code):
+                    price = DefaultPrices.query.filter_by(category_name=identify_dataset(code), organization=role).first()
+                else:
+                    price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
 
                 if price:
                     newPrice = {
