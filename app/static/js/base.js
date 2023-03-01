@@ -290,13 +290,9 @@ let shoppingCart = (function () {
 
     };
 
-    obj.assignvendors = function (identifier, supplier, catalog) {
+    obj.assignvendors = function (identifier, supplier) {
         let item_index = obj.getItemIndexFromCart(identifier);
-        let vendors = obj.getPossibleVendors('zinc22', catalog, supplier);
-        if (default_prices.length === 0) {
-            default_prices = JSON.parse(localStorage.getItem("default_prices"));
-        }
-        cart[item_index].supplier = vendors;
+        cart[item_index].supplier = supplier;
         saveCart();
     };
 
