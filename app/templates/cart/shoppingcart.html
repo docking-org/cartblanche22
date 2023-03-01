@@ -188,7 +188,7 @@
                     else{
                         vendors = getPurchasability(cart[c].identifier).catalog
                     }
-                    shoppingCart.assignvendors(cart[c].identifier, res.catalog)
+                    shoppingCart.assignvendors(cart[c].identifier, vendors)
                 }
                 $('#loadingModal').modal('hide');
                 location.reload();
