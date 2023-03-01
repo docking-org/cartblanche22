@@ -183,7 +183,7 @@
                 for (let c = 0; c < cart.length; c++) {
                     let vendors;
                     if(cart[c].db === "zinc22"){
-                        vendors = obj.getPossibleVendors(db, catalog, supplier);
+                        vendors = shoppingCart.getPossibleVendors(db, catalog, supplier);
                     }
                     else{
                         vendors = getPurchasability(cart[c].identifier).catalog
