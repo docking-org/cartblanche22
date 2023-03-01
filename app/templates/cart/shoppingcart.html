@@ -175,28 +175,37 @@
         })
         $('#refresh').on('click', () => {
             let cart = shoppingCart.getCart()
-            $('#loadingModal').modal('show');
-            if (cart.length === 0) {
-                $('#loadingModal').modal('hide');
-            }
-            else{
-                for (let c = 0; c < cart.length; c++) {
-                    let vendors;
-                    const res = getPurchasability(cart[c].identifier, cart[c].db);
-                    let db = res.db;
-                    let supplier = res.supplier;
-                    let catalog = res.catalog;
-                    vendors = catalog;
-
-                    if (db === 'zinc22') {
-                        vendors = shoppingCart.getPossibleVendors(db, catalog, supplier);
-                    }
-
-                    shoppingCart.assignvendors(cart[c].identifier, vendors)
+            $('#loadingModal').on('shown.bs.modal', function (e) {
+                if (cart.length === 0) {
+                    $('#loadingModal').modal('hide');
                 }
-            }
-            $('#loadingModal').modal('hide');
-            location.reload();
+                else{
+                    for (let c = 0; c < cart.length; c++) {
+                        let vendors;
+                        const res = getPurchasability(cart[c].identifier, cart[c].db);
+                        let db = res.db;
+                        let supplier = res.supplier;
+                        let catalog = res.catalog;
+                        vendors = catalog;
+    
+                        if (db === 'zinc22') {
+                            vendors = shoppingCart.getPossibleVendors(db, catalog, supplier);
+                        }
+    
+                        shoppingCart.assignvendors(cart[c].identifier, vendors)
+                    }
+                       
+                    $('#loadingModal').modal('hide');
+                    location.reload();
+                }
+
+            })
+            
+            $('#loadingModal').modal('show');
+            
+
+            
+         
             
 
 
