@@ -182,18 +182,21 @@
             else{
                 for (let c = 0; c < cart.length; c++) {
                     let vendors;
-                    if(cart[c].db === "zinc22"){
-                        vendors = shoppingCart.getPossibleVendors(db, catalog, supplier);
+                    const res = getPurchasability(identifier, db);
+                    let db = res.db;
+                    let supplier = res.supplier;
+                    let catalog = res.catalog;
+                    vendors = catalog;
+
+                    if (db === 'zinc22') {
+                        vendors = obj.getPossibleVendors(db, catalog, supplier);
                     }
-                    else{
-                        vendors = getPurchasability(cart[c].identifier).catalog
-                    }
+
                     shoppingCart.assignvendors(cart[c].identifier, vendors)
                 }
-                $('#loadingModal').modal('hide');
-                location.reload();
             }
-            
+            $('#loadingModal').modal('hide');
+            location.reload();
             
 
 
