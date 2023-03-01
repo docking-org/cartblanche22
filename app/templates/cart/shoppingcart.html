@@ -181,7 +181,13 @@
             }
             else{
                 for (let c = 0; c < cart.length; c++) {
-                    res = getPurchasability(cart[c].identifier)
+                    let vendors;
+                    if(cart[c].db === "zinc22"){
+                        vendors = obj.getPossibleVendors(db, catalog, supplier);
+                    }
+                    else{
+                        vendors = getPurchasability(cart[c].identifier).catalog
+                    }
                     shoppingCart.assignvendors(cart[c].identifier, res.catalog)
                 }
                 $('#loadingModal').modal('hide');
