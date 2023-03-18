@@ -2,6 +2,10 @@ import re
 import urllib.parse
 from flask_login import current_user
 from app.data.models.default_prices import DefaultPrices
+
+import gevent.monkey
+gevent.monkey.patch_all()
+
 import requests
 from app.main import application
 from flask import render_template, request, json, jsonify, flash, Markup, abort, redirect
@@ -198,7 +202,7 @@ def getZinc20Data(identifier):
         'zinc_id-in': [identifier],
         'output_fields': "zinc_id supplier_code smiles substance_purchasable catalog inchikey"
     }
-    monkey.patch_socket()
+   
     response = requests.post(
         "https://zinc20.docking.org/catitems/subsets/for-sale.json", data=zinc20_files)
     reload(socket)
@@ -286,8 +290,11 @@ def getZincData(identifier):
                 s = c['catalog_name'].lower()
                 code = c['supplier_code']
 
-                price = DefaultPrices.query.filter_by(
-                    short_name=s, organization=role).first()
+                price = None
+                if identify_dataset(code):
+                    price = DefaultPrices.query.filter_by(category_name=identify_dataset(code), organization=role).first()
+                else:
+                    price = DefaultPrices.query.filter_by(short_name=s, organization=role).first()
 
                 if price:
                     newPrice = {

@@ -173,77 +173,41 @@
                 }
             });
         })
-        $('#reassign').on('click', () => {
-            $('#loadingModal').modal('show');
-            let cart = shoppingCart.getCart()
-            let apiCalled = false;
-            for (let c = 0; c < cart.length; c++) {
-                if (cart[c].supplier.length == 0) {
-                    apiCalled = true;
-                    $.ajax({
-                        url: 'https://cartblanche22.docking.org/search.json?zinc_id=' + cart[c].identifier,
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        type: 'POST',
-                        success: function (response) {
-                            console.log('got response for ', cart[c].identifier)
-                            console.log(response.items)
-                        },
-
-                        error: function (error) {
-                            {#console.log('calling zinc api from smile search', error)#}
-                        },
-                        complete: function (data) {
-                            console.log('data', data.responseJSON.items)
-                            if (data.status != 404 && data.responseJSON.items != undefined) {
-                                let suppliers = data.responseJSON.items.supplier_code
-                                let catalogs = data.responseJSON.items.catalogs
-                                shoppingCart.assignvendors(cart[c].identifier, suppliers, catalogs)
-                            }
-                        },
-                    });
-                }
-            }
-            if (apiCalled) {
-                $(document).ajaxStop(function () {
-                    location.reload();
-                });
-            } else {
-                $('#loadingModal').modal('hide');
-            }
-
-
-        });
         $('#refresh').on('click', () => {
-            $('#loadingModal').modal('show');
             let cart = shoppingCart.getCart()
-            for (let c = 0; c < cart.length; c++) {
-                $.ajax({
-                    url: 'https://cartblanche22.docking.org/search.json?zinc_id=' + cart[c].identifier,
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    type: 'POST',
-                    error: function (error) {
-                    },
-                    complete: function (data) {
-                        if (data.status != 404 && data.responseJSON.items != undefined) {
-                            let suppliers = data.responseJSON.items.supplier_code
-                            let catalogs = data.responseJSON.items.catalogs
-                            shoppingCart.assignvendors(cart[c].identifier, suppliers, catalogs)
+            $('#loadingModal').on('shown.bs.modal', function (e) {
+                if (cart.length === 0) {
+                    $('#loadingModal').modal('hide');
+                }
+                else{
+                    for (let c = 0; c < cart.length; c++) {
+                        let vendors;
+                        const res = getPurchasability(cart[c].identifier, cart[c].db);
+                        let db = res.db;
+                        let supplier = res.supplier;
+                        let catalog = res.catalog;
+                        vendors = catalog;
+    
+                        if (db === 'zinc22') {
+                            vendors = shoppingCart.getPossibleVendors(db, catalog, supplier);
                         }
-                    },
-                });
-            }
-            $(document).ajaxStop(function () {
-                $('#loadingModal').modal('hide');
-                location.reload();
+    
+                        shoppingCart.assignvendors(cart[c].identifier, vendors)
+                    }
+                       
+                    $('#loadingModal').modal('hide');
+                    location.reload();
+                }
 
-            });
-            if (cart.length === 0) {
-                $('#loadingModal').modal('hide');
-            }
+            })
+            
+            $('#loadingModal').modal('show');
+            
+
+            
+         
+            
+
 
         });
 
@@ -281,15 +245,9 @@
             <h5 class="card-title" id='checkoutTitle'>Total : $<span id='total'>-</span></h5>
             <button type="button" class="btn btn-info"
                     id="refresh"
-                    title="Throw away all assigned vendors then assign new vendors"
+                    title="Refresh and assign vendors for all molecules"
                     data-toggle="tooltip" data-placement="up">
                 Refresh Vendors
-            </button>
-            <button type="button" class="btn btn-info"
-                    id="reassign"
-                    title="Assign vendors for unassigned molecules"
-                    data-toggle="tooltip" data-placement="up">
-                Assign Vendors
             </button>
             <button type="button" class="btn btn-info" id="checkout">Checkout</button>
 {#            <button type="button" class="btn btn-warning" id="deleteAll">Clear cart</button>#}
