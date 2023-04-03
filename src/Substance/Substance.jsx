@@ -178,7 +178,7 @@ export default function Substance() {
                                     }}>
                                         <ButtonGroup>
                                             <Button variant="warning"
-                                                href={"/similarity/sw?smiles=" + results.smiles}
+                                                href={"/similarity/sw?smiles=" + encodeURIComponent(results.smiles)}
                                             >
                                                 Find Similar
                                             </Button>
