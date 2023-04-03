@@ -14,7 +14,7 @@ FROM continuumio/anaconda3:latest
 WORKDIR /home/cartblanche22
 
 ADD backend/application.py backend/config.py  backend/requirements.txt ./
-RUN conda create -c rdkit -n cartblanche-rdkit-env rdkit -y
+RUN conda create -c rdkit -n cartblanche-rdkit-env rdkit python=3.7 -y
 RUN echo "conda activate cartblanche-rdkit-env" > ~/.bashrc
 ENV PATH /opt/conda/envs/cartblanche-rdkit-env/bin:$PATH
 RUN pip install -r requirements.txt
