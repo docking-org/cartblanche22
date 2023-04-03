@@ -40,7 +40,7 @@ export default function SW() {
 
 
     const [params, setParams] = React.useState({
-        smi: window.location.search.split("=")[1] || "",
+        smi: window.location.search.split("=")[1] ? decodeURIComponent(window.location.search.split("=")[1]) : "",
         db: Object.keys(maps)[0],
     });
 
