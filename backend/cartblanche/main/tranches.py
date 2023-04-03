@@ -260,10 +260,10 @@ def tranches3d():
 
 @app.route('/tranches/2d/download', methods=['POST'])
 def tranches2dDownload():
-    formData = Download2DForm(request.values)
-    data_ = formData.tranches.data.split()
-    format = formData.format.data
-    using = formData.using.data
+    formData = request.form
+    data_ = formData['tranches'].split()
+    format = formData['format']
+    using = formData['method']
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
     add_url_2D = 'zinc22/2d/'
 
