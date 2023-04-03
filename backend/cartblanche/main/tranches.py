@@ -176,6 +176,22 @@ methods_3d ={
     "PowerShell": "powershell"
 }
 
+methods_2d = {
+    "URIs" : "uri",
+    "DOCK Database Index" : "database_index",
+    "WGET": "wget",
+    "CURL": "curl",
+    "PowerShell": "powershell"
+}
+
+formats_2d = {
+    "SMILES" : "smi.tgz",
+    "DOCK37" : "db2.tgz",
+    "AutoDock" : "pdbqt.tgz",
+    "Mol2" : "mol2.tgz",
+    "SDF" : "sdf.tgz",
+}
+
 generations = [chr(i) for i in range(97, 123)]
 
 @app.route('/tranches/get2d', methods=['GET'])
@@ -199,8 +215,8 @@ def tranches2d():
         'ticks': ticks, 
         'unfilteredSize': unfilteredSize, 
         'subsets': subsets,
-        'formats': formats_3d,
-        'methods': methods_3d
+        'formats': formats_2d,
+        'methods': methods_2d
     }, 200)
 
 
@@ -260,9 +276,11 @@ def tranches2dDownload():
     arr = map(gen_tranches, data_)
     data = '\n'.join(list(arr))
     download_filename = 'ZINC22-downloader-2D-{}.{}'.format(format, using)
-    response = Response(data, mimetype=mimetype)
-    response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
-    return response
+   
+    return {
+        'data': data,
+        'filename': download_filename
+    }, 200
 
 zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
 zinc22_common_conn = psycopg2.connect(zinc22_common_url)

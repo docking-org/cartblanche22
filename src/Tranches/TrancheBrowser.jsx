@@ -137,7 +137,10 @@ export default function TrancheBrowser() {
         let t = ref.current.getCurrentTranches();
         console.log(t);
         let trancheString = "";
-        t.map(tranche => trancheString += tranche['generation'] + tranche['h_num'] + tranche['p_num'] + tranche['charge'] + " ");
+        t.map(tranche => trancheString += 
+                    (trance['generation'] !== '-' ? tranche['generation']: "") +
+                    tranche['h_num'] + tranche['p_num'] + 
+                    (tranche['charge'] !== '-' ? tranche['charge'] : "") + "");
         setTrancheString(trancheString);
     }
 
