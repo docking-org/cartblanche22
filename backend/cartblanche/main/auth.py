@@ -34,13 +34,18 @@ def login():
 @jwt_required()
 def verify():
     #extend the expiration time of the access token, if token is within 5 minutes of expiring
+    inucsf = request.access_route[-1][0:3] == '10.' or  request.access_route[-1][0:8] == '169.230.' or request.access_route[-1][0:8] == '128.218.' or request.access_route[0] == '127.0.0.1'
     current_user = get_jwt_identity()
     exp = get_jwt()['exp']
     if exp - time() < 300:
         access_token = create_access_token(identity=current_user)
-        return {'access_token': access_token}, 200
+        return {'access_token': access_token,
+                'inucsf': inucsf,
+        }, 200
 
-    return {'msg': 'Verified'}, 200
+    return {'msg': 'Verified',
+            'inucsf': inucsf,
+    }, 200
 
 
 @app.route('/logout', methods=['POST'])

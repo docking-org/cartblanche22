@@ -7,6 +7,7 @@ export default function Navigation() {
     const [show, setShow] = React.useState(false);
     const [register, setRegister] = React.useState(false);
     const [forgot, setForgot] = React.useState(false);
+    const [inucsf, setInUCSF] = React.useState(false);
     const [form, setForm] = React.useState({
         username: "",
         password: "",
@@ -22,6 +23,9 @@ export default function Navigation() {
                 headers: { "Authorization": "Bearer " + token },
             }).then((res) => {
                 console.log(res);
+                if(res.data.inucsf){
+                    setInUCSF(true);
+                }
             }).catch((err) => {
                 console.log(err);
                 removeToken();
@@ -144,14 +148,16 @@ export default function Navigation() {
                                 <NavDropdown title="Similarity" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/similarity/sw">Public</NavDropdown.Item>
                                     <NavDropdown.Item href="/similarity/swp">Private</NavDropdown.Item>
-                                    <NavDropdown.Item href="/similarity/swc">Super Private</NavDropdown.Item>
+                                    {inucsf && 
+                                    <NavDropdown.Item href="/similarity/swc">Super Private</NavDropdown.Item>}
                                 </NavDropdown>
                             </Nav.Item>
                             <Nav.Item>
                                 <NavDropdown title="Patterns" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/patterns/arthor">Public</NavDropdown.Item>
                                     <NavDropdown.Item href="/patterns/arthorp">Private</NavDropdown.Item>
-                                    <NavDropdown.Item href="/patterns/arthorc">Super Private</NavDropdown.Item>
+                                    {inucsf &&
+                                    <NavDropdown.Item href="/patterns/arthorc">Super Private</NavDropdown.Item>}
                                 </NavDropdown>
                             </Nav.Item>
                             <Nav.Item>
