@@ -1,0 +1,16 @@
+.nav-tabs{
+    background-color: var(--bs-card-cap-bg);
+    height: 100%;
+    
+}
+
+.nav-tabs .nav-link.active {
+    height: 100%;
+}
+
+
+li.nav-item:has(> .add-to-cart) { 
+    margin-left: auto;
+    padding: 0;
+    margin-bottom: 0;
+}

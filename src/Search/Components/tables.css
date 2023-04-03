@@ -1,0 +1,10 @@
+tr.align-middle > td{ 
+    max-height: 20px;
+    
+    
+    font-size: small;
+}
+
+.mol-info > p{
+    margin: -6px;
+}

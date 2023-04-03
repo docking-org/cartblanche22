@@ -1,0 +1,875 @@
+{% extends 'base.html' %}
+{% block title %}
+3D Tranche Browser - Cartblanche22
+{% endblock %}
+{% block styles %}
+{{ super() }}
+<style>
+    .title-text {
+        font-size: 19px;
+    }
+
+    .div-tranche {
+        max-height: 74vh;
+        overflow: scroll;
+        position: relative;
+
+    }
+
+    .top-bar {
+        padding-top: 5px;
+    }
+
+    .top-button {
+        padding-right: 5px;
+    }
+
+    table {
+        position: relative;
+        border-collapse: collapse;
+    }
+
+    table div {
+            {
+            #width: 60px;
+            #
+        }
+    }
+
+    .div-last {
+        width: max-content;
+        display: table;
+        margin: 0 auto;
+
+    }
+
+    .last-col {
+        box-shadow: 0 0 0 .5px black inset;
+    }
+
+    th {
+        padding: 0.5em;
+        text-align: center;
+    }
+
+    td {
+        border: 1px solid #ccc;
+
+            {
+            #padding: 0.5em;
+            #
+        }
+
+        width: 100px;
+        text-align: center;
+    }
+
+    thead th:first-child {
+        left: 0;
+        z-index: 2;
+        border: none;
+    }
+
+    thead th:last-child {
+        right: 0;
+        z-index: 2;
+    }
+
+    thead th {
+        position: -webkit-sticky;
+        /* for Safari */
+        position: sticky;
+        top: 0;
+        background: white;
+        color: black;
+        border-left: 1px solid #ccc;
+
+        margin-top: 0;
+        z-index: 1;
+    }
+
+    tbody th {
+        position: -webkit-sticky;
+        /* for Safari */
+        position: sticky;
+        left: 0;
+        background: white;
+        color: black;
+        border-bottom: 1px solid #ccc;
+        border-top: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        z-index: 1;
+
+    }
+
+
+    tbody td:last-child {
+        position: -webkit-sticky;
+        /* for Safari */
+        position: sticky;
+        right: 0;
+        background-color: white;
+        color: black;
+        text-align: center;
+
+        font-weight: bold;
+
+    }
+
+    tfoot th {
+        position: -webkit-sticky;
+        /* for Safari */
+        position: sticky;
+        bottom: 0;
+        background: white;
+        color: black;
+
+
+        box-shadow: 0 0 0 .5px black inset;
+    }
+
+    tfoot th:first-child {
+        left: 0;
+        z-index: 2;
+
+    }
+
+    tfoot th:last-child {
+        right: 0;
+        z-index: 2;
+    }
+
+    .cell-th:hover {
+        background-color: grey;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked+.slider {
+        background-color: grey;
+    }
+
+    input:focus+.slider {
+        box-shadow: 0 0 1px #ccc;
+    }
+
+    input:checked+.slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+    $(".cell").hover(function () {
+        var attr = $(this).attr('data-col');
+        $('.v-guide[data-id=' + attr + "]").css("background-color", "gray");
+        $(this).siblings('th').css("background-color", "gray");
+
+    }, function () {
+        var attr = $(this).attr('data-col');
+        $('.v-guide[data-id=' + attr + "]").css("background-color", "white");
+        $(this).siblings('th').css("background-color", "white");
+    }
+    );
+</script>
+<script>
+    let numberToggle = true;
+    let generation = {
+        "a": true,
+        "b": true,
+        "c": true,
+        "d": true,
+        "e": true,
+        "f": true,
+        "g": true,
+        "h": true,
+        "i": true,
+        "j": true,
+        "k": true,
+        "l": true,
+        "m": true,
+        "n": true,
+        "o": true,
+        "p": true,
+        "q": true,
+        "r": true,
+        "s": true,
+        "t": true,
+        "u": true,
+        "v": true,
+        "w": true,
+        "x": true,
+        "y": true,
+        "z": true,
+    }
+
+    // shards (H04-H09) to P340
+    // fragments (H10-H16) to P340
+    // flagments H15 H16 H17 H18 H19  to P340
+    // small leads H17 H18 H19 to P340
+    // medium leads H20 H21 H22 to P340
+    // big leads H23 H24 H25 to P340
+    // lugs H26 H27 H28 H29 to P390
+    // drug-like  H04 to H27  to P490
+    // big-n-greasy  H25 H26 H27 H28 H29  P350 to P900
+    let predefined = {
+        'all': [[0, 61], [0, 62]],
+        'none': [[0, 0], [0, 0]],
+        'shards': [[0, 41], [4, 10]],
+        'fragments': [[0, 41], [7, 16]],
+        'flagments': [[0, 41], [15, 20]],
+        'lead-like': [[0, 41], [16, 26]],
+        'goldilocks': [[16, 36], [18, 24]],
+        'small-leads': [[0, 41], [16, 20]],
+        'medium-leads': [[0, 41], [20, 23]],
+        'big-leads': [[0, 41], [23, 26]],
+        'lugs': [[0, 46], [26, 30]],
+        'drug-like': [[0, 56], [0, 28]],
+        'big-n-greasy': [[41, 500], [25, 30]]
+    };
+
+
+    let charges = {
+        "J": true,
+        "K": true,
+        "L": true,
+        "M": true,
+        "N": true,
+        "O": true,
+        "P": true,
+        "Q": true,
+        "R": true
+    }
+
+    let chargeMap = {
+        "J": "J -4",
+        "K": "K -3",
+        "L": "L -2",
+        "M": "M -1",
+        "N": "N 0",
+        "O": "O +1",
+        "P": "P +2",
+        "Q": "Q +3",
+        "R": "R +4"
+    }
+
+
+
+    $(document).ready(function () {
+        let data = {{ cell3D| safe
+    }};
+
+
+    let cols = new Array(62).fill(true);
+    let rows = new Array(61).fill(true);
+    localStorage.setItem('3d', JSON.stringify(data));
+    localStorage.setItem('cols3d', JSON.stringify(cols));
+    localStorage.setItem('rows3d', JSON.stringify(rows));
+    var t = document.getElementById("numberToggle");
+    numberToggles(t);
+    renderTrancheTable();
+
+
+    var ul = document.getElementById("generation");
+
+    Object.keys(generation).forEach(element => {
+        var li = document.createElement("li");
+        li.setAttribute('id', element.toLowerCase());
+        li.setAttribute('onclick', `setGeneration(${element.toLowerCase()})`);
+        li.setAttribute('data-val', element.toLowerCase());
+        $(li).toggleClass('active');
+        var a = document.createElement("a");
+        a.appendChild(document.createTextNode(element));
+        li.appendChild(a);
+        ul.appendChild(li);
+
+    });
+
+    var ul = document.getElementById("charges");
+    Object.keys(charges).forEach(element => {
+        var li = document.createElement("li");
+        li.setAttribute('id', element);
+        li.setAttribute('onclick', `chargeSelect(${element})`);
+        li.setAttribute('data-val', element);
+        $(li).toggleClass('active');
+        var a = document.createElement("a");
+        a.appendChild(document.createTextNode(chargeMap[element]));
+        li.appendChild(a);
+        ul.appendChild(li);
+    });
+
+            
+        });
+
+    function renderTrancheTable() {
+
+        arr = JSON.parse(localStorage.getItem('3d'))
+        let rowSize = new Array(61).fill(0);
+        let colSize = new Array(62).fill(0);
+        let totalSize = 0
+        let log_total = Math.log({{ unfilteredSize }})
+    let trancheCount = 0
+    for (let i = 0; i < 61; i++) {
+        for (let j = 0; j < 62; j++) {
+            tranches = arr[i][j]
+            let trancheSizeTotal = 0
+            let trancheChosenTotal = false;
+            tranches.tranches.forEach(x => {
+                if (!generation[x.generation] || !charges[x.charge]) {
+                    x.chosen = false;
+                }
+                if (x.chosen) {
+                    trancheSizeTotal += x.size;
+                }
+                trancheChosenTotal = trancheChosenTotal || x.chosen
+            })
+            let cell = $('#' + i + '-' + j)
+            cell.html(!numberToggle ? bigNumber(trancheSizeTotal) : trancheSizeTotal)
+
+            let td = $('#cell-' + i + '-' + j)
+            let color = (Math.floor(255 - 255 * (log_total - 1.1 * Math.log(trancheSizeTotal)) / log_total));
+
+            if (color < 0) {
+                color = 0
+            }
+            td.css('background-color', '#' + color.toString(16).repeat(3));
+            cell.css('color', color > 105 ? '#333' : '#ccc');
+            if (tranches.chosen && trancheChosenTotal) {
+                let val = parseInt(trancheSizeTotal)
+                rowSize[i] += val
+                colSize[j] += val
+                totalSize += val
+                cell.css('opacity', 1)
+                tranches.tranches.forEach(x => {
+                    if (x.size != 0 && x.chosen) {
+                        trancheCount += 1
+                    }
+                })
+            } else {
+                cell.css('opacity', 0.1)
+                cell.css('color', 'black')
+                $('#cell-' + i + '-' + j).css('background-color', 'white');
+            }
+        }
+    }
+
+    rowSize.forEach((val, index) => $('#row-sum-' + index).html(numberToggle ? val : bigNumber(val)))
+    colSize.forEach((val, index) => $('#col-sum-' + index).html(numberToggle ? val : bigNumber(val)))
+
+    $('#tranche-total').html(numberToggle ? totalSize : bigNumber(totalSize))
+    $('#tranche-count').html(numberToggle ? trancheCount : bigNumber(trancheCount))
+        }
+
+    function colToggle(obj) {
+        let id = obj.getAttribute('data-id')
+        let arr = JSON.parse(localStorage.getItem('3d'))
+        let cols = JSON.parse(localStorage.getItem('cols3d'))
+        cols[id] = !cols[id]
+        $(obj.target).css('opacity', 1 ? cols[id] : 0.1)
+        for (let i = 0; i < 61; i++) {
+            if (arr[i][id].size === 0) {
+                arr[i][id].chosen = false
+            }
+            else {
+                arr[i][id].chosen = cols[id]
+
+            }
+        }
+        localStorage.setItem('3d', JSON.stringify(arr));
+        localStorage.setItem('cols3d', JSON.stringify(cols));
+        renderTrancheTable();
+    }
+
+    function rowToggle(obj) {
+        let id = obj.getAttribute('data-id')
+        let arr = JSON.parse(localStorage.getItem('3d'))
+        let rows = JSON.parse(localStorage.getItem('rows3d'))
+        rows[id] = !rows[id]
+        for (let i = 0; i < 62; i++) {
+            if (arr[id][i].size === 0) {
+                arr[id][i].chosen = false
+            }
+            else {
+                arr[id][i].chosen = rows[id]
+
+            }
+        }
+        localStorage.setItem('3d', JSON.stringify(arr));
+        localStorage.setItem('rows3d', JSON.stringify(rows));
+        renderTrancheTable();
+    }
+
+    function cellToggle(obj) {
+        let row = obj.getAttribute('data-row')
+        let col = obj.getAttribute('data-col')
+        let arr = JSON.parse(localStorage.getItem('3d'))
+        if (arr[row][col].size === 0) {
+            arr[row][col].chosen = false
+        }
+        else {
+            arr[row][col].chosen = !arr[row][col].chosen
+
+        }
+        localStorage.setItem('3d', JSON.stringify(arr));
+        renderTrancheTable();
+    }
+
+    function numberToggles(btn) {
+        numberToggle = $(btn).prop('checked');
+        renderTrancheTable();
+    }
+
+    function bigNumber(input) {
+        if (input >= 10000000) {
+            return '' + Math.round(input / 1000000) + 'M';
+        } else if (input >= 1000000) {
+            return '' + Math.round(input / 100000) / 10 + 'M';
+        } else if (input >= 10000) {
+            return '' + Math.round(input / 1000) + 'K';
+        } else if (input >= 1000) {
+            return '' + Math.round(input / 100) / 10 + 'K';
+        } else {
+            return input;
+        }
+    }
+
+    function setPredefined(s) {
+        let arr = JSON.parse(localStorage.getItem('3d'))
+        let p = predefined[s]
+
+        for (let i = 0; i < 61; i++) {
+            for (let j = 0; j < 62; j++) {
+                if (p[0][0] <= i && i < p[0][1] && p[1][0] <= j && j < p[1][1] && arr[i][j].size != 0) {
+                    arr[i][j].chosen = true
+                } else {
+                    arr[i][j].chosen = false
+                }
+            }
+        }
+        localStorage.setItem('3d', JSON.stringify(arr));
+        renderTrancheTable();
+    }
+
+    function setGeneration(li) {
+        if (li === 'all') {
+            for (let e in generation) {
+                var li = document.getElementById(e)
+                if (!li.classList.contains('active')) {
+                    $(li).toggleClass('active');
+                }
+                generation[e] = true;
+            }
+        }
+        else if (li === 'none') {
+            for (let e in generation) {
+                var li = document.getElementById(e)
+                if (li.classList.contains('active')) {
+                    $(li).toggleClass('active');
+                }
+                generation[e] = false;
+            }
+        }
+        else {
+            let bool = $(li).hasClass('active')
+            $(li).toggleClass('active');
+
+            let gen = li.dataset.val;
+            generation[gen] = !generation[gen];
+        }
+        renderTrancheTable();
+    }
+    function chargeSelect(li) {
+        if (li === 'all') {
+            for (let e in charges) {
+                var li = document.getElementById(e)
+                if (!li.classList.contains('active')) {
+                    $(li).toggleClass('active');
+                }
+                charges[e] = true;
+            }
+        }
+        else if (li === 'none') {
+            for (let e in charges) {
+                var li = document.getElementById(e)
+                if (li.classList.contains('active')) {
+                    $(li).toggleClass('active');
+                }
+                charges[e] = false;
+            }
+        }
+        else {
+            let bool = $(li).hasClass('active')
+            $(li).toggleClass('active');
+
+            let gen = li.dataset.val;
+            charges[gen] = !charges[gen];
+        }
+
+        renderTrancheTable();
+    }
+    function trancheDownloadModalClicked() {
+        let arr = JSON.parse(localStorage.getItem('3d'))
+        let col = ['H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
+            'H16', 'H17',
+            'H18', 'H19', 'H20', 'H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28', 'H29', 'H30', 'H31', 'H32', 'H33',
+            'H34', 'H35', 'H36', 'H37', 'H38', 'H39', 'H40', 'H41', "H42", 'H43', 'H44', 'H45', 'H46', 'H47', 'H48', 'H49',
+            'H50', 'H51', 'H52', 'H53', 'H54', 'H55', 'H56', 'H57', 'H58', 'H59', 'H60', 'H61']
+        let row = ['M500', 'M400', 'M300', 'M200', 'M100', 'M000', 'P000', 'P010', 'P020', 'P030', 'P040', 'P050', 'P060', 'P070',
+            'P080', 'P090', 'P100', 'P110', 'P120', 'P130', 'P140', 'P150', 'P160', 'P170', 'P180', 'P190', 'P200', 'P210', 'P220',
+            'P230', 'P240', 'P250', 'P260', 'P270', 'P280', 'P290', 'P300', 'P310', 'P320', 'P330', 'P340', 'P350', 'P360',
+            'P370', 'P380', 'P390', 'P400', 'P410', 'P420', 'P430', 'P440', 'P450', 'P460', 'P470', 'P480', 'P490', 'P500', 'P600',
+            'P700', 'P800', 'P900']
+        let st = '';
+        for (let i = 0; i < 61; i++) {
+            for (let j = 0; j < 62; j++) {
+                tranches = arr[i][j]
+                if (tranches.chosen) {
+                    tranches.tranches.forEach(x => {
+
+                        if (x.chosen && generation[x.generation] && charges[x.charge]) {
+                            st = st + x.generation + col[j] + row[i] + x.charge + ' ';
+                        }
+                    });
+
+                }
+            }
+        }
+        $('#selected-tranches').html(st)
+
+    }
+
+
+</script>
+{% endblock %}
+{% block tranchebrowser %}
+<div class="row">
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="trancheDownloadModal" tabindex="-1" role="dialog"
+        aria-labelledby="trancheDownloadModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="{{ url_for('main.tranches3dDownload') }}" method="post">
+                    <div class="modal-header">
+                        <button class="close" data-dismiss="modal">&times;</button>
+                        <h3>Download Tranches</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div>
+                                <label for="selected-tranches">
+
+                                </label>
+                            </div>
+                            <div class="text-center">
+                                <textarea id="selected-tranches" class="tranche-list form-control" name="tranches"
+                                    rows="6" cols="20"></textarea>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label for="download-since">Only If Modified Since</label>
+                                    <input id="download-since" class="form-control" type="date" name="since">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <h4 class="pull-left">Method</h4>
+                            </div>
+                        </div>
+                        <div class="btn-toolbar">
+                            <div class="btn-group pull-right">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="glyphicon glyphicon-download-alt"></i>
+                                    Download
+                                </button>
+                            </div>
+                            <div class="form-group">
+
+                                <select name="format" class="btn btn-info" id="downloadFormat">
+                                    <option value="smi.tgz" id="format-smi" selected>
+                                        SMILES (*.smi)
+                                    </option>
+                                    <option id="format-db2.tgz" value="db2.tgz">DOCK37 (*.db2.tgz)
+                                    </option>
+                                    <option id="format-pdbqt.tgz" value="pdbqt.tgz">AutoDock (*.pdbqt.tgz)
+                                    </option>
+                                    <option id="format-mol2.tgz" value="mol2.tgz">Mol2 (*.mol2.tgz)
+                                    </option>
+                                    <option id="format-sdf.tgz" value="sdf.tgz">SDF (*.sdf.tgz)
+                                    </option>
+                                </select>
+
+                                <select name="using" class="btn btn-info" id="downloadUsing">
+                                    <option value="uri" id="using-uri">
+                                        URIs
+                                    </option>
+                                    <option id="using-database_index" value="database_index">DOCK Database Index
+                                    </option>
+                                    <option value="wynton" id="using-wynton">
+                                        Wynton
+                                    </option>
+                                    <option value="bkslab" id="using-bks">
+                                        BKS Lab
+                                    </option>
+                                    <option value="aws" id="using-aws">
+                                        AWS S3
+                                    </option>
+                                    <option value="oci" id="using-oci">
+                                        Oracle OCI
+                                    </option>
+                                    <option value="wget" id="using-wget">
+                                        WGET
+                                    </option>
+                                    <option value="rsync" id="using-rsync">
+                                        RSYNC
+                                    </option>
+                                    <option value="curl" id="using-curl">
+                                        CURL
+                                    </option>
+                                    <option value="powershell" id="using-powershell">
+                                        PowerShell
+                                    </option>
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12 top-bar" style="background-color: white; border: 1px solid #ccc; text-align: center;
+                 text-justify: auto; color: black;font-weight: bold;
+                ">
+        <div class="row">
+            <div class="col-sm-1 col-xs-1 col-md-1 col-lg-1">
+                <div class="dropdown">
+                    <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Layers
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu" id='generation'>
+                        <li><a href="#" onclick="setGeneration('all')">All</a></li>
+                        <li><a href="#" onclick="setGeneration('none')">None</a></li>
+                        <li class="divider"></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pull-right top-button">
+                <button class="btn btn-dark" type="button" data-toggle="modal" data-target="#trancheDownloadModal"
+                    onclick="trancheDownloadModalClicked()"><i class="fa fa-download"></i></button>
+            </div>
+
+            <div class="pull-right top-button btn-group dropleft">
+                <div class="dropdown">
+                    <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown"><i
+                            class="glyphicon glyphicon-th"></i>
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu pull-right">
+                        <li class="dropdown-header">Predefined Subsets</li>
+                        <li><a href="#" onclick="setPredefined('all')">All</a></li>
+                        <li><a href="#" onclick="setPredefined('none')">None</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#" onclick="setPredefined('shards')">Shards</a></li>
+                        <li><a href="#" onclick="setPredefined('fragments')">Fragments</a></li>
+                        <li><a href="#" onclick="setPredefined('flagments')">Flagments</a></li>
+                        <li><a href="#" onclick="setPredefined('lead-like')">Lead-like</a></li>
+                        <li><a href="#" onclick="setPredefined('goldilocks')">Goldilocks</a></li>
+                        <li><a href="#" onclick="setPredefined('small-leads')">Small Leads</a></li>
+                        <li><a href="#" onclick="setPredefined('medium-leads')">Medium Leads</a></li>
+                        <li><a href="#" onclick="setPredefined('big-leads')">Big Leads</a></li>
+                        <li><a href="#" onclick="setPredefined('lugs')">Lugs</a></li>
+                        <li><a href="#" onclick="setPredefined('drug-like')">Drug-Like</a></li>
+                        <li><a href="#" onclick="setPredefined('big-n-greasy')">Big-n-Greasy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pull-right top-button">
+                <div class="dropdown">
+                    <button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown">Charge
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu" id='charges'>
+                        <li><a href="#" onclick="chargeSelect('all')">All</a></li>
+                        <li><a href="#" onclick="chargeSelect('none')">None</a></li>
+                        <li class="divider"></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pull-right top-button">
+                <label class="switch">
+                    <input type="checkbox" id="numberToggle" onclick="numberToggles(this)">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+
+            <div class="col-sm-5 col-xs-3 col-md-5 col-lg-6 top-bar pull-right">
+                <p class="title-text">
+                    Heavy Atom Count
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-sm-1 col-xs-1" style="background-color: white; height:74vh;  color:black; border-left: 1px solid #ccc;
+                 border-right:1px solid #ccc;width: 2em; font-weight: bold;">
+        <p class="title-text" style="transform: rotate(-90deg); top: 21em; position: sticky;">LogP</p>
+    </div>
+    <div style="background-color: grey; border-bottom: 1px solid #ccc">
+        <div class="div-tranche">
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>
+                            <div></div>
+                        </th>
+                        {% for cell in ticks[0][4:35] %}
+                        <th class="cell-th v-guide" data-id="{{ cell }}" onclick="colToggle(this)" data-toggle="tooltip"
+                            title="{{ axes[2][cell] }}" data-delay='{"show": 100, "hide": 1000}'>
+                            <div>
+                                {{ axes[0][cell] }}
+                            </div>
+                        </th>
+                        {% endfor %}
+                        <th class="last-col">
+                            <div class="div-last">Totals</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for row in ticks[1] %}
+                    <tr>
+                        <th class="cell-th" id="h-guide" data-id="{{ row }}" onclick="rowToggle(this)"
+                            data-toggle="tooltip" title="{{ axes[2][row] }}" data-delay='{"show": 100, "hide": 1000}'>
+                            <div>{{ axes[1][row] }}</div>
+                        </th>
+                        {% for col in ticks[0][4:35] %}
+                        <td class="cell" id="cell-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}"
+                            onclick="cellToggle(this)">
+                            <div>
+                                <p id='{{ row }}-{{ col }}'></p>
+                                {# <a style="color: darkgrey;" href="" #} {#
+                                    title="View substances in the {{ row }} -{{ col }} tranche" #} {#
+                                    class="hover-link hover-link-se hover-link-slow">#}
+                                    {# <i class="glyphicon glyphicon-info-sign"><span class="sr-only">View</span></i>#}
+                                    {# </a>#}
+                            </div>
+                        </td>
+                        {% endfor %}
+                        <td class="last-col">
+                            <div class="div-last">
+                                <span id="row-sum-{{ row }}">
+                                    Sum {{ row }}
+                                </span>
+                            </div>
+                        </td>
+
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>
+                            <div>Totals</div>
+                        </th>
+                        {% for col in ticks[0][4:35] %}
+                        <th>
+                            <div>
+                                <!-- <span>
+                                            {{ axes[2][col] }}<br>{{ axes[0][col] }}
+                                        </span>
+                                        <br/> -->
+                                <span id="col-sum-{{ col }}">
+                                    sum {{ axes[0][col] }}
+                                </span>
+                            </div>
+                        </th>
+                        {% endfor %}
+                        <th class="last-col">
+                            <div class="div-last">
+                                = <span id="tranche-total"></span>
+                            </div>
+                        </th>
+
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+
+
+{% endblock %}
