@@ -140,7 +140,7 @@ export default function TrancheBrowser() {
         t.map(tranche => trancheString += 
                     (tranche['generation'] !== '-' ? tranche['generation']: "") +
                     tranche['h_num'] + tranche['p_num'] + 
-                    (tranche['charge'] !== '-' ? tranche['charge'] : "") + "");
+                    (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
         setTrancheString(trancheString);
     }
 
