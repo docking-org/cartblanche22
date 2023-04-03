@@ -153,7 +153,7 @@ export default function TrancheBrowser() {
 
         let i = axios({
             method: "post",
-            url: "/tranches/3d/download",
+            url: `/tranches/${url}/download`,
             data: form,
             headers: {
                 "Content-Type": "multipart/form-data"
