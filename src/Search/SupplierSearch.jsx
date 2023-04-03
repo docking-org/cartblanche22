@@ -66,7 +66,7 @@ export default function SupplierSearch() {
 
                 </Card.Header>
                 <Card.Body>
-                    <p>Example: <code>curl -X GET https://cartblanche22.docking.org/catitems.txt -F supplier_codes=@sup.txt -F dist=4 -F adist=4</code></p>
+                    <p>Example: <code>curl -X GET https://cartblanche22.docking.org/catitems.txt -F supplier_codes=@sup.txt</code></p>
 
                     <p>
                         - Results can be formatted in the desired file format.

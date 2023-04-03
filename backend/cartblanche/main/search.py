@@ -156,8 +156,8 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
         if res.get('zinc20'):
             result.extend(result['zinc20'])
 
-        if request.get('output_fields'):
-            output_fields = request.get('output_fields').split(',')
+        if request.form.get('output_fields'):
+            output_fields = request.form.get('output_fields').split(',')
             result = [{k:v for k,v in i.items() if k in output_fields} for i in result]
         
         return make_response(formatZincResult(result, format), 200)
