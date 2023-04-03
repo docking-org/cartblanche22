@@ -338,7 +338,7 @@ const ResultsTable = forwardRef((props, ref) => {
                                             </td>
                                         }
                                         {
-                                            molecule[1] ? <td>{molecule[1]}</td> : null
+                                            <td>{molecule[1]}</td>
                                         }
                                         {
                                             molecule[2] ? <td>{parseFloat(molecule[2]).toFixed(2)}</td> : null
