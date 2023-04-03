@@ -19,7 +19,7 @@ export default function MyCarts() {
     function loadCarts() {
         axios({
             method: "get",
-            url: "/carts",
+            url: "/myCarts",
             headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
         })
             .then(response => {
