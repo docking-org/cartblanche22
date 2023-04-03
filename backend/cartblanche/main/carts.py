@@ -54,7 +54,7 @@ def cart():
     else:
         return make_response(jsonify({'msg': 'No cart found'}), 200)
 
-@app.route('/carts', methods= ['GET',  'POST'])
+@app.route('/myCarts', methods= ['GET',  'POST'])
 @jwt_required()
 def carts():
     user_id = get_jwt_identity()
