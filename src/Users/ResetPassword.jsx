@@ -15,14 +15,13 @@ export default function ResetPassword() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
+        data = new FormData();
+        data.append("token", passwordToken);
+        data.append("password", password);
         axios({
-            method: "post",
-            url: "https://cartblanche22.docking.org/reset_password",
-            data: {
-                token: passwordToken,
-                password: password,
-            },
+            method: "POST",
+            url: "/reset_password",
+            data: data,
             headers: { "Content-Type": "multipart/form-data" },
 
         }).then((response) => {
