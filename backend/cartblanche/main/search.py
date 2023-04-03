@@ -119,7 +119,7 @@ def search_substance(identifier, data = None, format = 'json'):
 
 
 @search_bp.route('/substances.<format>', methods=["POST", "GET"])
-def search_substances(file = None, data = None, format = 'json', ids = []): 
+def search_substances(file = None, data = None, format = 'json', ids = [], output_fields=["zinc_id, smiles"]): 
     ids = []
     if 'zinc_ids' in request.files:
         file = request.files['zinc_ids'].read().decode()
@@ -149,6 +149,17 @@ def search_substances(file = None, data = None, format = 'json', ids = []):
         task = start_search_task.delay(task,ids, callback)
         task = AsyncResult(task.id)
         result = task.get()
+        task = result['id']
+        task = AsyncResult(task)
+        result = task.get()['zinc22']
+
+        if result.get('zinc20'):
+            result.extend(result['zinc20'])
+
+        if request.get('output_fields'):
+            output_fields = request.get('output_fields').split(',')
+            result = [{k:v for k,v in i.items() if k in output_fields} for i in result]
+        
         return make_response(formatZincResult(result, format), 200)
     
     
@@ -175,7 +186,9 @@ def search_catitems(ids=[], data = None, format = 'json', file = None):
     if request.method == "POST":
         return {"task": task.id}
     else:
-        res= task.get()['zinc22']
+        res= task.get()['id']
+        res = AsyncResult(res).get()
+        res  = res['zinc22']
         return make_response(formatZincResult(res, format), 200)
 
 
@@ -214,7 +227,10 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
     if request.method == "POST":
         return {"task": task.id}
     else:
-        res= task.get()['zinc22']
+        res= task.get()['id']
+        res = AsyncResult(res).get()
+        res = res['zinc22']
+
         return make_response(formatZincResult(res, format), 200)
     
 @search_bp.route('/substance/random.<format>', methods=["GET", "POST"])
