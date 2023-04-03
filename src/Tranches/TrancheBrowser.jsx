@@ -138,7 +138,7 @@ export default function TrancheBrowser() {
         console.log(t);
         let trancheString = "";
         t.map(tranche => trancheString += 
-                    (trance['generation'] !== '-' ? tranche['generation']: "") +
+                    (tranche['generation'] !== '-' ? tranche['generation']: "") +
                     tranche['h_num'] + tranche['p_num'] + 
                     (tranche['charge'] !== '-' ? tranche['charge'] : "") + "");
         setTrancheString(trancheString);
