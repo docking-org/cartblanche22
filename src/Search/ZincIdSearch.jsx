@@ -73,8 +73,8 @@ export default function ZincIdSearch() {
                 <Card.Header><b>CURL commands for searching multiple ZincIDs</b></Card.Header>
                 <Card.Body>
 
-                    <p>Example: <code>curl https://cartblanche22.docking.org/substances.txt -F
-                        zinc_id-in=@test.txt -F output_fields='smiles,zinc_id'
+                    <p>Example: <code>curl -X GET https://cartblanche22.docking.org/substances.txt -F
+                        zinc_ids=@test.txt -F output_fields='smiles,zinc_id'
                     </code></p>
                     <p>
                         - Results can be formatted in the desired file format.
@@ -95,7 +95,7 @@ export default function ZincIdSearch() {
                         <tbody>
                             <tr>
                                 <td>To specify return format</td>
-                                <td><code>curl https://cartblanche22.docking.org/substances<i>.txt</i></code></td>
+                                <td><code>curl -X GET https://cartblanche22.docking.org/substances<i>.txt</i></code></td>
                                 <td>
                                     <ul>
                                         <li>.txt</li>
@@ -106,7 +106,7 @@ export default function ZincIdSearch() {
                             </tr>
                             <tr>
                                 <td>To add search value</td>
-                                <td> <code>-F zinc_id-in=<i>@test.txt</i></code></td>
+                                <td> <code>-F zinc_ids=<i>@test.txt</i></code></td>
                                 <td>.txt file with list of zinc identifers</td>
                             </tr>
                             <tr>

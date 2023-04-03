@@ -102,7 +102,7 @@ export default function SmilesSearch() {
             <Card className="mt-2">
                 <Card.Header><b>CURL commands for searching using SMILES</b></Card.Header>
                 <Card.Body>
-                    <p>Example: <code>curl https://cartblanche22.docking.org/smiles.txt -F smiles-in=@smiles.txt -F dist=4 -F adist=4</code></p>
+                    <p>Example: <code>curl -X GET https://cartblanche22.docking.org/smiles.txt -F smiles-in=@smiles.txt -F dist=4 -F adist=4</code></p>
 
                     <p>
                         - Results can be formatted in the desired file format.
@@ -122,7 +122,7 @@ export default function SmilesSearch() {
 
                             <tr>
                                 <td>To specify return format</td>
-                                <td><code>curl https://cartblanche22.docking.org/smiles<i><b>.txt</b></i></code></td>
+                                <td><code>curl -X GET https://cartblanche22.docking.org/smiles<i><b>.txt</b></i></code></td>
                                 <td>
                                     <ul>
                                         <li>.txt</li>
