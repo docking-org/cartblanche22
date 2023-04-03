@@ -205,7 +205,13 @@ export default function Navigation() {
                     <Modal.Title>Sign in</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                    <Form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleLogin();
+                        }}
+
+                    >
                         <Form.Group className="mb-3" controlId="">
                             <Form.Label>Username</Form.Label>
 

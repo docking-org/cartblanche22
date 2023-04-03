@@ -104,7 +104,16 @@ export default function MyCarts() {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                    <Form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            createCart(newCartName).then((response) => {
+                                loadCarts();
+                                setAddModal(false);
+                                setNewCartName("");
+                            })
+                        }}
+                    >
                         <Form.Group>
                             <Form.Label>Cart Name</Form.Label>
                             <Form.Control
