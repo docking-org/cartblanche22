@@ -18,7 +18,7 @@ export default function ResetPassword() {
 
         axios({
             method: "post",
-            url: "/reset_password",
+            url: "https://cartblanche22.docking.org/reset_password",
             data: {
                 token: passwordToken,
                 password: password,
