@@ -1,0 +1,8 @@
+.molecule-structure-svg svg rect:first-of-type {
+    fill: transparent !important;
+}
+
+.molecule-structure-svg svg{
+    width: 100%;
+    height: auto;
+}

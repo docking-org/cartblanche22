@@ -1,0 +1,309 @@
+{% extends 'bootstrap/base.html' %}
+{% block html_attribs %} lang="en"{% endblock %}
+
+{% block metas %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8">
+<meta name="Description" content="Cartblanche molecule shopping application">
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link rel="shortcut icon" href="#">
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/base.css') }}">
+{#
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/datatables.min.css') }}">#}
+{#
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery-ui.min.css') }}">#}
+{#
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/fontawesome-all.min.css') }}">#}
+{#
+<link rel="stylesheet" type="text/css" href="../static/css/datatables.min.css" />#}
+{#
+<link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.min.css" />#}
+{#
+<link rel="stylesheet" type="text/css" href="../static/css/fontawesome-all.min.css">#}
+{#
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">#}
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/json2html/2.1.0/json2html.min.js"></script>
+
+
+
+<style>
+    .ui-tooltip {
+        padding: 10px 20px;
+        color: black;
+
+        border-radius: 20px;
+        font: 14px "Helvetica Neue", Sans-Serif;
+
+            {
+            #box-shadow: 0 0 7px black;
+            #
+        }
+
+        opacity: 1;
+        background-color: white;
+        position: absolute;
+        margin-left: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename = 'js/datatables.min.js') }}"></script>
+<script src="{{ url_for('static', filename = 'js/jquery-ui.min.js') }}"></script>
+<script src="{{ url_for('static', filename = 'js/custom/cart.js') }}"></script>
+<script src="{{ url_for('static', filename = 'js/custom/cartblanche.js') }}"></script>
+<script src="{{ url_for('static', filename = 'js/custom/hg.js') }}"></script>
+<script src="{{ url_for('static', filename = 'js/base.js') }}"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip({
+            boundary: 'window',
+            position: {
+                my: "center bottom-10",
+                at: "center top",
+                using: function (position, feedback) {
+                    $(this).css(position);
+                    $("<div>")
+                        .addClass("arrow")
+                        .addClass(feedback.vertical)
+                        .addClass(feedback.horizontal)
+                        .appendTo(this);
+                }
+            }
+        })
+    })
+
+    $(document).ready(() => {
+        $('#cartCount').html(shoppingCart.countCart())
+        localStorage.setItem('is_authenticated', '{{current_user.is_authenticated}}')
+        loadApplication();
+    })
+    $('#logoutTab').on('click', () => {
+        //user this api to get default prices information
+        //getDefaultPrices
+        $.ajax({
+            type: "GET",
+            url: "/getDefaultPrices",
+            success: function (data) {
+                console.log(data)
+                localStorage.setItem('default_prices', JSON.stringify(data));
+            }
+        });
+        shoppingCart.clearCart();
+        localStorage.setItem('pageLoaded', false)
+        $.ajax({
+            type: "GET",
+            url: "/logout",
+            success: function (route) {
+                window.location.href = route;
+            }
+        });
+
+    })
+    if (localStorage.getItem('punchout') == 'False' && localStorage.getItem('is_authenticated') == 'False') {
+        $('#loginTab').show()
+    }
+
+
+</script>
+{% endblock %}
+
+/* {% block title %}
+{% if title %}{{ title }}
+{% else %}Welcome to Molecule Shopping Cart
+{% endif %}
+{% endblock %} */
+
+{% block navbar %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('main.cartblanche') }}">Cartblanche</a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+                {% if current_user.is_anonymous %}
+                <li>
+                    <a href="{{ url_for('main.sw') }}" class="test" data-toggle="tooltip" data-placement="bottom"
+                        title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
+                        Similarity
+                    </a>
+                </li>
+                {% else %}
+                <li class="dropdown">
+                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" data-toggle="tooltip"
+                        data-placement="bottom"
+                        title="Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient">
+                        Similarity
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('main.sw') }}">Public</a></li>
+                        {% if request.access_route[-1][0:3] == '10.' or request.access_route[-1][0:8] == '169.230.' or
+                        request.access_route[-1][0:8] == '128.218.' %}
+                        <li><a href="{{ url_for('main.swc') }}">Super Private</a></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('main.swp') }}">Private</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+                {% if current_user.is_anonymous %}
+                <li>
+                    <a href="{{ url_for('main.arthor') }}" class="test" data-toggle="tooltip" data-placement="bottom"
+                        title="Arthor : Search by substructure or pattern (SMARTS)">
+                        Patterns
+                    </a>
+                </li>
+                {% else %}
+                <li class="dropdown">
+                <li class="dropdown">
+                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" data-toggle="tooltip"
+                        data-placement="bottom" title="Arthor : Search by substructure or pattern (SMARTS)">
+                        Patterns
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('main.arthor') }}">Public</a></li>
+                        <li><a href="{{ url_for('main.arthorp') }}">Private</a></li>
+                    </ul>
+                </li>
+                </li>
+                {% endif %}
+
+
+
+                <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle"> Lookup <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+
+                    </ul>
+                </li>
+
+                <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Tranches <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('main.tranches2d') }}">2D</a></li>
+                        <li><a href="{{ url_for('main.tranches3d') }}">3D</a></li>
+                    </ul>
+                </li>
+                {% if not current_user.is_anonymous %}
+                <li><a href="{{ url_for('main.carts') }}">My Carts</a></li>
+                {% endif %}
+
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_anonymous %}
+                <li id="loginTab"><a href="{{ url_for('main.login') }}" id="username">
+                        <span class="glyphicon glyphicon-user"></span>
+                        Hello, Sign in!
+                    </a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{{ url_for('main.profile') }}" id="username">
+                        <span class="glyphicon glyphicon-user"></span>
+                        Hello, {{ current_user.username }}
+                    </a>
+                </li>
+                <li><a id="logoutTab"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('main.cart') }}"><span class="glyphicon glyphicon-shopping-cart"
+                            style="font-size:18px"></span><span class="badge" id="cartCount">{{ cart_count }}</span>
+                    </a>
+                </li>
+                <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">About <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header">About Us</li>
+                        <li><a href="/about">Credits</a></li>
+                        <li><a href="/usage/">Usage</a></li>
+                        <li class="dropdown-header">Get Help</li>
+                        <li><a target=_blank href="https://wiki.docking.org/index.php/Category:ZINC22">Help</a></li>
+                        <li>
+                            <a href="http://wiki.docking.org/index.php/ZINC22:Getting_started" target="_blank">
+                                Getting Started
+                            </a>
+                        </li>
+
+                        <li class="dropdown-header">Socialize</li>
+                        <li>
+                            <a target=_blank href="https://www.surveymonkey.com/s/8NDGM6G"
+                                title="Tell us what you think">
+                                Feedback
+                            </a>
+                        </li>
+                        <li>
+                            <a target=_blank href="http://facebook.com/zincdb" title="Like us on Facebook">
+                                Like us on Facebook
+                            </a>
+                        </li>
+                        <li>
+                            <a target=_blank href="https://www.linkedin.com/grp/home?gid=706977" title="LinkedIn">
+                                LinkedIn
+                            </a>
+                        </li>
+                        <li>
+                            <a target=_blank href="https://twitter.com/#!/chem4biology" title="Follow us on Twitter">
+                                Tweet at us
+                            </a>
+                        </li>
+                        <li>
+                            <a target=_blank href="http://www.youtube.com/user/chemistry4biology"
+                                title="chemistry4biology on YouTube">
+                                Videos
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-info" role="alert">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    {# application content needs to be provided in the app_content block #}
+    {% block app_content %}{% endblock %}
+
+</div>
+
+<div class="container-fluid">
+    {% block search_results %}{% endblock %}
+    {% block tranchebrowser %}{% endblock %}
+    {# application content needs to be provided in the app_content block #}
+</div>
+<br>
+<footer>
+    <p><a href="{{ url_for(" main.about") }}">Acknowledgements</a> Roger Sayle. Nextmovesoftware.com Arthor.
+        Smallworld.<a href="https://www.nigms.nih.gov/">Supported by NIGMS via GM71896</a> Questions, Discussion, Bug
+        reports,
+        Feature requests <a href="http://irwinlab.compbio.ucsf.edu/">Irwin</a> and Shoichet Labs and UC Regents.</p>
+
+</footer>
+{% endblock %}

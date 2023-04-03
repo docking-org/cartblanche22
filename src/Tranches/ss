@@ -1,0 +1,134 @@
+import React from "react";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
+import { Col, Row, Button, Card, Table, Pagination, Navbar, Spinner, Dropdown, Container, NavLink } from 'react-bootstrap';
+
+
+const TrancheTable = forwardRef((props, ref) => {
+    const [table, setTable] = React.useState([]);
+    const [tranches, setTranches] = React.useState(props.tranches);
+    const [axes, setAxes] = React.useState(props.axes);
+    const [total, setTotal] = React.useState(0);
+    useEffect(() => {
+        let total = 0;
+        let table = initTable();
+        console.log(table);
+        tranches.map(tranche => {
+            let row = axes[0].indexOf(tranche['h_num']);
+            let col = axes[1].indexOf(tranche['p_num']);
+
+            table[col][row]['tranches'].push(tranche);
+            table[col][row]['sum'] += parseInt(tranche.sum);
+            total += parseInt(tranche.sum);
+        })
+        setTotal(total);
+        console.log(table);
+        setTable(table);
+    }, [tranches]);
+
+    function initTable() {
+        let table = [];
+        for (let i = 0; i < axes[1].length; i++) {
+            let row = [];
+            for (let j = 0; j < axes[0].length; j++) {
+                row.push({ 'tranches': [], 'sum': 0, 'chosen': true });
+            }
+            table.push(row);
+        }
+
+
+        return table;
+    }
+
+    return (
+        <div className="">
+
+            <div className="col-sm-1 col-xs-1" style={{ backgroundColor: 'white', height: '74vh', color: 'black', borderLeft: '1px solid #ccc', borderRight: '1px solid #ccc', width: '2em', fontWeight: 'bold' }}>
+                <p className="title-text" style={{ transform: 'rotate(-90deg)', top: '21em', position: 'sticky' }}>LogP</p>
+            </div>
+            <div style={{ backgroundColor: 'grey', borderBottom: '1px solid #ccc' }}>
+                <div className="div-tranche">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div />
+                                </th>
+                                {axes[0].map((axis, index) => {
+                                    return (
+                                        <th className="cell-th v-guide" key={index}>
+                                            <div>
+                                                <p>{axis}</p>
+                                            </div>
+                                        </th>
+
+                                    )
+                                })}
+                                <th className="last-col">
+                                    <div className="div-last">Totals</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {table.map((row, index) => {
+                                return (
+                                    <tr>
+                                        <th className="cell-th h-guide">
+                                            {axes[1][index]}
+                                        </th>
+                                        {
+                                            row.map((col, index) => {
+                                                return (
+                                                    <td
+                                                        style={{
+                                                            backgroundColor: `#${(Math.floor(255 - 255 * (Math.log(total) - 1.1 * Math.log(col.sum)) / Math.log(total))).toString(16).repeat(3)}`,
+                                                            color: (Math.floor(255 * (Math.log(total) - 1.1 * Math.log(col.sum)) / Math.log(total))).toString(16).repeat(3) > 100 ? '#333' : '#ccc'
+                                                        }}
+                                                    >
+                                                        {col.sum}
+                                                    </td>
+                                                )
+                                            }
+                                            )
+                                        }
+                                        <th>
+                                            {
+                                                row.reduce((acc, curr) => {
+                                                    return acc + curr.sum;
+                                                }, 0)
+                                            }
+                                        </th>
+
+                                    </tr>
+                                )
+                            })}
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>
+                                    <div>Totals</div>
+                                </th><th>
+                                    <div>
+
+                                        <span id="col-sum-{{ col }}">
+
+                                        </span>
+                                    </div>
+                                </th><th className="last-col">
+                                    <div className="div-last">
+                                        = <span id="tranche-total" />
+                                    </div>
+                                </th>
+                            </tr>
+                        </tfoot>
+
+                    </table>
+                </div>
+            </div>
+        </div >
+    )
+})
+
+
+export default TrancheTable;
