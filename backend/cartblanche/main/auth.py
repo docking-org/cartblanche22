@@ -83,8 +83,8 @@ def reset_password_request():
         send_password_reset_email(user)
     return {'msg': 'If your email is linked to an account, an email will be sent to you shortly. Please follow the instructions there to reset your password.'}, 200
 
-@app.route('/reset_password/', methods=['GET'])
-@app.route('/reset_password/<token>', methods=['GET'])
+@app.route('/reset_password/', methods=['POST'])
+@app.route('/reset_password/<token>', methods=['POST'])
 def reset_password():
     token = request.form.get('token')
     password = request.form.get('password')

@@ -15,7 +15,7 @@ export default function ResetPassword() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        data = new FormData();
+        let data = new FormData();
         data.append("token", passwordToken);
         data.append("password", password);
         axios({
