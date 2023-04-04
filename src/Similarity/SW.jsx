@@ -42,7 +42,7 @@ export default function SW(props) {
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
 
     const [params, setParams] = React.useState({
@@ -277,7 +277,7 @@ export default function SW(props) {
             ref.current.setPage(1);
         }
         let reqParams = "";
-        reqParams += `smi=${params.smi}`;
+        reqParams += `smi=${encodeURIComponent(params.smi)}`;
         reqParams += `&db=${params.db}`;
 
         sliders.forEach((item) => {
@@ -301,7 +301,7 @@ export default function SW(props) {
                 ref.current.getResults(e.hlid, start);
                 start += 1;
             }
-            if (e.elap){
+            if (e.elap) {
                 setElapsed(e.elap);
                 console.log(elapsed)
             }
