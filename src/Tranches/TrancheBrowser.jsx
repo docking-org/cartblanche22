@@ -11,7 +11,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import Cart from '../Cart/Cart';
 
-export default function TrancheBrowser() {
+export default function TrancheBrowser(props) {
     const { toastLoading, toast200, toastError } = Cart();
     const ref = React.useRef();
     const [activeCharges, setActiveCharges] = React.useState([]);
@@ -36,6 +36,11 @@ export default function TrancheBrowser() {
     const [downloadMethod, setDownloadMethod] = React.useState("");
     const [downloadMethods, setDownloadMethods] = React.useState([]);
     const [url, setUrl] = React.useState(useParams().tranches);
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
     useEffect(() => {
         fetch(`/tranches/get${url}`).then(res => res.json()).then(data => {
             console.log(data);

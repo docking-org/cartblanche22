@@ -18,7 +18,7 @@ import "./sw.css";
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
-export default function SW() {
+export default function SW(props) {
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
         alignment: { name: "alignment", orderable: true, label: "" },
@@ -35,8 +35,14 @@ export default function SW() {
     const [server, setServer] = React.useState(useParams().server);
     const [currentEvent, setCurrentEvent] = React.useState(0);
     const [maps, setMaps] = React.useState({});
+    const [elapsed, setElapsed] = React.useState(0);
+
     const minDistance = 0;
     const ref = React.useRef();
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
 
 
     const [params, setParams] = React.useState({
@@ -262,6 +268,7 @@ export default function SW() {
         setResults([]);
         setLoad(true);
         setHlid("");
+        setElapsed(0);
         let start = 0;
         if (currentEvent) {
             currentEvent.close();
@@ -293,6 +300,10 @@ export default function SW() {
                 setHlid(e.hlid);
                 ref.current.getResults(e.hlid, start);
                 start += 1;
+            }
+            if (e.elap){
+                setElapsed(e.elap);
+                console.log(elapsed)
             }
 
         }
@@ -449,6 +460,8 @@ export default function SW() {
                                 server={server}
                                 sliderValues={sliders}
                                 db={params.db}
+                                elapsed={elapsed}
+                                loading={loading}
                             ></ResultsTable>
                         </Col>
                     </Row>

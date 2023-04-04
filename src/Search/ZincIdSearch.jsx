@@ -5,7 +5,7 @@ import axios from "axios";
 import useToken from "../utils/useToken";
 import { useNavigate } from "react-router-dom";
 
-export default function ZincIdSearch() {
+export default function ZincIdSearch(props) {
     const navigate = useNavigate();
     const [input, setInput] = React.useState("");
     const { token, removeToken, setToken, username } = useToken();
@@ -13,6 +13,10 @@ export default function ZincIdSearch() {
     useEffect(() => {
 
     }, [])
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
 
 
     function getMolecules() {

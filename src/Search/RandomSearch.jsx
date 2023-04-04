@@ -5,8 +5,12 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 import Modal from 'react-bootstrap/Modal';
 
-export default function RandomSearch() {
+export default function RandomSearch(props) {
     const [loading, setLoading] = React.useState(false);
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
 
     function getMolecules() {
         var bodyFormData = new FormData();

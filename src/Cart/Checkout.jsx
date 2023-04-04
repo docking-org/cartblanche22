@@ -8,7 +8,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import { saveAs } from 'file-saver';
 import useToken from '../utils/useToken';
 
-export default function Checkout() {
+
+export default function Checkout(props) {
+
     const { token, setToken } = useToken();
     const { getCart, addToCart, removeFromCart, cartSize, inCart, getTotalPrice, clearCart } = Cart();
     const [cart, setCart] = React.useState(getCart());
@@ -22,6 +24,39 @@ export default function Checkout() {
         setCart(getCart());
     }, [cartSize])
 
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
+    function createGoogleSheet() {
+        let form = new FormData();
+        form.append('cart', JSON.stringify(cart));
+
+        const id = toast.loading("Creating Google Sheet...", {
+            position: toast.POSITION.BOTTOM_LEFT,
+            autoClose: 2000
+        });
+        axios({
+            method: 'post',
+            url : "/cart/createGoogleSheet",
+            data: form,
+        }).then((response) => {
+            toast.update(id, {
+                render: "Google Sheet Created",
+                type: toast.TYPE.SUCCESS,
+                isLoading: false,
+                autoClose: 2000
+            });
+            console.log(response.data);
+        }).catch((error) => {
+            toast.update(id, {
+                render: "Error Creating Google Sheet",
+                type: toast.TYPE.ERROR,
+                autoClose: 2000,
+                isLoading: false,
+            });
+        });
+    }
 
 
     function buildPagination() {
@@ -146,6 +181,12 @@ export default function Checkout() {
                             <Navbar.Text>
                                 <Button onClick={() => setDownloadModal(true)}>Download</Button>
                             </Navbar.Text>
+                            {/* &nbsp;
+                            <Navbar.Text>
+                                <Button onClick={() => 
+                                    createGoogleSheet
+                                }>Export to Google Sheets</Button>
+                            </Navbar.Text> */}
                         </Navbar.Collapse>
                     </Navbar>
 

@@ -5,10 +5,15 @@ import axios from "axios";
 import useToken from "../utils/useToken";
 
 
-export default function SmilesSearch() {
+export default function SmilesSearch(props) {
     //use text box value by default
     const [input, setInput] = React.useState("");
     const { token } = useToken();
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
     function getMolecules() {
         var bodyFormData = new FormData();
         bodyFormData.append('smiles', input);

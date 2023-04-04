@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import useToken from "./utils/useToken.js";
 import axios from "axios";
-import { Container, Row, Col, Form, Navbar, Nav, NavDropdown, Modal, Button } from "react-bootstrap";
+import { Container, Row, Col, Form, Navbar, Nav, NavDropdown, Modal, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 export default function Navigation() {
     const { token, removeToken, setToken, username } = useToken();
     const [show, setShow] = React.useState(false);
@@ -14,6 +14,7 @@ export default function Navigation() {
         confirmPassword: "",
         email: "",
     });
+    
     useEffect(() => {
         //check if token is valid
         if (token) {
@@ -145,20 +146,34 @@ export default function Navigation() {
                     <Navbar.Collapse>
                         <Nav className="mr-auto">
                             <Nav.Item>
+                                <OverlayTrigger
+                                    placement="right"
+                                    delay={{ show: 250, hide: 0}}
+                                    overlay={<Tooltip id="button-tooltip-2">Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient</Tooltip>}
+                                >
                                 <NavDropdown title="Similarity" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/similarity/sw">Public</NavDropdown.Item>
                                     <NavDropdown.Item href="/similarity/swp">Private</NavDropdown.Item>
                                     {inucsf && 
                                     <NavDropdown.Item href="/similarity/swc">Super Private</NavDropdown.Item>}
                                 </NavDropdown>
+                                </OverlayTrigger>
                             </Nav.Item>
                             <Nav.Item>
+                                
+                                <OverlayTrigger
+                                    placement="left"
+                                    delay={{ show: 250, hide: 0}}
+                                    overlay={<Tooltip id="button-tooltip-2">Arthor : Search by substructure or pattern (SMARTS)</Tooltip>}
+
+                                >
                                 <NavDropdown title="Patterns" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/patterns/arthor">Public</NavDropdown.Item>
                                     <NavDropdown.Item href="/patterns/arthorp">Private</NavDropdown.Item>
                                     {inucsf &&
                                     <NavDropdown.Item href="/patterns/arthorc">Super Private</NavDropdown.Item>}
                                 </NavDropdown>
+                                </OverlayTrigger>
                             </Nav.Item>
                             <Nav.Item>
                                 <NavDropdown title="Lookup" id="basic-nav-dropdown">

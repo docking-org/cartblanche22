@@ -14,6 +14,13 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from cartblanche.helpers.validation import identify_dataset
 from pandas import DataFrame
 
+
+from config import Config
+import google.auth
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+
 @app.route('/cart/getCart', methods=['GET',  'POST'])
 @jwt_required(optional=True)
 def cart():
@@ -399,6 +406,34 @@ def getPurchasability(database = None):
         }]
   
     return make_response(jsonify(item), 200)
+
+
+# @app.route('/cart/createGoogleSheet', methods=["POST"])
+# def createGoogleSheet():
+#     data = request.form.get('cart')
+#     print(data)
+    
+#     GOOGLE_API_KEY = Config.GOOGLE_API_KEY
+#     GOOGLE_CLIENT_ID = Config.GOOGLE_CLIENT_ID
+#     try:
+#         service = build('sheets', 'v4',)
+#         spreadsheet = {
+#             'properties': {
+#                 'title': title
+#             }
+#         }
+#         spreadsheet = service.spreadsheets().create(body=spreadsheet,
+#                                                     fields='spreadsheetId') \
+#             .execute()
+#         print(f"Spreadsheet ID: {(spreadsheet.get('spreadsheetId'))}")
+#         return make_response(jsonify(spreadsheet.get('spreadsheetId')), 200)
+#         return spreadsheet.get('spreadsheetId')
+#     except HttpError as error:
+#         print(f"An error occurred: {error}")
+#         return error
+
+
+
  
     
 # @app.route("/cart/addAllItem", methods=['POST'])

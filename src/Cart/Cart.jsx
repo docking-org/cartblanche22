@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import useToken from '../utils/useToken';
-export default function Cart() {
+export default function Cart(props) {
     const { token } = useToken();
 
     const [cart, setCart] = React.useState([]);
@@ -24,6 +24,10 @@ export default function Cart() {
 
         refreshCart();
     }, [])
+
+    // useEffect(() => {
+    //     document.title = props.title || "";
+    //   }, [props.title]);
 
     function refreshCart() {
 

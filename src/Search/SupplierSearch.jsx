@@ -4,9 +4,15 @@ import { Card, Container, Table } from "react-bootstrap";
 import axios from "axios";
 import useToken from "../utils/useToken";
 
-export default function SupplierSearch() {
+export default function SupplierSearch(props) {
     const [input, setInput] = React.useState("");
     const { token } = useToken();
+
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
     function getMolecules() {
         var bodyFormData = new FormData();
         bodyFormData.append('supplier_codes', input);

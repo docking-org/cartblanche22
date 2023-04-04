@@ -4,6 +4,7 @@ import { Col, Row, Button, Card, Table, Pagination, Navbar, Spinner, Dropdown, C
 
 
 const TrancheTable = forwardRef((props, ref) => {
+    
     const [table, setTable] = React.useState([]);
     const [tranches, setTranches] = React.useState(props.tranches);
     const [axes, setAxes] = React.useState(props.axes);
@@ -15,6 +16,7 @@ const TrancheTable = forwardRef((props, ref) => {
         refreshTable();
 
     }, [tranches]);
+
 
     useImperativeHandle(ref, () => ({
         refreshTable() {

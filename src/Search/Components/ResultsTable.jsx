@@ -22,6 +22,7 @@ const ResultsTable = forwardRef((props, ref) => {
     const [loading, setLoading] = React.useState(false);
     const [currentEvent, setCurrentEvent] = React.useState(0);
     const [substructure, setSubstructure] = React.useState(null);
+    const [elapsed, setElapsed] = React.useState(props.elapsed);
 
     useImperativeHandle(ref, () => ({
         getResults(hlid, draw, substructure = null) {
@@ -37,6 +38,8 @@ const ResultsTable = forwardRef((props, ref) => {
 
 
     function getArthorResults() {
+        setLoading(true);
+        setElapsed(0);
         console.log("getArthorResults");
 
         let url = `https://${encodeURIComponent(props.server)}.docking.org/dt/${(props.db)}/search`
@@ -72,6 +75,10 @@ const ResultsTable = forwardRef((props, ref) => {
                         res.push([newRow]);
 
                     });
+                }
+                if(response.data.time){
+                    setElapsed(response.data.time + "ms") ;
+
                 }
 
                 setResults(res);
@@ -181,7 +188,18 @@ const ResultsTable = forwardRef((props, ref) => {
     return (
         <>
             <Card>
-                <Card.Header>{total.toLocaleString('en-US', { maximumFractionDigits: 2 })} results</Card.Header>
+                <Card.Header>
+                    <div className="d-flex justify-content-between">
+                        <div>
+                    {total.toLocaleString('en-US', { maximumFractionDigits: 2 })} results {props.elapsed === 0 ? null: (`found in ${props.elapsed || elapsed}`)}
+                    </div>
+                    <div>
+                    {props.loading || loading ? 
+                    <Spinner size="sm" animation="border" role="status" /> : null
+                    }
+                        </div>
+                    </div> 
+                    </Card.Header>
                 <Card.Body>
                     <Navbar bg="clear" className=''>
                         <Pagination style={{ "marginBottom": "auto", }}>
