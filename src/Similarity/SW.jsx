@@ -36,7 +36,8 @@ export default function SW(props) {
     const [currentEvent, setCurrentEvent] = React.useState(0);
     const [maps, setMaps] = React.useState({});
     const [elapsed, setElapsed] = React.useState(0);
-
+    const [smi, setSmi] = React.useState(window.location.search.split("=")[1] ? decodeURIComponent(window.location.search.split("=")[1]) : "");
+    const [db, setDB] = React.useState(Object.keys(maps)[0]);
     const minDistance = 0;
     const ref = React.useRef();
 
@@ -45,10 +46,7 @@ export default function SW(props) {
     }, [props.title]);
 
 
-    const [params, setParams] = React.useState({
-        smi: window.location.search.split("=")[1] ? decodeURIComponent(window.location.search.split("=")[1]) : "",
-        db: Object.keys(maps)[0],
-    });
+
 
     useEffect(() => {
         getMaps();
@@ -176,9 +174,7 @@ export default function SW(props) {
         )
             .then((res) => {
                 setMaps(res.data);
-                setParams((prev) => {
-                    return { ...prev, db: Object.keys(res.data)[0] }
-                });
+                setDB(Object.keys(res.data)[0])
             }
             )
     }
@@ -264,7 +260,11 @@ export default function SW(props) {
     }
 
 
-    async function submitSearch() {
+    async function submitSearch(smiles) {
+        if (smi !== smiles) {
+            setSmi(smiles);
+        }
+
         setResults([]);
         setLoad(true);
         setHlid("");
@@ -277,8 +277,8 @@ export default function SW(props) {
             ref.current.setPage(1);
         }
         let reqParams = "";
-        reqParams += `smi=${encodeURIComponent(params.smi)}`;
-        reqParams += `&db=${params.db}`;
+        reqParams += `smi=${encodeURIComponent(smiles)}`;
+        reqParams += `&db=${db}`;
 
         sliders.forEach((item) => {
             reqParams += `&${item.name}=${item.value[1]}`;
@@ -298,7 +298,9 @@ export default function SW(props) {
             e = JSON.parse(e.data);
             if (e.hlid) {
                 setHlid(e.hlid);
-                ref.current.getResults(e.hlid, start);
+                if (ref.current) {
+                    ref.current.getResults(e.hlid, start);
+                }
                 start += 1;
             }
             if (e.elap) {
@@ -332,14 +334,11 @@ export default function SW(props) {
                                 width="100%"
                                 height="350px"
                                 onChange={(smiles) => {
-                                    setParams({
-                                        ...params,
-                                        smi: smiles,
-                                    });
 
-                                    submitSearch();
+                                    submitSearch(smiles);
                                 }}
-                                smiles={params.smi}
+                                smiles={smi}
+                                options={"nocanonize"}
 
                             />
 
@@ -348,13 +347,9 @@ export default function SW(props) {
                                 <InputGroup.Text>SMILES</InputGroup.Text>
                                 <input
                                     className="form-control"
-                                    value={params.smi}
+                                    value={smi}
                                     onChange={(e) => {
-                                        setParams({
-                                            ...params,
-                                            smi: e.target.value,
-                                        });
-                                        submitSearch();
+                                        submitSearch(e.target.value);
                                     }}
                                 />
 
@@ -363,13 +358,10 @@ export default function SW(props) {
                                 <InputGroup.Text>Dataset</InputGroup.Text>
                                 <select
                                     className="form-control"
-                                    value={params.db}
+                                    value={db}
                                     onChange={(e) => {
 
-                                        setParams({
-                                            ...params,
-                                            db: e.target.value,
-                                        });
+                                        setDB(e.target.value);
                                         submitSearch();
                                     }}
                                 >
@@ -459,7 +451,7 @@ export default function SW(props) {
                                 findAndAdd={findAndAdd}
                                 server={server}
                                 sliderValues={sliders}
-                                db={params.db}
+                                db={db}
                                 elapsed={elapsed}
                                 loading={loading}
                             ></ResultsTable>
