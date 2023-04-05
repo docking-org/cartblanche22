@@ -70,46 +70,55 @@ export default function TrancheBrowser(props) {
 
     useEffect(() => {
 
-        if (activeCharges.length !== 0) {
+        // if (activeCharges.length !== 0) {
+        //     tranches.map(tranche => {
+        //         if (activeCharges.length !== 0) {
+        //             if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
+        //                 tranche['chosen'] = true;
+        //             }
+        //             else {
+        //                 tranche['chosen'] = false;
+        //             }
+        //         }
+        //     });
+        // }
+        // else {
+        //     if (tranches && (url === '3d')) {
+        //         tranches.map(tranche => {
+        //             tranche['chosen'] = false;
+        //         });
+        //     }
+        // }
+        // if (ref.current) {
+        //     ref.current.refreshTable()
+        // }
+
+        if (tranches) {
+            chooseSubset(activeSubset);
+        }
+    }, [activeCharges, activeGenerations]);
+
+
+    function chooseSubset(subset) {
+        console.log(subset)
+        if (subset === "all") {
             tranches.map(tranche => {
                 if (activeCharges.length !== 0) {
                     if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
                         tranche['chosen'] = true;
                     }
-                    else {
-                        tranche['chosen'] = false;
-                    }
+                }
+                else {
+                    tranche['chosen'] = false;
                 }
             });
-        }
-        else {
-            if (tranches && (url === '3d')) {
-                tranches.map(tranche => {
-                    tranche['chosen'] = false;
-                });
-            }
-        }
-        if (ref.current) {
-            ref.current.refreshTable()
-        }
-
-    }, [activeCharges, activeGenerations]);
-
-
-    function chooseSubset(subset) {
-        setActiveSubset("");
-        let newTranches = [];
-        if (subset === "all") {
-            tranches.map(tranche => {
-                tranche['chosen'] = true;
-            });
+            setActiveSubset("all")
         }
         else if (subset === "none") {
             tranches.map(tranche => {
                 tranche['chosen'] = false;
             });
-
-
+            setActiveSubset("none");
         }
         else {
             setActiveSubset(subset);
@@ -127,7 +136,14 @@ export default function TrancheBrowser(props) {
                     && row >= minRow
                     && row < maxRow
                 ) {
-                    tranche['chosen'] = true;
+                    if (activeCharges.length !== 0) {
+                        if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
+                            tranche['chosen'] = true;
+                        }
+                    }
+                    else {
+                        tranche['chosen'] = false;
+                    }
                 }
                 else {
                     tranche['chosen'] = false;
@@ -150,9 +166,11 @@ export default function TrancheBrowser(props) {
         console.log(t);
         let trancheString = "";
         t.map(tranche => trancheString +=
-            (tranche['generation'] !== '-' ? tranche['generation'] : "") +
-            tranche['h_num'] + tranche['p_num'] +
-            (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
+            tranche['chosen'] ?
+                (tranche['generation'] !== '-' ? tranche['generation'] : "") +
+                tranche['h_num'] + tranche['p_num'] +
+                (tranche['charge'] !== '-' ? tranche['charge'] : "") + " " : "");
+
         setTrancheString(trancheString);
     }
 
