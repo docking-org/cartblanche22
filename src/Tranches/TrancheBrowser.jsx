@@ -39,7 +39,7 @@ export default function TrancheBrowser(props) {
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
     useEffect(() => {
         fetch(`/tranches/get${url}`).then(res => res.json()).then(data => {
@@ -81,6 +81,13 @@ export default function TrancheBrowser(props) {
                     }
                 }
             });
+        }
+        else {
+            if (tranches && (url === '3d')) {
+                tranches.map(tranche => {
+                    tranche['chosen'] = false;
+                });
+            }
         }
         if (ref.current) {
             ref.current.refreshTable()
@@ -142,10 +149,10 @@ export default function TrancheBrowser(props) {
         let t = ref.current.getCurrentTranches();
         console.log(t);
         let trancheString = "";
-        t.map(tranche => trancheString += 
-                    (tranche['generation'] !== '-' ? tranche['generation']: "") +
-                    tranche['h_num'] + tranche['p_num'] + 
-                    (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
+        t.map(tranche => trancheString +=
+            (tranche['generation'] !== '-' ? tranche['generation'] : "") +
+            tranche['h_num'] + tranche['p_num'] +
+            (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
         setTrancheString(trancheString);
     }
 
@@ -303,7 +310,7 @@ export default function TrancheBrowser(props) {
                                             </DropdownMenu>
                                         </Dropdown>
                                     }
-                                    {charges.length > 0 &&
+                                    {Object.keys(charges).length > 0 &&
                                         <Dropdown
                                             align="end"
                                             className='mx-1'
