@@ -151,10 +151,11 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
         result = task.get()
         task = result['id']
         task = AsyncResult(task)
+        #i apologize for these variable names :)
         res = task.get()
         result = ['zinc22']
         if res.get('zinc20'):
-            result.extend(result['zinc20'])
+            result.extend(res['zinc20'])
 
         if request.form.get('output_fields'):
             output_fields = request.form.get('output_fields').split(',')
