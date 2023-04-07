@@ -9,7 +9,7 @@ COPY ./src ./src
 COPY ./public ./public
 RUN yarn build
 
-FROM continuumio/anaconda3:latest
+FROM continuumio/anaconda3:latest as backend
 
 WORKDIR /home/cartblanche22
 

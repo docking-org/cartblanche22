@@ -10,7 +10,7 @@ import './search.css';
 import { saveAs } from "file-saver";
 import Cart from "../Cart/Cart";
 import { useRef } from "react";
-export default function Results() {
+export default function Results(props) {
     const childRef = useRef();
     const { getCart, addToCart, removeFromCart, cartSize, inCart } = Cart();
     const [results, setResults] = React.useState([]);
@@ -21,6 +21,10 @@ export default function Results() {
     const [load, setLoad] = React.useState(false);
     const [submission, setSubmission] = React.useState(undefined);
     const [logs, setLogs] = React.useState(undefined);
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
 
     function downloadAll(format) {
         axios({

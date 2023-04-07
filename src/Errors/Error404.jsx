@@ -3,8 +3,13 @@ import { useState } from "react";
 import { Card, Container } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 
-export default function Error404(){
+export default function Error404(props){
     const [substance] = useState(useParams().id);
+
+    React.useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
     return (
         <Container className="mt-2">
             <Card>

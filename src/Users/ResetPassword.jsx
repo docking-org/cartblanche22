@@ -7,22 +7,25 @@ import {
 } from "react-router-dom";
 import useToken from "../utils/useToken";
 
-export default function ResetPassword() {
+export default function ResetPassword(props) {
     const [passwordToken] = React.useState(useParams().token);
     const [password, setPassword] = React.useState("");
     const [password2, setPassword2] = React.useState("");
     const { token, removeToken, setToken, username } = useToken();
 
+    React.useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
-
+        let data = new FormData();
+        data.append("token", passwordToken);
+        data.append("password", password);
         axios({
-            method: "post",
+            method: "POST",
             url: "/reset_password",
-            data: {
-                token: passwordToken,
-                password: password,
-            },
+            data: data,
             headers: { "Content-Type": "multipart/form-data" },
 
         }).then((response) => {

@@ -28,6 +28,8 @@ import Error404 from './Errors/Error404';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
+
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -38,26 +40,36 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/search/zincid",
-        element: <ZincIdSearch />,
+        element: <ZincIdSearch
+          title="Zinc ID Search - Cartblanche22"
+        />,
       },
       {
         path: "/search/smiles",
-        element: <SmilesSearch />,
+        element: <SmilesSearch 
+          title="SMILES Search - Cartblanche22"
+        />,
       },
       {
         path: "/search/random",
-        element: <RandomSearch />,
+        element: <RandomSearch 
+          title="Random Search - Cartblanche22"
+        />,
       },
       {
         path: "/search/catitems",
-        element: <SupplierSearch />,
+        element: <SupplierSearch 
+          title="Supplier Search - Cartblanche22"
+        />,
       }
     ]
 
   },
   {
     path: "/results",
-    element: <Results />,
+    element: <Results 
+      title="Search Results - Cartblanche22"
+    />,
   },
   {
     path: "/substance/:id",
@@ -66,45 +78,52 @@ const router = createBrowserRouter([
   },
   {
     path: "/tranches/:tranches",
-    element: <TrancheBrowser />,
+    element: <TrancheBrowser
+      title="Tranche Browser - Cartblanche22"
+    />,
 
   },
   {
     path: "/carts",
-    element: <MyCarts></MyCarts>,
+    element: <MyCarts
+      title="My Carts - Cartblanche22"
+    ></MyCarts>,
   }, {
     path: "/cart",
-    element: <Checkout />
+    element: <Checkout 
+      title="Checkout - Cartblanche22"
+    />
   },
   {
-    path: "/reset_password/:token",
-    element: <ResetPassword></ResetPassword>,
+    path: "/resetPassword/:token",
+    element: <ResetPassword 
+      title="Reset Password - Cartblanche22"
+    />,
   },
   {
     path: "/similarity/:server",
-    element: <SW />,
+    element: <SW 
+      title="Similarity Search - Cartblanche22"
+    />,
   },
   {
     path: "/patterns/:server",
-    element: <Arthor></Arthor>,
+    element: <Arthor 
+      title="Substructure Search - Cartblanche22"
+    />,
   },
   {
     path: "/404",
-    element: <Substance404></Substance404>
+    element: <Substance404 
+      title="404 - Cartblanche22"
+    />
   },
   {
     path: "*",
-    element: <Error404 />
+    element: <Error404 
+      title="404 - Cartblanche22"
+    />
   }
-
-  // {
-  //   path: "/Substructure",
-  //   element: <Substructure />,
-  // },
-  // {
-  //   path: "/Substances",
-  //   element: <Substances />,
-  // }
 ]);
 
 

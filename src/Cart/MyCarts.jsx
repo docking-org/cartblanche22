@@ -5,7 +5,7 @@ import { Container, Card, Table, Button, Modal, Form } from "react-bootstrap";
 import Cart from "./Cart";
 import { ToastContainer } from "react-toastify";
 
-export default function MyCarts() {
+export default function MyCarts(props) {
     const { activateCart, createCart, deleteCart } = Cart();
     const [carts, setCarts] = React.useState([]);
     const [deleteModal, setDeleteModal] = React.useState(false);
@@ -15,6 +15,10 @@ export default function MyCarts() {
     useEffect(() => {
         loadCarts();
     }, [])
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
 
     function loadCarts() {
         axios({

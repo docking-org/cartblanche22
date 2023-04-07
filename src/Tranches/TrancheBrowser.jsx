@@ -11,7 +11,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import Cart from '../Cart/Cart';
 
-export default function TrancheBrowser() {
+export default function TrancheBrowser(props) {
     const { toastLoading, toast200, toastError } = Cart();
     const ref = React.useRef();
     const [activeCharges, setActiveCharges] = React.useState([]);
@@ -36,6 +36,11 @@ export default function TrancheBrowser() {
     const [downloadMethod, setDownloadMethod] = React.useState("");
     const [downloadMethods, setDownloadMethods] = React.useState([]);
     const [url, setUrl] = React.useState(useParams().tranches);
+
+    useEffect(() => {
+        document.title = props.title || "";
+    }, [props.title]);
+
     useEffect(() => {
         fetch(`/tranches/get${url}`).then(res => res.json()).then(data => {
             console.log(data);
@@ -65,39 +70,57 @@ export default function TrancheBrowser() {
 
     useEffect(() => {
 
-        if (activeCharges.length !== 0) {
+        // if (activeCharges.length !== 0) {
+        //     tranches.map(tranche => {
+        //         if (activeCharges.length !== 0) {
+        //             if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
+        //                 tranche['chosen'] = true;
+        //             }
+        //             else {
+        //                 tranche['chosen'] = false;
+        //             }
+        //         }
+        //     });
+        // }
+        // else {
+        //     if (tranches && (url === '3d')) {
+        //         tranches.map(tranche => {
+        //             tranche['chosen'] = false;
+        //         });
+        //     }
+        // }
+        // if (ref.current) {
+        //     ref.current.refreshTable()
+        // }
+
+        if (tranches) {
+            chooseSubset(activeSubset);
+        }
+    }, [activeCharges, activeGenerations]);
+
+
+    function chooseSubset(subset) {
+        console.log(subset)
+        if (subset === "all") {
             tranches.map(tranche => {
                 if (activeCharges.length !== 0) {
                     if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
                         tranche['chosen'] = true;
                     }
-                    else {
-                        tranche['chosen'] = false;
-                    }
+                }
+                else if (charges.length === 0) {
+                    tranche['chosen'] = true;
+                } else {
+                    tranche['chosen'] = false;
                 }
             });
-        }
-        if (ref.current) {
-            ref.current.refreshTable()
-        }
-
-    }, [activeCharges, activeGenerations]);
-
-
-    function chooseSubset(subset) {
-        setActiveSubset("");
-        let newTranches = [];
-        if (subset === "all") {
-            tranches.map(tranche => {
-                tranche['chosen'] = true;
-            });
+            setActiveSubset("all")
         }
         else if (subset === "none") {
             tranches.map(tranche => {
                 tranche['chosen'] = false;
             });
-
-
+            setActiveSubset("none");
         }
         else {
             setActiveSubset(subset);
@@ -115,7 +138,16 @@ export default function TrancheBrowser() {
                     && row >= minRow
                     && row < maxRow
                 ) {
-                    tranche['chosen'] = true;
+                    if (activeCharges.length !== 0) {
+                        if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
+                            tranche['chosen'] = true;
+                        }
+                    }
+                    else if (charges.length === 0) {
+                        tranche['chosen'] = true;
+                    } else {
+                        tranche['chosen'] = false;
+                    }
                 }
                 else {
                     tranche['chosen'] = false;
@@ -137,7 +169,12 @@ export default function TrancheBrowser() {
         let t = ref.current.getCurrentTranches();
         console.log(t);
         let trancheString = "";
-        t.map(tranche => trancheString += tranche['generation'] + tranche['h_num'] + tranche['p_num'] + tranche['charge'] + " ");
+        t.map(tranche => trancheString +=
+            tranche['chosen'] ?
+                (tranche['generation'] !== '-' ? tranche['generation'] : "") +
+                tranche['h_num'] + tranche['p_num'] +
+                (tranche['charge'] !== '-' ? tranche['charge'] : "") + " " : "");
+
         setTrancheString(trancheString);
     }
 
@@ -150,7 +187,7 @@ export default function TrancheBrowser() {
 
         let i = axios({
             method: "post",
-            url: "/tranches/3d/download",
+            url: `/tranches/${url}/download`,
             data: form,
             headers: {
                 "Content-Type": "multipart/form-data"
@@ -295,7 +332,7 @@ export default function TrancheBrowser() {
                                             </DropdownMenu>
                                         </Dropdown>
                                     }
-                                    {charges.length > 0 &&
+                                    {Object.keys(charges).length > 0 &&
                                         <Dropdown
                                             align="end"
                                             className='mx-1'

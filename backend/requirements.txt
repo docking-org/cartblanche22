@@ -86,7 +86,7 @@ pyasn1-modules==0.2.8
 pycparser==2.19
 pycryptodome==3.9.4
 PyJWT==2.6.0
-pyOpenSSL==19.1.0
+pyopenssl
 pyparsing==2.4.7
 python-dateutil
 python-dotenv==0.14.0

@@ -4,9 +4,15 @@ import { Card, Container, Table } from "react-bootstrap";
 import axios from "axios";
 import useToken from "../utils/useToken";
 
-export default function SupplierSearch() {
+export default function SupplierSearch(props) {
     const [input, setInput] = React.useState("");
     const { token } = useToken();
+
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
     function getMolecules() {
         var bodyFormData = new FormData();
         bodyFormData.append('supplier_codes', input);
@@ -66,7 +72,7 @@ export default function SupplierSearch() {
 
                 </Card.Header>
                 <Card.Body>
-                    <p>Example: <code>curl https://cartblanche22.docking.org/smiles.txt -F smiles-in=@smiles.txt -F dist=4 -F adist=4</code></p>
+                    <p>Example: <code>curl -X GET https://cartblanche22.docking.org/catitems.txt -F supplier_codes=@sup.txt</code></p>
 
                     <p>
                         - Results can be formatted in the desired file format.
@@ -85,7 +91,7 @@ export default function SupplierSearch() {
                         <tbody>
                             <tr>
                                 <td>To specify return format</td>
-                                <td><code>curl https://cartblanche22.docking.org/catitems<i>.txt</i></code></td>
+                                <td><code>curl -X GET https://cartblanche22.docking.org/catitems<i>.txt</i></code></td>
                                 <td><ul>
                                     <li>.txt</li>
                                     <li>.csv</li>
@@ -94,7 +100,7 @@ export default function SupplierSearch() {
                             </tr>
                             <tr>
                                 <td>To add search value</td>
-                                <td> <code>-F supplier_code-in=<i>@sup.txt</i></code></td>
+                                <td> <code>-F supplier_codes=<i>@sup.txt</i></code></td>
                                 <td>.txt file with list of supplier codes</td>
                             </tr>
                         </tbody>

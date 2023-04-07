@@ -5,10 +5,15 @@ import axios from "axios";
 import useToken from "../utils/useToken";
 
 
-export default function SmilesSearch() {
+export default function SmilesSearch(props) {
     //use text box value by default
     const [input, setInput] = React.useState("");
     const { token } = useToken();
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
+
     function getMolecules() {
         var bodyFormData = new FormData();
         bodyFormData.append('smiles', input);
@@ -102,7 +107,7 @@ export default function SmilesSearch() {
             <Card className="mt-2">
                 <Card.Header><b>CURL commands for searching using SMILES</b></Card.Header>
                 <Card.Body>
-                    <p>Example: <code>curl https://cartblanche22.docking.org/smiles.txt -F smiles-in=@smiles.txt -F dist=4 -F adist=4</code></p>
+                    <p>Example: <code>curl -X GET https://cartblanche22.docking.org/smiles.txt -F smiles=@smiles.txt -F dist=4 -F adist=4</code></p>
 
                     <p>
                         - Results can be formatted in the desired file format.
@@ -122,7 +127,7 @@ export default function SmilesSearch() {
 
                             <tr>
                                 <td>To specify return format</td>
-                                <td><code>curl https://cartblanche22.docking.org/smiles<i><b>.txt</b></i></code></td>
+                                <td><code>curl -X GET https://cartblanche22.docking.org/smiles<i><b>.txt</b></i></code></td>
                                 <td>
                                     <ul>
                                         <li>.txt</li>
@@ -133,7 +138,7 @@ export default function SmilesSearch() {
                             </tr>
                             <tr>
                                 <td>To add search value</td>
-                                <td> <code>-F smiles-in=<i>@test.txt</i></code></td>
+                                <td> <code>-F smiles=<i>@test.txt</i></code></td>
                                 <td>.txt file with list of smiles</td>
                             </tr>
                             <tr>

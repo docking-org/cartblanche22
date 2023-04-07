@@ -101,7 +101,7 @@ URI_EXTENSION_TO_MIMETYPE = {
 
 base_url = 'http://files.docking.org/'
 
-axes = [('H00', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
+axes = [('H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
          'H16', 'H17',
          'H18', 'H19', 'H20', 'H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28', 'H29', 'H30', 'H31', 'H32', 'H33',
          'H34', 'H35', 'H36', 'H37', 'H38', 'H39', 'H40', 'H41', "H42", 'H43', 'H44', 'H45', 'H46', 'H47', 'H48', 'H49',
@@ -176,6 +176,22 @@ methods_3d ={
     "PowerShell": "powershell"
 }
 
+methods_2d = {
+    "URIs" : "uri",
+    "DOCK Database Index" : "database_index",
+    "WGET": "wget",
+    "CURL": "curl",
+    "PowerShell": "powershell"
+}
+
+formats_2d = {
+    "SMILES" : "smi.tgz",
+    "DOCK37" : "db2.tgz",
+    "AutoDock" : "pdbqt.tgz",
+    "Mol2" : "mol2.tgz",
+    "SDF" : "sdf.tgz",
+}
+
 generations = [chr(i) for i in range(97, 123)]
 
 @app.route('/tranches/get2d', methods=['GET'])
@@ -199,8 +215,8 @@ def tranches2d():
         'ticks': ticks, 
         'unfilteredSize': unfilteredSize, 
         'subsets': subsets,
-        'formats': formats_3d,
-        'methods': methods_3d
+        'formats': formats_2d,
+        'methods': methods_2d
     }, 200)
 
 
@@ -244,10 +260,10 @@ def tranches3d():
 
 @app.route('/tranches/2d/download', methods=['POST'])
 def tranches2dDownload():
-    formData = Download2DForm(request.values)
-    data_ = formData.tranches.data.split()
-    format = formData.format.data
-    using = formData.using.data
+    formData = request.form
+    data_ = formData['tranches'].split()
+    format = formData['format']
+    using = formData['method']
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
     add_url_2D = 'zinc22/2d/'
 
@@ -260,9 +276,11 @@ def tranches2dDownload():
     arr = map(gen_tranches, data_)
     data = '\n'.join(list(arr))
     download_filename = 'ZINC22-downloader-2D-{}.{}'.format(format, using)
-    response = Response(data, mimetype=mimetype)
-    response.headers['Content-Disposition'] = 'attachment; filename={}'.format(download_filename)
-    return response
+   
+    return {
+        'data': data,
+        'filename': download_filename
+    }, 200
 
 zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
 zinc22_common_conn = psycopg2.connect(zinc22_common_url)

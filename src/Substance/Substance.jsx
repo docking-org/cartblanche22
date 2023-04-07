@@ -177,7 +177,9 @@ export default function Substance() {
                                         offset: 0
                                     }}>
                                         <ButtonGroup>
-                                            <Button variant="warning">
+                                            <Button variant="warning"
+                                                href={"/similarity/sw?smiles=" + encodeURIComponent(results.smiles)}
+                                            >
                                                 Find Similar
                                             </Button>
                                             <DropdownButton as={ButtonGroup} title={<i className="fa fa-download"></i>} id="bg-nested-dropdown" variant="secondary">

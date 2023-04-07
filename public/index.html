@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="Cartblanche" />
@@ -12,8 +12,10 @@
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-  <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+  <!-- <link rel="icon" href="%PUBLIC_URL%/favicon.ico" /> -->
+  <!-- <link rel="manifest" href="%PUBLIC_URL%/manifest.json" /> -->
+  <script src="%PUBLIC_URL%/RDKit_minimal.js"></script>
+  <script src="%PUBLIC_URL%/RDKit_minimal.wasm"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
   <!--
       Notice the use of %PUBLIC_URL% in the tags above.
@@ -24,6 +26,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+  <script async defer src="https://apis.google.com/js/api.js"></script>
   <title>Cartblanche</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-4F58EF9FSG"></script>

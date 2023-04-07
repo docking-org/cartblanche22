@@ -17,11 +17,13 @@ import Cart from '../Cart/Cart';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
-export default function Arthor() {
+export default function Arthor(props) {
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
 
     });
+
+
     axiosRetry(axios, { retries: 3 });
     const [results, setResults] = React.useState([]);
     const [loading, setLoad] = React.useState(false);
@@ -33,6 +35,10 @@ export default function Arthor() {
     const [maps, setMaps] = React.useState({});
     const minDistance = 0;
     const ref = React.useRef();
+
+    useEffect(() => {
+        document.title = props.title || "";
+      }, [props.title]);
 
 
     const [params, setParams] = React.useState({
