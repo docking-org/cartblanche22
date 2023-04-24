@@ -156,7 +156,7 @@ charges = {
 }
 
 formats_3d = {
-    "SMILES" : "smi.tgz",
+#    "SMILES" : "smi.tgz",
     "DOCK37" : "db2.tgz",
     "AutoDock" : "pdbqt.tgz",
     "Mol2" : "mol2.tgz",
@@ -185,11 +185,11 @@ methods_2d = {
 }
 
 formats_2d = {
-    "SMILES" : "smi.tgz",
-    "DOCK37" : "db2.tgz",
-    "AutoDock" : "pdbqt.tgz",
-    "Mol2" : "mol2.tgz",
-    "SDF" : "sdf.tgz",
+    "SMILES" : "smi.gz",
+#    "DOCK37" : "db2.tgz",
+#    "AutoDock" : "pdbqt.tgz",
+#    "Mol2" : "mol2.tgz",
+#    "SDF" : "sdf.tgz",
 }
 
 generations = [chr(i) for i in range(97, 123)]
