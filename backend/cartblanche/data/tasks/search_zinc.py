@@ -81,7 +81,7 @@ def zinc20search(zinc20):
                 'logp': round(Descriptors.MolLogP(mol),3),
                 'mwt': round(Descriptors.MolWt(mol),3),
                 'inchi': Chem.MolToInchi(mol),
-                'inchi_key': Chem.MolToInchiKey(mol),
+                'inchikey': Chem.MolToInchiKey(mol),
             }
             result['mol_formula'] = Chem.rdMolDescriptors.CalcMolFormula(mol)
             result['rings'] = Chem.rdMolDescriptors.CalcNumRings(mol)

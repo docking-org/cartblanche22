@@ -38,6 +38,11 @@ export default function SW(props) {
     const [elapsed, setElapsed] = React.useState(0);
     const [smi, setSmi] = React.useState(window.location.search.split("=")[1] ? decodeURIComponent(window.location.search.split("=")[1]) : "");
     const [db, setDB] = React.useState(Object.keys(maps)[0]);
+    const [atomAlignment, setAtomAlignment] = React.useState(true);
+    const [smartsAlignment, setSmartsAlignment] = React.useState(false);
+    const [ecfp4, setecfp4] = React.useState(true);
+    const [daylight, setDaylight] = React.useState(true);
+
     const minDistance = 0;
     const ref = React.useRef();
 
@@ -252,7 +257,7 @@ export default function SW(props) {
         }
         );
         if (newSearch) {
-            submitSearch();
+            submitSearch(smi);
         }
         else {
             ref.current.getResults(hlid);
@@ -261,6 +266,7 @@ export default function SW(props) {
 
 
     async function submitSearch(smiles) {
+
         if (smi !== smiles) {
             setSmi(smiles);
         }
@@ -283,7 +289,8 @@ export default function SW(props) {
         sliders.forEach((item) => {
             reqParams += `&${item.name}=${item.value[1]}`;
         });
-        reqParams += "&scores=Atom%20Alignment,ECFP4,Daylight";
+        // reqParams += "&scores=Atom%20Alignment,ECFP4,Daylight";
+        reqParams += "&scores=" + (atomAlignment ? "Atom%20Alignment," : "") + (ecfp4 ? "ECFP4," : "") + (daylight ? "Daylight" : "") + (smartsAlignment ? ",SMARTS%20Alignment" : "");
 
         const event = new EventSource(`https://${server}.docking.org/search/submit?${reqParams}`,
             {
@@ -325,140 +332,178 @@ export default function SW(props) {
 
     return (
         <Container className="mt-2 mb-2" fluid>
-            <Card>
-                <Card.Header><b>Similarity Search</b></Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col lg={4}>
-                            <Jsme
-                                width="100%"
-                                height="350px"
-                                onChange={(smiles) => {
 
-                                    submitSearch(smiles);
-                                }}
-                                smiles={smi}
-                                options={"nocanonize"}
 
-                            />
+            <Row>
+                <Col lg={4}>
+                    <Jsme
+                        width="100%"
+                        height="350px"
+                        onChange={(smiles) => {
 
+                            submitSearch(smiles);
+                        }}
+                        smiles={smi}
+                        options={"nocanonize, nostereo"}
+
+                    />
+
+
+                    <InputGroup className='mb-1 mt-1'>
+                        <InputGroup.Text>SMILES</InputGroup.Text>
+                        <input
+                            className="form-control"
+                            value={smi}
+                            onChange={(e) => {
+                                submitSearch(e.target.value);
+                            }}
+                        />
+
+                    </InputGroup>
+                    <InputGroup
+                        className='mb-1'
+                    >
+                        <InputGroup.Text>Dataset</InputGroup.Text>
+                        <select
+                            className="form-control"
+                            value={db}
+                            onChange={(e) => {
+
+                                setDB(e.target.value);
+                                submitSearch(smi);
+                            }}
+                        >
+                            {
+                                Object.keys(maps).map((key) => {
+                                    return (
+                                        <option value={key}>{maps[key].name}</option>
+                                    )
+                                })
+                            }
+                        </select>
+                    </InputGroup>
+
+
+
+                    <Card
+                        className='mb-1'
+                    >
+                        <Card.Header
+                            className='p-0 ps-2'
+                        >Advanced Options
+                        </Card.Header>
+                        <Card.Body
+                            className='p-2'
+                        >
+                            <Row
+                                className=''
+                            >
+
+
+                                {
+
+                                    sliders.map((slider) => {
+                                        return (
+
+                                            <Col lg={slider.half ? 6 : 12}>
+                                                <div className="d-flex justify-content-between ">
+                                                    <b
+                                                        style={{
+                                                            width: slider.half ? "35%" : "27%",
+                                                            textAlign: "start",
+                                                            marginTop: "auto",
+                                                            marginBottom: "auto",
+                                                            fontSize: "0.6rem",
+                                                            textWrap: "nowrap",
+                                                        }}
+
+                                                    >{slider.label}</b>
+
+                                                    <div
+                                                        style={{
+                                                            width: slider.half ? "55%" : "73%",
+
+                                                        }}
+                                                    >
+                                                        <Slider
+                                                            size='small'
+                                                            name={slider.name}
+                                                            value={slider.value}
+                                                            onChange={handleSliderChangeDual}
+                                                            onChangeCommitted={handleSliderCommit}
+                                                            valueLabelDisplay="auto"
+                                                            aria-labelledby="range-slider"
+                                                            min={slider.min}
+                                                            max={slider.max}
+                                                            step={1}
+                                                            marks={[{
+                                                                value: slider.value[0],
+                                                                label: slider.value[0],
+                                                            },
+                                                            {
+                                                                value: slider.value[1],
+                                                                label: slider.value[1],
+                                                            },
+                                                            ]
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </Col>
+                                        );
+                                    })
+                                }
+
+                            </Row>
+                        </Card.Body>
+                    </Card>
+
+                    {/* <Card>
+                        <Card.Header
+                            className='p-0 ps-2'>
+                            Scoring Methods
+                        </Card.Header>
+                        <Card.Body>
+                            <input type={"checkbox"} checked={atomAlignment} onChange={(e) => {
+                                setAtomAlignment(e.target.checked);
+                                submitSearch(smi);
+                            }} /> Atom Alignment
                             <br />
-                            <InputGroup className='mb-1'>
-                                <InputGroup.Text>SMILES</InputGroup.Text>
-                                <input
-                                    className="form-control"
-                                    value={smi}
-                                    onChange={(e) => {
-                                        submitSearch(e.target.value);
-                                    }}
-                                />
-
-                            </InputGroup>
-                            <InputGroup>
-                                <InputGroup.Text>Dataset</InputGroup.Text>
-                                <select
-                                    className="form-control"
-                                    value={db}
-                                    onChange={(e) => {
-
-                                        setDB(e.target.value);
-                                        submitSearch();
-                                    }}
-                                >
-                                    {
-                                        Object.keys(maps).map((key) => {
-                                            return (
-                                                <option value={key}>{maps[key].name}</option>
-                                            )
-                                        })
-                                    }
-                                </select>
-                            </InputGroup>
-
-
-                            <Accordion className="mt-2">
-                                <Accordion.Item eventKey="0">
-                                    <Accordion.Header>Advanced Options</Accordion.Header>
-                                    <Accordion.Body eventKey="0">
-                                        <Row>
-
-                                            {
-
-                                                sliders.map((slider) => {
-                                                    return (
-
-                                                        <Col lg={slider.half ? 6 : 12}>
-                                                            <div className="d-flex justify-content-between m-1 border-bottom ">
-                                                                <b
-                                                                    style={{
-                                                                        width: slider.half ? "35%" : "27%",
-                                                                        textAlign: "start",
-                                                                        marginTop: "auto",
-                                                                        marginBottom: "auto",
-                                                                        fontSize: "0.7rem",
-                                                                        textWrap: "nowrap",
-                                                                    }}
-
-                                                                >{slider.label}</b>
-
-                                                                <div
-                                                                    style={{
-                                                                        width: slider.half ? "55%" : "73%",
-
-                                                                    }}
-                                                                >
-                                                                    <Slider
-                                                                        size='small'
-                                                                        name={slider.name}
-                                                                        value={slider.value}
-                                                                        onChange={handleSliderChangeDual}
-                                                                        onChangeCommitted={handleSliderCommit}
-                                                                        valueLabelDisplay="auto"
-                                                                        aria-labelledby="range-slider"
-                                                                        min={slider.min}
-                                                                        max={slider.max}
-                                                                        step={1}
-                                                                        marks={[{
-                                                                            value: slider.value[0],
-                                                                            label: slider.value[0],
-                                                                        },
-                                                                        {
-                                                                            value: slider.value[1],
-                                                                            label: slider.value[1],
-                                                                        },
-                                                                        ]
-                                                                        }
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </Col>
-                                                    );
-                                                })
-                                            }
-                                        </Row>
-                                    </Accordion.Body>
-                                </Accordion.Item>
-
-                            </Accordion>
-
+                            <input type={"checkbox"} checked={smartsAlignment} onChange={(e) => {
+                                setSmartsAlignment(e.target.checked);
+                                submitSearch(smi);
+                            }} /> SMARTS Alignment
                             <br />
-                        </Col>
-                        <Col lg={8}>
-                            <ResultsTable
-                                ref={ref}
-                                hlid={hlid}
-                                cols={cols}
-                                findAndAdd={findAndAdd}
-                                server={server}
-                                sliderValues={sliders}
-                                db={db}
-                                elapsed={elapsed}
-                                loading={loading}
-                            ></ResultsTable>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card >
+                            <input type={"checkbox"} checked={ecfp4} onChange={(e) => {
+                                setecfp4(e.target.checked);
+                                submitSearch(smi);
+                            }} /> ECFP4
+                            <br />
+                            <input type={"checkbox"} checked={daylight} onChange={(e) => {
+                                setDaylight(e.target.checked);
+                                submitSearch(smi);
+                            }} /> Daylight
+
+                        </Card.Body>
+                    </Card> */}
+
+                    <br />
+                </Col>
+                <Col lg={8}>
+                    <ResultsTable
+                        ref={ref}
+                        hlid={hlid}
+                        cols={cols}
+                        findAndAdd={findAndAdd}
+                        server={server}
+                        sliderValues={sliders}
+                        db={db}
+                        elapsed={elapsed}
+                        loading={loading}
+                    ></ResultsTable>
+                </Col>
+            </Row>
+
             <ToastContainer />
         </Container >
 

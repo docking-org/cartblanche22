@@ -38,7 +38,7 @@ export default function Arthor(props) {
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
 
     const [params, setParams] = React.useState({
@@ -81,86 +81,83 @@ export default function Arthor(props) {
 
     return (
         <Container className="mt-2 mb-2" fluid>
-            <Card>
-                <Card.Header><b>Pattern Search</b></Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col lg={4}>
-                            <Jsme
-                                width="100%"
-                                height="350px"
-                                onChange={(smiles) => {
-                                    setParams({
-                                        ...params,
-                                        smi: smiles,
-                                    });
 
-                                    submitSearch();
-                                }}
-                                smiles={params.smi}
+            <Row>
+                <Col lg={4}>
+                    <Jsme
+                        width="100%"
+                        height="350px"
+                        onChange={(smiles) => {
+                            setParams({
+                                ...params,
+                                smi: smiles,
+                            });
 
-                            />
+                            submitSearch();
+                        }}
+                        smiles={params.smi}
 
-                            <br />
-                            <InputGroup className='mb-1'>
-                                <InputGroup.Text>SMILES</InputGroup.Text>
-                                <input
-                                    className="form-control"
-                                    value={params.smi}
-                                    onChange={(e) => {
-                                        setParams({
-                                            ...params,
-                                            smi: e.target.value,
-                                        });
-                                        submitSearch();
-                                    }}
-                                />
+                    />
 
-                            </InputGroup>
-                            <InputGroup>
-                                <InputGroup.Text>Dataset</InputGroup.Text>
-                                <select
-                                    className="form-control"
-                                    value={params.db}
-                                    onChange={(e) => {
+                    <br />
+                    <InputGroup className='mb-1'>
+                        <InputGroup.Text>SMILES</InputGroup.Text>
+                        <input
+                            className="form-control"
+                            value={params.smi}
+                            onChange={(e) => {
+                                setParams({
+                                    ...params,
+                                    smi: e.target.value,
+                                });
+                                submitSearch();
+                            }}
+                        />
 
-                                        setParams({
-                                            ...params,
-                                            db: e.target.value,
-                                        });
-                                        submitSearch();
-                                    }}
-                                >
-                                    {
-                                        Object.keys(maps).map((key) => {
-                                            return (
-                                                <option value={maps[key].displayName}>{maps[key].displayName}</option>
-                                            )
-                                        })
-                                    }
-                                </select>
-                            </InputGroup>
+                    </InputGroup>
+                    <InputGroup>
+                        <InputGroup.Text>Dataset</InputGroup.Text>
+                        <select
+                            className="form-control"
+                            value={params.db}
+                            onChange={(e) => {
+
+                                setParams({
+                                    ...params,
+                                    db: e.target.value,
+                                });
+                                submitSearch();
+                            }}
+                        >
+                            {
+                                Object.keys(maps).map((key) => {
+                                    return (
+                                        <option value={maps[key].displayName}>{maps[key].displayName}</option>
+                                    )
+                                })
+                            }
+                        </select>
+                    </InputGroup>
 
 
 
 
-                            <br />
-                        </Col>
-                        <Col lg={8}>
-                            <ResultsTable
-                                ref={ref}
-                                hlid={hlid}
-                                cols={cols}
-                                findAndAdd={findAndAdd}
-                                server={server}
-                                arthor={true}
-                                db={params.db}
-                                smi={params.smi}
-                            ></ResultsTable>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card >
+                    <br />
+                </Col>
+                <Col lg={8}>
+                    <ResultsTable
+                        ref={ref}
+                        hlid={hlid}
+                        cols={cols}
+                        findAndAdd={findAndAdd}
+                        server={server}
+                        arthor={true}
+                        db={params.db}
+                        smi={params.smi}
+                    ></ResultsTable>
+                </Col>
+            </Row>
+
             <ToastContainer />
         </Container >
 

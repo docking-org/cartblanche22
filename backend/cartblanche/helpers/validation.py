@@ -86,13 +86,13 @@ def get_compound_details(smiles):
     mwt = round(MolWt(m), 3)
     logp = round(MolLogP(m), 3)
     inchi = MolToInchi(m)
-    inchi_key = MolToInchiKey(m)
+    inchikey = MolToInchiKey(m)
     details = {
         'heavy_atoms': heavy_atoms,
         'mwt': mwt,
         'logp': logp,
         'inchi': inchi,
-        'inchi_key': inchi_key
+        'inchikey': inchikey
     }
     return details
 

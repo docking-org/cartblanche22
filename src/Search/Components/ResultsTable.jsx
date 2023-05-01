@@ -76,8 +76,8 @@ const ResultsTable = forwardRef((props, ref) => {
 
                     });
                 }
-                if(response.data.time){
-                    setElapsed(response.data.time + "ms") ;
+                if (response.data.time) {
+                    setElapsed(response.data.time + "ms");
 
                 }
 
@@ -191,15 +191,20 @@ const ResultsTable = forwardRef((props, ref) => {
                 <Card.Header>
                     <div className="d-flex justify-content-between">
                         <div>
-                    {total.toLocaleString('en-US', { maximumFractionDigits: 2 })} results {props.elapsed === 0 ? null: (`found in ${props.elapsed || elapsed}`)}
-                    </div>
-                    <div>
-                    {props.loading || loading ? 
-                    <Spinner size="sm" animation="border" role="status" /> : null
-                    }
+                            {total.toLocaleString('en-US', { maximumFractionDigits: 2 })} results {props.elapsed === 0 ? null : (`found in ${props.elapsed || elapsed}`)}
                         </div>
-                    </div> 
-                    </Card.Header>
+                        <div>
+
+
+                            Showing {page === 1 ? 1 : ((page - 1) * perPage) + 1}-{page * perPage > total ? total : page * perPage} of {total.toLocaleString('en-US', { maximumFractionDigits: 2 })} entries
+                            &nbsp;
+                            {props.loading || loading ?
+                                <Spinner size="sm" animation="border" role="status" /> : null
+                            }
+                        </div>
+
+                    </div>
+                </Card.Header>
                 <Card.Body>
                     <Navbar bg="clear" className=''>
                         <Pagination style={{ "marginBottom": "auto", }}>
@@ -209,6 +214,7 @@ const ResultsTable = forwardRef((props, ref) => {
                             <Pagination.Next onClick={() => page >= Math.ceil(total / perPage) ? setPage(Math.ceil(total / perPage)) : setPage(page + 1)} />
                             <Pagination.Last onClick={() => setPage(Math.ceil(total / perPage))} />
                         </Pagination>
+                        &nbsp;
                         &nbsp;
                         <Dropdown>
                             <Dropdown.Toggle variant="" id="dropdown-basic">
@@ -221,6 +227,7 @@ const ResultsTable = forwardRef((props, ref) => {
                                 <Dropdown.Item onClick={() => setPerPage(100)}>100</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
+                        Per Page
                         &nbsp;
 
                         <Navbar.Collapse className='justify-content-end align-middle'>
@@ -253,7 +260,9 @@ const ResultsTable = forwardRef((props, ref) => {
                                 <th>
                                     <i className="fa fa-shopping-cart" aria-hidden="true"></i>
                                 </th>
-                                <th></th>
+                                <th>
+
+                                </th>
 
                                 {Object.keys(cols).map((key, index) => (
                                     <th key={index}>{cols[key].label}</th>

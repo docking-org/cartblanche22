@@ -107,6 +107,7 @@ const SubstanceTable = forwardRef((props, ref) => {
 
                 </Pagination>
                 &nbsp;
+
                 <Dropdown>
                     <Dropdown.Toggle variant="" id="dropdown-basic">
                         {perPage}
@@ -118,6 +119,7 @@ const SubstanceTable = forwardRef((props, ref) => {
                         <Dropdown.Item onClick={() => setPerPage(100)}>100</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
+                Per Page
                 &nbsp;
 
                 <Navbar.Collapse className='justify-content-end align-middle'>
