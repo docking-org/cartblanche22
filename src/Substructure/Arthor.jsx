@@ -17,6 +17,8 @@ import Cart from '../Cart/Cart';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
+import initRDKit from '../utils/initRDKit';
+
 export default function Arthor(props) {
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
@@ -29,10 +31,11 @@ export default function Arthor(props) {
     const [loading, setLoad] = React.useState(false);
 
     const [hlid, setHlid] = React.useState(undefined);
-
+    const [rdKit, setRdKit] = React.useState(undefined);
     const [server, setServer] = React.useState(useParams().server);
-
+    const [arthorSearchType, setArthorSearchType] = React.useState("Substructure")
     const [maps, setMaps] = React.useState({});
+    const [patchedSmi, setPatchedSmi] = React.useState("");
     const minDistance = 0;
     const ref = React.useRef();
 
@@ -40,16 +43,17 @@ export default function Arthor(props) {
         document.title = props.title || "";
     }, [props.title]);
 
-
     const [params, setParams] = React.useState({
         smi: window.location.search.split("=")[1] || "",
         db: maps[1] ? maps[1].displayName : [],
     });
 
     useEffect(() => {
+        initRDKit().then((rdKit) => {
+            setRdKit(rdKit);
+        });
         getMaps();
     }, []);
-
 
     function getMaps() {
         axios.get(`https://${server}.docking.org/dt/data`,
@@ -66,18 +70,32 @@ export default function Arthor(props) {
             )
     }
 
-    async function submitSearch() {
+    async function submitSearch(smiles= null) {
         setResults([]);
+        if(smiles){
+            if(smiles !== params.smi && smiles !== patchedSmi){
+                setParams({
+                    ...params,
+                    smi: smiles,
+                });
+                setPatchedSmi(rdKit.get_mol(smiles) ? rdKit.get_mol(smiles).get_smiles(): patchedSmi);
+            }
+        }
 
 
         if (ref.current) {
             ref.current.setPage(1);
-            ref.current.getArthorResults();
+            ref.current.getArthorResults(arthorSearchType);
         }
 
 
 
     }
+
+    useEffect(() => {
+        submitSearch();
+    }, [arthorSearchType]);
+    
 
     return (
         <Container className="mt-2 mb-2" fluid>
@@ -88,44 +106,63 @@ export default function Arthor(props) {
                         width="100%"
                         height="350px"
                         onChange={(smiles) => {
-                            setParams({
-                                ...params,
-                                smi: smiles,
-                            });
-
-                            submitSearch();
+                            submitSearch(smiles);
                         }}
-                        smiles={params.smi}
-
+                        smiles={patchedSmi}
+                        options={"newlook,polarnitro,multipart,zoom"}
                     />
 
-                    <br />
+                    <Card className='mt-1 mb-1'>
+                    <ButtonGroup>
+                        <Button
+                            disabled
+                            size="sm"
+                            variant="secondary" 
+                        >
+                            Search Type
+                        </Button>
+                        <Button
+                            onClick={()=> setArthorSearchType("Similarity")}
+                            variant={arthorSearchType === "Similarity"?  'primary':'secondary'}
+                        >
+                            Similarity
+                        </Button>
+                        <Button
+                        onClick={()=> setArthorSearchType("Substructure")}
+                        variant={arthorSearchType === "Substructure"?  'primary': 'secondary'}
+                        >
+                            Substructure
+                        </Button>
+                        <Button
+                        onClick={()=> {
+                            setArthorSearchType("SMARTS")
+                        }}
+                        variant={arthorSearchType === "SMARTS"? 'primary': 'secondary'}
+                        >
+                            SMARTS    
+                        </Button>                            
+                    </ButtonGroup>
+                    </Card>
                     <InputGroup className='mb-1'>
-                        <InputGroup.Text>SMILES</InputGroup.Text>
+                        <InputGroup.Text>{arthorSearchType !== "SMARTS" ? "SMILES" : "SMARTS"}</InputGroup.Text>
                         <input
                             className="form-control"
                             value={params.smi}
                             onChange={(e) => {
-                                setParams({
-                                    ...params,
-                                    smi: e.target.value,
-                                });
-                                submitSearch();
+                                
+                                submitSearch(e.target.value);
                             }}
                         />
 
                     </InputGroup>
-                    <InputGroup>
+                    
+                    <InputGroup  className='mb-1'>
                         <InputGroup.Text>Dataset</InputGroup.Text>
                         <select
                             className="form-control"
                             value={params.db}
                             onChange={(e) => {
-
-                                setParams({
-                                    ...params,
-                                    db: e.target.value,
-                                });
+                                
                                 submitSearch();
                             }}
                         >
@@ -139,8 +176,15 @@ export default function Arthor(props) {
                         </select>
                     </InputGroup>
 
-
-
+                    <a
+                        
+                        href="https://wiki.docking.org/index.php/Smallworld_and_Arthor_Databases#Smallworld_Databases"
+                        style={{"fontSize": "10pt", "float":"right"}}
+                    >
+                        Database Information
+                    </a>
+                        <br></br>
+                    
 
                     <br />
                 </Col>
@@ -154,6 +198,7 @@ export default function Arthor(props) {
                         arthor={true}
                         db={params.db}
                         smi={params.smi}
+                        arthorSearchType = {arthorSearchType}
                     ></ResultsTable>
                 </Col>
             </Row>

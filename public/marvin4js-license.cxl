@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--PLEASE DO NOT MODIFY THIS FILE AND BE AWARE THAT THE FILE CONTAINS CONFIDENTIAL INFORMATION.--><ChemAxon>
+     <License>
+        <Field Name="Software" Value="Marvin Beans"/>
+        <Field Name="License Term" Value="Annual"/>
+        <Field Name="Licensee" Value="University of California, San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="10"/>
+        <Field Name="Expiration Date" Value="2023-06-26"/>
+        <Field Name="Support Expiration Date" Value="2023-06-26"/>
+        <Field Name="Comment" Value="null"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFFJAGis11B5Aqu7BksSIIep5cpFaAhQUs2NhZwR0EsmRZWFUPMbmgbkRuw=="/>
+    </License>
+     <License>
+        <Field Name="Software" Value="JKlustor"/>
+        <Field Name="License Term" Value="Annual"/>
+        <Field Name="Licensee" Value="University of California, San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="10"/>
+        <Field Name="Expiration Date" Value="2023-06-26"/>
+        <Field Name="Support Expiration Date" Value="2023-06-26"/>
+        <Field Name="Comment" Value="null"/>
+        <Restriction Name="B/S/P/E" Value="Standard"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFGvGmSyQtOuPY7tBCHTN0LEpJGmuAhR4lDNCzpd44fiu+ECJ3cqh3f3eyQ=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="ECFP/FCFP"/>
+        <Field Name="License Term" Value="Annual"/>
+        <Field Name="Licensee" Value="University of California, San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="10"/>
+        <Field Name="Expiration Date" Value="2023-06-26"/>
+        <Field Name="Support Expiration Date" Value="2023-06-26"/>
+        <Field Name="Comment" Value="null"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MC0CFQCQUUzbqt5EvKgOyR01uufd4iFn6AIUdmPcuJpwRLm8Oc3r1mVaFcEKUjw="/>
+    </License>
+   <License>
+        <Field Name="Software" Value="Marvin Beans"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Allowed"/>
+        <Signature Value="MCwCFAoEdRHLYHDwg7aHlDsQ6jq+BvZmAhQjfQ6yeOob58Emk2GaYN/z/ckndg=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Protonation Plugin Group"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Allowed"/>
+        <Signature Value="MC0CFAdCWfuboAKAOQuIBUCBJ6Obr8GjAhUAlJMRZdvjKYL52Pv/jrt7V9Mvkrg="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Isomers Plugin Group"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Allowed"/>
+        <Signature Value="MCwCFD0fZ0dRgyrZswzF7vcRvWcRcHnkAhRMSrVzmIYO8uj9LW2msRQsaluDSA=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Structural Calculations"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFCGfnGOKU1on7gvZfHmmi9b/ABAMAhRfb2Xj5IfWtvys9+fUBKhch+Jn6Q=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Charge Plugin Group"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFCNSgtCCBQO/0Xdn9q6KFLnmHPAuAhRM3CBBuWyGrp/tIjoFFi6+uG/qBg=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Conformation Plugin Group"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFHxtNHStQ+qss/wTVU3qKpTQ1LroAhQMeDF+rbsiS1Tz49NcnpcXcVZfeg=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Geometry Plugin Group"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFFJ+Jf7f5j89DmAwmXajAonGgnCqAhR7XjHytduWcSY2VXAcgsgfO6S8Ig=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Huckel Analysis Plugin"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFCv/6fJRB0kMxfmdRcMIU74qRSUHAhQo0sYoqpOBvOc4y908S4M9gng7QA=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Refractivity Plugin"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFGwSjDFQ63Nkny5V6cb2NQLx4Ke/AhQN/Cba7Z+rkiWYRCjU2IMOxznu+A=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="HBDA Plugin"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFG5UXiUw9cVt5jDwi1/AVqZwC18GAhRsWczPbhpdfoFHZ0yLAm984raa7w=="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="3D Alignment"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MC0CFQCPBr3Ij2Py8HfYGXjhBWwdUc0W3gIUW60rGXZOCDkbF/oAlClF3YnKc0s="/>
+    </License>
+    <License>
+        <Field Name="Software" Value="Structural Frameworks Plugin"/>
+        <Field Name="License Term" Value="Evaluation"/>
+        <Field Name="Licensee" Value="University of California  San Francisco (UCSF)"/>
+        <Field Name="Number of Users" Value="Unlimited"/>
+        <Field Name="Expiration Date" Value="2023-05-26"/>
+        <Field Name="Support Expiration Date" Value="2023-05-26"/>
+        <Field Name="Comment" Value="temporary license while ZINC Program put on solid legal footing;  2022.07.29 adding STRC"/>
+        <Restriction Name="Server Use" Value="Not Allowed"/>
+        <Signature Value="MCwCFD5Llw+pP4Pr61F/uEoCWGRIQWgPAhQi3ZmB3/5YVi1P9zRJ5bgohruisg=="/>
+    </License>
+</ChemAxon>

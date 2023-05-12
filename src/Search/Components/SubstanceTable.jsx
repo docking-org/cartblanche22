@@ -122,17 +122,17 @@ const SubstanceTable = forwardRef((props, ref) => {
                 Per Page
                 &nbsp;
 
-                <Navbar.Collapse className='justify-content-end align-middle'>
+                <Navbar.Collapse key="1" className='justify-content-end align-middle'>
 
                     <Dropdown>
                         <Dropdown.Toggle variant="success" id="dropdown-basic">
-                            <i class="fa fa-download"></i>
+                            <i className="fa fa-download"></i>
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => downloadResults("json")}>JSON</Dropdown.Item>
-                            <Dropdown.Item onClick={() => downloadResults("csv")}>CSV</Dropdown.Item>
-                            <Dropdown.Item onClick={() => downloadResults("txt")}>TXT</Dropdown.Item>
+                            <Dropdown.Item key="json" onClick={() => downloadResults("json")}>JSON</Dropdown.Item>
+                            <Dropdown.Item key="csv" onClick={() => downloadResults("csv")}>CSV</Dropdown.Item>
+                            <Dropdown.Item key="txt" onClick={() => downloadResults("txt")}>TXT</Dropdown.Item>
 
 
                         </Dropdown.Menu>
@@ -184,18 +184,18 @@ const SubstanceTable = forwardRef((props, ref) => {
                                         >
                                             <MoleculeStructure
                                                 id={molecule.zinc_id}
-
+                                                key={molecule.zinc_id}
                                                 structure={molecule.smiles}
                                                 svgMode
                                             />
                                             {
                                                 incart === true ?
-                                                    (<i class="fa fa-check-circle text-success" aria-hidden="true"
+                                                    (<i className="fa fa-check-circle text-success" aria-hidden="true"
                                                         style={{ position: "absolute", bottom: "5%", left: "5%" }}
                                                     ></i>)
                                                     :
                                                     (incart === "sorta" ?
-                                                        (<i class="fa fa-check-circle text-warning" aria-hidden="true"
+                                                        (<i className="fa fa-check-circle text-warning" aria-hidden="true"
                                                             style={{ position: "absolute", bottom: "5%", left: "5%" }}
                                                         ></i>)
                                                         :

@@ -24,7 +24,7 @@ export default function Results(props) {
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
     function downloadAll(format) {
         axios({
@@ -142,19 +142,20 @@ export default function Results(props) {
 
                 {progress > 0 && progress < 100 &&
                     !results.zinc22 && !results.zinc20 &&
-                    <ProgressBar animated now={progress} label={`${progress}%`} />
+                    <ProgressBar key="progress" animated now={progress} label={`${progress}%`} />
                 }
 
                 {
                     (progress === 100 || progress < 5) &&
                     !results.zinc22 && !results.zinc20 &&
-                    <ProgressBar animated now={progress} label={`Processing`} />
+                    <ProgressBar key="loading" animated now={progress} label={`Processing`} />
                 }
                 <Card>
 
                     <Tabs
                         id="results-tab"
                         activeKey={currentTab}
+
                         onSelect={
                             (key, event) => setCurrentTab(key)
                         }
@@ -181,7 +182,7 @@ export default function Results(props) {
 
                         {results.zinc20 && results.zinc20.length > 0 &&
                             <Tab eventKey="zinc20" title="ZINC20 Results"
-                                key={"zinc20"}
+                                key="zinc20"
                                 onSelect={
                                     (key, event) => setCurrentTab(key)
                                 }
@@ -201,6 +202,7 @@ export default function Results(props) {
                             (results.zinc20 || results.zinc22) &&
 
                             <Tab
+
                                 title={
                                     !allInCart() ?
 
@@ -216,7 +218,7 @@ export default function Results(props) {
                                                 addToCart(send)
                                             }}
                                         >
-                                            <Button variant="primary" size="sm">Add all to cart</Button>
+                                            <div className="bg-primary rounded text-white p-2" size="sm">Add all to cart</div>
 
                                         </div>)
                                         :
@@ -233,7 +235,7 @@ export default function Results(props) {
                                             }
                                             }
                                         >
-                                            <Button variant="danger" size="sm">Remove all from cart</Button>
+                                            <div className="bg-danger rounded text-white p-2" size="sm">Remove all from cart</div>
                                         </div>)
                                 }
                                 key={"download"}
@@ -256,7 +258,7 @@ export default function Results(props) {
                             <Accordion.Header>Original Submission</Accordion.Header>
                             <Accordion.Body>
                                 <Form.Control as='textarea' rows={6}
-                                    editable={false}
+                                    editable="false"
                                     disabled={true}
                                     value={submission.join('\n')}
                                 />
@@ -267,7 +269,7 @@ export default function Results(props) {
                                 <Accordion.Header>Search Logs</Accordion.Header>
                                 <Accordion.Body>
                                     <Form.Control as='textarea' rows={6}
-                                        editable={false}
+                                        editable="false"
                                         disabled={true}
                                         value={logs.join('\n')}
                                     />

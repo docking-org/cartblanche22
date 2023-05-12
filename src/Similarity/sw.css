@@ -11,3 +11,26 @@
 .css-xmer36-MuiSlider-root{
     margin-bottom: .1em !important;
 }
+
+.Editor-module_editor__o0Gjz {
+    min-width: 0 !important;
+    max-height: 40% !important;
+}
+
+.App-module_top__SBeSV {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scrollbar-width: 0px;
+}
+
+.App-module_top__SBeSV::-webkit-scrollbar {
+    background-color: gray;
+    height: 0px;
+    width: 0px;
+    
+}
+
+.ketcher-container{
+    height: 400px !important;
+    max-height: 400px !important;
+}

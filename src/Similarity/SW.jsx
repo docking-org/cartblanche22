@@ -6,7 +6,6 @@ import {
 import { Container, Table, Tabs, Tab, Card, Row, Col, InputGroup, OverlayTrigger, Tooltip, Button, ButtonGroup, Dropdown, DropdownButton, Accordion } from "react-bootstrap";
 
 import { useEffect } from 'react';
-import { Jsme } from 'jsme-react';
 
 import Slider from '@mui/material/Slider';
 
@@ -18,14 +17,24 @@ import "./sw.css";
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
+
+import initRDKit from '../utils/initRDKit';
+import { Jsme } from 'jsme-react';
+
 export default function SW(props) {
+
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
         alignment: { name: "alignment", orderable: true, label: "" },
         dist: { name: "dist", orderable: true, label: "Distance" },
         ecfp4: { name: "ecfp4", orderable: true, label: "ECFP4" },
         daylight: { name: "daylight", orderable: true, label: "Daylight" },
+        maj: {name:"maj", orderable:true, label:"Maj"},
+        min: {name:"min", orderable:true, label:"Min"},
+        hyb: {name:"hyb", orderable:true, label:"Hyb"},
+        sub: {name:"sub", orderable:true, label:"Sub"},
     });
+    
     axiosRetry(axios, { retries: 3 });
     const [results, setResults] = React.useState([]);
     const [loading, setLoad] = React.useState(false);
@@ -42,7 +51,10 @@ export default function SW(props) {
     const [smartsAlignment, setSmartsAlignment] = React.useState(false);
     const [ecfp4, setecfp4] = React.useState(true);
     const [daylight, setDaylight] = React.useState(true);
-
+    const [rdKit, setRDKit] = React.useState(null);
+    const [patchedSmi, setPatchedSmi] = React.useState("");
+    
+    
     const minDistance = 0;
     const ref = React.useRef();
 
@@ -52,10 +64,13 @@ export default function SW(props) {
 
 
 
-
     useEffect(() => {
+        initRDKit().then((rdKit) => {
+            setRDKit(rdKit);
+        });
         getMaps();
     }, []);
+
 
     const [sliders, setSliders] = React.useState([
         {
@@ -267,8 +282,11 @@ export default function SW(props) {
 
     async function submitSearch(smiles) {
 
-        if (smi !== smiles) {
-            setSmi(smiles);
+        if (smi !== smiles && smiles !== patchedSmi) {
+            setSmi(smiles)
+            
+            setPatchedSmi(rdKit.get_mol(smiles) ? rdKit.get_mol(smiles).get_smiles(): patchedSmi);
+        
         }
 
         setResults([]);
@@ -321,7 +339,7 @@ export default function SW(props) {
             setLoad(false);
         }
         event.onopen = (e) => {
-            console.log(e);
+            console.log();
         }
         event.addEventListener("done", (e) => {
             event.close();
@@ -329,6 +347,8 @@ export default function SW(props) {
         });
 
     }
+
+    
 
     return (
         <Container className="mt-2 mb-2" fluid>
@@ -340,14 +360,11 @@ export default function SW(props) {
                         width="100%"
                         height="350px"
                         onChange={(smiles) => {
-
                             submitSearch(smiles);
                         }}
-                        smiles={smi}
-                        options={"nocanonize, nostereo"}
-
-                    />
-
+                        smiles={patchedSmi}
+                        options={"newlook,polarnitro,multipart,zoom"}
+                    /> 
 
                     <InputGroup className='mb-1 mt-1'>
                         <InputGroup.Text>SMILES</InputGroup.Text>
@@ -355,6 +372,7 @@ export default function SW(props) {
                             className="form-control"
                             value={smi}
                             onChange={(e) => {
+                          
                                 submitSearch(e.target.value);
                             }}
                         />
@@ -382,8 +400,7 @@ export default function SW(props) {
                             }
                         </select>
                     </InputGroup>
-
-
+                 
 
                     <Card
                         className='mb-1'
@@ -398,8 +415,6 @@ export default function SW(props) {
                             <Row
                                 className=''
                             >
-
-
                                 {
 
                                     sliders.map((slider) => {
@@ -457,6 +472,8 @@ export default function SW(props) {
                             </Row>
                         </Card.Body>
                     </Card>
+
+           
 
                     {/* <Card>
                         <Card.Header
