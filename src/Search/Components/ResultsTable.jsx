@@ -39,7 +39,7 @@ const ResultsTable = forwardRef((props, ref) => {
     }));
 
 
-    function getArthorResults(searchType = arthorSearchType, searchFlag) {
+    async function getArthorResults(searchType = arthorSearchType, searchFlag) {
         setLoading(true);
         setElapsed(0);
         setArthorSearchType(searchType);
@@ -63,43 +63,42 @@ const ResultsTable = forwardRef((props, ref) => {
             url += `&${encodeURIComponent(`columns[${index}][search][value]`)}=`;
             url += `&${encodeURIComponent(`columns[${index}][search][regex]`)}=false`;
         });
-        axios({
-            method: 'GET',
-            url: url,
-            withCredentials: props.server === "arthor" ? false : true,
+        let response = await fetch(url, {
+            credentials: props.server === "arthor" ? "omit" : "include",
         })
-            .then((response) => {
+        response = await response.json();
+        try {
+            let res = []
+            console.log(response);
+            if (response.data) {
+                response.data.map((row, index) => {
+                    let newRow = {};
+                    newRow["id"] = row[1].split(" ")[1] || row[1].split("\t")[1] || row[1].split(" ")[0];
+                    newRow["hitSmiles"] = row[1].split(" ")[0] || row[1].split("\t")[0] || row[1].split(" ")[0];
+                    newRow["similarity"] = row[2] ? row[2] : null
+                    res.push([newRow]);
 
-                let res = []
-                console.log(response.data);
-                if (response.data.data) {
-                    response.data.data.map((row, index) => {
-                        let newRow = {};
-                        newRow["id"] = row[1].split(" ")[1] || row[1].split("\t")[1] || row[1].split(" ")[0];
-                        newRow["hitSmiles"] = row[1].split(" ")[0] || row[1].split("\t")[0] || row[1].split(" ")[0];
-                        newRow["similarity"] = row[2] ? row[2] : null
-                        res.push([newRow]);
-
-                    });
-                }
-                if (response.data.time) {
-                    setElapsed(response.data.time + "ms");
-
-                }
-
-                setResults(res);
-                setTotal(response.data.recordsTotal > 20000 ? 20000 : response.data.recordsTotal);
-
-                setLoading(false);
-            }).catch((error) => {
-                setResults([]);
-                setTotal(0);
-                setLoading(false);
+                });
             }
-            );
+            if (response.time) {
+                setElapsed(response.time + "ms");
+
+            }
+
+            setResults(res);
+            setTotal(response.recordsTotal > 20000 ? 20000 : response.recordsTotal);
+
+            setLoading(false);
+        }
+        catch (error) {
+            setResults([]);
+            setTotal(0);
+            setLoading(false);
+        }
+
     }
 
-    function getResults(hlid, draw, substructure = null, start = (page - 1) * perPage, sortBy = sortByCol, sortDir = sortColDir) {
+    async function getResults(hlid, draw, substructure = null, start = (page - 1) * perPage, sortBy = sortByCol, sortDir = sortColDir) {
         let url = `https://${props.server}.docking.org/search/view?hlid=${hlid}`;
         let index = 0;
         Object.keys(cols).map((key, index) => {
@@ -127,18 +126,18 @@ const ResultsTable = forwardRef((props, ref) => {
         url += `&start=${start}`;
         url += '&length=' + perPage;
 
-        axios(
-            {
-                method: 'get',
-                url: url,
-                withCredentials: props.server === "sw" ? false : true
-            }).then((response) => {
-                setResults(response.data.data);
+        try {
+            let response = await fetch(url,
+                {
+                    credentials: props.server === "sw" ? "omit" : "include",
+                })
+            response = await response.json();
+            setResults(response.data);
 
-                setTotal(response.data.recordsTotal);
-            }).catch((error) => {
-                console.log(error);
-            });
+            setTotal(response.recordsTotal);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     function buildPagination() {

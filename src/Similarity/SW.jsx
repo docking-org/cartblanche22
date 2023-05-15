@@ -184,18 +184,17 @@ export default function SW(props) {
         },
     ]);
 
-    function getMaps() {
+    async function getMaps() {
+        let res = await fetch(`https://${server}.docking.org/search/maps`,
+            {
+                credentials: server === "sw" ? "omit" : "include",
 
-        axios({
-            method: "get",
-            url: `https://${server}.docking.org/search/maps`,
-            withCredentials: server === "sw" ? false : true,
-        })
-            .then((res) => {
-                setMaps(res.data);
-                setDB(Object.keys(res.data)[0])
             }
-            )
+        );
+        res = await res.json();
+        console.log(res);
+        setMaps(res);
+        setDB(Object.keys(res)[0])
     }
 
     const handleSliderChangeDual = (

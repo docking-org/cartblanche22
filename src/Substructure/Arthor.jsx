@@ -79,21 +79,18 @@ export default function Arthor(props) {
         getMaps();
     }, []);
 
-    function getMaps() {
-        axios(
+    async function getMaps() {
+        let res = await fetch(`https://${server}.docking.org/dt/data`,
             {
-                method: "get",
-                url: `https://${server}.docking.org/dt/data`,
-                withCredentials: server === "arthor" ? false : true,
+                credentials: server === "arthor" ? "omit" : "include",
             }
         )
-            .then((res) => {
-                setMaps(res.data);
-                setParams((prev) => {
-                    return { ...prev, db: res.data[1].displayName }
-                });
-            }
-            )
+        res = await res.json();
+        setMaps(res);
+        setParams((prev) => {
+            return { ...prev, db: res[1].displayName }
+        });
+
     }
 
     async function submitSearch(smiles = null) {
