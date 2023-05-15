@@ -155,9 +155,9 @@ def get_zinc_id(sub_id, tranche_name):
     return zid
 
 def get_tranche(zinc_id):
-    hac = base62_rev(zinc_id[4])
-    lgp = base62_rev(zinc_id[5])
     try:
+        hac = base62_rev(zinc_id[4])
+        lgp = base62_rev(zinc_id[5])
         tranche = "H{:>02d}{}".format(hac, logp_range[lgp])
         return tranche
     except:

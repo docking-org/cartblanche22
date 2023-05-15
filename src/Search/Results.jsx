@@ -10,6 +10,8 @@ import './search.css';
 import { saveAs } from "file-saver";
 import Cart from "../Cart/Cart";
 import { useRef } from "react";
+
+import NoResults from "../Errors/NoResults";
 export default function Results(props) {
     const childRef = useRef();
     const { getCart, addToCart, removeFromCart, cartSize, inCart } = Cart();
@@ -21,7 +23,7 @@ export default function Results(props) {
     const [load, setLoad] = React.useState(false);
     const [submission, setSubmission] = React.useState(undefined);
     const [logs, setLogs] = React.useState(undefined);
-
+    const [noResults, setNoResults] = React.useState(false);
     useEffect(() => {
         document.title = props.title || "";
     }, [props.title]);
@@ -47,11 +49,15 @@ export default function Results(props) {
 
                     console.log(response.data);
                     setResults(response.data.result);
+
                     if (response.data.result.zinc22.length > 0) {
                         setCurrentTab("zinc22");
                     }
                     else if (response.data.result.zinc20.length > 0) {
                         setCurrentTab("zinc20");
+                    }
+                    else {
+                        setNoResults(true);
                     }
                     setSubmission(response.data.submission);
                     setLogs(response.data.result.logs);
@@ -138,147 +144,152 @@ export default function Results(props) {
 
     return (
         <>
-            <Container className="my-2" fluid>
+            {noResults &&
+                <NoResults
+                    submission={submission}
+                />}
+            {!noResults &&
+                <Container className="my-2" fluid>
+                    {progress > 0 && progress < 100 &&
+                        !results.zinc22 && !results.zinc20 &&
+                        <ProgressBar key="progress" animated now={progress} label={`${progress}%`} />
+                    }
 
-                {progress > 0 && progress < 100 &&
-                    !results.zinc22 && !results.zinc20 &&
-                    <ProgressBar key="progress" animated now={progress} label={`${progress}%`} />
-                }
+                    {
+                        (progress === 100 || progress < 5) &&
+                        !results.zinc22 && !results.zinc20 &&
+                        <ProgressBar key="loading" animated now={progress} label={`Processing`} />
+                    }
+                    <Card>
 
-                {
-                    (progress === 100 || progress < 5) &&
-                    !results.zinc22 && !results.zinc20 &&
-                    <ProgressBar key="loading" animated now={progress} label={`Processing`} />
-                }
-                <Card>
+                        <Tabs
+                            id="results-tab"
+                            activeKey={currentTab}
 
-                    <Tabs
-                        id="results-tab"
-                        activeKey={currentTab}
-
-                        onSelect={
-                            (key, event) => setCurrentTab(key)
-                        }
-                    >
-
-
-                        {results.zinc22 && results.zinc22.length > 0 &&
-                            <Tab eventKey="zinc22" title="ZINC22 Results"
-                                key={"zinc22"}
-
-
-                            >
-                                <SubstanceTable
-                                    ref={childRef}
-                                    molecules={results.zinc22}
-                                    load={load}
-                                    addMol={addMol}
-                                    removeMol={removeMol}
-                                    task={task}
-                                />
-                            </Tab>
-                        }
+                            onSelect={
+                                (key, event) => setCurrentTab(key)
+                            }
+                        >
 
 
-                        {results.zinc20 && results.zinc20.length > 0 &&
-                            <Tab eventKey="zinc20" title="ZINC20 Results"
-                                key="zinc20"
-                                onSelect={
-                                    (key, event) => setCurrentTab(key)
-                                }
+                            {results.zinc22 && results.zinc22.length > 0 &&
+                                <Tab eventKey="zinc22" title="ZINC22 Results"
+                                    key={"zinc22"}
 
-                            >
-                                <SubstanceTable
-                                    molecules={results.zinc20}
-                                    ref={childRef}
-                                    load={load}
-                                    addMol={addMol}
-                                    removeMol={removeMol}
-                                    task={task}
-                                />
-                            </Tab>
-                        }
-                        {
-                            (results.zinc20 || results.zinc22) &&
 
-                            <Tab
+                                >
+                                    <SubstanceTable
+                                        ref={childRef}
+                                        molecules={results.zinc22}
+                                        load={load}
+                                        addMol={addMol}
+                                        removeMol={removeMol}
+                                        task={task}
+                                    />
+                                </Tab>
+                            }
 
-                                title={
-                                    !allInCart() ?
 
-                                        (<div size="sm"
-                                            onClick={async () => {
-                                                let send = [];
-                                                if (results.zinc20) {
-                                                    send = send.concat(results.zinc20);
+                            {results.zinc20 && results.zinc20.length > 0 &&
+                                <Tab eventKey="zinc20" title="ZINC20 Results"
+                                    key="zinc20"
+                                    onSelect={
+                                        (key, event) => setCurrentTab(key)
+                                    }
+
+                                >
+                                    <SubstanceTable
+                                        molecules={results.zinc20}
+                                        ref={childRef}
+                                        load={load}
+                                        addMol={addMol}
+                                        removeMol={removeMol}
+                                        task={task}
+                                    />
+                                </Tab>
+                            }
+                            {
+                                (results.zinc20 || results.zinc22) &&
+
+                                <Tab
+
+                                    title={
+                                        !allInCart() ?
+
+                                            (<div size="sm"
+                                                onClick={async () => {
+                                                    let send = [];
+                                                    if (results.zinc20) {
+                                                        send = send.concat(results.zinc20);
+                                                    }
+                                                    if (results.zinc22) {
+                                                        send = send.concat(results.zinc22);
+                                                    }
+                                                    addToCart(send)
+                                                }}
+                                            >
+                                                <div className="bg-primary rounded text-white p-2" size="sm">Add all to cart</div>
+
+                                            </div>)
+                                            :
+                                            (<div size="sm"
+                                                onClick={async () => {
+                                                    let send = [];
+                                                    if (results.zinc20) {
+                                                        send = send.concat(results.zinc20);
+                                                    }
+                                                    if (results.zinc22) {
+                                                        send = send.concat(results.zinc22);
+                                                    }
+                                                    removeFromCart(send)
                                                 }
-                                                if (results.zinc22) {
-                                                    send = send.concat(results.zinc22);
                                                 }
-                                                addToCart(send)
-                                            }}
-                                        >
-                                            <div className="bg-primary rounded text-white p-2" size="sm">Add all to cart</div>
-
-                                        </div>)
-                                        :
-                                        (<div size="sm"
-                                            onClick={async () => {
-                                                let send = [];
-                                                if (results.zinc20) {
-                                                    send = send.concat(results.zinc20);
-                                                }
-                                                if (results.zinc22) {
-                                                    send = send.concat(results.zinc22);
-                                                }
-                                                removeFromCart(send)
-                                            }
-                                            }
-                                        >
-                                            <div className="bg-danger rounded text-white p-2" size="sm">Remove all from cart</div>
-                                        </div>)
-                                }
-                                key={"download"}
-                                tabClassName="add-to-cart"
-                            >
-                            </Tab>
-                        }
-                    </Tabs>
+                                            >
+                                                <div className="bg-danger rounded text-white p-2" size="sm">Remove all from cart</div>
+                                            </div>)
+                                    }
+                                    key={"download"}
+                                    tabClassName="add-to-cart"
+                                >
+                                </Tab>
+                            }
+                        </Tabs>
 
 
 
-                </Card >
+                    </Card >
 
-                <br />
-                {submission &&
-                    <Accordion className="bottom-0 start-0 "
-                        style={{ width: '100%' }}
-                    >
-                        <Accordion.Item eventKey="0">
-                            <Accordion.Header>Original Submission</Accordion.Header>
-                            <Accordion.Body>
-                                <Form.Control as='textarea' rows={6}
-                                    editable="false"
-                                    disabled={true}
-                                    value={submission.join('\n')}
-                                />
-                            </Accordion.Body>
-                        </Accordion.Item>
-                        {inUCSF &&
-                            <Accordion.Item eventKey="1">
-                                <Accordion.Header>Search Logs</Accordion.Header>
+                    <br />
+                    {submission &&
+                        <Accordion className="bottom-0 start-0 "
+                            style={{ width: '100%' }}
+                        >
+                            <Accordion.Item eventKey="0">
+                                <Accordion.Header>Original Submission</Accordion.Header>
                                 <Accordion.Body>
                                     <Form.Control as='textarea' rows={6}
                                         editable="false"
                                         disabled={true}
-                                        value={logs.join('\n')}
+                                        value={submission.join('\n')}
                                     />
                                 </Accordion.Body>
                             </Accordion.Item>
-                        }
-                    </Accordion>
-                }
-            </Container >
+                            {inUCSF &&
+                                <Accordion.Item eventKey="1">
+                                    <Accordion.Header>Search Logs</Accordion.Header>
+                                    <Accordion.Body>
+                                        <Form.Control as='textarea' rows={6}
+                                            editable="false"
+                                            disabled={true}
+                                            value={logs.join('\n')}
+                                        />
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                            }
+                        </Accordion>
+                    }
+                </Container >
+            }
             <ToastContainer />
         </>
 

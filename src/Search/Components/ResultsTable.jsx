@@ -30,8 +30,8 @@ const ResultsTable = forwardRef((props, ref) => {
         getResults(hlid, draw, substructure = null) {
             getResults(hlid, draw, substructure);
         },
-        getArthorResults(searchType=arthorSearchType) {
-            getArthorResults(searchType);
+        getArthorResults(searchType = arthorSearchType, searchFlag) {
+            getArthorResults(searchType, searchFlag);
         },
         setPage(page) {
             setPage(page);
@@ -39,7 +39,7 @@ const ResultsTable = forwardRef((props, ref) => {
     }));
 
 
-    function getArthorResults(searchType=arthorSearchType) {
+    function getArthorResults(searchType = arthorSearchType, searchFlag) {
         setLoading(true);
         setElapsed(0);
         setArthorSearchType(searchType);
@@ -49,9 +49,9 @@ const ResultsTable = forwardRef((props, ref) => {
         url += `?query=${encodeURIComponent(props.smi)}`
         url += `&start=${(page - 1) * perPage}`;
         url += `&length=${perPage}`;
-        url += `&flags=6144`;
+        url += `&flags=${searchFlag}`;
         url += `&qopts=`;
-        url += `&type=`+ searchType;
+        url += `&type=` + searchType;
 
         url = encodeURI(url);
 
@@ -63,7 +63,9 @@ const ResultsTable = forwardRef((props, ref) => {
             url += `&${encodeURIComponent(`columns[${index}][search][value]`)}=`;
             url += `&${encodeURIComponent(`columns[${index}][search][regex]`)}=false`;
         });
-        axios.get(url, {
+        axios({
+            method: 'GET',
+            url: url,
             withCredentials: props.server === "arthor" ? false : true,
         })
             .then((response) => {
@@ -125,19 +127,22 @@ const ResultsTable = forwardRef((props, ref) => {
         url += `&start=${start}`;
         url += '&length=' + perPage;
 
-        axios.get(url, {
-            withCredentials: props.server === "sw" ? false : true
-        }).then((response) => {
-            setResults(response.data.data);
+        axios(
+            {
+                method: 'get',
+                url: url,
+                withCredentials: props.server === "sw" ? false : true
+            }).then((response) => {
+                setResults(response.data.data);
 
-            setTotal(response.data.recordsTotal);
-        }).catch((error) => {
-            console.log(error);
-        });
+                setTotal(response.data.recordsTotal);
+            }).catch((error) => {
+                console.log(error);
+            });
     }
 
     function buildPagination() {
-        
+
         let pagination = [];
         //show 2 pages before and after current page
         let start = page - 2;
@@ -301,7 +306,7 @@ const ResultsTable = forwardRef((props, ref) => {
                                                 <th>
                                                     SMILES
                                                 </th>
-                                                {arthorSearchType === "Similarity"?<th>Similarity</th>: null}
+                                                {arthorSearchType === "Similarity" ? <th>Similarity</th> : null}
                                             </>
                                         )
                                         :
@@ -365,7 +370,7 @@ const ResultsTable = forwardRef((props, ref) => {
                                             style={{ "width": props.arthor ? "200px" : "100px" }}
                                         >
                                             <MoleculeStructure id={molecule[0].hitSmiles} structure={molecule[0].hitSmiles} height={100} width={100} svgMode
-                                                subStructure={arthorSearchType !== "Similarity"?props.smi : null}
+                                                subStructure={arthorSearchType !== "Similarity" ? props.smi : null}
                                             />
 
                                         </td>
@@ -396,17 +401,17 @@ const ResultsTable = forwardRef((props, ref) => {
                                                     style={{ "overflowWrap": "break-word" }}
                                                 ><b>{molecule[0].hitSmiles}</b></p>
                                             </td>
-                                       
+
                                         }
                                         {
                                             molecule[0].similarity && <td>{molecule[0].similarity}</td>
                                         }
                                         {
-                                            molecule[1] !== undefined && <td>{molecule[1]}</td>           
+                                            molecule[1] !== undefined && <td>{molecule[1]}</td>
                                         }
                                         {
                                             molecule.slice(2, Object.values(cols).length).map((i) =>
-                                                i === undefined ? null : (i ? <td>{parseFloat(i).toFixed(2)}</td> : <td>0.00</td>)   
+                                                i === undefined ? null : (i ? <td>{parseFloat(i).toFixed(2)}</td> : <td>0.00</td>)
                                             )
                                         }
                                     </tr>

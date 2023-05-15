@@ -29,12 +29,12 @@ export default function SW(props) {
         dist: { name: "dist", orderable: true, label: "Distance" },
         ecfp4: { name: "ecfp4", orderable: true, label: "ECFP4" },
         daylight: { name: "daylight", orderable: true, label: "Daylight" },
-        maj: {name:"maj", orderable:true, label:"Maj"},
-        min: {name:"min", orderable:true, label:"Min"},
-        hyb: {name:"hyb", orderable:true, label:"Hyb"},
-        sub: {name:"sub", orderable:true, label:"Sub"},
+        maj: { name: "maj", orderable: true, label: "Maj" },
+        min: { name: "min", orderable: true, label: "Min" },
+        hyb: { name: "hyb", orderable: true, label: "Hyb" },
+        sub: { name: "sub", orderable: true, label: "Sub" },
     });
-    
+
     axiosRetry(axios, { retries: 3 });
     const [results, setResults] = React.useState([]);
     const [loading, setLoad] = React.useState(false);
@@ -53,8 +53,8 @@ export default function SW(props) {
     const [daylight, setDaylight] = React.useState(true);
     const [rdKit, setRDKit] = React.useState(null);
     const [patchedSmi, setPatchedSmi] = React.useState("");
-    
-    
+
+
     const minDistance = 0;
     const ref = React.useRef();
 
@@ -186,12 +186,11 @@ export default function SW(props) {
 
     function getMaps() {
 
-        axios.get(`https://${server}.docking.org/search/maps`,
-            {
-                withCredentials: server === "sw" ? false : true,
-
-            }
-        )
+        axios({
+            method: "get",
+            url: `https://${server}.docking.org/search/maps`,
+            withCredentials: server === "sw" ? false : true,
+        })
             .then((res) => {
                 setMaps(res.data);
                 setDB(Object.keys(res.data)[0])
@@ -284,9 +283,9 @@ export default function SW(props) {
 
         if (smi !== smiles && smiles !== patchedSmi) {
             setSmi(smiles)
-            
-            setPatchedSmi(rdKit.get_mol(smiles) ? rdKit.get_mol(smiles).get_smiles(): patchedSmi);
-        
+
+            setPatchedSmi(rdKit.get_mol(smiles) ? rdKit.get_mol(smiles).get_smiles() : patchedSmi);
+
         }
 
         setResults([]);
@@ -348,7 +347,7 @@ export default function SW(props) {
 
     }
 
-    
+
 
     return (
         <Container className="mt-2 mb-2" fluid>
@@ -364,7 +363,7 @@ export default function SW(props) {
                         }}
                         smiles={patchedSmi}
                         options={"newlook,polarnitro,multipart,zoom"}
-                    /> 
+                    />
 
                     <InputGroup className='mb-1 mt-1'>
                         <InputGroup.Text>SMILES</InputGroup.Text>
@@ -372,7 +371,7 @@ export default function SW(props) {
                             className="form-control"
                             value={smi}
                             onChange={(e) => {
-                          
+
                                 submitSearch(e.target.value);
                             }}
                         />
@@ -400,7 +399,7 @@ export default function SW(props) {
                             }
                         </select>
                     </InputGroup>
-                 
+
 
                     <Card
                         className='mb-1'
@@ -473,7 +472,7 @@ export default function SW(props) {
                         </Card.Body>
                     </Card>
 
-           
+
 
                     {/* <Card>
                         <Card.Header
