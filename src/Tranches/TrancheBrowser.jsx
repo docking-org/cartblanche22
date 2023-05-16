@@ -88,6 +88,7 @@ export default function TrancheBrowser(props) {
                 }
                 else if (charges.length === 0) {
                     tranche['chosen'] = true;
+                    t.push(tranche);
                 } else {
                     tranche['chosen'] = false;
                 }
@@ -125,6 +126,7 @@ export default function TrancheBrowser(props) {
                     }
                     else if (charges.length === 0) {
                         tranche['chosen'] = true;
+                        t.push(tranche);
                     } else {
                         tranche['chosen'] = false;
                     }
