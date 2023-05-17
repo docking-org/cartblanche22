@@ -53,7 +53,7 @@ export default function Results(props) {
                     if (response.data.result.zinc22.length > 0) {
                         setCurrentTab("zinc22");
                     }
-                    else if (response.data.result.zinc20.length > 0) {
+                    else if (response.data.result.zinc20 && (response.data.result.zinc20.length > 0)) {
                         setCurrentTab("zinc20");
                     }
                     else {
