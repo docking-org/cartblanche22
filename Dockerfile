@@ -4,9 +4,10 @@ FROM node:16-alpine as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json ./
+RUN npm install --force
 COPY ./src ./src
 COPY ./public ./public
-RUN yarn build
+RUN npm run build --force
 
 FROM continuumio/anaconda3:latest as backend
 
