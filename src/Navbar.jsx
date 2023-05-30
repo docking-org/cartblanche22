@@ -167,7 +167,7 @@ export default function Navigation() {
                                     overlay={<Tooltip id="button-tooltip-2">Arthor : Search by substructure or pattern (SMARTS)</Tooltip>}
 
                                 >
-                                <NavDropdown title="Patterns" id="basic-nav-dropdown">
+                                <NavDropdown title="Arthor" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/patterns/arthor">Public</NavDropdown.Item>
                                     <NavDropdown.Item href="/patterns/arthorp">Private</NavDropdown.Item>
                                     {inucsf &&

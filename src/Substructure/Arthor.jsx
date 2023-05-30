@@ -132,9 +132,9 @@ export default function Arthor(props) {
         <Container className="mt-2 mb-2" fluid>
 
             <Row>
-                <Col lg={4}>
+                <Col lg={3}>
                     <Jsme
-                        width="100%"
+                   
                         height="350px"
                         onChange={(smiles) => {
                             submitSearch(smiles);
@@ -184,28 +184,36 @@ export default function Arthor(props) {
                     </a>
                     <br></br>
 
-                    <Card className='mt-1 mb-1'>
-                        <ButtonGroup>
+                    <Card className='mt-1 mb-1'
+                    style={{width:"100%"}}
+                    >
+                        <ButtonGroup
+                        style={{width:"100%", "font-size":"2vw"}}
+                        >
                             <Button
                                 disabled
                                 size="sm"
                                 variant="secondary"
+                                style={{"font-size":"0.7vw"}}
                             >
                                 Search Type
                             </Button>
                             <Button
                                 onClick={() => setArthorSearchType("Similarity")}
                                 variant={arthorSearchType === "Similarity" ? 'primary' : 'secondary'}
+                                style={{"font-size":"1vw"}}
                             >
                                 Similarity
                             </Button>
                             <Button
                                 onClick={() => setArthorSearchType("Substructure")}
                                 variant={arthorSearchType === "Substructure" ? 'primary' : 'secondary'}
+                                style={{"font-size":"1vw"}}
                             >
                                 Substructure
                             </Button>
                             <Button
+                                style={{"font-size":"1vw"}}
                                 onClick={() => {
                                     setArthorSearchType("SMARTS")
                                 }}
@@ -215,10 +223,15 @@ export default function Arthor(props) {
                             </Button>
                         </ButtonGroup>
                     </Card>
-                    <Card className='mt-1 mb-1'>
-                        <ButtonGroup>
+                    <Card className='mt-1 mb-1'
+                         style={{width:"100%"}}
+                    >
+                        <ButtonGroup
+                        style={{width:"100%"}}
+                        >
 
                             <Button
+                            style={{"font-size":"0.8vw", 'white-space': 'nowrap'}}
                                 variant="warning"
                                 onClick={() => {
 
@@ -231,6 +244,7 @@ export default function Arthor(props) {
                                 Ring Systems
                             </Button>
                             <Button
+                                  style={{"font-size":"0.8vw", 'white-space': 'nowrap'}}
                                 variant="warning"
                                 onClick={() => {
                                     setChains(!chains);
@@ -241,6 +255,7 @@ export default function Arthor(props) {
                                 Chains
                             </Button>
                             <Button
+                                  style={{"font-size":"0.8vw", 'white-space': 'nowrap'}}
                                 variant="warning"
                                 onClick={() => {
                                     if (!chains && !ringSystems) {
@@ -265,7 +280,7 @@ export default function Arthor(props) {
 
                     <br />
                 </Col>
-                <Col lg={8}>
+                <Col lg={9}>
                     <ResultsTable
                         ref={ref}
                         hlid={hlid}

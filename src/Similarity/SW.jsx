@@ -69,7 +69,17 @@ export default function SW(props) {
             setRDKit(rdKit);
         });
         getMaps();
+
+        
     }, []);
+
+
+
+    useEffect(() => {   
+        if(smi){
+            submitSearch(smi);
+        }
+    }, [db]);
 
 
     const [sliders, setSliders] = React.useState([
@@ -195,6 +205,7 @@ export default function SW(props) {
         console.log(res);
         setMaps(res);
         setDB(Object.keys(res)[0])
+    
     }
 
     const handleSliderChangeDual = (
@@ -353,9 +364,9 @@ export default function SW(props) {
 
 
             <Row>
-                <Col lg={4}>
+                <Col lg={3}>
                     <Jsme
-                        width="100%"
+                  
                         height="350px"
                         onChange={(smiles) => {
                             submitSearch(smiles);
@@ -504,7 +515,7 @@ export default function SW(props) {
 
                     <br />
                 </Col>
-                <Col lg={8}>
+                <Col lg={9}>
                     <ResultsTable
                         ref={ref}
                         hlid={hlid}

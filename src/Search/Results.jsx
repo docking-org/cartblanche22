@@ -265,7 +265,7 @@ export default function Results(props) {
                             style={{ width: '100%' }}
                         >
                             <Accordion.Item eventKey="0">
-                                <Accordion.Header>Original Submission</Accordion.Header>
+                                <Accordion.Header>Original Submission ({submission.length})</Accordion.Header>
                                 <Accordion.Body>
                                     <Form.Control as='textarea' rows={6}
                                         editable="false"
@@ -276,7 +276,7 @@ export default function Results(props) {
                             </Accordion.Item>
                             {inUCSF &&
                                 <Accordion.Item eventKey="1">
-                                    <Accordion.Header>Search Logs</Accordion.Header>
+                                    <Accordion.Header>Search Logs ({logs.length})</Accordion.Header>
                                     <Accordion.Body>
                                         <Form.Control as='textarea' rows={6}
                                             editable="false"
