@@ -19,6 +19,7 @@ import axiosRetry from 'axios-retry';
 
 import initRDKit from '../utils/initRDKit';
 import { exactProp } from '@mui/utils';
+import { parseArgs } from 'util';
 
 export default function Arthor(props) {
     const { findAndAdd } = Cart();
@@ -40,7 +41,8 @@ export default function Arthor(props) {
     const [ringSystems, setRingSystems] = React.useState(true);
     const [chains, setChains] = React.useState(true);
     const [properties, setProperties] = React.useState(true);
-
+    const [smilesText, setSmilesText] = React.useState("");
+    const [smi, setSmi] = React.useState("");
     const ref = React.useRef();
 
     //making a table of search flags
@@ -93,21 +95,21 @@ export default function Arthor(props) {
 
     }
 
-    async function submitSearch(smiles = null) {
+    async function submitSearch(smiles = null, fromJSME = false, fromText = false) {
+        if (fromJSME) {
+            setSmilesText(smiles);
+        }
+        else if (fromText) {
+            setSmilesText(smiles);
+            setSmi(smiles);
+        }
+
         let array = [ringSystems, chains, properties];
         console.log(array);
         let searchFlag = Object.keys(searchFlags).find(key => JSON.stringify(searchFlags[key]) === JSON.stringify(array));
         console.log(searchFlag);
         setResults([]);
-        if (smiles) {
-            if (smiles !== params.smi && smiles !== patchedSmi) {
-                setParams({
-                    ...params,
-                    smi: smiles,
-                });
-                setPatchedSmi(rdKit.get_mol(smiles) ? rdKit.get_mol(smiles).get_smiles() : patchedSmi);
-            }
-        }
+
 
 
         if (ref.current) {
@@ -132,24 +134,25 @@ export default function Arthor(props) {
         <Container className="mt-2 mb-2" fluid>
 
             <Row>
-                <Col lg={3}>
+                <Col lg={4}>
                     <Jsme
-                   
+                        src="/jsme/jsme.nocache.js"
                         height="350px"
                         onChange={(smiles) => {
-                            submitSearch(smiles);
+
+                            submitSearch(rdKit.get_mol(smiles).get_smiles(), true, false);
                         }}
-                        smiles={patchedSmi}
-                        options={"newlook,polarnitro,multipart,zoom"}
+                        smiles={rdKit ? rdKit.get_mol(smi).get_smiles() : ''}
+                        options={"noautoez,newlook,nocanonize,multipart,zoom"}
                     />
-                    <InputGroup className='mt-1 mb-1'>
+
+                    <InputGroup className='mb-1 mt-1'>
                         <InputGroup.Text>{arthorSearchType !== "SMARTS" ? "SMILES" : "SMARTS"}</InputGroup.Text>
                         <input
                             className="form-control"
-                            value={params.smi}
+                            value={smilesText}
                             onChange={(e) => {
-
-                                submitSearch(e.target.value);
+                                submitSearch(e.target.value, false, true);
                             }}
                         />
 
@@ -185,35 +188,35 @@ export default function Arthor(props) {
                     <br></br>
 
                     <Card className='mt-1 mb-1'
-                    style={{width:"100%"}}
+                        style={{ width: "100%" }}
                     >
                         <ButtonGroup
-                        style={{width:"100%", "font-size":"2vw"}}
+                            style={{ width: "100%", "font-size": "2vw" }}
                         >
                             <Button
                                 disabled
                                 size="sm"
                                 variant="secondary"
-                                style={{"font-size":"0.7vw"}}
+                                style={{ "font-size": "0.7vw" }}
                             >
                                 Search Type
                             </Button>
                             <Button
                                 onClick={() => setArthorSearchType("Similarity")}
                                 variant={arthorSearchType === "Similarity" ? 'primary' : 'secondary'}
-                                style={{"font-size":"1vw"}}
+                                style={{ "font-size": "1vw" }}
                             >
                                 Similarity
                             </Button>
                             <Button
                                 onClick={() => setArthorSearchType("Substructure")}
                                 variant={arthorSearchType === "Substructure" ? 'primary' : 'secondary'}
-                                style={{"font-size":"1vw"}}
+                                style={{ "font-size": "1vw" }}
                             >
                                 Substructure
                             </Button>
                             <Button
-                                style={{"font-size":"1vw"}}
+                                style={{ "font-size": "1vw" }}
                                 onClick={() => {
                                     setArthorSearchType("SMARTS")
                                 }}
@@ -224,14 +227,14 @@ export default function Arthor(props) {
                         </ButtonGroup>
                     </Card>
                     <Card className='mt-1 mb-1'
-                         style={{width:"100%"}}
+                        style={{ width: "100%" }}
                     >
                         <ButtonGroup
-                        style={{width:"100%"}}
+                            style={{ width: "100%" }}
                         >
 
                             <Button
-                            style={{"font-size":"0.8vw", 'white-space': 'nowrap'}}
+                                style={{ "font-size": "0.8vw", 'white-space': 'nowrap' }}
                                 variant="warning"
                                 onClick={() => {
 
@@ -244,7 +247,7 @@ export default function Arthor(props) {
                                 Ring Systems
                             </Button>
                             <Button
-                                  style={{"font-size":"0.8vw", 'white-space': 'nowrap'}}
+                                style={{ "font-size": "0.8vw", 'white-space': 'nowrap' }}
                                 variant="warning"
                                 onClick={() => {
                                     setChains(!chains);
@@ -255,7 +258,7 @@ export default function Arthor(props) {
                                 Chains
                             </Button>
                             <Button
-                                  style={{"font-size":"0.8vw", 'white-space': 'nowrap'}}
+                                style={{ "font-size": "0.8vw", 'white-space': 'nowrap' }}
                                 variant="warning"
                                 onClick={() => {
                                     if (!chains && !ringSystems) {
@@ -280,7 +283,7 @@ export default function Arthor(props) {
 
                     <br />
                 </Col>
-                <Col lg={9}>
+                <Col lg={8}>
                     <ResultsTable
                         ref={ref}
                         hlid={hlid}

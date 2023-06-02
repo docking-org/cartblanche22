@@ -52,7 +52,7 @@ export default function SW(props) {
     const [ecfp4, setecfp4] = React.useState(true);
     const [daylight, setDaylight] = React.useState(true);
     const [rdKit, setRDKit] = React.useState(null);
-    const [patchedSmi, setPatchedSmi] = React.useState("");
+    const [smilesText, setSmilesText] = React.useState(smi);
 
 
     const minDistance = 0;
@@ -70,13 +70,13 @@ export default function SW(props) {
         });
         getMaps();
 
-        
+
     }, []);
 
 
 
-    useEffect(() => {   
-        if(smi){
+    useEffect(() => {
+        if (smi) {
             submitSearch(smi);
         }
     }, [db]);
@@ -205,7 +205,7 @@ export default function SW(props) {
         console.log(res);
         setMaps(res);
         setDB(Object.keys(res)[0])
-    
+
     }
 
     const handleSliderChangeDual = (
@@ -289,13 +289,15 @@ export default function SW(props) {
     }
 
 
-    async function submitSearch(smiles) {
+    async function submitSearch(smiles, fromJSME = false, fromText = false) {
 
-        if (smi !== smiles && smiles !== patchedSmi) {
-            setSmi(smiles)
+        if (fromJSME) {
+            setSmilesText(smiles);
+        }
+        else if (fromText) {
 
-            setPatchedSmi(rdKit.get_mol(smiles) ? rdKit.get_mol(smiles).get_smiles() : patchedSmi);
-
+            setSmilesText(smiles);
+            setSmi(smiles);
         }
 
         setResults([]);
@@ -364,25 +366,25 @@ export default function SW(props) {
 
 
             <Row>
-                <Col lg={3}>
+                <Col lg={4}>
                     <Jsme
-                  
-                        height="350px"
+                        src="/jsme/jsme.nocache.js"
+                        height="300px"
                         onChange={(smiles) => {
-                            submitSearch(smiles);
+                            console.log(smiles)
+                            submitSearch(rdKit.get_mol(smiles).get_smiles(), true, false);
                         }}
-                        smiles={patchedSmi}
-                        options={"newlook,polarnitro,multipart,zoom"}
+                        smiles={rdKit ? rdKit.get_mol(smi).get_smiles() : ''}
+                        options={"noautoez,newlook,nocanonize,multipart,zoom"}
                     />
 
                     <InputGroup className='mb-1 mt-1'>
                         <InputGroup.Text>SMILES</InputGroup.Text>
                         <input
                             className="form-control"
-                            value={smi}
+                            value={smilesText}
                             onChange={(e) => {
-
-                                submitSearch(e.target.value);
+                                submitSearch(e.target.value, false, true);
                             }}
                         />
 
@@ -415,11 +417,11 @@ export default function SW(props) {
                         className='mb-1'
                     >
                         <Card.Header
-                            className='p-0 ps-2'
+                            className='p-0 ps-2 h6'
                         >Advanced Options
                         </Card.Header>
                         <Card.Body
-                            className='p-2'
+                            className='ps-1 px-1 pt-0'
                         >
                             <Row
                                 className=''
@@ -437,15 +439,15 @@ export default function SW(props) {
                                                             textAlign: "start",
                                                             marginTop: "auto",
                                                             marginBottom: "auto",
-                                                            fontSize: "0.6rem",
-                                                            textWrap: "nowrap",
+                                                            fontSize: "0.55rem",
+                                                            textWrap: "no-wrap",
                                                         }}
 
                                                     >{slider.label}</b>
 
                                                     <div
                                                         style={{
-                                                            width: slider.half ? "55%" : "73%",
+                                                            width: slider.half ? "55%" : "70%",
 
                                                         }}
                                                     >
@@ -515,7 +517,7 @@ export default function SW(props) {
 
                     <br />
                 </Col>
-                <Col lg={9}>
+                <Col lg={8}>
                     <ResultsTable
                         ref={ref}
                         hlid={hlid}
