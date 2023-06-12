@@ -21,6 +21,7 @@ cryptography==39.0.2
 csvalidate==1.1.1
 dicttoxml==1.7.4
 dominate==2.4.0
+eventlet==0.33.3
 Flask==2.2.3
 Flask-Admin==1.6.1
 Flask-Bootstrap==3.3.7.1
