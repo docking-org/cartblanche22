@@ -29,10 +29,22 @@ client_configuration = {
         "mem_max_cached_file" : 0
 }
 
+from contextlib import contextmanager
+#for psycopg2 not allowing copy_from to be used in a transaction
+#https://stackoverflow.com/questions/34812942/psycopg2-copy-from-raises-asynchronous-programmingerror-with-sync-connection-in
+@contextmanager
+def _paused_thread():
+    try:
+        thread = psycopg2.extensions.get_wait_callback()
+        psycopg2.extensions.set_wait_callback(None)
+        yield
+    finally:
+        psycopg2.extensions.set_wait_callback(thread)
+
 @celery.task
 def mergeResults(res, submission = None):
-    zinc20 = [i for i in res if i and i.get('db') and i['db'] == 'zinc20']
-    
+    for i in res:
+        print(i)
     if isinstance(res, list):
         for i in range(1, len(res)):
             if res and res[i]:
@@ -41,66 +53,72 @@ def mergeResults(res, submission = None):
         
     if submission:
         res['submission'] = submission
-    res['zinc20'] = zinc20
     return res
 
-
-@celery.task
-def getzinc20list(input):
-    return [zinc20search.si(i) for i in input]
+def formatZincID(sub_id):
+    #ZINC000000000007
+    return 'ZINC' + str(sub_id).zfill(12)
         
 @celery.task
 def zinc20search(zinc20):
-
-    result = {}
+    if len(zinc20) == 0:
+        return []
+    fixed = []
     for i in zinc20:
-        zinc20_files = {
-                'zinc_id-in': [zinc20],
-                'output_fields': "zinc_id supplier_code smiles substance_purchasable catalog"
-        }
-    
-        response = requests.post("https://zinc20.docking.org/catitems/subsets/for-sale.json", data=zinc20_files)
         
-        if response:
-            data= json.loads(response.text)
-            if not data or not data[0]:
-                return {
-                    'zinc_id': zinc20,
-                    'db': 'zinc20',
-                    'catalogs': [],
-                    'smiles': None
-                }
-            item = data[0]
-            
-            result['smiles'] = item['smiles']
-            result['zinc_id'] = item['zinc_id']
-            result['db'] = 'zinc20'
-            mol = Chem.MolFromSmiles(item['smiles'])        
-            result['tranche_details'] = {
+        if 'ZINC' in str.upper(str(i)):
+            i = str.upper(i).split('ZINC')[1]
+        elif 'C' in str.upper(i):
+            i = str.upper(i).split('C')[1]
+        fixed.append(i)
+    zinc20 = fixed
+
+    db = psycopg2.connect(Config.SQLALCHEMY_BINDS['zinc20'])
+    curs = db.cursor()
+    
+    curs.execute("select sub_id_fk, supplier_code, catalog.name, catalog.purchasable, smiles from catalog_item\
+                  left join catalog on cat_id_fk = cat_id left join substance on sub_id_fk = sub_id where sub_id_fk in %s", (tuple(zinc20),))
+    result = {}
+    for i in curs.fetchall():
+
+        smiles = i[4]
+        mol = Chem.MolFromSmiles(smiles)
+        
+        if i[0] not in result:
+
+            result[i[0]] = {}
+            result[i[0]]['smiles'] = smiles
+            result[i[0]]['tranche_details'] = {
                 'heavy_atoms': mol.GetNumHeavyAtoms(),
                 'logp': round(Descriptors.MolLogP(mol),3),
                 'mwt': round(Descriptors.MolWt(mol),3),
                 'inchi': Chem.MolToInchi(mol),
                 'inchikey': Chem.MolToInchiKey(mol),
             }
-            result['mol_formula'] = Chem.rdMolDescriptors.CalcMolFormula(mol)
-            result['rings'] = Chem.rdMolDescriptors.CalcNumRings(mol)
-            result['hetero_atoms'] = Chem.rdMolDescriptors.CalcNumHeteroatoms(mol)
+            result[i[0]]['mol_formula'] = Chem.rdMolDescriptors.CalcMolFormula(mol)
+            result[i[0]]['rings'] = Chem.rdMolDescriptors.CalcNumRings(mol)
+            result[i[0]]['hetero_atoms'] = Chem.rdMolDescriptors.CalcNumHeteroatoms(mol)
+
+            result[i[0]]['db'] = 'zinc20'
+            result[i[0]]['zinc_id'] = formatZincID(i[0])
+            result[i[0]]['catalogs'] = []
+        result[i[0]]['catalogs'].append({
+            'catalog_name': i[2],
+            'price': 240,
+            'purchase': 1,
+            'quantity': 10,
+            'shipping': "6 weeks",
+            'supplier_code': i[1],
+            'unit': "mg"
+            })
         
-            result['catalogs'] = []
-            for item in data:        
-                result['catalogs'].append({
-                    'catalog_name': item['catalog']['name'],
-                    'price': 240,
-                    'purchase': 1,
-                    'quantity': 10,
-                    'shipping': "6 weeks",
-                    'supplier_code': item['supplier_code'],
-                    'unit': "mg"
-                    })
+    results = []
+    for i in result:
+        results.append(result[i])
 
-    return result
-
+        
+    return {'zinc20':results}
+   
 @celery.task
 def vendorSearch(vendor_ids, role='public'):
     result = {}
@@ -429,9 +447,12 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
         return {'zinc22':result, 'zinc22_missing':missing_file.read().split("\n"), 'logs':logs}
         
 
+
+
 def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
     search_curs.execute("create temporary table cb_sub_id_input (sub_id bigint, tranche_id_orig smallint)")
-    search_curs.copy_from(data_file, 'cb_sub_id_input', sep='\t', columns=['sub_id', 'tranche_id_orig'])
+    with _paused_thread():
+        search_curs.copy_from(data_file, 'cb_sub_id_input', sep='\t', columns=['sub_id', 'tranche_id_orig'])
     search_curs.execute("create temporary table cb_sub_output (smiles text, sub_id bigint, tranche_id smallint, tranche_id_orig smallint)")
     search_curs.execute("call get_some_substances_by_id('cb_sub_id_input', 'cb_sub_output')")
     search_curs.execute("select smiles, sub_id, tranche_id_orig from cb_sub_output")
@@ -440,7 +461,8 @@ def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
 
 def get_vendor_results(data_file, search_curs, output_file, tranches_internal):
     search_curs.execute("create temporary table cb_sub_id_input (sub_id bigint, tranche_id_orig smallint)")
-    search_curs.copy_from(data_file, 'cb_sub_id_input', sep='\t', columns=['sub_id', 'tranche_id_orig'])
+    with _paused_thread():
+        search_curs.copy_from(data_file, 'cb_sub_id_input', sep='\t', columns=['sub_id', 'tranche_id_orig'])
     search_curs.execute("create temporary table cb_pairs_output (smiles text, sub_id bigint, tranche_id smallint, supplier_code text, cat_content_id bigint, cat_id_fk smallint, tranche_id_orig smallint)")
     search_curs.execute("call cb_get_some_pairs_by_sub_id()")
     search_curs.execute("select smiles, sub_id, tranche_id_orig, supplier_code, catalog.short_name from cb_pairs_output left join catalog on cb_pairs_output.cat_id_fk = catalog.cat_id")
@@ -449,7 +471,8 @@ def get_vendor_results(data_file, search_curs, output_file, tranches_internal):
     
 def get_vendor_results_antimony(data_file, search_curs, output_file, missing_file):
     search_curs.execute("create temporary table tq_in (supplier_code text)")
-    search_curs.copy_from(data_file, 'tq_in', columns=['supplier_code'])
+    with _paused_thread():
+        search_curs.copy_from(data_file, 'tq_in', columns=['supplier_code'])
     # we have a more standard query for antimony, since it's not as complicated as tin and therefore doesn't need custom database functions
     search_curs.execute("select tq_in.supplier_code, cat_content_id, machine_id_fk from tq_in left join supplier_codes on tq_in.supplier_code = supplier_codes.supplier_code left join supplier_map on sup_id = sup_id_fk")
     
@@ -469,7 +492,8 @@ def get_vendor_results_antimony(data_file, search_curs, output_file, missing_fil
 
 def get_vendor_results_cat_id(data_file, search_curs, output_file):
     search_curs.execute("create temporary table cb_vendor_input (supplier_code text)")
-    search_curs.copy_from(data_file, 'cb_vendor_input', sep=',', columns=['supplier_code'])
+    with _paused_thread():
+        search_curs.copy_from(data_file, 'cb_vendor_input', sep=',', columns=['supplier_code'])
     search_curs.execute("create temporary table cb_pairs_output (smiles text, sub_id bigint, tranche_id smallint, supplier_code text, cat_content_id bigint, cat_id smallint)")
     search_curs.execute("call cb_get_some_pairs_by_vendor()")
     search_curs.execute("select smiles, sub_id, tranches.tranche_name, supplier_code, catalog.short_name from cb_pairs_output left join tranches on cb_pairs_output.tranche_id = tranches.tranche_id left join catalog on cb_pairs_output.cat_id = catalog.cat_id")

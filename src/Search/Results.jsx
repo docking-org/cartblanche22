@@ -150,16 +150,31 @@ export default function Results(props) {
                 />}
             {!noResults &&
                 <Container className="my-2" fluid>
+
                     {progress > 0 && progress < 100 &&
                         !results.zinc22 && !results.zinc20 &&
-                        <ProgressBar key="progress" animated now={progress} label={`${progress}%`} />
+                        <div
+                            style={{ 'marginTop': '35vh' }}
+                            className="justify-content-center align-items-center"
+
+                        >
+                            <ProgressBar key="progress" animated now={progress} label={`${progress}%`} />
+                        </div>
                     }
 
                     {
-                        (progress === 100 || progress < 5) &&
+
+                        (progress >= 100 || progress < 5) &&
                         !results.zinc22 && !results.zinc20 &&
-                        <ProgressBar key="loading" animated now={progress} label={`Processing`} />
+                        <div
+                            style={{ 'marginTop': '35vh' }}
+                            className="justify-content-center align-items-center"
+
+                        >
+                            <ProgressBar key="loading" animated now={progress} label={`Searching...`} />
+                        </div>
                     }
+
                     <Card>
 
                         <Tabs

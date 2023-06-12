@@ -12,13 +12,20 @@ export default function SmilesSearch(props) {
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
     function getMolecules() {
         var bodyFormData = new FormData();
         bodyFormData.append('smiles', input);
         bodyFormData.append('dist', document.getElementById("distformat").value);
         bodyFormData.append('adist', document.getElementById("adistformat").value);
+        if (document.getElementById("zinc22").checked) {
+            bodyFormData.append('zinc22', document.getElementById("zinc22").value);
+        }
+        if (document.getElementById("zinc20").checked) {
+            bodyFormData.append('zinc20', document.getElementById("zinc20").value);
+        }
+
         var file = document.getElementById("smilesfile").files[0];
         if (file) {
             bodyFormData.append('smiles', file);
@@ -94,6 +101,15 @@ export default function SmilesSearch(props) {
                                 4
                             </option>
                         </select>
+                        <br></br>
+                        Search Database
+                        <br></br>
+                        <input type={'checkbox'} id={'zinc22'} name={'zinc22'} value={'true'} defaultChecked={"true"} />
+                        &nbsp;<label for={'zinc22'}>ZINC22</label>
+                        <br></br>
+                        <input type={'checkbox'} id={'zinc20'} name={'zinc20'} value={'false'} />
+                        &nbsp;<label for={'zinc20'}>ZINC20 For Sale</label>
+                        <br></br>
                         <br />
                         <button id="searchZincBtn2" type="submit" onClick={getMolecules}
                             class="btn btn-info m-1">Search</button>

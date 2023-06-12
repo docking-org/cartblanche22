@@ -15,8 +15,9 @@ def find_molecule(identifier, data=None, db=None, smiles=None):
             return None
         data = res['zinc22'][0]
     elif 'ZINC' in identifier:
-        task = zinc20search.delay(identifier)
-        res = task.get()
+        sub_id = identifier.split('ZINC')[1]
+        task = zinc20search.delay([sub_id])
+        res = task.get()['zinc20'][0]
 
         if res:
             data = res

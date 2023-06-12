@@ -1,12 +1,13 @@
 import re
+import uuid
 from flask import Blueprint
 
 from flask import request, abort, make_response, redirect, url_for, jsonify
 
 from celery.result import AsyncResult
 from cartblanche.data.tasks import start_search_task
-from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults, vendorSearch, getzinc20list
-from cartblanche.data.tasks.search_smiles import sw_search
+from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults, vendorSearch
+from cartblanche.data.tasks.search_smiles import sw_search, filter_sw_results
 from cartblanche.data.tasks.get_random import getRandom
 from cartblanche.helpers.validation import is_zinc22, filter_zinc_ids
 from cartblanche.formatters.format import formatZincResult
@@ -135,10 +136,10 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
    
     if len(zinc22) == 0 and len(zinc20) == 0:
         return "No Valid ZINC IDs, please try again", 400
-    zinc20tasks = [zinc20search.si(zinc20) for zinc20 in zinc20]
+    zinc20tasks = zinc20search.si(zinc20)
     task = [
-        getSubstanceList.si(zinc22,  getRole(), discarded ),
-    ] + zinc20tasks
+        getSubstanceList.si(zinc22,  getRole(), discarded ), zinc20tasks
+    ] 
     
     callback = mergeResults.s()
 
@@ -217,14 +218,21 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
     dist = '4' if int(dist) > 4 else dist
     adist = '4' if int(dist) > 4 else adist
 
+    zinc22 = True if request.form.get('zinc22') else False    
+    zinc20 = True if request.form.get('zinc20') else False
     if len(ids) == 0:
         return "No Valid SMILES, please try again", 400
-    
-    #sw search for zincids -> zinc22 search for cat info
-    task = [sw_search.s(ids, adist, dist), getSubstanceList.s(getRole())]
+
+    #this task id is used to track the progress of the search, between the sw search and the zinc22 search. need to add zinc20 search progress
+    task_id_progress = uuid.uuid4()
 
     
-    task = start_search_task.delay(task,submission)
+    
+    task = [sw_search.s(ids, adist, dist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
+    
+    task = start_search_task.delay(task, submission, task_id_progress=task_id_progress)
+ 
+
 
     if request.method == "POST":
         return {"task": task.id}

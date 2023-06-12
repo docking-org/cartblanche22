@@ -4,6 +4,7 @@ from celery import Celery
 celery = Celery(__name__, 
                 broker='redis://localhost:6379/0',
                 backend='pyamqp://guest@localhost//',
+                result_extended=True,
                 include=[
                            'cartblanche.data.tasks',
                            'cartblanche.data.tasks.search_smiles',
