@@ -10,7 +10,7 @@ export default function RandomSearch(props) {
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
     function getMolecules() {
         var bodyFormData = new FormData();
@@ -38,7 +38,7 @@ export default function RandomSearch(props) {
     return (
         <Container className="mt-2 mb-2">
             <Card>
-                <Card.Header><b>Search by supplier codes, one per line</b></Card.Header>
+                <Card.Header><b>Download Random Molecules</b></Card.Header>
 
                 <Card.Body>
                     <form id='data' class="form-inline">
