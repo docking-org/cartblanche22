@@ -14,7 +14,7 @@ from cartblanche.data.tasks.search_zinc import zinc20search
 @celery.task
 def filter_sw_results(ids, role, task_id_progress):
     zinc22, zinc20, discarded = filter_zinc_ids(ids)
-    
+    print(zinc20)
     task = [
         getSubstanceList.s(zinc22, role, discarded), zinc20search.s(zinc20)
     ] 
@@ -32,52 +32,26 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
     current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
    
     result = []
-    
-    if zinc22:
-        with tempfile.NamedTemporaryFile() as tmp:
-            print(smilelist)
-            tmp.write(smilelist.encode())
-            tmp.flush()
-            
-            if adist == '0':
-                res = subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
-                            "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -n50" \
-                            " {smiles} | grep -E '=[0-{dist}] '".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE) 
-            else:
-                res = subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
-                                "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v   " \
-                                #grep from =[0-{dist}]
-                                "-n0 -k 20 -score AtomAlignment:SMILES -d{adist} {smiles} | grep -E '=[0-{dist}] '".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
-                                
-            
-            out, err = res.communicate()
-           
-            
-            result = out.decode().split('\n')
-    
-    if zinc20:
-        with tempfile.NamedTemporaryFile() as tmp:
-        
-            tmp.write(smilelist.encode())
-            tmp.flush()
-            
-            if adist == '0':
-                res = subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
-                            "sim -db "+ Config.SMALLWORLD_PUBLIC_MAP_PATH + "/for-sale.smi.anon.map -n50" \
-                            " {smiles} | grep -E '=[0-{dist}] '".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE) 
-            else:
-                res = subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
-                                "sim -db "+ Config.SMALLWORLD_PUBLIC_MAP_PATH + "/for-sale.smi.anon.map -v   " \
-                                #grep from =[0-{dist}]
-                                "-n0 -k 20 -score AtomAlignment:SMILES -d{adist} {smiles} | grep -E '=[0-{dist}] '".format(smiles=tmp.name, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)
-                                
-            
-            out, err = res.communicate()
-            #on console print, print hi
-            
-            result.extend(out.decode().split('\n'))
-            print(result)
+    smilelist = smilelist.split('\n')
+    processes = []
+ 
+    for smile in smilelist:   
+        if zinc22:  
+            processes.append(subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
+                    "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v   " \
+                    #grep from =[0-{dist}]
+                    "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE))
+        if zinc20:
+            processes.append(subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
+                    "sim -db "+ Config.SMALLWORLD_PUBLIC_MAP_PATH + "/for-sale.smi.anon.map -v   " \
+                    #grep from =[0-{dist}]
+                    "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE))
 
+         
+    for process in processes:
+        out, err = process.communicate()
+        result.extend(out.decode().split('\n'))
+       
     hits = []
     for line in result:
         if 'ZINC' in line:

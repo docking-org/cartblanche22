@@ -227,7 +227,10 @@ def filter_zinc_ids(ids):
         if is_zinc22(identifier) is True:
             zinc22.append(identifier)
         elif is_zinc22(identifier) is False:
-            zinc20.append(identifier)
+            if 'ZINC' in identifier and not identifier.split('ZINC')[1].isnumeric():
+                zinc22.append(identifier)
+            else:   
+                zinc20.append(identifier)
         else:
             discarded.append(identifier)
     print("ZINC22: {}, ZINC20: {}, Discarded: {}".format(len(zinc22), len(zinc20), len(discarded)))

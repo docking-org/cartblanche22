@@ -4,6 +4,8 @@ from cartblanche import celery
 
 from celery import chord, signature, chain, group
 
+#a wrapper for all of the search tasks. This allows keeping track of the job id that will return the final result, the original submission, and the progress of the zinc22 search
+
 @celery.task
 def start_search_task(task, submission, callback=None, children=None, task_id_progress=None):
     if isinstance(task, list):

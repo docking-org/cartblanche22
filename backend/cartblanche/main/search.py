@@ -29,7 +29,8 @@ def saveResult(
 
     if task:
         result = task.get()
-        result = result['zinc22'] + result['zinc20']
+        print(result)
+        result = result['zinc22'] + (result['zinc20'] if result.get('zinc20') else [])
 
         for mol in result:
             best_catalog = None
@@ -228,7 +229,7 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
 
     
     
-    task = [sw_search.s(ids, adist, dist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
+    task = [sw_search.s(ids, dist, adist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
     
     task = start_search_task.delay(task, submission, task_id_progress=task_id_progress)
  
