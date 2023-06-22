@@ -1,6 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, jsonify, session
 from cartblanche.app import app 
-from cartblanche.data.forms.authForms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, ChangePasswordForm
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_jwt_extended import create_access_token, create_refresh_token, unset_jwt_cookies, jwt_required, get_jwt_identity, get_jwt
 from werkzeug.urls import url_parse

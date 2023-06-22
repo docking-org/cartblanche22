@@ -92,6 +92,8 @@ pyparsing==2.4.7
 python-dateutil
 python-dotenv==0.14.0
 python-editor==1.0.4
+pytest
+pytest-celery
 pytz
 redis==3.5.3
 redis-server==6.0.9

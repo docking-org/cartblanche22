@@ -16,7 +16,7 @@ export default function ZincIdSearch(props) {
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
 
     function getMolecules() {
@@ -127,7 +127,6 @@ export default function ZincIdSearch(props) {
                                         <li>catalogs</li>
                                         <li>smiles</li>
                                         <li>sub_id</li>
-                                        <li>supplier_code</li>
                                         <li>tranche</li>
                                         <li>tranche_details</li>
                                         <li>zinc_id</li>

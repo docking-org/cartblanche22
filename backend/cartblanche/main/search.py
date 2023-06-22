@@ -213,14 +213,24 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
         adist = request.form['adist']
     if request.form.get('dist'):
         dist = request.form['dist']
-    
+
+    if request.form.get('database'):
+        database = request.form['database']
+        if 'zinc20' in database:
+            zinc20 = True
+        if 'zinc22' in database:
+            zinc22 = True
+    else:
+        zinc20 = False
+        zinc22 = True
+
     submission = ids
     ids = '\n'.join(ids)
     dist = '4' if int(dist) > 4 else dist
     adist = '4' if int(dist) > 4 else adist
 
-    zinc22 = True if request.form.get('zinc22') else False    
-    zinc20 = True if request.form.get('zinc20') else False
+    # zinc22 = True if request.form.get('zinc22') else False    
+    # zinc20 = True if request.form.get('zinc20') else False
     if len(ids) == 0:
         return "No Valid SMILES, please try again", 400
 
@@ -238,11 +248,17 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
     if request.method == "POST":
         return {"task": task.id}
     else:
+
         res= task.get()['id']
         res = AsyncResult(res).get()
-        res = res['zinc22']
+        
+        
+        results = res['zinc22']
 
-        return make_response(formatZincResult(res, format), 200)
+        if res.get('zinc20'):
+            results.extend(res['zinc20'])
+            
+        return make_response(formatZincResult(results, format), 200)
     
 @search_bp.route('/substance/random.<format>', methods=["GET", "POST"])
 def random_substance(format = 'json', subset = None):

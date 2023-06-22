@@ -12,7 +12,7 @@ class Config(object):
         
         ZINC_SMALL_WORLD_SERVER = os.getenv('ZINC_SMALL_WORLD_SERVER') or "http://swp.docking.org"    
         TEMPLATES_AUTO_RELOAD = True
-
+        
         SQLALCHEMY_TRACK_MODIFICATIONS = False
         MAIL_SERVER =  os.getenv('MAIL_SERVER')
         MAIL_PORT = 587 or int(os.getenv('MAIL_PORT'))

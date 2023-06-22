@@ -2,11 +2,10 @@ from inspect import trace
 import psycopg2
 from config import Config
 from itertools import groupby
-from flask import render_template, request, Response, stream_with_context, jsonify, make_response
+from flask import request, make_response
 from cartblanche.app import app 
-import json
 from cartblanche.data.models.tranche import TrancheModel
-from cartblanche.data.forms.tranchesForms import Download2DForm, Download3DForm
+
 
 
 def URIFormatter(hac, logp, format, add_url, charge, generation):
