@@ -12,7 +12,7 @@ class Config(object):
         
         ZINC_SMALL_WORLD_SERVER = os.getenv('ZINC_SMALL_WORLD_SERVER') or "http://swp.docking.org"    
         TEMPLATES_AUTO_RELOAD = True
-
+        
         SQLALCHEMY_TRACK_MODIFICATIONS = False
         MAIL_SERVER =  os.getenv('MAIL_SERVER')
         MAIL_PORT = 587 or int(os.getenv('MAIL_PORT'))
@@ -24,18 +24,21 @@ class Config(object):
 
         CELERY_IMPORTS = ("app.data.tasks.search_zinc", "app.data.tasks.search_smiles", "app.data.tasks.get_random" )
         SMALLWORLD_JAR_PATH = os.getenv("SMALLWORLD_JAR_PATH")
+        SMALLWORLD_PUBLIC_MAP_PATH = os.getenv("SMALLWORLD_PUBLIC_MAP_PATH")
         SMALLWORLD_MAP_PATH = os.getenv("SMALLWORLD_MAP_PATH")
         SWDIR = os.getenv("SWDIR")
-
+       
         CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
         CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND') or 'redis://0.0.0.0:6379/0'
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
         SQLALCHEMY_BINDS = {
             # Server Database
+
             'zinc22_common': os.getenv('COMMON_DATABASE'),
             'zinc22': os.getenv('ZINC22_DATABASE'),
             'tin': os.getenv('TIN_DATABASE'),
+            'zinc20': os.getenv('ZINC20_DATABASE'),
         }
 
         DOWNLOAD_PASS_2D = os.getenv('DOWNLOAD_PASS_2D')

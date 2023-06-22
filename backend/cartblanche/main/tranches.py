@@ -2,11 +2,10 @@ from inspect import trace
 import psycopg2
 from config import Config
 from itertools import groupby
-from flask import render_template, request, Response, stream_with_context, jsonify, make_response
+from flask import request, make_response
 from cartblanche.app import app 
-import json
 from cartblanche.data.models.tranche import TrancheModel
-from cartblanche.data.forms.tranchesForms import Download2DForm, Download3DForm
+
 
 
 def URIFormatter(hac, logp, format, add_url, charge, generation):
@@ -156,7 +155,7 @@ charges = {
 }
 
 formats_3d = {
-    "SMILES" : "smi.tgz",
+#    "SMILES" : "smi.tgz",
     "DOCK37" : "db2.tgz",
     "AutoDock" : "pdbqt.tgz",
     "Mol2" : "mol2.tgz",
@@ -185,11 +184,11 @@ methods_2d = {
 }
 
 formats_2d = {
-    "SMILES" : "smi.tgz",
-    "DOCK37" : "db2.tgz",
-    "AutoDock" : "pdbqt.tgz",
-    "Mol2" : "mol2.tgz",
-    "SDF" : "sdf.tgz",
+    "SMILES" : "smi.gz",
+#    "DOCK37" : "db2.tgz",
+#    "AutoDock" : "pdbqt.tgz",
+#    "Mol2" : "mol2.tgz",
+#    "SDF" : "sdf.tgz",
 }
 
 generations = [chr(i) for i in range(97, 123)]

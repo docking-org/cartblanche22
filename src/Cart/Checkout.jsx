@@ -7,7 +7,7 @@ import MoleculeStructure from '../RDKit/MoleculeStructure'
 import { ToastContainer, toast } from 'react-toastify';
 import { saveAs } from 'file-saver';
 import useToken from '../utils/useToken';
-
+import { gapi, gapiComplete } from 'gapi-script';
 
 export default function Checkout(props) {
 
@@ -20,43 +20,168 @@ export default function Checkout(props) {
     const [page, setPage] = React.useState(1);
     const [perPage, setPerPage] = React.useState(20);
     const [total, setTotal] = React.useState(getCart().length);
+    const [gapInited, setGapInited] = React.useState(false);
+
+
+
+
+    function createSpreadsheet() {
+        const GOOGLE_CLIENT_ID = '655763979132-hbv1uk9ipqk3ee60a1v3hmossud56s08.apps.googleusercontent.com';
+        const GOOGLE_API_KEY = 'AIzaSyBOgEaWPe4LlZqAzAqxe6MsBNwFl405tGA';
+        const GOOGLE_DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
+        const GOOGLE_SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+
+        const id = toast.loading("Creating Google Sheet...", {
+            position: toast.POSITION.BOTTOM_LEFT,
+            autoClose: 2000
+        });
+
+
+        let cells = [];
+        let items = cart;
+        items = items.map(item => {
+            return {
+                "identifier": item.identifier,
+                "smiles": item.smile,
+                "db": item.db,
+                "catalog_name": item.vendors[0] ? item.vendors[0].catalog_name : null,
+                "price": item.vendors[0] ? item.vendors[0].price : null,
+                "quantity": item.vendors[0] ? item.vendors[0].quantity : null,
+                "shipping": item.vendors[0] ? item.vendors[0].shipping : null,
+                "short_name": item.vendors[0] ? item.vendors[0].short_name : null,
+                "supplier_code": item.vendors[0] ? item.vendors[0].supplier_code : null,
+                "unit": item.vendors[0] ? item.vendors[0].unit : null,
+                "purchase": item.vendors[0] ? item.vendors[0].purchase : null,
+            }
+        })
+        items.forEach((item, index) => {
+            Object.entries(item).forEach(([key, value]) => {
+                cells.push({
+                    "cell": {
+                        "row": index + 1,
+                        "column": key + 1,
+                        "value": value
+                    },
+                    "fields": "userEnteredValue"
+                })
+            })
+        })
+        let header = Object.keys(items[0]);
+        let contents = items.map(item => { return Object.values(item) })
+
+
+        gapi.load('client:auth2', () => {
+            gapi.client.init({
+                apiKey: GOOGLE_API_KEY,
+                clientId: GOOGLE_CLIENT_ID,
+                discoveryDocs: [GOOGLE_DISCOVERY_DOC],
+                scope: GOOGLE_SCOPES,
+                plugin_name: "cb22"
+            }).then(() => {
+                if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
+                    gapi.auth2.getAuthInstance().signIn();
+                }
+
+                gapi.client.sheets.spreadsheets.create({
+                    properties: {
+                        title: "Cartblanche22 Cart " + Date.parse(new Date()),
+                    },
+                }).then((response) => {
+                    toast.update(id, {
+                        render: "Created Google Sheet",
+                        type: toast.TYPE.SUCCESS,
+                        isLoading: false,
+                        autoClose: 2000
+                    });
+                    console.log(response.data);
+                    let sheetid = response.result.spreadsheetId;
+
+                    gapi.client.sheets.spreadsheets.values.append({
+                        spreadsheetId: sheetid,
+                        range: "Sheet1!A1",
+                        valueInputOption: "USER_ENTERED",
+                        resource: { values: [header, ...contents] },
+
+                    }).then((response) => {
+                        console.log(response.result);
+
+                        window.open('https://docs.google.com/spreadsheets/d/' + sheetid);
+                    }).catch((error) => {
+                        console.log(error);
+                    })
+
+
+
+
+
+                }).catch((error) => {
+                    console.log(error);
+                    toast.update(id, {
+                        render: "Error Creating Google Sheet",
+                        type: toast.TYPE.ERROR,
+                        autoClose: 2000,
+                        isLoading: false,
+                    });
+
+                });
+            }, (error) => {
+                console.log(error);
+                toast.update(id, {
+                    render: "Error Creating Google Sheet",
+                    type: toast.TYPE.ERROR,
+                    autoClose: 2000,
+                    isLoading: false,
+                });
+            });
+
+
+
+            setGapInited(true);
+        })
+
+
+
+
+    }
+
+
     useEffect(() => {
         setCart(getCart());
     }, [cartSize])
 
     useEffect(() => {
         document.title = props.title || "";
-      }, [props.title]);
+    }, [props.title]);
 
-    function createGoogleSheet() {
-        let form = new FormData();
-        form.append('cart', JSON.stringify(cart));
+    // function createGoogleSheet() {
+    //     let form = new FormData();
+    //     form.append('cart', JSON.stringify(cart));
 
-        const id = toast.loading("Creating Google Sheet...", {
-            position: toast.POSITION.BOTTOM_LEFT,
-            autoClose: 2000
-        });
-        axios({
-            method: 'post',
-            url : "/cart/createGoogleSheet",
-            data: form,
-        }).then((response) => {
-            toast.update(id, {
-                render: "Google Sheet Created",
-                type: toast.TYPE.SUCCESS,
-                isLoading: false,
-                autoClose: 2000
-            });
-            console.log(response.data);
-        }).catch((error) => {
-            toast.update(id, {
-                render: "Error Creating Google Sheet",
-                type: toast.TYPE.ERROR,
-                autoClose: 2000,
-                isLoading: false,
-            });
-        });
-    }
+    //     const id = toast.loading("Creating Google Sheet...", {
+    //         position: toast.POSITION.BOTTOM_LEFT,
+    //         autoClose: 2000
+    //     });
+    //     axios({
+    //         method: 'post',
+    //         url : "/cart/createGoogleSheet",
+    //         data: form,
+    //     }).then((response) => {
+    //         toast.update(id, {
+    //             render: "Google Sheet Created",
+    //             type: toast.TYPE.SUCCESS,
+    //             isLoading: false,
+    //             autoClose: 2000
+    //         });
+    //         console.log(response.data);
+    //     }).catch((error) => {
+    //         toast.update(id, {
+    //             render: "Error Creating Google Sheet",
+    //             type: toast.TYPE.ERROR,
+    //             autoClose: 2000,
+    //             isLoading: false,
+    //         });
+    //     });
+    // }
 
 
     function buildPagination() {
@@ -156,22 +281,63 @@ export default function Checkout(props) {
     }
 
     return (
-        <Container className='mt-2'>
+        <Container className='mt-2 mb-2'>
             <Card>
                 <Card.Header>
                     <b>Checkout</b>
                 </Card.Header>
-                <Card.Body>
-                    <Navbar className=''>
+                <Card.Body
+                    className='pt-0'
+                >
+
+                    <Navbar className=''
+
+                        expand="lg"
+                    >
+
                         <Button variant="danger" onClick={() => setClearModal(true)}>Clear Cart</Button>
 
-                        <Navbar.Collapse className="justify-content-end">
+                        &nbsp;
+
+                        <Pagination
+                            style={
+                                {
+                                    paddingTop: "1rem",
+
+                                }
+                            }
+                        >
+                            <Pagination.First onClick={() => setPage(1)} />
+                            <Pagination.Prev onClick={() => page <= 1 ? setPage(1) : setPage(page - 1)} />
+                            {buildPagination()}
+                            <Pagination.Next onClick={() => page >= Math.ceil(getCart().length / perPage) ? setPage(Math.ceil(getCart().length / perPage)) : setPage(page + 1)} />
+                            <Pagination.Last onClick={() => setPage(Math.ceil(getCart().length / perPage))} />
+
+                            <Dropdown>
+                                <Dropdown.Toggle variant="" id="dropdown-basic">
+                                    {perPage}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Dropdown.Item onClick={() => setPerPage(10)}>10</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => setPerPage(20)}>20</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => setPerPage(50)}>50</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => setPerPage(100)}>100</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </Pagination>
+
+                        <Navbar.Collapse
+                            id="navbar-toggle"
+                            className="justify-content-end d-flex ">
+
                             <Navbar.Text>
                                 <Button variant="success" disabled>
                                     {getCart().length} Items
                                 </Button>
                             </Navbar.Text>
                             &nbsp;
+
+
                             <Navbar.Text>
                                 <Button variant="success" disabled>
                                     Total Price: ${getTotalPrice().toLocaleString()}
@@ -181,6 +347,17 @@ export default function Checkout(props) {
                             <Navbar.Text>
                                 <Button onClick={() => setDownloadModal(true)}>Download</Button>
                             </Navbar.Text>
+                            &nbsp;
+                            <Navbar.Text>
+                                <Button
+                                    onClick={() => {
+                                        createSpreadsheet();
+                                    }}
+                                >
+                                    Send to Google Sheets
+                                </Button>
+                            </Navbar.Text>
+
                             {/* &nbsp;
                             <Navbar.Text>
                                 <Button onClick={() => 
@@ -190,25 +367,6 @@ export default function Checkout(props) {
                         </Navbar.Collapse>
                     </Navbar>
 
-                    <Pagination className='mx-1'>
-                        <Pagination.First onClick={() => setPage(1)} />
-                        <Pagination.Prev onClick={() => page <= 1 ? setPage(1) : setPage(page - 1)} />
-                        {buildPagination()}
-                        <Pagination.Next onClick={() => page >= Math.ceil(getCart().length / perPage) ? setPage(Math.ceil(getCart().length / perPage)) : setPage(page + 1)} />
-                        <Pagination.Last onClick={() => setPage(Math.ceil(getCart().length / perPage))} />
-
-                        <Dropdown>
-                            <Dropdown.Toggle variant="" id="dropdown-basic">
-                                {perPage}
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Item onClick={() => setPerPage(10)}>10</Dropdown.Item>
-                                <Dropdown.Item onClick={() => setPerPage(20)}>20</Dropdown.Item>
-                                <Dropdown.Item onClick={() => setPerPage(50)}>50</Dropdown.Item>
-                                <Dropdown.Item onClick={() => setPerPage(100)}>100</Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </Pagination>
 
 
                     <div
@@ -249,7 +407,9 @@ export default function Checkout(props) {
                                     <th>
                                         Est. Pack Price
                                     </th>
-                                    <th>
+                                    <th
+
+                                    >
                                         Purchase Qty
                                     </th>
                                     <th>
@@ -265,18 +425,24 @@ export default function Checkout(props) {
                                 {cart ? cart.slice((page - 1) * perPage, page * perPage).map((item, cartIdx) => {
                                     return (
                                         <tr key={cartIdx}>
-                                            <td>
-                                                {cartIdx + 1}
+                                            <td
+                                                width={10}
+                                            >
+                                                {(page - 1) * perPage + cartIdx + 1}
                                             </td>
                                             <td
-                                                width={100}
+                                                width={150}
                                             >
                                                 <MoleculeStructure
+                                                    id={item.identifier}
+                                                    key={item.identifier}
                                                     structure={item.smile}
                                                     svgMode
                                                 />
                                             </td>
-                                            <td>
+                                            <td
+                                                width={10}
+                                            >
                                                 {item.identifier && item.identifier.includes("ZINC") ? (
                                                     <a href={`/substance/${item.identifier}`} target="_blank" rel="noreferrer">
                                                         {item.identifier}
@@ -293,7 +459,7 @@ export default function Checkout(props) {
                                                     if (vendor.assigned) {
                                                         return (
                                                             <>
-                                                                <td key={index}>
+                                                                <td width={10} key={index}>
                                                                     {vendor.price === 0 ? "No Vendor Available" : (
                                                                         <>
                                                                             {vendor.cat_name}
@@ -303,17 +469,25 @@ export default function Checkout(props) {
                                                                     )
                                                                     }
                                                                 </td>
-                                                                <td>
+                                                                <td
+                                                                    width={60}
+                                                                >
                                                                     {vendor.price === 0 ? "" : vendor.quantity + vendor.unit}
 
                                                                 </td>
-                                                                <td>
+                                                                <td
+                                                                    width={10}
+                                                                >
                                                                     {vendor.price === 0 ? "" : vendor.shipping}
                                                                 </td>
-                                                                <td>
+                                                                <td
+                                                                    width={70}
+                                                                >
                                                                     {vendor.price === 0 ? "" : parseFloat(vendor.price).toFixed(2)}
                                                                 </td>
-                                                                <td>
+                                                                <td
+                                                                    width={80}
+                                                                >
                                                                     {vendor.price === 0 ? "" : (
                                                                         <Form.Select size="sm">
                                                                             <option>1</option>
@@ -322,7 +496,9 @@ export default function Checkout(props) {
                                                                             <option>4</option>
                                                                         </Form.Select>)}
                                                                 </td>
-                                                                <td>
+                                                                <td
+                                                                    width={10}
+                                                                >
                                                                     {vendor.price === 0 ? "" :
 
                                                                         parseFloat(vendor.price * vendor.purchase).toFixed(2)}
@@ -337,7 +513,9 @@ export default function Checkout(props) {
                                             }
                                             {item.vendors.length === 0 ? (<td colSpan={6}>No vendor available</td>) : null}
 
-                                            <td>
+                                            <td
+                                                width={10}
+                                            >
                                                 <Button
                                                     variant="danger"
                                                     size="sm"
@@ -420,7 +598,7 @@ export default function Checkout(props) {
                             >
                                 <option value="json">JSON</option>
                                 <option value="csv">CSV</option>
-                                <option value="xlsx">TSV</option>
+                                <option value="tsv">TSV</option>
                             </Form.Select>
                         </Form.Group>
                     </Form>

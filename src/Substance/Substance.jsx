@@ -24,6 +24,7 @@ export default function Substance() {
     const [id, setId] = React.useState(useParams().id);
     const [loading, setLoading] = React.useState(true);
     const [notFound, setNotFound] = React.useState(false);
+    const [zinc20, setZinc20] = React.useState(false);
 
     useEffect(() => {
         document.title = id
@@ -33,6 +34,16 @@ export default function Substance() {
         refreshCart();
         getResult();
     }, []);
+
+    useEffect(() => {
+        if (results) {
+            results.catalogs.map((catalog) => {
+                if (catalog.supplier_code.includes('ZINC')) {
+                    setZinc20(true)
+                }
+            })
+        }
+    }, [results]);
 
     function searchSupplier(code) {
         var bodyFormData = new FormData();
@@ -96,6 +107,20 @@ export default function Substance() {
             })
     }
 
+    function isZinc20() {
+        if (id) {
+            let tempid = id.toUpperCase();
+            if (!tempid.match(/ZINC[a-z]/i)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+
+        }
+
+    }
+
     return (
         <Container className="mt-2" >
             {notFound ? <Substance404 id={id} /> : null}
@@ -139,28 +164,65 @@ export default function Substance() {
                                         </tr>
                                     </tbody>
                                 </Table>
-                                <InputGroup>
+                                <InputGroup
+                                    className="mb-1"
+                                >
                                     <InputGroup.Text>SMILES</InputGroup.Text>
                                     <input type="text" className="form-control"
                                         disabled
                                         value={results.smiles} />
+
+                                    <Button variant="outline-secondary"
+                                        onClick={() => navigator.clipboard.writeText(results.smiles)}
+                                    >
+                                        <i className="fa fa-clipboard"
+
+                                        ></i>
+                                    </Button>
                                 </InputGroup>
-                                <br />
-                                <InputGroup>
-                                    <InputGroup.Text>INCHI</InputGroup.Text>
+
+                                <InputGroup
+                                    className="mb-1"
+                                >
+                                    <InputGroup.Text>InChI</InputGroup.Text>
                                     <input type="text" className="form-control"
                                         disabled
                                         value={results.tranche_details.inchi} />
-                                </InputGroup>
-                                <br />
 
-                                <InputGroup>
-                                    <InputGroup.Text>INCHI Key</InputGroup.Text>
+                                    <Button variant="outline-secondary"
+                                        onClick={() => navigator.clipboard.writeText(results.tranche_details.inchi)}
+                                    >
+                                        <i className="fa fa-clipboard"
+
+                                        ></i>
+                                    </Button>
+                                </InputGroup>
+
+
+                                <InputGroup
+                                    className="mb-1"
+                                >
+                                    <InputGroup.Text>InChIKey</InputGroup.Text>
                                     <input type="text" className="form-control"
                                         disabled
-                                        value={results.tranche_details.inchi_key} />
+                                        value={results.tranche_details.inchikey} />
+
+
+                                    <Button variant="outline-secondary"
+                                        onClick={() => navigator.clipboard.writeText(results.tranche_details.inchikey)}
+                                    >
+                                        <i className="fa fa-clipboard"
+
+                                        ></i>
+                                    </Button>
 
                                 </InputGroup>
+                                {isZinc20() &&
+                                    <Button variant="outline-primary"
+                                        href={`https://zinc.docking.org/substances/${id}`}
+                                    >
+                                        View Molecule In ZINC20
+                                    </Button>}
 
                             </Col>
                             <Col lg={4}>
@@ -173,16 +235,24 @@ export default function Substance() {
                                 <Row>
 
                                     <Col lg={{
-                                        span: 5,
+                                        span: 6,
                                         offset: 0
                                     }}>
                                         <ButtonGroup>
                                             <Button variant="warning"
+
                                                 href={"/similarity/sw?smiles=" + encodeURIComponent(results.smiles)}
                                             >
-                                                Find Similar
+                                                <div
+                                                    style={{ fontSize: ".9rem" }}
+                                                >
+                                                    Find Similar
+                                                </div>
+
                                             </Button>
-                                            <DropdownButton as={ButtonGroup} title={<i className="fa fa-download"></i>} id="bg-nested-dropdown" variant="secondary">
+                                            <DropdownButton as={ButtonGroup} title={<i className="fa fa-download"></i>} id="bg-nested-dropdown" variant="secondary"
+
+                                            >
 
 
                                                 <Dropdown.Item onClick={() => downloadResults("json")}>JSON</Dropdown.Item>
@@ -195,21 +265,28 @@ export default function Substance() {
 
 
                                     <Col
+
                                         lg={{
-                                            span: 4,
-                                            offset: 3
+                                            span: 6,
+
                                         }}
                                     >
-                                        {
-                                            inCart(results) ?
-                                                <Button variant="danger" onClick={() => removeFromCart(
-                                                    results
-                                                )}>Remove from Cart</Button>
-                                                :
-                                                <Button variant="primary" onClick={() => addToCart(
-                                                    results
-                                                )}>Add to Cart</Button>
-                                        }
+                                        <div
+                                            style={{ 'float': "right" }}
+                                        >
+
+
+                                            {
+                                                inCart(results) ?
+                                                    <Button variant="danger" onClick={() => removeFromCart(
+                                                        results
+                                                    )}>Remove from Cart</Button>
+                                                    :
+                                                    <Button variant="primary" onClick={() => addToCart(
+                                                        results
+                                                    )}>Add to Cart</Button>
+                                            }
+                                        </div>
                                     </Col>
                                 </Row>
                             </Col>

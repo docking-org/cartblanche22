@@ -14,7 +14,7 @@ export default function Navigation() {
         confirmPassword: "",
         email: "",
     });
-    
+
     useEffect(() => {
         //check if token is valid
         if (token) {
@@ -24,7 +24,7 @@ export default function Navigation() {
                 headers: { "Authorization": "Bearer " + token },
             }).then((res) => {
                 console.log(res);
-                if(res.data.inucsf){
+                if (res.data.inucsf) {
                     setInUCSF(true);
                 }
             }).catch((err) => {
@@ -148,31 +148,35 @@ export default function Navigation() {
                             <Nav.Item>
                                 <OverlayTrigger
                                     placement="right"
-                                    delay={{ show: 250, hide: 0}}
+                                    delay={{ show: 250, hide: 0 }}
                                     overlay={<Tooltip id="button-tooltip-2">Smallworld : Search by whole molecule similarity based on graph-edit-distance with calculated Tanimoto coefficient</Tooltip>}
                                 >
-                                <NavDropdown title="Similarity" id="basic-nav-dropdown">
-                                    <NavDropdown.Item href="/similarity/sw">Public</NavDropdown.Item>
-                                    <NavDropdown.Item href="/similarity/swp">Private</NavDropdown.Item>
-                                    {inucsf && 
-                                    <NavDropdown.Item href="/similarity/swc">Super Private</NavDropdown.Item>}
-                                </NavDropdown>
+                                    <NavDropdown title="Similarity" id="basic-nav-dropdown">
+                                        <NavDropdown.Item href="/similarity/sw">Public</NavDropdown.Item>
+                                        {!token &&
+                                            <NavDropdown.Item disabled href="#">Sign in for more</NavDropdown.Item>
+                                        }
+                                        {token &&
+                                            <NavDropdown.Item href="/similarity/swp">Private</NavDropdown.Item>}
+                                        {token && inucsf &&
+                                            <NavDropdown.Item href="/similarity/swc">Super Private</NavDropdown.Item>}
+                                    </NavDropdown>
                                 </OverlayTrigger>
                             </Nav.Item>
                             <Nav.Item>
-                                
+
                                 <OverlayTrigger
                                     placement="left"
-                                    delay={{ show: 250, hide: 0}}
+                                    delay={{ show: 250, hide: 0 }}
                                     overlay={<Tooltip id="button-tooltip-2">Arthor : Search by substructure or pattern (SMARTS)</Tooltip>}
 
                                 >
-                                <NavDropdown title="Patterns" id="basic-nav-dropdown">
-                                    <NavDropdown.Item href="/patterns/arthor">Public</NavDropdown.Item>
-                                    <NavDropdown.Item href="/patterns/arthorp">Private</NavDropdown.Item>
-                                    {inucsf &&
-                                    <NavDropdown.Item href="/patterns/arthorc">Super Private</NavDropdown.Item>}
-                                </NavDropdown>
+                                    <NavDropdown title="Arthor" id="basic-nav-dropdown">
+                                        <NavDropdown.Item href="/patterns/arthor">Public</NavDropdown.Item>
+                                        <NavDropdown.Item href="/patterns/arthorp">Private</NavDropdown.Item>
+                                        {inucsf &&
+                                            <NavDropdown.Item href="/patterns/arthorc">Super Private</NavDropdown.Item>}
+                                    </NavDropdown>
                                 </OverlayTrigger>
                             </Nav.Item>
                             <Nav.Item>

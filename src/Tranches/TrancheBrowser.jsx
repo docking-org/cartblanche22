@@ -60,7 +60,7 @@ export default function TrancheBrowser(props) {
             setDownloadMethods(data.methods);
             setDownloadFormat(Object.keys(data.formats)[0]);
             setDownloadMethod(Object.keys(data.methods)[0]);
-            // setFilteredTranches(data.tranches);
+            setFilteredTranches(data.tranches);
             setGenerations(data.generations);
             setActiveGenerations(data.generations);
         });
@@ -69,30 +69,6 @@ export default function TrancheBrowser(props) {
 
 
     useEffect(() => {
-
-        // if (activeCharges.length !== 0) {
-        //     tranches.map(tranche => {
-        //         if (activeCharges.length !== 0) {
-        //             if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
-        //                 tranche['chosen'] = true;
-        //             }
-        //             else {
-        //                 tranche['chosen'] = false;
-        //             }
-        //         }
-        //     });
-        // }
-        // else {
-        //     if (tranches && (url === '3d')) {
-        //         tranches.map(tranche => {
-        //             tranche['chosen'] = false;
-        //         });
-        //     }
-        // }
-        // if (ref.current) {
-        //     ref.current.refreshTable()
-        // }
-
         if (tranches) {
             chooseSubset(activeSubset);
         }
@@ -101,18 +77,22 @@ export default function TrancheBrowser(props) {
 
     function chooseSubset(subset) {
         console.log(subset)
+        let t = [];
         if (subset === "all") {
             tranches.map(tranche => {
                 if (activeCharges.length !== 0) {
                     if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
                         tranche['chosen'] = true;
+                        t.push(tranche);
                     }
                 }
                 else if (charges.length === 0) {
                     tranche['chosen'] = true;
+                    t.push(tranche);
                 } else {
                     tranche['chosen'] = false;
                 }
+
             });
             setActiveSubset("all")
         }
@@ -141,10 +121,12 @@ export default function TrancheBrowser(props) {
                     if (activeCharges.length !== 0) {
                         if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
                             tranche['chosen'] = true;
+                            t.push(tranche);
                         }
                     }
                     else if (charges.length === 0) {
                         tranche['chosen'] = true;
+                        t.push(tranche);
                     } else {
                         tranche['chosen'] = false;
                     }
@@ -156,6 +138,7 @@ export default function TrancheBrowser(props) {
             });
 
         }
+        setFilteredTranches(t);
         if (ref.current) {
             ref.current.refreshTable()
         }
@@ -391,7 +374,7 @@ export default function TrancheBrowser(props) {
                     </Navbar>
 
                     <TrancheTable
-                        tranches={tranches}
+                        tranches={filteredTranches}
                         axes={axes}
                         bigNumbers={bigNumbers}
                         table={table}

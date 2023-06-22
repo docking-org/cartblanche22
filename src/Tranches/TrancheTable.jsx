@@ -282,9 +282,12 @@ const TrancheTable = forwardRef((props, ref) => {
                                         row.map((col, colIdx) => {
                                             let sum = col.sum;
                                             //backgroud color is lighter the sum is higher
-                                            let backgroundColor = (Math.floor(255 - 255 * (Math.log(staticTotal) - 1.1 * Math.log(sum)) / (Math.log(staticTotal) - Math.log(1))));
-                                            let color = backgroundColor > 100 ? '#333' : '#ccc';
+                                            // let backgroundColor = (Math.floor(255 - 255 * (Math.log(total) - 1.1 * Math.log(sum)) / (Math.log(total) - Math.log(1))));
+                                            // background color is darker the sum is higher. do the opposite of above
+                                            let backgroundColor = (Math.floor(255 * (Math.log(total) - 1.1 * Math.log(sum)) / (Math.log(total) - Math.log(1))));
 
+                                            //make color lighter as the background color gets darker, so that the text is always visible
+                                            let color = backgroundColor > 90 ? 'black' : '#A0A0A0';
 
                                             if (col.sum === 0) {
                                                 backgroundColor = 'white';

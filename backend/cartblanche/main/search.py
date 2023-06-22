@@ -1,12 +1,13 @@
 import re
+import uuid
 from flask import Blueprint
 
 from flask import request, abort, make_response, redirect, url_for, jsonify
 
 from celery.result import AsyncResult
 from cartblanche.data.tasks import start_search_task
-from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults, vendorSearch, getzinc20list
-from cartblanche.data.tasks.search_smiles import sw_search
+from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults, vendorSearch
+from cartblanche.data.tasks.search_smiles import sw_search, filter_sw_results
 from cartblanche.data.tasks.get_random import getRandom
 from cartblanche.helpers.validation import is_zinc22, filter_zinc_ids
 from cartblanche.formatters.format import formatZincResult
@@ -28,7 +29,8 @@ def saveResult(
 
     if task:
         result = task.get()
-        result = result['zinc22'] + result['zinc20']
+        print(result)
+        result = result['zinc22'] + (result['zinc20'] if result.get('zinc20') else [])
 
         for mol in result:
             best_catalog = None
@@ -135,10 +137,10 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
    
     if len(zinc22) == 0 and len(zinc20) == 0:
         return "No Valid ZINC IDs, please try again", 400
-    zinc20tasks = [zinc20search.si(zinc20) for zinc20 in zinc20]
+    zinc20tasks = zinc20search.si(zinc20)
     task = [
-        getSubstanceList.si(zinc22,  getRole(), discarded ),
-    ] + zinc20tasks
+        getSubstanceList.si(zinc22,  getRole(), discarded ), zinc20tasks
+    ] 
     
     callback = mergeResults.s()
 
@@ -151,14 +153,16 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
         result = task.get()
         task = result['id']
         task = AsyncResult(task)
+        #i apologize for these variable names :)
         res = task.get()
-        result = ['zinc22']
+        result = res['zinc22']
         if res.get('zinc20'):
-            result.extend(result['zinc20'])
+            result.extend(res['zinc20'])
 
         if request.form.get('output_fields'):
-            output_fields = request.form.get('output_fields').split(',')
-            result = [{k:v for k,v in i.items() if k in output_fields} for i in result]
+            output_fields = request.form.get('output_fields').replace(' ', '').split(',')
+            print(output_fields)
+            result = [dict((k, v) for k, v in x.items() if k in output_fields) for x in result]
         
         return make_response(formatZincResult(result, format), 200)
     
@@ -209,29 +213,52 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
         adist = request.form['adist']
     if request.form.get('dist'):
         dist = request.form['dist']
-    
+
+    if request.form.get('database'):
+        database = request.form['database']
+        if 'zinc20' in database:
+            zinc20 = True
+        if 'zinc22' in database:
+            zinc22 = True
+    else:
+        zinc20 = False
+        zinc22 = True
+
     submission = ids
     ids = '\n'.join(ids)
     dist = '4' if int(dist) > 4 else dist
     adist = '4' if int(dist) > 4 else adist
 
+    # zinc22 = True if request.form.get('zinc22') else False    
+    # zinc20 = True if request.form.get('zinc20') else False
     if len(ids) == 0:
         return "No Valid SMILES, please try again", 400
-    
-    #sw search for zincids -> zinc22 search for cat info
-    task = [sw_search.s(ids, adist, dist), getSubstanceList.s(getRole())]
+
+    #this task id is used to track the progress of the search, between the sw search and the zinc22 search. need to add zinc20 search progress
+    task_id_progress = uuid.uuid4()
 
     
-    task = start_search_task.delay(task,submission)
+    
+    task = [sw_search.s(ids, dist, adist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
+    
+    task = start_search_task.delay(task, submission, task_id_progress=task_id_progress)
+ 
+
 
     if request.method == "POST":
         return {"task": task.id}
     else:
+
         res= task.get()['id']
         res = AsyncResult(res).get()
-        res = res['zinc22']
+        
+        
+        results = res['zinc22']
 
-        return make_response(formatZincResult(res, format), 200)
+        if res.get('zinc20'):
+            results.extend(res['zinc20'])
+            
+        return make_response(formatZincResult(results, format), 200)
     
 @search_bp.route('/substance/random.<format>', methods=["GET", "POST"])
 def random_substance(format = 'json', subset = None):

@@ -18,7 +18,8 @@ def getRandom(subset, count,timeout=10):
     dbcount = 0
     
     population, distribution = getDistribution(subset)    
-    results = []       
+    results = []     
+    tasks = []  
     while to_pull > 0:
         db_map = {}
         for i in range(to_pull):
@@ -30,16 +31,12 @@ def getRandom(subset, count,timeout=10):
             
         for url in db_map:
             limit = db_map[url]
-            try:
-                dbcount+=1
-                print(url)
-                tstart = time.time()
-                
+            try:        
                 conn = psycopg2.connect(url, connect_timeout=timeout)
                 curs = conn.cursor()
                 curs.execute('select max(sub_id) from substance;')
                 max = curs.fetchone()[0]
-                print(max)
+                
                 curs.execute(
                     ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
                 
@@ -75,7 +72,7 @@ def getRandom(subset, count,timeout=10):
                 
         to_pull = to_pull - len(results)
                 
-    print(("retrieved {count} results across {dbcount} databases").format(count = len(results), dbcount= dbcount))      
+    # print(("retrieved {count} results across {dbcount} databases").format(count = len(results), dbcount= dbcount))      
     random.shuffle(results)
 
     return results

@@ -86,13 +86,13 @@ def get_compound_details(smiles):
     mwt = round(MolWt(m), 3)
     logp = round(MolLogP(m), 3)
     inchi = MolToInchi(m)
-    inchi_key = MolToInchiKey(m)
+    inchikey = MolToInchiKey(m)
     details = {
         'heavy_atoms': heavy_atoms,
         'mwt': mwt,
         'logp': logp,
         'inchi': inchi,
-        'inchi_key': inchi_key
+        'inchikey': inchikey
     }
     return details
 
@@ -155,9 +155,9 @@ def get_zinc_id(sub_id, tranche_name):
     return zid
 
 def get_tranche(zinc_id):
-    hac = base62_rev(zinc_id[4])
-    lgp = base62_rev(zinc_id[5])
     try:
+        hac = base62_rev(zinc_id[4])
+        lgp = base62_rev(zinc_id[5])
         tranche = "H{:>02d}{}".format(hac, logp_range[lgp])
         return tranche
     except:
@@ -227,7 +227,10 @@ def filter_zinc_ids(ids):
         if is_zinc22(identifier) is True:
             zinc22.append(identifier)
         elif is_zinc22(identifier) is False:
-            zinc20.append(identifier)
+            if 'ZINC' in identifier and not identifier.split('ZINC')[1].isnumeric():
+                zinc22.append(identifier)
+            else:   
+                zinc20.append(identifier)
         else:
             discarded.append(identifier)
     print("ZINC22: {}, ZINC20: {}, Discarded: {}".format(len(zinc22), len(zinc20), len(discarded)))
