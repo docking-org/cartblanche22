@@ -28,17 +28,15 @@ RUN apt-get install -y rabbitmq-server
 
 COPY --from=frontend /app/build ../build
 ADD backend ./
-ADD backend/boot-test.sh backend/boot.sh backend/test-api.sh ./
+ADD backend/boot-test.sh backend/boot.sh ./
 
 ARG BOOT_SCRIPT=$BOOT_SCRIPT
 ENV BOOT_SCRIPT=$BOOT_SCRIPT
 
 RUN chmod +x boot.sh
 RUN chmod +x boot-test.sh
-RUN chmod +x test-api.sh
 EXPOSE 5000
 EXPOSE 5555
 
-RUN ./test-api.sh
 
 ENTRYPOINT "./$BOOT_SCRIPT.sh"
