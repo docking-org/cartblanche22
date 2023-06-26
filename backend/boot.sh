@@ -1,5 +1,7 @@
 #!/bin/bash
-  
+
+set -o errexit
+set -o pipefail
 set -m
 
 rabbitmq-server -detached &
