@@ -25,6 +25,7 @@ RUN apt-get update && \
 
 RUN apt-get install -y vim
 RUN apt-get install -y rabbitmq-server
+RUN apt-get install -y redis-server
 
 COPY --from=frontend /app/build ../build
 ADD backend ./
