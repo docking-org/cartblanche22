@@ -1,10 +1,9 @@
-variables:
-  CI_PROJECT_NAME: molecule-shopping-cart
-
 test-api job:
   only:
     - dev
   stage: test
+  tags:
+    - docker-testing
   image: continuumio/miniconda3:latest
   before_script:
     - pwd
@@ -16,6 +15,9 @@ test-api job:
     - pip install -r backend/requirements.txt
   script:
     - pytest backend/tests -v
+
+variables:
+  CI_PROJECT_NAME: molecule-shopping-cart
 
 deploy-dev job:
   only:
