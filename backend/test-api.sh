@@ -1,6 +1,4 @@
-set -o errexit
-set -o pipefail
-set -m
+set -e
 
 rabbitmq-server -detached &
 redis-server &
