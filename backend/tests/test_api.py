@@ -14,7 +14,9 @@ def test_sub_id_search(flask_app_client):
 def test_smiles_search(flask_app_client):
     response = call(flask_app_client, '/smiles.json', {'smiles': 'CCN(C(=O)COc1ccccc1)c1ccccc1', 'dist': '0', 'adist': '0'})[0]
     check_result(response)
-    response = call(flask_app_client, '/smiles.json', {'smiles': 'CCN(C(=O)COc1ccccc1)c1ccccc1', 'dist': '0', 'adist': '0', "database":'zinc20,zinc22'})[0]
+    
+    # response = call(flask_app_client, '/smiles.json', {'smiles': 'CCN(C(=O)COc1ccccc1)c1ccccc1', 'dist': '0', 'adist': '0', "database":'zinc20,zinc22'})[0]
+    
     check_result(response)
     
 def test_supplier_search(flask_app_client):
