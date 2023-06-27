@@ -12,7 +12,8 @@ test-api job:
     - conda activate cartblanche-rdkit-env
     - pip install -r backend/requirements.txt
   script:
-    - bash backend/test-api.sh
+    - cd backend
+    - bash test-api.sh
 variables:
   CI_PROJECT_NAME: molecule-shopping-cart
 
