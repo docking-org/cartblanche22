@@ -7,10 +7,7 @@ test-api job:
   image: continuumio/miniconda3:latest
   before_script:
     - pwd
-    - source ~/miniconda3/etc/profile.d/conda.sh
     - conda create -c rdkit -n cartblanche-rdkit-env rdkit python=3.7 -y
-    - conda init bash
-    - source ~./bashrc
     - conda activate cartblanche-rdkit-env
     - pip install -r backend/requirements.txt
   script:
