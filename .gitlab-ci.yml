@@ -8,7 +8,7 @@ test-api job:
   only:
     - dev
   stage: test
-  image: continuumio/anaconda3:latest
+  image: "continuumio/anaconda3:latest"
   before_script:
     - conda create -c rdkit -n cartblanche-rdkit-env rdkit python=3.7 -y
     - conda activate cartblanche-rdkit-env
