@@ -20,7 +20,10 @@ test-api job:
     - export CELERY_RESULT_BACKEND=redis://n-9-22:6379/0
   script:
     - cd backend
-    - bash test-api.sh
+    - rabbitmq-server -detached
+    - redis-server --daemonize yes
+    - celery -A cartblanche.run_celery.celery worker -P eventlet -l INFO -n worker --detach
+    - pytest tests
 variables:
   CI_PROJECT_NAME: molecule-shopping-cart
 
