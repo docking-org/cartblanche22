@@ -17,6 +17,7 @@ test-api job:
     - source ~/.bashrc
     - conda activate cartblanche-rdkit-env
     - pip install -r backend/requirements.txt
+    - export CELERY_RESULT_BACKEND=redis://n-9-22:6379/0
   script:
     - cd backend
     - bash test-api.sh
