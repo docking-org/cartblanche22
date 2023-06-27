@@ -4,6 +4,16 @@ variables:
 services:
   - redis:latest
 
+test-api job:
+  only:
+    - dev
+  state: test
+  image: python:3.7
+  before_script:
+    - pip install -r backend/requirements.txt
+  script:
+    - pytest backend/tests -v
+
 deploy-dev job:
   only:
     - dev
