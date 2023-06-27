@@ -8,9 +8,12 @@ test-api job:
   only:
     - dev
   stage: test
-  image: anaconda3:latest
+  image: continuumio/anaconda3:latest
   before_script:
+    - apt-get update
     - conda create -c rdkit -n cartblanche-rdkit-env rdkit python=3.7 -y
+    - conda init bash
+    - source ~./bashrc
     - conda activate cartblanche-rdkit-env
     - pip install -r backend/requirements.txt
   script:
