@@ -32,17 +32,17 @@ def saveResult(
         print(result)
         result = result['zinc22'] + (result['zinc20'] if result.get('zinc20') else [])
 
-        for mol in result:
-            best_catalog = None
-            #find the best catalog, by shipping time, which is formatted as 'x weeks', so like 6 weeks. split on space, take the first element, convert to int, and sort
-            for i in mol['catalogs']:
-                if not best_catalog:
-                    best_catalog = i
-                else:
-                    if i.get('price') and best_catalog.get('price'):
-                        if int(i['price']) < int(best_catalog['price']):
-                            best_catalog = i
-            mol['catalogs'] = best_catalog
+        # for mol in result:
+        #     best_catalog = None
+        #     #find the best catalog, by shipping time, which is formatted as 'x weeks', so like 6 weeks. split on space, take the first element, convert to int, and sort
+        #     for i in mol['catalogs']:
+        #         if not best_catalog:
+        #             best_catalog = i
+        #         else:
+        #             if i.get('price') and best_catalog.get('price'):
+        #                 if int(i['price']) < int(best_catalog['price']):
+        #                     best_catalog = i
+        #     mol['catalogs'] = best_catalog
 
         
         #return file to download
