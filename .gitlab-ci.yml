@@ -55,7 +55,6 @@ deploy-live job:
     - redis:latest
   tags:
     - cartblanche22
-    - n-9-22
   script:
     - sudo docker image prune -a -f
     - docker build --build-arg BOOT_SCRIPT=boot
