@@ -75,12 +75,6 @@ export default function SmilesSearch(props) {
                             <option value="2" id="dist-2">
                                 2
                             </option>
-                            <option value="3" id="dist-3">
-                                3
-                            </option>
-                            <option value="4" id="dist-4">
-                                4
-                            </option>
                         </select>
                         &nbsp;
                         <label for="adistformat">anon dist:</label>
@@ -93,12 +87,6 @@ export default function SmilesSearch(props) {
                             </option>
                             <option value="2" id="adist-2">
                                 2
-                            </option>
-                            <option value="3" id="adist-3">
-                                3
-                            </option>
-                            <option value="4" id="adist-4">
-                                4
                             </option>
                         </select>
                         <br></br>

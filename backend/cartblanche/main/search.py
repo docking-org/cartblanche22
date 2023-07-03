@@ -56,8 +56,10 @@ def getResult(task):
     #wrapper contains {task:task, submission:submission}
     inucsf = request.access_route[-1][0:3] == '10.' or  request.access_route[-1][0:8] == '169.230.' or request.access_route[-1][0:8] == '128.218.' or request.access_route[0] == '127.0.0.1'
     wrapper = AsyncResult(task)
-
-    task_info = wrapper.get()
+    try:
+        task_info = wrapper.get(timeout=60)
+    except:
+        return {'progress':0, 'result':[], 'status':wrapper.status}
     
     task = task_info['id']
     submission = task_info['submission'] if inucsf else None
@@ -226,8 +228,8 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
 
     submission = ids
     ids = '\n'.join(ids)
-    dist = '4' if int(dist) > 4 else dist
-    adist = '4' if int(dist) > 4 else adist
+    dist = '2' if int(dist) > 2 else dist
+    adist = '2' if int(dist) > 2 else adist
 
     # zinc22 = True if request.form.get('zinc22') else False    
     # zinc20 = True if request.form.get('zinc20') else False
