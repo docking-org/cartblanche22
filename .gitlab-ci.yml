@@ -56,7 +56,7 @@ deploy-live job:
   tags:
     - cartblanche22
   script:
-    - sudo docker image prune -a -f
+    - docker image prune -a -f
     - docker build --build-arg BOOT_SCRIPT=boot
       -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
     - docker stop ${CI_PROJECT_NAME} || true
