@@ -83,22 +83,29 @@ export default function TrancheBrowser(props) {
                 if (activeCharges.length !== 0) {
                     if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
                         tranche['chosen'] = true;
-                        t.push(tranche);
+
                     }
                 }
                 else if (charges.length === 0) {
                     tranche['chosen'] = true;
-                    t.push(tranche);
+
                 } else {
                     tranche['chosen'] = false;
-                }
 
+                }
+                if ((activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) || charges.length === 0) {
+                    t.push(tranche);
+                }
             });
+
             setActiveSubset("all")
         }
         else if (subset === "none") {
             tranches.map(tranche => {
                 tranche['chosen'] = false;
+                if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation']) || charges.length === 0) {
+                    t.push(tranche);
+                }
             });
             setActiveSubset("none");
         }
@@ -121,18 +128,25 @@ export default function TrancheBrowser(props) {
                     if (activeCharges.length !== 0) {
                         if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation'])) {
                             tranche['chosen'] = true;
-                            t.push(tranche);
+
                         }
                     }
                     else if (charges.length === 0) {
                         tranche['chosen'] = true;
-                        t.push(tranche);
+
                     } else {
                         tranche['chosen'] = false;
+
+                    }
+                    if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation']) || charges.length === 0) {
+                        t.push(tranche);
                     }
                 }
                 else {
                     tranche['chosen'] = false;
+                    if (activeCharges.includes(tranche['charge']) && activeGenerations.includes(tranche['generation']) || charges.length === 0) {
+                        t.push(tranche);
+                    }
                 }
 
             });

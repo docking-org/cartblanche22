@@ -353,7 +353,7 @@ const TrancheTable = forwardRef((props, ref) => {
                             {
                                 colSums.map((col, index) => {
                                     return (
-                                        <th className="cell-th v-guide"
+                                        <th className="cell-th v-guide col-sum"
                                             key={index + "-5"}
                                         >
 

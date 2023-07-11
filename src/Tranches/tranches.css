@@ -46,10 +46,8 @@ table {
 
 }
 
-.last-col {
-    border: 2px solid #ccc; 
 
-}
+
 
 th {
     padding: 0.5em;
@@ -139,8 +137,7 @@ tfoot th {
     background: white;
     color: black;
 
-
-    box-shadow: 0 0 0 .5px black inset;
+    box-shadow: 0 0 0 .2px black inset !important;
 }
 
 tfoot th:first-child {
