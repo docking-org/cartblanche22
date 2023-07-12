@@ -50,7 +50,6 @@ deploy-dev job:
 test-api job:
   stage: test
   tags:
-    - cartblanche22
     - docker-testing
   image: continuumio/miniconda3:latest
   cache:
