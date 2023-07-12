@@ -206,11 +206,12 @@ export default function TrancheBrowser(props) {
 
     return (
         <Container fluid
-            className='mt-1'
+            className='mt-1 page-wrapper'
+            
         >
             {
                 !tranches &&
-                <div className="d-flex mt-5 justify-content-center">
+                <div className="d-flex mt-5 justify-content-center h-100">
                     <div className="spinner-border" role="status">
                         <span className="sr-only">Loading...</span>
                     </div>

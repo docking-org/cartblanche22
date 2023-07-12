@@ -1,5 +1,10 @@
 .App {
   text-align: center;
+  
+}
+
+.page-wrapper{
+  min-height: 86vh;
 }
 
 .App-logo {
@@ -35,4 +40,22 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.footer{
+  bottom: 0;
+  width: 100%;
+  padding: .3rem;
+  color: gray;
+  
+}
+
+.footer a{
+  color: gray;
+  text-decoration: none;
+}
+
+.footer a:hover{
+  color: white;
+  text-decoration: none;
 }

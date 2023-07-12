@@ -25,6 +25,8 @@ import SW from './Similarity/SW';
 import Arthor from './Substructure/Arthor';
 import Substance404 from './Errors/Substance404';
 import Error404 from './Errors/Error404';
+import Footer from './Footer';
+import Acknowledgements from './Acknowledgements';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -113,6 +115,10 @@ const router = createBrowserRouter([
     />,
   },
   {
+    path: "/acknowledgements",
+    element: <Acknowledgements />,
+  },
+  {
     path: "/404",
     element: <Substance404 
       title="404 - Cartblanche22"
@@ -131,7 +137,8 @@ const router = createBrowserRouter([
 root.render(
   <div>
     <Navigation />
-    <RouterProvider router={router} />
+    <RouterProvider router={router}/>
+    <Footer></Footer>
   </div>
 
 );
