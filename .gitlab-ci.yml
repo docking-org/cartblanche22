@@ -47,6 +47,35 @@ deploy-dev job:
       --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
 
 
+test-api job:
+  stage: test
+  tags:
+    - cartblanche22
+    - docker-testing
+  image: continuumio/miniconda3:latest
+  cache:
+    paths:
+      - .cache/pip
+  before_script:
+    - apt-get update 
+    - apt-get install -y openjdk-11-jre-headless 
+    - apt-get clean
+    - apt-get install -y vim
+    - apt-get install -y rabbitmq-server
+    - apt-get install -y redis-server
+    - conda create -c rdkit -n cartblanche-rdkit-env rdkit python=3.7 -y
+    - conda init bash
+    - source ~/.bashrc
+    - conda activate cartblanche-rdkit-env
+    - pip install -r backend/requirements.txt
+    - export CELERY_RESULT_BACKEND=redis://n-9-22:6379/0
+  script:
+    - cd backend
+    - rabbitmq-server -detached
+    - redis-server --daemonize yes
+    - celery -A cartblanche.run_celery.celery worker -P eventlet -l INFO -n worker --detach
+    - pytest tests
+
 deploy-live job:
   only:
     - master
@@ -56,7 +85,6 @@ deploy-live job:
   tags:
     - cartblanche22
   script:
-    - docker image prune -a -f
     - docker build --build-arg BOOT_SCRIPT=boot
       -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
     - docker stop ${CI_PROJECT_NAME} || true
