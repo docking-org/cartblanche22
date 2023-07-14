@@ -149,7 +149,7 @@ export default function Results(props) {
                     submission={submission}
                 />}
             {!noResults &&
-                <Container className="my-2" fluid>
+                <Container className="my-2 page-wrapper" fluid>
 
                     {progress > 0 && progress < 100 &&
                         !results.zinc22 && !results.zinc20 &&
