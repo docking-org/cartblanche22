@@ -3,7 +3,7 @@ import re
 import os
 import tempfile
 from celery import current_task
-from celery.result import AsyncResult
+from celery.result import AsyncResult, allow_join_result
 from cartblanche import celery
 from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults
 from config import Config
@@ -21,11 +21,11 @@ def filter_sw_results(ids, role, task_id_progress):
 
     task = start_search_task.s(task, ids, mergeResults.s(), task_id_progress=task_id_progress)
     task = task.apply_async()
-    
-    res = task.get()['id']
+    with allow_join_result():
+        res = task.get()['id']
   
-    res = AsyncResult(res).get()
-    return res
+        res = AsyncResult(res).get()
+        return res
 
 @celery.task
 def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):     
