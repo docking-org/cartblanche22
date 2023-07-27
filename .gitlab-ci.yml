@@ -49,7 +49,7 @@ variables:
 
 build:
   tags:
-    - docker-testing
+    - docker-build
   stage: build
   script:
     - docker login gitlab.docking.org:5050 -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS} 
