@@ -1,6 +1,9 @@
 variables:
   CI_PROJECT_NAME: cartblanche22
 
+services:
+  - name: docker:dind
+    command: ["--insecure-registry=gitlab.docking.org"]
 # services:
 #   - redis:latest
 
@@ -52,15 +55,15 @@ build:
     - docker-build
   stage: build
   script:
-    - docker login n-9-22:5050 -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS} 
-    - docker build -t n-9-22:5050/mar/cartblanche22 .
-    - docker push n-9-22:5050/mar/cartblanche22
+    - docker login gitlab.docking.org:5050 -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS} 
+    - docker build -t gitlab.docking.org:5050/mar/cartblanche22 .
+    - docker push gitlab.docking.org:5050/mar/cartblanche22
 
 test-api job:
   stage: test
   tags:
     - docker-testing
-  image: n-9-22:5050/mar/cartblanche22
+  image: gitlab.docking.org:5050/mar/cartblanche22
   script:
     - conda init bash
     - source ~/.bashrc
@@ -111,7 +114,7 @@ deploy-live job:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 n-9-22:5050/mar/cartblanche22
+      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 gitlab.docking.org:5050/mar/cartblanche22
 
 # deploy-backup job:
 #   only:
