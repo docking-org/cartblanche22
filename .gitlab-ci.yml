@@ -1,74 +1,72 @@
 variables:
-  CI_PROJECT_NAME: molecule-shopping-cart
+  CI_PROJECT_NAME: cartblanche22
 
-services:
-  - redis:latest
+# services:
+#   - redis:latest
 
-deploy-dev job:
-  only:
-    - dev
-  stage: deploy
-  services:
-    - redis:latest
+# deploy-dev job:
+#   only:
+#     - dev
+#   stage: deploy
+#   services:
+#     - redis:latest
+#   tags:
+#     - cartblanche-dev
+#   script:
+#     - docker image prune -a -f
+#     - docker build --build-arg BOOT_SCRIPT=boot-test
+#       -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
+#     - docker stop ${CI_PROJECT_NAME} || true
+#     - docker rm ${CI_PROJECT_NAME} || true
+#     - docker stop redis || true
+#     - docker rm redis || true
+#     - docker run -d --restart unless-stopped -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+#       -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
+#       -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
+#       -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
+#       -v ${SMALLWORLD_PUBLIC_MAP_PATH}:${SMALLWORLD_PUBLIC_MAP_PATH}
+#       -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
+#       -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
+#       -e SWDIR=${SWDIR}
+#       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
+#       -e CELERY_RESULT_BACKEND=redis://n-9-22:6379/0
+#       -e COMMON_DATABASE=${COMMON_DATABASE}
+#       -e MAIL_PASSWORD=${MAIL_PASSWORD}
+#       -e MAIL_SERVER=${MAIL_SERVER}
+#       -e MAIL_USERNAME=${MAIL_USERNAME}
+#       -e SECRET_KEY=${SECRET_KEY}
+#       -e TIN_DATABASE=${TIN_DATABASE}
+#       -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER}
+#       -e ZINC22_DATABASE=${ZINC22_DATABASE}
+#       -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
+#       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+#       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
+#       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
+#       -e SMALLWORLD_PUBLIC_MAP_PATH=${SMALLWORLD_PUBLIC_MAP_PATH}
+#       -e ZINC20_DATABASE=${ZINC20_DATABASE}
+#       --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+
+
+build:
   tags:
-    - cartblanche-dev
+    - docker-testing
+  stage: build
   script:
-    - docker image prune -a -f
-    - docker build --build-arg BOOT_SCRIPT=boot-test
-      -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
-    - docker stop ${CI_PROJECT_NAME} || true
-    - docker rm ${CI_PROJECT_NAME} || true
-    - docker stop redis || true
-    - docker rm redis || true
-    - docker run -d --restart unless-stopped -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
-      -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
-      -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
-      -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-      -v ${SMALLWORLD_PUBLIC_MAP_PATH}:${SMALLWORLD_PUBLIC_MAP_PATH}
-      -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
-      -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
-      -e SWDIR=${SWDIR}
-      -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      -e CELERY_RESULT_BACKEND=redis://n-9-22:6379/0
-      -e COMMON_DATABASE=${COMMON_DATABASE}
-      -e MAIL_PASSWORD=${MAIL_PASSWORD}
-      -e MAIL_SERVER=${MAIL_SERVER}
-      -e MAIL_USERNAME=${MAIL_USERNAME}
-      -e SECRET_KEY=${SECRET_KEY}
-      -e TIN_DATABASE=${TIN_DATABASE}
-      -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER}
-      -e ZINC22_DATABASE=${ZINC22_DATABASE}
-      -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
-      -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      -e SMALLWORLD_PUBLIC_MAP_PATH=${SMALLWORLD_PUBLIC_MAP_PATH}
-      -e ZINC20_DATABASE=${ZINC20_DATABASE}
-      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
-
+    - docker login gitlab.docking.org:5050 -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS} 
+    - docker build -t gitlab.docking.org:5050/mar/cartblanche22 .
+    - docker push gitlab.docking.org:5050/mar/cartblanche22
 
 test-api job:
   stage: test
   tags:
     - docker-testing
-  image: continuumio/miniconda3:latest
-  cache:
-    paths:
-      - .cache/pip
-  before_script:
-    - apt-get update 
-    - apt-get install -y openjdk-11-jre-headless 
-    - apt-get clean
-    - apt-get install -y vim
-    - apt-get install -y rabbitmq-server
-    - apt-get install -y redis-server
-    - conda create -c rdkit -n cartblanche-rdkit-env rdkit python=3.7 -y
+  image: gitlab.docking.org:5050/mar/cartblanche22
+  script:
     - conda init bash
     - source ~/.bashrc
     - conda activate cartblanche-rdkit-env
     - pip install -r backend/requirements.txt
     - export CELERY_RESULT_BACKEND=redis://n-9-22:6379/0
-  script:
     - cd backend
     - rabbitmq-server -detached
     - redis-server --daemonize yes
@@ -84,8 +82,6 @@ deploy-live job:
   tags:
     - cartblanche22
   script:
-    - docker build --build-arg BOOT_SCRIPT=boot
-      -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}" .
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -115,7 +111,7 @@ deploy-live job:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-0.1.${CI_JOB_ID}
+      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 gitlab.docking.org:5050/mar/cartblanche22
 
 # deploy-backup job:
 #   only:
