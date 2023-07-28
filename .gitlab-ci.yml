@@ -64,8 +64,6 @@ test-api job:
     name: ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     entrypoint: [""]
   script:
-    - conda init bash
-    - source ~/.bashrc
     - conda activate cartblanche-rdkit-env
     - cd backend
     - pytest tests
