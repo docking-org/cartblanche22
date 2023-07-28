@@ -27,9 +27,9 @@ class Config(object):
         SMALLWORLD_PUBLIC_MAP_PATH = os.getenv("SMALLWORLD_PUBLIC_MAP_PATH")
         SMALLWORLD_MAP_PATH = os.getenv("SMALLWORLD_MAP_PATH")
         SWDIR = os.getenv("SWDIR")
-       
+
         CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
-        CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND') or 'redis://0.0.0.0:6379/0'
+        CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
         SQLALCHEMY_BINDS = {
