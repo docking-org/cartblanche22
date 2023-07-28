@@ -67,6 +67,7 @@ test-api job:
     - eval "$(conda shell.bash hook)"
     - conda activate cartblanche-rdkit-env
     - echo ${CELERY_RESULT_BACKEND}
+    - ping 10.20.1.18
   script:
     - cd backend
     - rabbitmq-server -detached
