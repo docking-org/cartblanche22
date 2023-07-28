@@ -70,7 +70,7 @@ test-api job:
   script:
     - cd backend
     - rabbitmq-server -detached
-    - celery -A cartblanche.run_celery.celery worker -P eventlet -l INFO -n worker --detach
+    - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 --detach
     - pytest tests
 
 deploy-live job:
