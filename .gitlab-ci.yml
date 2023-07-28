@@ -66,11 +66,10 @@ test-api job:
   before_script:
     - eval "$(conda shell.bash hook)"
     - conda activate cartblanche-rdkit-env
-    - echo ${CELERY_RESULT_BACKEND}
+    - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 &
+    - rabbitmq-server -detached
   script:
     - cd backend
-    - rabbitmq-server -detached
-    - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 --detach
     - pytest tests
 
 deploy-live job:
