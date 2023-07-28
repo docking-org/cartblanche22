@@ -62,15 +62,9 @@ test-api job:
     - docker-testing
   image: ${GITLAB_REGISTRY_URL}/mar/cartblanche22
   script:
-    - conda init bash
     - source ~/.bashrc
     - conda activate cartblanche-rdkit-env
-    - pip install -r backend/requirements.txt
-    - export CELERY_RESULT_BACKEND=redis://n-9-22:6379/0
     - cd backend
-    - rabbitmq-server -detached
-    - redis-server --daemonize yes
-    - celery -A cartblanche.run_celery.celery worker -P eventlet -l INFO -n worker --detach
     - pytest tests
 
 deploy-live job:
