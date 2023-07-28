@@ -60,8 +60,9 @@ test-api job:
   stage: test
   tags:
     - docker-testing
-  image: ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-  entrypoint: [""]
+  image: 
+    name: ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    entrypoint: [""]
   script:
     - echo "here!"
     - source ~/.bashrc
