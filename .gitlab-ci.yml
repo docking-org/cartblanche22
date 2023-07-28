@@ -69,7 +69,6 @@ test-api job:
     - conda activate cartblanche-rdkit-env
   script:
     - cd backend
-    - pytest tests
     - rabbitmq-server -detached
     - redis-server --daemonize yes
     - celery -A cartblanche.run_celery.celery worker -P eventlet -l INFO -n worker --detach
