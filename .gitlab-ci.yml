@@ -70,7 +70,6 @@ test-api job:
   script:
     - cd backend
     - rabbitmq-server -detached
-    - redis-server --daemonize yes
     - celery -A cartblanche.run_celery.celery worker -P eventlet -l INFO -n worker --detach
     - pytest tests
 
