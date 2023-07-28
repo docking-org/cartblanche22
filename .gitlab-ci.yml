@@ -66,10 +66,11 @@ test-api job:
   before_script:
     - eval "$(conda shell.bash hook)"
     - conda activate cartblanche-rdkit-env
-    - cd backend
-    - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 &
-    - rabbitmq-server -detached
+    - echo ${CELERY_RESULT_BACKEND}
   script:
+    - cd backend
+    - rabbitmq-server -detached
+    - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 --detach
     - pytest tests
 
 deploy-live job:
@@ -85,7 +86,7 @@ deploy-live job:
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
     - docker rm redis || true
-    - docker run -d --restart unless-stopped -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+    - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
       -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
       -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
       -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
@@ -109,4 +110,4 @@ deploy-live job:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      --name ${CI_PROJECT_NAME} -d -p 0.0.0.0:5068:5000 -p 0.0.0.0:5555:5555 ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+      --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
