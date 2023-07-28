@@ -73,14 +73,14 @@ test-api job:
     - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 --detach
     - pytest tests
 
-deploy-live job:
+deploy epyc2:
   only:
     - master
   stage: deploy
   services:
     - redis:latest
   tags:
-    - cartblanche22
+    - cartblanche22-epyc2
   script:
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
@@ -111,3 +111,44 @@ deploy-live job:
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+
+
+deploy n-9-38:
+  only:
+    - master
+  stage: deploy
+  services:
+    - redis:latest
+  tags:
+    - cartblanche22-n-9-38
+  script:
+    - docker stop ${CI_PROJECT_NAME} || true
+    - docker rm ${CI_PROJECT_NAME} || true
+    - docker stop redis || true
+    - docker rm redis || true
+    - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+      -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
+      -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
+      -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
+      -v ${SMALLWORLD_PUBLIC_MAP_PATH}:${SMALLWORLD_PUBLIC_MAP_PATH}
+      -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
+      -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
+      -e SWDIR=${SWDIR}
+      -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      -e COMMON_DATABASE=${COMMON_DATABASE}
+      -e MAIL_PASSWORD=${MAIL_PASSWORD}
+      -e SMALLWORLD_PUBLIC_MAP_PATH=${SMALLWORLD_PUBLIC_MAP_PATH}
+      -e ZINC20_DATABASE=${ZINC20_DATABASE}
+      -e MAIL_SERVER=${MAIL_SERVER}
+      -e MAIL_USERNAME=${MAIL_USERNAME}
+      -e SECRET_KEY=${SECRET_KEY}
+      -e TIN_DATABASE=${TIN_DATABASE}
+      -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER}
+      -e ZINC22_DATABASE=${ZINC22_DATABASE}
+      -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
+      -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
+      --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+
