@@ -37,6 +37,7 @@ deploy epyc2:
     - cartblanche22-epyc2
   script:
     - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
+    - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -78,6 +79,7 @@ deploy n-9-38:
     - cartblanche22-n-9-38
   script:
     - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
+    - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -118,6 +120,7 @@ deploy n-1-18:
     - cartblanche22-n-1-18
   script:
     - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
+    - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
