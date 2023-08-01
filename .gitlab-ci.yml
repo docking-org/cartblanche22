@@ -10,7 +10,7 @@ build:
     - docker build -t ${GITLAB_REGISTRY_URL}/mar/cartblanche22 .
     - docker push ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
-test-api job:
+test api:
   stage: test
   tags:
     - docker-testing
