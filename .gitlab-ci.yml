@@ -108,14 +108,14 @@ deploy n-9-38:
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
-deploy n-9-34:
+deploy n-1-18:
   only:
     - master
   stage: deploy
   services:
     - redis:latest
   tags:
-    - cartblanche22-n-9-34
+    - cartblanche22-n-1-18
   script:
     - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     - docker stop ${CI_PROJECT_NAME} || true
