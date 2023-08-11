@@ -28,7 +28,8 @@ def filter_sw_results(ids, role, task_id_progress):
         return res
 
 @celery.task
-def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):     
+def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):   
+      
     current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
    
     result = []
