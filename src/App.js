@@ -87,10 +87,10 @@ function App() {
                 </li>
 
                 <li>
-                  <a href="/sw">Search for similar molecules using Smallworld</a>
+                  <a href="/similarity/sw">Search for similar molecules using Smallworld</a>
                 </li>
                 <li>
-                  <a href="/arthor">Search by Substructure or SMARTS using Arthor</a>
+                  <a href="/patterns/arthor">Search by Substructure or SMARTS using Arthor</a>
                 </li>
                 <li>
                   <a href="/search/zincid">Lookup molecules by ZINC ID</a>
