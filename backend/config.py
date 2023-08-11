@@ -32,9 +32,9 @@ class Config(object):
         CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+        BASE_URL = "https://cartblanche22.docking.org"
         SQLALCHEMY_BINDS = {
             # Server Database
-
             'zinc22_common': os.getenv('COMMON_DATABASE'),
             'zinc22': os.getenv('ZINC22_DATABASE'),
             'tin': os.getenv('TIN_DATABASE'),
