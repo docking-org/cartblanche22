@@ -1,0 +1,14 @@
+Dear administrator,
+
+ZINC SEARCH FAILURE LOG
+
+{% for dict_item in data %}
+    {% for k, v in dict_item.items() %}
+        <b>{{ k }}</b>: {{ v }}<br>
+    {% endfor %}
+    ----------------------------------<br><br>
+{% endfor %}
+
+Sincerely,
+
+The Cartblanche Team
