@@ -10,9 +10,13 @@ import './search.css';
 import { saveAs } from "file-saver";
 import Cart from "../Cart/Cart";
 import { useRef } from "react";
-
+import axiosRetry from 'axios-retry';
 import NoResults from "../Errors/NoResults";
+
 export default function Results(props) {
+    
+    axiosRetry(axios, { retries: 3, shouldResetTimeout: true, retryCondition: () => true });    
+
     const childRef = useRef();
     const { getCart, addToCart, removeFromCart, cartSize, inCart } = Cart();
     const [results, setResults] = React.useState([]);
@@ -32,6 +36,7 @@ export default function Results(props) {
         axios({
             method: "get",
             url: "/search/result/" + task + "." + format,
+      
         })
             .then(response => {
                 var blob = new Blob([response.data], { type: "text/plain;charset=utf-8" });
@@ -43,6 +48,7 @@ export default function Results(props) {
         axios({
             method: "get",
             url: "/search/result/" + window.location.search.split("=")[1],
+            timeout: 2000
         })
             .then(response => {
                 if (response.data.status === "SUCCESS") {
@@ -71,11 +77,13 @@ export default function Results(props) {
                     else {
                         setProgress(Math.round(response.data.progress * 100, 2));
                     }
-
+ 
                     setTimeout(getResult, 500);
                 }
 
-            })
+            }).catch(error =>
+                window.location.reload(true)
+            );
     }
 
     function allInCart(func = null) {

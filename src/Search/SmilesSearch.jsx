@@ -9,7 +9,9 @@ export default function SmilesSearch(props) {
     //use text box value by default
     const [input, setInput] = React.useState("");
     const { token } = useToken();
-
+    const[zinc20, setZinc20] = React.useState(false);
+    const[zinc22, setZinc22] = React.useState(true);
+    
     useEffect(() => {
         document.title = props.title || "";
     }, [props.title]);
@@ -19,13 +21,16 @@ export default function SmilesSearch(props) {
         bodyFormData.append('smiles', input);
         bodyFormData.append('dist', document.getElementById("distformat").value);
         bodyFormData.append('adist', document.getElementById("adistformat").value);
-        if (document.getElementById("zinc22").checked) {
-            bodyFormData.append('zinc22', document.getElementById("zinc22").value);
+        let databases = [];
+        if (zinc20){
+            databases.push("zinc20");
         }
-        if (document.getElementById("zinc20").checked) {
-            bodyFormData.append('zinc20', document.getElementById("zinc20").value);
+        if (zinc22){
+            databases.push("zinc22");
         }
+        bodyFormData.append('database', databases.join(","));
 
+        
         var file = document.getElementById("smilesfile").files[0];
         if (file) {
             bodyFormData.append('smiles', file);
@@ -92,10 +97,14 @@ export default function SmilesSearch(props) {
                         <br></br>
                         Search Database
                         <br></br>
-                        <input type={'checkbox'} id={'zinc22'} name={'zinc22'} value={'true'} defaultChecked={"true"} />
+                        <input type={'checkbox'} id={'zinc22'} name={'zinc22'} value={zinc22} defaultChecked={zinc22}
+                            onClick={() => setZinc22(!zinc22)}
+                        ></input>
                         &nbsp;<label for={'zinc22'}>ZINC22</label>
                         <br></br>
-                        <input type={'checkbox'} id={'zinc20'} name={'zinc20'} value={'false'} />
+                        <input type={'checkbox'} id={'zinc20'} name={'zinc20'} value={zinc20} defaultChecked={zinc20}
+                            onClick={() => setZinc20(!zinc20)}
+                        />
                         &nbsp;<label for={'zinc20'}>ZINC20 For Sale</label>
                         <br></br>
                         <br />

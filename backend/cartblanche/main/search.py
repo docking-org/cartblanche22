@@ -200,6 +200,8 @@ def search_catitems(ids=[], data = None, format = 'json', file = None):
 
 @search_bp.route('/smiles.<format>', methods=["GET","POST"])
 def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, dist=0):
+    zinc20 = False
+    zinc22 = False
     ids = []
     if 'smiles' in request.files:
         file = request.files['smiles'].read().decode()
@@ -231,16 +233,13 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
     dist = '2' if int(dist) > 2 else dist
     adist = '2' if int(dist) > 2 else adist
 
-    # zinc22 = True if request.form.get('zinc22') else False    
-    # zinc20 = True if request.form.get('zinc20') else False
     if len(ids) == 0:
         return "No Valid SMILES, please try again", 400
 
     #this task id is used to track the progress of the search, between the sw search and the zinc22 search. need to add zinc20 search progress
     task_id_progress = uuid.uuid4()
-
     
-    
+    # sw search => filter results => zinc22/20 search
     task = [sw_search.s(ids, dist, adist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
     
     task = start_search_task.delay(task, submission, task_id_progress=task_id_progress)

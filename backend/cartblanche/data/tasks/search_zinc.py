@@ -60,7 +60,8 @@ def formatZincID(sub_id):
     return 'ZINC' + str(sub_id).zfill(12)
         
 @celery.task
-def zinc20search(zinc20):
+def zinc20search(zinc20, matched_smiles=None):
+
     if len(zinc20) == 0:
         return []
     fixed = []
@@ -87,6 +88,8 @@ def zinc20search(zinc20):
         if i[0] not in result:
 
             result[i[0]] = {}
+            if matched_smiles and matched_smiles.get(formatZincID(i[0])):
+                result[i[0]]['matched_smiles'] = matched_smiles[formatZincID(i[0])]
             result[i[0]]['smiles'] = smiles
             result[i[0]]['tranche_details'] = {
                 'heavy_atoms': mol.GetNumHeavyAtoms(),
@@ -303,7 +306,7 @@ def vendorSearch(vendor_ids, role='public'):
     
     
 @celery.task
-def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True):
+def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True, matched_smiles=None):
     
     t_start = time.time()
     logs = []
@@ -434,7 +437,11 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
         for line in output_file.readlines():
             try:
                 for line in json.loads(line):
+                    if line.get('zinc_id') and matched_smiles:
+                        line['matched_smiles'] = matched_smiles[line['zinc_id']]                        
+                    print(line)
                     result.append(line)
+
             except:
                 continue
 
