@@ -15,7 +15,7 @@ from cartblanche.data.tasks.search_zinc import zinc20search
 def filter_sw_results(ids, role, task_id_progress):
     matched_smiles = ids
     print(ids)
-    ids = ids.keys()
+    ids = list(ids.keys())
 
     zinc22, zinc20, discarded = filter_zinc_ids(ids)
     
