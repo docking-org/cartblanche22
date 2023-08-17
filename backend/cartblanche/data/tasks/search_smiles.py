@@ -57,16 +57,17 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
                     #grep from =[0-{dist}]
                     "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)])
 
-         
+    done = 0
     for process in processes:
         smile = process[0]
 
         out, err = process[1].communicate()
-        
+   
         for line in out.decode().split('\n'):
             if 'ZINC' in line:
                 result.append(line + ' ' + smile)
-
+        done +=1 
+        current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':len(processes)/done, 'projected':len(processes), 'time_elapsed':0})
     hits = {}
     for line in result:
         row = line.split(' ')

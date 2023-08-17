@@ -14,8 +14,8 @@ import axiosRetry from 'axios-retry';
 import NoResults from "../Errors/NoResults";
 
 export default function Results(props) {
-    
-    axiosRetry(axios, { retries: 3, shouldResetTimeout: true, retryCondition: () => true });    
+
+    axiosRetry(axios, { retries: 3, shouldResetTimeout: true, retryCondition: () => true });
 
     const childRef = useRef();
     const { getCart, addToCart, removeFromCart, cartSize, inCart } = Cart();
@@ -36,7 +36,7 @@ export default function Results(props) {
         axios({
             method: "get",
             url: "/search/result/" + task + "." + format,
-      
+
         })
             .then(response => {
                 var blob = new Blob([response.data], { type: "text/plain;charset=utf-8" });
@@ -70,14 +70,16 @@ export default function Results(props) {
                     setInUCSF(response.data.inUCSF);
                 }
                 else {
-
-                    if (response.data.progress * 100 < 1) {
+                    if (response.data.status === "PENDING") {
+                        setProgress(-1);
+                    }
+                    else if (response.data.progress * 100 < 1 ) {
                         setProgress(100);
                     }
                     else {
                         setProgress(Math.round(response.data.progress * 100, 2));
                     }
- 
+
                     setTimeout(getResult, 500);
                 }
 
@@ -172,7 +174,7 @@ export default function Results(props) {
 
                     {
 
-                        (progress >= 100 || progress < 5) &&
+                        (progress === 0.0) &&
                         !results.zinc22 && !results.zinc20 &&
                         <div
                             style={{ 'marginTop': '35vh' }}
@@ -180,6 +182,19 @@ export default function Results(props) {
 
                         >
                             <ProgressBar key="loading" animated now={progress} label={`Searching...`} />
+                        </div>
+                    }
+
+                    {
+
+                        (progress === -1) &&
+                        !results.zinc22 && !results.zinc20 &&
+                        <div
+                            style={{ 'marginTop': '35vh' }}
+                            className="justify-content-center align-items-center"
+
+                        >
+                            <ProgressBar key="loading" animated now={100} label={`Processing Results...`} />
                         </div>
                     }
 
