@@ -22,7 +22,7 @@ import initRDKit from '../utils/initRDKit';
 import { Jsme } from 'jsme-react';
 
 export default function SW(props) {
-
+    
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
         alignment: { name: "alignment", orderable: true, label: "" },
@@ -65,6 +65,8 @@ export default function SW(props) {
 
 
     useEffect(() => {
+        alert("Smallworld is down for maintenance. Please try again later.")
+        
         initRDKit().then((rdKit) => {
             setRDKit(rdKit);
         });

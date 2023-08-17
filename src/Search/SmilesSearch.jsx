@@ -16,6 +16,13 @@ export default function SmilesSearch(props) {
         document.title = props.title || "";
     }, [props.title]);
 
+
+        
+    useEffect(() => {
+        alert("Smallworld is down for maintenance. Please try your search again later.")
+    }, []);
+    
+
     function getMolecules() {
         var bodyFormData = new FormData();
         bodyFormData.append('smiles', input);
@@ -108,7 +115,7 @@ export default function SmilesSearch(props) {
                         &nbsp;<label for={'zinc20'}>ZINC20 For Sale</label>
                         <br></br>
                         <br />
-                        <button id="searchZincBtn2" type="submit" onClick={getMolecules}
+                        <button id="searchZincBtn2" type="submit" onClick={getMolecules} disabled
                             class="btn btn-info m-1">Search</button>
 
                         <button id="testData" onClick={loadTestData}
