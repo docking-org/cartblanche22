@@ -73,9 +73,11 @@ export default function Results(props) {
                     if (response.data.status === "PENDING") {
                         setProgress(-1);
                     }
-                    else if (response.data.progress * 100 < 1 ) {
+
+                    else if (response.data.progress <= 1) {
                         setProgress(100);
                     }
+
                     else {
                         setProgress(Math.round(response.data.progress * 100, 2));
                     }
@@ -173,8 +175,7 @@ export default function Results(props) {
                     }
 
                     {
-
-                        (progress === 0.0) &&
+                        (progress === 100) &&
                         !results.zinc22 && !results.zinc20 &&
                         <div
                             style={{ 'marginTop': '35vh' }}
@@ -186,7 +187,6 @@ export default function Results(props) {
                     }
 
                     {
-
                         (progress === -1) &&
                         !results.zinc22 && !results.zinc20 &&
                         <div
@@ -197,6 +197,7 @@ export default function Results(props) {
                             <ProgressBar key="loading" animated now={100} label={`Processing Results...`} />
                         </div>
                     }
+
 
                     <Card>
 
