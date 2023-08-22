@@ -109,13 +109,13 @@ const ResultsTable = forwardRef((props, ref) => {
             index++;
         });
         if (props.sliderValues && props.sliderValues.length > 0) {
-            props.sliderValues.map((slider, index) => {
 
+            props.sliderValues.map((slider, index) => {
                 url += `&${encodeURIComponent(`columns[${index}][data]`)}=${index}`;
                 url += `&${encodeURIComponent(`columns[${index}][name]`)}=${slider.name}`;
                 url += `&${encodeURIComponent(`columns[${index}][min]`)}=${slider.min}`;
                 url += `&${encodeURIComponent(`columns[${index}][searchable]`)}=true`;
-                url += `&${encodeURIComponent(`columns[${index}][search][value]`)}=${slider.min}-${slider.value[1]}`;
+                url += `&${encodeURIComponent(`columns[${index}][search][value]`)}=${slider.value[0]}-${slider.value[1]}`;
                 url += `&${encodeURIComponent(`columns[${index}][search][regex]`)}=false`;
                 index++;
             });

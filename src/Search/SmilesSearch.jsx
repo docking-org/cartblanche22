@@ -115,7 +115,7 @@ export default function SmilesSearch(props) {
                         &nbsp;<label for={'zinc20'}>ZINC20 For Sale</label>
                         <br></br>
                         <br />
-                        <button id="searchZincBtn2" type="submit" onClick={getMolecules} disabled
+                        <button id="searchZincBtn2" type="submit" onClick={getMolecules}
                             class="btn btn-info m-1">Search</button>
 
                         <button id="testData" onClick={loadTestData}

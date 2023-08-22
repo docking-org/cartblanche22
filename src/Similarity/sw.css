@@ -4,8 +4,11 @@
 
 
 .css-1eoe787-MuiSlider-markLabel{
-    font-size: 8px !important;
-    top: 20px !important;
+    font-size: 0px !important;
+    top: 0px!important;
+}
+.css-xmer36-MuiSlider-root{
+    color:#739ab5 !important
 }
 
 .css-xmer36-MuiSlider-root{

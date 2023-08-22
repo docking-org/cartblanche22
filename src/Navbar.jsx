@@ -164,7 +164,6 @@ export default function Navigation() {
                                 </OverlayTrigger>
                             </Nav.Item>
                             <Nav.Item>
-
                                 <OverlayTrigger
                                     placement="left"
                                     delay={{ show: 250, hide: 0 }}
@@ -219,6 +218,10 @@ export default function Navigation() {
                                     <i className="fas fa-shopping-cart"></i>
                                 </Nav.Link>
                             </Nav.Item>
+                            <NavDropdown align="end" title="About" id="basic-nav-dropdown">
+                                        <NavDropdown.Item href="https://wiki.docking.org/index.php/Zinc22:Searching">Usage</NavDropdown.Item>
+                                        <NavDropdown.Item href="mailto:jjiteam@googlegroups.com">Contact</NavDropdown.Item>              
+                            </NavDropdown>
                         </Nav>
                     </Navbar.Collapse>
 

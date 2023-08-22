@@ -16,13 +16,13 @@ import Cart from '../Cart/Cart';
 import "./sw.css";
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-
-
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import initRDKit from '../utils/initRDKit';
 import { Jsme } from 'jsme-react';
 
 export default function SW(props) {
-    
+
+
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
         alignment: { name: "alignment", orderable: true, label: "" },
@@ -203,7 +203,7 @@ export default function SW(props) {
             }
         );
         res = await res.json();
-        console.log(res);
+     
         setMaps(res);
         setDB(Object.keys(res)[0])
 
@@ -214,6 +214,7 @@ export default function SW(props) {
         newValue,
         activeThumb,
     ) => {
+        
         if (!Array.isArray(newValue)) {
             return;
         }
@@ -313,7 +314,7 @@ export default function SW(props) {
             ref.current.setPage(1);
         }
         let reqParams = "";
-        reqParams += `smi=${encodeURIComponent(smiles)}`;
+        reqParams += `smi=${encodeURIComponent(smilesText)}`;
         reqParams += `&db=${db}`;
 
         sliders.forEach((item) => {
@@ -370,7 +371,7 @@ export default function SW(props) {
                 <Col lg={4}>
                     <Jsme
                         src="/jsme/jsme.nocache.js"
-                        height="300px"
+                        height="250px"
                         onChange={(smiles) => {
                             console.log(smiles)
                             submitSearch(rdKit.get_mol(smiles).get_smiles(), true, false);
@@ -379,7 +380,9 @@ export default function SW(props) {
                         options={"noautoez,newlook,nocanonize,multipart,zoom"}
                     />
 
-                    <InputGroup className='mb-1 mt-1'>
+                    <InputGroup className='mb-1 mt-1'
+                        size='sm'
+                    >
                         <InputGroup.Text>SMILES</InputGroup.Text>
                         <input
                             className="form-control"
@@ -391,6 +394,7 @@ export default function SW(props) {
 
                     </InputGroup>
                     <InputGroup
+                        size='sm'
                         className='mb-1'
                     >
                         <InputGroup.Text>Dataset</InputGroup.Text>
@@ -413,19 +417,12 @@ export default function SW(props) {
                         </select>
                     </InputGroup>
 
-
-                    <Card
-                        className='mb-1'
-                    >
-                        <Card.Header
-                            className='p-0 ps-2 h6'
-                        >Advanced Options
-                        </Card.Header>
                         <Card.Body
-                            className='ps-1 px-1 pt-0'
+                            className='ps-1 px-1 pt-0 '
                         >
                             <Row
                                 className=''
+                                
                             >
                                 {
 
@@ -442,16 +439,30 @@ export default function SW(props) {
                                                             marginBottom: "auto",
                                                             fontSize: "0.55rem",
                                                             textWrap: "no-wrap",
+                                                           
                                                         }}
 
-                                                    >{slider.label}</b>
+                                                    >{slider.half ? slider.label.split(' ')[0] : slider.label}</b>
 
                                                     <div
                                                         style={{
                                                             width: slider.half ? "55%" : "70%",
-
+                                                            display: "flex",
                                                         }}
                                                     >
+                                                        <div
+                                                         style={{
+                                                            width: ".9rem",
+                                                            textAlign: "start",
+                                                            marginTop: ".4rem",
+                                                            marginBottom: "auto",
+                                                            fontSize: "0.55rem",
+                                                            textWrap: "no-wrap",
+                                                         }}
+                                                        >
+                                                            {slider.value[0]}
+                                                        </div>
+                                                
                                                         <Slider
                                                             size='small'
                                                             name={slider.name}
@@ -462,6 +473,7 @@ export default function SW(props) {
                                                             aria-labelledby="range-slider"
                                                             min={slider.min}
                                                             max={slider.max}
+                                                         
                                                             step={1}
                                                             marks={[{
                                                                 value: slider.value[0],
@@ -474,6 +486,24 @@ export default function SW(props) {
                                                             ]
                                                             }
                                                         />
+                                                    
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            
+                                                            textAlign: "start",
+                                                            marginTop: ".4rem",
+                                                            marginBottom: "auto",
+                                                            fontSize: "0.55rem",
+                                                            textWrap: "no-wrap",
+                                                        }}
+                                                    >
+                                                            {slider.value[1]} 
+                                                            <b>
+                                                            &nbsp;
+                                                            
+                                                            { slider.half && slider.label.split(' ')[1]}
+                                                            </b>
                                                     </div>
                                                 </div>
                                             </Col>
@@ -483,8 +513,7 @@ export default function SW(props) {
 
                             </Row>
                         </Card.Body>
-                    </Card>
-
+                 
 
 
                     {/* <Card>
