@@ -2,6 +2,10 @@
     background-color: black;
 }
 
+.MuiSlider-root{
+    margin-bottom: 0px !important;
+}
+
 .MuiSlider-markLabel{
     font-size: 0px !important;
     top: 0px!important;
