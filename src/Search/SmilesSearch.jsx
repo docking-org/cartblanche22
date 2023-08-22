@@ -19,7 +19,7 @@ export default function SmilesSearch(props) {
 
         
     useEffect(() => {
-        alert("Smallworld is down for maintenance. Please try your search again later.")
+        
     }, []);
     
 

@@ -65,7 +65,6 @@ export default function SW(props) {
 
 
     useEffect(() => {
-        alert("Smallworld is down for maintenance. Please try again later.")
         
         initRDKit().then((rdKit) => {
             setRDKit(rdKit);

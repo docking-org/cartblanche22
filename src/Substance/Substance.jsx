@@ -250,6 +250,17 @@ export default function Substance() {
                                                 </div>
 
                                             </Button>
+                                            <Button variant="warning"
+
+                                                href={"https://ab3.docking.org/?smiles=" + encodeURIComponent(results.smiles)}
+                                            >
+                                                <div
+                                                    style={{ fontSize: ".9rem" }}
+                                                >
+                                                    Find Analogs
+                                                </div>
+
+                                            </Button>
                                             <DropdownButton as={ButtonGroup} title={<i className="fa fa-download"></i>} id="bg-nested-dropdown" variant="secondary"
 
                                             >
