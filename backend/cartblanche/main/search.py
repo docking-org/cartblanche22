@@ -13,8 +13,8 @@ from cartblanche.helpers.validation import is_zinc22, filter_zinc_ids
 from cartblanche.formatters.format import formatZincResult
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from cartblanche.helpers.common import find_molecule, getRole
-
-
+from cartblanche.helpers.validation import base62
+import random 
 search_bp = Blueprint('search', __name__)
 
 @search_bp.route('/search/saveResult/<task>.<format>', methods=["GET"])
@@ -261,6 +261,52 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
             
         return make_response(formatZincResult(results, format), 200)
     
+  
+@search_bp.route('/substance/random/<jobid>.<format>', methods=["GET"])
+def random_substance_status(jobid, format = "json"):
+    logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
+    logp_range={e:i for i, e in enumerate(logp_range)}
+    task = AsyncResult(jobid)
+    if task.status == "PROGRESS" or task.status == "PENDING":
+        if task.info:
+            return {'progress':(task.info['current']/task.info['projected']), 'status':task.status}
+    
+    if task.status == "SUCCESS":
+        result = task.get()
+        id = result['id']
+        task = AsyncResult(id)
+        result = task.get()
+        res = []
+        #randomize result
+       
+
+        for dbresult in result:
+            for i in dbresult:
+                molecule= {}
+                
+                tranche = i[7] if len(i) > 7 else None
+                if(tranche):
+                    sub = base62(int(i[0]))
+                    h = base62(int(tranche[1:3]))
+                    p = base62(logp_range[tranche[3:]])
+                    molecule['tranche'] = tranche
+
+                else:
+                    molecule['tranche'] = "None"
+                sub = (10 - len(sub)) * "0" + sub
+                molecule['zincid'] = "ZINC" + h + p + sub
+                molecule['SMILES'] = i[1].encode('ascii').replace(b'\x01', b'\\1').decode()
+                res.append(molecule)
+        print(res)
+        random.shuffle(res)
+        res = formatZincResult(res, format)
+       
+        return { 'result':res, 'status':task.status}
+
+        
+    
+    return {'progress':0, 'status':task.status}
+
 @search_bp.route('/substance/random.<format>', methods=["GET", "POST"])
 def random_substance(format = 'json', subset = None):
 
@@ -273,9 +319,15 @@ def random_substance(format = 'json', subset = None):
     if subset == 'none':
         subset = None
     
-    task = getRandom.delay(subset, count)
-    
-    result = task.get()
+    task = getRandom(subset, count)
 
-    return make_response(formatZincResult(result, format), 200)
+    if request.method == "POST":
+        return {"task": task}
+    else:
+        res= task.get()['id']
+        res = AsyncResult(res).get()
+
+        return make_response(formatZincResult(res, format), 200)
+
+    
     

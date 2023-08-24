@@ -4,10 +4,12 @@ import { Card, Container, Row, Table, Col } from "react-bootstrap";
 import axios from "axios";
 import { saveAs } from "file-saver";
 import Modal from 'react-bootstrap/Modal';
+import { ToastContainer, toast } from 'react-toastify'; 
 
 export default function RandomSearch(props) {
     const [loading, setLoading] = React.useState(false);
-
+    const [jobid, setJobid] = React.useState("");
+    const [id, setId] = React.useState("");
     useEffect(() => {
         document.title = props.title || "";
     }, [props.title]);
@@ -16,10 +18,15 @@ export default function RandomSearch(props) {
         var bodyFormData = new FormData();
         bodyFormData.append('count', document.getElementById("amountformat").value);
         bodyFormData.append('subset', document.getElementById("subset").value);
+        const toast_id = toast.loading("Downloading...", {
+            position: toast.POSITION.BOTTOM_LEFT,
+            autoClose: false,
+            progress: 0,
 
+        });
+        
         //request opens modal with loading spinner
-        setLoading(true);
-
+        
         axios({
             method: "post",
             url: "/substance/random." + document.getElementById("format").value,
@@ -28,12 +35,62 @@ export default function RandomSearch(props) {
         })
             .then(response => {
                 //download response as file with format, close modal
-                setLoading(false);
-                var blob = new Blob([response.data], { type: "text/plain;charset=utf-8" });
-                saveAs(blob, "random." + document.getElementById("format").value);
+                
+                setJobid(response.data.task);
+                setTimeout(checkStatus(response.data.task, toast_id), 1000);
+                // var blob = new Blob([response.data], { type: "text/plain;charset=utf-8" });
+                // saveAs(blob, "random." + document.getElementById("format").value);
             })
+
     }
 
+    function checkStatus(jobid, id) {
+        axios({
+            method: "get",
+            url: "/substance/random/" + jobid + "." + document.getElementById("format").value,  
+            headers: { "Content-Type": "multipart/form-data" },
+        })
+            .then(response => {
+                if (response.data.status === "SUCCESS") {
+                    //close modal, download file
+                    
+                    toast.update(id, {
+                        render: "Done!",
+                        type: toast.TYPE.SUCCESS,
+                        autoClose: 2000,
+                        isLoading: false,
+                    });
+                    console.log(id)
+                    var blob = new Blob([response.data.result], { type: "text/plain;charset=utf-8" });
+                    saveAs(blob, "random." + document.getElementById("format").value);
+                }
+                else if(response.data.status === "PROGRESS"){
+                    toast.update(id, {
+                        render: "Downloading...",
+                        type: toast.TYPE.INFO,
+                        autoClose: false,
+                        isLoading: false,
+                        progress: response.data.progress,
+                    });
+                    setTimeout(checkStatus(jobid, id), 1000);
+                }
+
+                else if (response.data.status === "FAILURE") {
+                    //close modal, download file
+                    setLoading(false);
+                    toast.update(id, {
+                        render: "Error!",
+                        type: toast.TYPE.ERROR,
+                        autoClose: 2000,
+                        isLoading: false,
+                    });
+                }
+                else {
+                    //check again
+                    setTimeout(checkStatus(jobid, id), 1000);
+                }
+            })
+    }
 
     return (
         <Container className="mt-2 mb-2">
@@ -176,7 +233,9 @@ export default function RandomSearch(props) {
                     </div>
                 </Modal.Body>
             </Modal>
+            <ToastContainer />
         </Container >
+        
     );
 
 }

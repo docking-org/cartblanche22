@@ -46,11 +46,18 @@ def mergeResults(res, submission = None):
     for i in res:
         print(i)
     if isinstance(res, list):
-        for i in range(1, len(res)):
-            if res and res[i]:
-                res[0].update(res[i])
-        res = res[0]
-        
+        if isinstance(res[0], dict):
+            for i in range(1, len(res)):
+                
+                if res and res[i]:
+                    res[0].update(res[i])
+            res = res[0]
+        else:
+            result = []
+            for i in res:
+                result += i
+            res = result
+
     if submission:
         res['submission'] = submission
     return res
