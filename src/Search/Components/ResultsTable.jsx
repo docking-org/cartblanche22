@@ -202,12 +202,13 @@ const ResultsTable = forwardRef((props, ref) => {
                 <Card.Header>
                     <div className="d-flex justify-content-between">
                         <div>
-                            {total.toLocaleString('en-US', { maximumFractionDigits: 2 })} results {props.elapsed === 0 ? null : (`found in ${props.elapsed || elapsed}`)}
+
+                            {total ? total.toLocaleString('en-US', { maximumFractionDigits: 2 }): '0'} results {props.elapsed === 0 ? null : (`found in ${props.elapsed || elapsed}`)}
                         </div>
                         <div>
 
 
-                            Showing {page === 1 ? 1 : ((page - 1) * perPage) + 1}-{page * perPage > total ? total : page * perPage} of {total.toLocaleString('en-US', { maximumFractionDigits: 2 })} entries
+                            Showing {page === 1 ? 1 : ((page - 1) * perPage) + 1}-{page * perPage > total ? total : page * perPage} of {total ? total.toLocaleString('en-US', { maximumFractionDigits: 2 }) : "0"} entries
                             &nbsp;
                             {props.loading || loading ?
                                 <Spinner size="sm" animation="border" role="status" /> : null
