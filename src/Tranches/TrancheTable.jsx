@@ -5,9 +5,10 @@ import { Col, Row, Button, Card, Table, Pagination, Navbar, Spinner, Dropdown, C
 
 const TrancheTable = forwardRef((props, ref) => {
 
-    const [table, setTable] = React.useState([]);
+    
     const [tranches, setTranches] = React.useState(props.tranches);
     const [axes, setAxes] = React.useState(props.axes);
+    const [table, setTable] = React.useState(initTable());
     const [total, setTotal] = React.useState(0);
     const [colSums, setColSums] = React.useState([]);
     const [bigNumbers, setBigNumbers] = React.useState(props.bigNumbers);
@@ -31,8 +32,8 @@ const TrancheTable = forwardRef((props, ref) => {
 
     function refreshTable() {
         let total = 0;
-        let table = initTable();
-        console.log(table);
+        let newTable = initTable();
+    
         let colSums = new Array(axes[0].length).fill(0);
 
         tranches.map(tranche => {
@@ -40,21 +41,21 @@ const TrancheTable = forwardRef((props, ref) => {
                 let row = axes[0].indexOf(tranche['h_num']);
                 let col = axes[1].indexOf(tranche['p_num']);
 
-                table[col][row]['tranches'].push(tranche);
-                table[col][row]['sum'] += parseInt(tranche.sum);
+                newTable[col][row]['tranches'].push(tranche);
+                newTable[col][row]['sum'] += parseInt(tranche.sum);
                 if (tranche['chosen'] || tranche['chosen'] === undefined) {
                     total += parseInt(tranche.sum);
-                    table[col][row]['chosen'] = true;
+                    newTable[col][row]['chosen'] = true;
                 }
                 else if (tranche['chosen'] === false) {
-                    table[col][row]['chosen'] = false;
+                    newTable[col][row]['chosen'] = false;
                 }
 
             }
 
         })
 
-        table.map(row => {
+        newTable.map(row => {
             row.map(col => {
                 if (col.chosen) {
                     colSums[row.indexOf(col)] += col.sum;
@@ -67,7 +68,9 @@ const TrancheTable = forwardRef((props, ref) => {
         setColSums(colSums);
         setTotal(total);
         setStaticTotal(total);
-        setTable(table);
+
+        setTable(newTable);
+        return newTable;
     }
 
     useEffect(() => {
@@ -88,17 +91,17 @@ const TrancheTable = forwardRef((props, ref) => {
     }
 
     function getCurrentTranches() {
-        let t = [];
-
+        let tranches = [];
         table.map(row => {
             row.map(col => {
-                col.tranches.map(tranche => {
-                    t.push(tranche);
-                })
+                if (col.chosen) {
+                    col.tranches.map(tranche => {
+                        tranches.push(tranche);
+                    })
+                }
             })
         })
-        console.log(t);
-        return t;
+        return tranches;
     }
 
 

@@ -309,7 +309,6 @@ def random_substance_status(jobid, format = "json"):
 
 @search_bp.route('/substance/random.<format>', methods=["GET", "POST"])
 def random_substance(format = 'json', subset = None):
-
     count = request.form['count']
   
     if request.form.get('subset'):

@@ -167,10 +167,9 @@ export default function TrancheBrowser(props) {
         console.log(t);
         let trancheString = "";
         t.map(tranche => trancheString +=
-            tranche['chosen'] ?
                 (tranche['generation'] !== '-' ? tranche['generation'] : "") +
                 tranche['h_num'] + tranche['p_num'] +
-                (tranche['charge'] !== '-' ? tranche['charge'] : "") + " " : "");
+                (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
 
         setTrancheString(trancheString);
     }
