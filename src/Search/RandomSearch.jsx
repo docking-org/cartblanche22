@@ -58,6 +58,7 @@ export default function RandomSearch(props) {
                         render: "Done!",
                         type: toast.TYPE.SUCCESS,
                         autoClose: 2000,
+                        progress: 100,
                         isLoading: false,
                     });
                     console.log(id)

@@ -1,8 +1,9 @@
 from config import Config
 import random
 from celery import chord, current_task, chain, group
+from celery.result import AsyncResult
 from cartblanche import celery
-
+import uuid
 from cartblanche.helpers.validation import base62, get_conn_string
 import time
 import os
@@ -11,9 +12,11 @@ import psycopg2
 from cartblanche.data.tasks import start_search_task
 from cartblanche.data.tasks.search_zinc import mergeResults
 
+logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
+logp_range={e:i for i, e in enumerate(logp_range)}
+
 def getRandom(subset, count,timeout=10):
-    logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
-    logp_range={e:i for i, e in enumerate(logp_range)}
+    
     
     total = 0
     result = []
@@ -34,14 +37,14 @@ def getRandom(subset, count,timeout=10):
         else:
             db_map[url] = 1
 
-    for url in db_map:
-        tasks.append(getRandomFromDB.s(url, db_map[url], to_pull))
-
+    mergeResultsTask = mergeResults.s()
     
-    task_id_progress = base62(int(time.time()))
-    task = start_search_task.s(tasks, None, mergeResults.s(), task_id_progress=task_id_progress)
+    for url in db_map:
+        tasks.append(getRandomFromDB.s(url, db_map[url]))
+
+    task = start_search_task.s(tasks, None, group_tasks=True)
+
     task = task.apply_async()
-    print(task.id)
     return task.id
 
             
@@ -50,9 +53,8 @@ subsets = {
 }
 
 @celery.task
-def getRandomFromDB(url, limit, to_pull):
+def getRandomFromDB(url, limit, current=None):
     result = []
-    
     try:        
         os.environ['PGOPTIONS'] = '-c statement_timeout=1000'
         conn = psycopg2.connect(url)
@@ -71,8 +73,26 @@ def getRandomFromDB(url, limit, to_pull):
     except Exception as e:
         print (e)   
         return []
+    res = current or []
+    for x in result:
+        for i in x: 
+            molecule= {}
 
-    return result
+            tranche = i[7] if len(i) > 7 else None
+            if(tranche):
+                sub = base62(int(i[0]))
+                h = base62(int(tranche[1:3]))
+                p = base62(logp_range[tranche[3:]])
+                molecule['tranche'] = tranche
+                sub = (10 - len(sub)) * "0" + sub
+                molecule['zincid'] = "ZINC" + h + p + sub
+                molecule['SMILES'] = i[1].encode('ascii').replace(b'\x01', b'\\1').decode()
+                res.append(molecule)
+
+    if len(res) < limit:
+        return getRandomFromDB(url, limit - len(res), current=res)
+    
+    return res
 
 def getDistribution(subset=None):
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
