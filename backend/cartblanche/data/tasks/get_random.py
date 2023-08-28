@@ -53,7 +53,7 @@ subsets = {
 }
 
 @celery.task
-def getRandomFromDB(url, limit, current=None):
+def getRandomFromDB(url, limit, current=None, retries=0):
     result = []
     try:        
         os.environ['PGOPTIONS'] = '-c statement_timeout=1000'
@@ -89,8 +89,8 @@ def getRandomFromDB(url, limit, current=None):
                 molecule['SMILES'] = i[1].encode('ascii').replace(b'\x01', b'\\1').decode()
                 res.append(molecule)
 
-    if len(res) < limit:
-        return getRandomFromDB(url, limit - len(res), current=res)
+    if len(res) < limit and retries < 3:
+        return getRandomFromDB(url, limit - len(res), current=res, retries=retries + 1)
     
     return res
 
