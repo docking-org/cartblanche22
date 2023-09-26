@@ -165,7 +165,9 @@ export default function Arthor(props) {
                             className="form-control"
                             value={params.db}
                             onChange={(e) => {
-
+                                setParams((prev) => {
+                                    return { ...prev, db: e.target.value }
+                                });
                                 submitSearch();
                             }}
                         >

@@ -1,7 +1,10 @@
 import subprocess
 import re
 import os
+import requests
 import tempfile
+import time
+import json
 from celery import current_task
 from celery.result import AsyncResult, allow_join_result
 from cartblanche import celery
@@ -42,15 +45,17 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
     processes = []
     print(zinc20)
     print(zinc22)
+
     for smile in smilelist:   
+
         if zinc22:  
             processes.append([smile, subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
                     "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v   " \
                     #grep from =[0-{dist}]
                     "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)])
 
-                
-                
+
+
         if zinc20:
             processes.append([smile, subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
                     "sim -db "+ Config.SMALLWORLD_PUBLIC_MAP_PATH + "/for-sale.smi.anon.map -v   " \
