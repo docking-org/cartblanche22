@@ -26,4 +26,4 @@ celery = Celery(__name__,
 #         'routing_key': 'sw.search'
 #     },
 # }
-# celery.conf.broker_transport_options = { 'master_name': "cartblanche-master" }
+celery.conf.broker_transport_options = { 'master_name': "cartblanche-master" }

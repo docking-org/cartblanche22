@@ -27,6 +27,11 @@ export default function Footer() {
                         &nbsp;
                         &nbsp;
                         <a href="https://irwinlab.compbio.ucsf.edu/">Irwin</a>, <a href="https://bkslab.org/">Shoichet</a> Labs and UC Regents
+                        &nbsp;
+                        &nbsp;
+                        Arthor/Smallworld by <a href="https://www.nextmovesoftware.com/">NextMove Software Ltd. </a>
+                        
+                        
             </Container>
         </div>
 

@@ -237,11 +237,9 @@ export default function Arthor(props) {
 
                             <Button
                                 style={{ "font-size": "0.8vw", 'white-space': 'nowrap' }}
-                                variant="warning"
+                                variant="outline-secondary"
                                 onClick={() => {
-
                                     setRingSystems(!ringSystems);
-
                                 }
                                 }
                             >
@@ -250,7 +248,7 @@ export default function Arthor(props) {
                             </Button>
                             <Button
                                 style={{ "font-size": "0.8vw", 'white-space': 'nowrap' }}
-                                variant="warning"
+                                variant="outline-secondary"
                                 onClick={() => {
                                     setChains(!chains);
                                 }
@@ -261,7 +259,7 @@ export default function Arthor(props) {
                             </Button>
                             <Button
                                 style={{ "font-size": "0.8vw", 'white-space': 'nowrap' }}
-                                variant="warning"
+                                variant="outline-secondary"
                                 onClick={() => {
                                     if (!chains && !ringSystems) {
                                         setProperties(true);
@@ -284,6 +282,21 @@ export default function Arthor(props) {
 
 
                     <br />
+
+                    <p
+                        style={{
+                            fontSize: "0.7rem",
+                            textAlign: "center",
+                            marginTop: "auto",
+                            marginBottom: "auto",
+                            textWrap: "no-wrap",
+                        }}
+                    >
+                    <br />
+                    <img src="https://arthor.docking.org/img/arthor_bandit_crop_32x32.png" width="40px" /> Arthor© 2018-2023 NextMove Software Ltd. All Rights Reserved.
+                    <br />
+                 
+                    </p>
                 </Col>
                 <Col lg={8}>
                     <ResultsTable

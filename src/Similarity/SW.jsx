@@ -544,8 +544,23 @@ export default function SW(props) {
 
                         </Card.Body>
                     </Card> */}
-
+                    <p
+                        style={{
+                            fontSize: "0.6rem",
+                            textAlign: "center",
+                            marginTop: "auto",
+                            marginBottom: "auto",
+                            textWrap: "no-wrap",
+                        }}
+                    >
                     <br />
+                    <img src="https://sw.docking.org/img/logo3_box.svg" width="20px" /> SmallWorld© 2015-2023 NextMove Software Ltd. All Rights Reserved.
+                    <br />
+                 
+                    </p>
+
+                    
+                    
                 </Col>
                 <Col lg={8}>
                     <ResultsTable

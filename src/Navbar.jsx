@@ -153,12 +153,10 @@ export default function Navigation() {
                                 >
                                     <NavDropdown title="Similarity" id="basic-nav-dropdown">
                                         <NavDropdown.Item href="/similarity/sw">Public</NavDropdown.Item>
-                                        {!token &&
-                                            <NavDropdown.Item disabled href="#">Sign in for more</NavDropdown.Item>
-                                        }
-                                        {token &&
+
+                                        {
                                             <NavDropdown.Item href="/similarity/swp">Private</NavDropdown.Item>}
-                                        {token && inucsf &&
+                                        {inucsf &&
                                             <NavDropdown.Item href="/similarity/swc">Super Private</NavDropdown.Item>}
                                     </NavDropdown>
                                 </OverlayTrigger>
