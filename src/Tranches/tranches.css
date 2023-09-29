@@ -46,11 +46,17 @@ table {
 
 }
 
+.table>:not(caption)>*>*{
+    padding: .5em .5em !important;
+}
 
-
+p {
+    margin-bottom: 0px;
+}
 
 th {
-    padding: 0.5em;
+    
+    
     text-align: center;
     width: max-content;
     background-color: white !important;
@@ -58,8 +64,9 @@ th {
 
 td {
     border: 1px solid #ccc;
-    text-align: center;
-    padding: 0.5em;
+    text-align: center !important;
+    
+    
 }
 /* 
 thead th:first-child {
