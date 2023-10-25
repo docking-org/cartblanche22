@@ -14,17 +14,20 @@ export default function NoResults(props) {
                     <p>
                         Your search did not return any results.
                     </p>
-                    <p>
-                        You searched for:
+                    {props.submission ?
+                        <p>
+                            You searched for:
 
-                        <Form.Control as='textarea' rows={6}
-                            editable="false"
-                            disabled={true}
-                            value={props.submission.join('\n')}
-                        />
+                            <Form.Control as='textarea' rows={6}
+                                editable="false"
+                                disabled={true}
+                                value={props.submission.join('\n')}
+                            />
 
-                    </p>
+                        </p>
+                        : ""}
                     <p>
+
                         If you believe this is an error, please contact jjiteam@googlegroups.com.
                     </p>
 
