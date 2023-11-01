@@ -252,7 +252,7 @@ export default function Substance() {
                                             </Button>
                                             <Button variant="warning"
 
-                                                href={"https://ab3.docking.org/?smiles=" + encodeURIComponent(results.smiles)}
+                                                href={"https://ab3.docking.org/search?smiles=" + encodeURIComponent(results.smiles)}
                                             >
                                                 <div
                                                     style={{ fontSize: ".9rem" }}
