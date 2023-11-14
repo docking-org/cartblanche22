@@ -303,7 +303,7 @@ def tranches3dDownload():
     formData = request.form
     tranches_data = formData['tranches'].split(" ")
     tranches_data = [i for i in tranches_data if i != '']
-    print(tranches_data)
+    
     dformat = formData['format']
     using = formData['method']
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
@@ -316,9 +316,9 @@ def tranches3dDownload():
     def gen_all_tranches(tranches):
         res = []
         for tranche in tranches:
+            generation = tranche[0:1]
             hac = tranche[1:4]
             logp = tranche[4:8]
-            generation = tranche[0:1]
             charge = tranche[-1]
             prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, dformat, add_url_3D, charge, generation)
             for extra, suffix in get3dfiles(generation, hac+logp, charge):

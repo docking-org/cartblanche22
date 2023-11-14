@@ -314,7 +314,7 @@ export default function SW(props) {
             ref.current.setPage(1);
         }
         let reqParams = "";
-        reqParams += `smi=${encodeURIComponent(smilesText)}`;
+        reqParams += `smi=${encodeURIComponent(smiles)}`;
         reqParams += `&db=${db}`;
 
         sliders.forEach((item) => {

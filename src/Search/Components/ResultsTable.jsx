@@ -39,7 +39,7 @@ const ResultsTable = forwardRef((props, ref) => {
     }));
 
 
-    async function getArthorResults(searchType = arthorSearchType, searchFlag) {
+    async function getArthorResults(searchType = arthorSearchType, searchFlag = props.searchFlag) {
         setLoading(true);
         setElapsed(0);
         setArthorSearchType(searchType);
@@ -246,7 +246,23 @@ const ResultsTable = forwardRef((props, ref) => {
 
 
                             <Button variant="success" id="dropdown-basic"
+                            
                                 onClick={() => {
+                                    if(props.arthor){
+                                        let url = `https://${encodeURIComponent(props.server)}.docking.org/dt/${(props.db)}/search`
+                                        url += `?query=${encodeURIComponent(props.smi)}`
+                                        url += `&fmt=tsv`;
+                                        url += `&start=${(page - 1) * perPage}`;
+                                        url += `&length=${perPage}`;
+                                        url += `&flags=${props.searchFlag}`;
+                                        url += `&qopts=`;
+                                        url += `&type=` + props.arthorSearchType;
+                                
+                                        url = encodeURI(url);
+                                        window.open(url, '_blank');
+                                    }
+                                    else{
+                                        
                                     let url = `https://${props.server}.docking.org/search/export?hlid=${props.hlid}`;
                                     Object.keys(cols).map((key, index) => {
                                         url += `&${encodeURIComponent(`columns[${index}][data]`)}=${index}`;
@@ -258,7 +274,7 @@ const ResultsTable = forwardRef((props, ref) => {
                                     url += `&start=0`;
                                     url += '&length=' + total;
                                     window.open(url, '_blank');
-
+                                }
                                 }}>
                                 <i className="fa fa-download" aria-hidden="true"></i>
                             </Button>

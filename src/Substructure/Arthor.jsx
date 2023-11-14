@@ -110,15 +110,10 @@ export default function Arthor(props) {
         console.log(searchFlag);
         setResults([]);
 
-
-
         if (ref.current) {
             ref.current.setPage(1);
             ref.current.getArthorResults(arthorSearchType, searchFlag);
         }
-
-
-
     }
 
     useEffect(() => {
@@ -307,8 +302,9 @@ export default function Arthor(props) {
                         server={server}
                         arthor={true}
                         db={params.db}
-                        smi={params.smi}
+                        smi={smilesText}
                         arthorSearchType={arthorSearchType}
+                        searchFlag={Object.keys(searchFlags).find(key => JSON.stringify(searchFlags[key]) === JSON.stringify([ringSystems, chains, properties]))}
                     ></ResultsTable>
                 </Col>
             </Row>
