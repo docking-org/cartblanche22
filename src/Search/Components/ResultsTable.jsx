@@ -30,8 +30,8 @@ const ResultsTable = forwardRef((props, ref) => {
         getResults(hlid, draw, substructure = null) {
             getResults(hlid, draw, substructure);
         },
-        getArthorResults(searchType = arthorSearchType, searchFlag) {
-            getArthorResults(searchType, searchFlag);
+        getArthorResults(searchType = arthorSearchType, searchFlag, smi) {
+            getArthorResults(searchType, searchFlag, smi);
         },
         setPage(page) {
             setPage(page);
@@ -39,14 +39,15 @@ const ResultsTable = forwardRef((props, ref) => {
     }));
 
 
-    async function getArthorResults(searchType = arthorSearchType, searchFlag = props.searchFlag) {
+    async function getArthorResults(searchType = arthorSearchType, searchFlag = props.searchFlag, smi = props.smi) {
         setLoading(true);
         setElapsed(0);
         setArthorSearchType(searchType);
         console.log("getArthorResults");
 
         let url = `https://${encodeURIComponent(props.server)}.docking.org/dt/${(props.db)}/search`
-        url += `?query=${encodeURIComponent(props.smi)}`
+        url += `?query=${encodeURI(smi)}`
+        
         url += `&start=${(page - 1) * perPage}`;
         url += `&length=${perPage}`;
         url += `&flags=${searchFlag}`;
@@ -250,7 +251,7 @@ const ResultsTable = forwardRef((props, ref) => {
                                 onClick={() => {
                                     if(props.arthor){
                                         let url = `https://${encodeURIComponent(props.server)}.docking.org/dt/${(props.db)}/search`
-                                        url += `?query=${encodeURIComponent(props.smi)}`
+                                        url += `?query=${encodeURI(props.smi)}`
                                         url += `&fmt=tsv`;
                                         url += `&start=${(page - 1) * perPage}`;
                                         url += `&length=${perPage}`;

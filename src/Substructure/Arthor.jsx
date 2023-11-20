@@ -95,7 +95,7 @@ export default function Arthor(props) {
 
     }
 
-    async function submitSearch(smiles = null, fromJSME = false, fromText = false) {
+    async function submitSearch(smiles = smi, fromJSME = false, fromText = false) {
         if (fromJSME) {
             setSmilesText(smiles);
         }
@@ -112,13 +112,13 @@ export default function Arthor(props) {
 
         if (ref.current) {
             ref.current.setPage(1);
-            ref.current.getArthorResults(arthorSearchType, searchFlag);
+            ref.current.getArthorResults(arthorSearchType, searchFlag, smiles);
         }
     }
 
     useEffect(() => {
         submitSearch();
-    }, [arthorSearchType]);
+    }, [arthorSearchType, params.db]);
 
     useEffect(() => {
         (!ringSystems && !chains) ? setProperties(true) : console.log()
@@ -163,7 +163,7 @@ export default function Arthor(props) {
                                 setParams((prev) => {
                                     return { ...prev, db: e.target.value }
                                 });
-                                submitSearch();
+                             
                             }}
                         >
                             {
