@@ -4,8 +4,7 @@ FROM node:19.9.0 as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json ./
-RUN apt-get install git
-RUN yarn install
+RUN npm install
 COPY ./src ./src
 COPY ./public ./public
 RUN yarn build
