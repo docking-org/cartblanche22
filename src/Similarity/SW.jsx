@@ -376,7 +376,7 @@ export default function SW(props) {
                             console.log(smiles)
                             submitSearch(rdKit.get_mol(smiles).get_smiles(), true, false);
                         }}
-                        smiles={rdKit ? rdKit.get_mol(smi).get_smiles() : ''}
+                        smiles={(rdKit && rdKit.get_mol(smi).get_smiles()) ? rdKit.get_mol(smi).get_smiles(): ''}
                         options={"noautoez,newlook,nocanonize,multipart,zoom"}
                     />
 

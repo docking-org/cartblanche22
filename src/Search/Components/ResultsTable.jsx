@@ -6,7 +6,7 @@ import MoleculeStructure from "../../RDKit/MoleculeStructure";
 import axios from 'axios';
 import Cart from "../../Cart/Cart";
 import { ToastContainer } from "react-toastify";
-import ReactHtmlParser from 'react-html-parser';
+import parse from 'html-react-parser';
 import "./tables.css";
 
 
@@ -405,7 +405,7 @@ const ResultsTable = forwardRef((props, ref) => {
                                             {molecule[0].anonIdx &&
                                                 <p><b>SWIDX: </b>{molecule[0].anonIdx}</p>}
                                             {molecule[0].mf &&
-                                                <p><b>MF: </b>{ReactHtmlParser(molecule[0].mf)}</p>}
+                                                <p><b>MF: </b>{parse(molecule[0].mf)}</p>}
                                             {molecule[0].mw &&
                                                 <p><b>MW:</b> {molecule[0].mw}</p>}
                                         </td>
