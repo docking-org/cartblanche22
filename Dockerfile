@@ -4,7 +4,7 @@ FROM node:16.19.1-alpine as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json ./
-RUN npm install --force
+RUN npm install
 COPY ./src ./src
 COPY ./public ./public
 RUN yarn build
