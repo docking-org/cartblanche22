@@ -4,6 +4,7 @@ FROM node:19.9.0-alpine as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json ./
+RUN apt-get install git
 RUN yarn install
 COPY ./src ./src
 COPY ./public ./public
