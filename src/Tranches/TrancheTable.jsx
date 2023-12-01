@@ -40,17 +40,17 @@ const TrancheTable = forwardRef((props, ref) => {
             if (tranche) {
                 let row = axes[0].indexOf(tranche['h_num']);
                 let col = axes[1].indexOf(tranche['p_num']);
-
-                newTable[col][row]['tranches'].push(tranche);
-                newTable[col][row]['sum'] += parseInt(tranche.sum);
-                if (tranche['chosen'] || tranche['chosen'] === undefined) {
-                    total += parseInt(tranche.sum);
-                    newTable[col][row]['chosen'] = true;
+                if(newTable[col][row]){ 
+                    newTable[col][row]['tranches'].push(tranche);
+                    newTable[col][row]['sum'] += parseInt(tranche.sum);
+                    if (tranche['chosen'] || tranche['chosen'] === undefined) {
+                        total += parseInt(tranche.sum);
+                        newTable[col][row]['chosen'] = true;
+                    }
+                    else if (tranche['chosen'] === false) {
+                        newTable[col][row]['chosen'] = false;
+                    }
                 }
-                else if (tranche['chosen'] === false) {
-                    newTable[col][row]['chosen'] = false;
-                }
-
             }
 
         })
