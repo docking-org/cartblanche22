@@ -3,6 +3,7 @@ from kombu import Queue
 
 celery = Celery(__name__, 
                 result_backend_transport_options={'master_name': 'cartblanche-master'},
+                broker_transport_options={ 'master_name': "cartblanche-master" },
                 result_extended=True,
                 include=[
                            'cartblanche.data.tasks',
@@ -26,4 +27,3 @@ celery = Celery(__name__,
 #         'routing_key': 'sw.search'
 #     },
 # }
-celery.conf.broker_transport_options = { 'master_name': "cartblanche-master" }
