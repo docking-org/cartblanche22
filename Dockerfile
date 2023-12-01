@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM node:19.9.0-alpine as frontend
+FROM node:19.9.0 as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json ./
