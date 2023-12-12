@@ -33,7 +33,7 @@ def send_password_reset_email(user):
                 html_body="<p>Dear " + user.username + ",</p>" +
                             "<p>To reset your password <a href=\"" + current_app.config['BASE_URL'] + "/resetPassword/" + token + "\">click here</a>.</p>" +
                             "<p>Alternatively, you can paste the following link in your browser's address bar:</p>" +
-                            "<p>" + current_app.config['BASE_URL'] + "/reset_password/" + token + "</p>" +
+                            "<p>" + current_app.config['BASE_URL'] + "/resetPassword/" + token + "</p>" +
                             "<p>If you have not requested a password reset simply ignore this message.</p>" +
                             "<p>Sincerely,</p>" +
                             "<p>The Cartblanche Team</p>"
