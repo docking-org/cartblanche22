@@ -155,6 +155,7 @@ def vendorSearch(vendor_ids, role='public'):
         machine_id_map[machine_id] = ':'.join([host, str(port)])
   
     sb_partition_map = {}
+
     config_curs.execute("select hashseq, host, port from antimony_hash_partitions ahp left join antimony_machines am on ahp.partition = am.partition")
     for result in config_curs.fetchall():
         hashseq = result[0]
@@ -188,7 +189,7 @@ def vendorSearch(vendor_ids, role='public'):
             tf_input.write("{} {}\n".format(vendor, v_db))
             total_length += 1
         tf_input.flush()
-    
+       
         # ========== FIRST SORT PROC- SEARCH SB ==========
         # limit sort memory usage according to configuration, we want the client-side search process to have as low a footprint as possible, while remaining fast for typical usage
         sort_mem_arg = "{}K".format(client_configuration["mem_max_sort"]//1000)

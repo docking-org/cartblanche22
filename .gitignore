@@ -9,7 +9,7 @@ sshtunnel.sh
 
 # C extensions
 *.so
-
+*.sqlite
 # Distribution / packaging
 .Python
 venv/

@@ -40,7 +40,7 @@ export default function ResetPassword(props) {
     }
 
     return (
-        <Container className="mt-5 ">
+        <Container className="mt-5 mb-4">
             <Row className="justify-content-md-center">
                 < Col xs={6} md={4} className="bg-light border rounded p-3" >
                     <h1>Reset Password</h1>

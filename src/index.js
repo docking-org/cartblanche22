@@ -30,8 +30,6 @@ import Acknowledgements from './Acknowledgements';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -48,19 +46,19 @@ const router = createBrowserRouter([
       },
       {
         path: "/search/smiles",
-        element: <SmilesSearch 
+        element: <SmilesSearch
           title="SMILES Search - Cartblanche22"
         />,
       },
       {
         path: "/search/random",
-        element: <RandomSearch 
+        element: <RandomSearch
           title="Random Search - Cartblanche22"
         />,
       },
       {
         path: "/search/catitems",
-        element: <SupplierSearch 
+        element: <SupplierSearch
           title="Supplier Search - Cartblanche22"
         />,
       }
@@ -69,7 +67,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/results",
-    element: <Results 
+    element: <Results
       title="Search Results - Cartblanche22"
     />,
   },
@@ -92,25 +90,25 @@ const router = createBrowserRouter([
     ></MyCarts>,
   }, {
     path: "/cart",
-    element: <Checkout 
+    element: <Checkout
       title="Checkout - Cartblanche22"
     />
   },
   {
-    path: "/resetPassword/:token",
-    element: <ResetPassword 
+    path: "/reset_password/:token",
+    element: <ResetPassword
       title="Reset Password - Cartblanche22"
     />,
   },
   {
     path: "/similarity/:server",
-    element: <SW 
+    element: <SW
       title="Similarity Search - Cartblanche22"
     />,
   },
   {
     path: "/patterns/:server",
-    element: <Arthor 
+    element: <Arthor
       title="Substructure Search - Cartblanche22"
     />,
   },
@@ -120,13 +118,13 @@ const router = createBrowserRouter([
   },
   {
     path: "/404",
-    element: <Substance404 
+    element: <Substance404
       title="404 - Cartblanche22"
     />
   },
   {
     path: "*",
-    element: <Error404 
+    element: <Error404
       title="404 - Cartblanche22"
     />
   }
@@ -137,7 +135,7 @@ const router = createBrowserRouter([
 root.render(
   <div>
     <Navigation />
-    <RouterProvider router={router}/>
+    <RouterProvider router={router} />
     <Footer></Footer>
   </div>
 
