@@ -25,13 +25,13 @@ def send_password_reset_email(user):
                recipients=[user.email],
                text_body= "Dear " + user.username + ",\n\n" +
                             "To reset your password, visit the following link:\n" +
-                            current_app.config['BASE_URL'] + "/reset_password/" + token + "\n\n" +
+                            current_app.config['BASE_URL'] + "/resetPassword/" + token + "\n\n" +
                             "If you did not make this request then simply ignore this email and no changes will be made.\n\n" +
                             "Sincerely,\n" +
                             "The Cartblanche Team",
                 
                 html_body="<p>Dear " + user.username + ",</p>" +
-                            "<p>To reset your password <a href=\"" + current_app.config['BASE_URL'] + "/reset_password/" + token + "\">click here</a>.</p>" +
+                            "<p>To reset your password <a href=\"" + current_app.config['BASE_URL'] + "/resetPassword/" + token + "\">click here</a>.</p>" +
                             "<p>Alternatively, you can paste the following link in your browser's address bar:</p>" +
                             "<p>" + current_app.config['BASE_URL'] + "/reset_password/" + token + "</p>" +
                             "<p>If you have not requested a password reset simply ignore this message.</p>" +

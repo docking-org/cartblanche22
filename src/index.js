@@ -95,7 +95,7 @@ const router = createBrowserRouter([
     />
   },
   {
-    path: "/reset_password/:token",
+    path: "/resetPassword/:token",
     element: <ResetPassword
       title="Reset Password - Cartblanche22"
     />,
