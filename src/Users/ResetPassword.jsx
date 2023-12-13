@@ -24,7 +24,7 @@ export default function ResetPassword(props) {
         data.append("password", password);
         axios({
             method: "post",
-            url: "https://cartblanche22.docking.org/reset_password",
+            url: "/reset_password/",
             data: data,
             headers: { "Content-Type": "multipart/form-data" },
 
