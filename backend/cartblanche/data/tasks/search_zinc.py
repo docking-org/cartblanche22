@@ -203,11 +203,12 @@ def vendorSearch(vendor_ids, role='public'):
                     data_file.seek(0)
                     search_database = get_conn_string(p_id, user='antimonyuser', db='antimony')
                     logs.append("searching "+ search_database)
-                    search_conn = psycopg2.connect(search_database, connect_timeout=1)
+                    search_conn = psycopg2.connect(search_database, connect_timeout=5)
                     search_curs = search_conn.cursor()
                     # output fmt: VENDOR CAT_CONTENT_ID MACHINE_ID
                     get_vendor_results_antimony(data_file, search_curs, output_file, missing_file)
                 except psycopg2.OperationalError as e:
+                    print(e)
                     message = "failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database)
                
                     logs.append(message)
@@ -260,7 +261,7 @@ def vendorSearch(vendor_ids, role='public'):
                     data_file.seek(0)
                     search_database = get_conn_string(p_id)
                     logs.append("searching "+ search_database)
-                    search_conn = psycopg2.connect(search_database, connect_timeout=1)
+                    search_conn = psycopg2.connect(search_database, connect_timeout=5)
                     search_curs = search_conn.cursor()
                     t_elapsed = time.time() - t_start
                     get_vendor_results_cat_id(data_file, search_curs, output_file)
@@ -367,7 +368,7 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
                   
                     search_database = get_conn_string(p_id)
                     logs.append("searching "+ search_database)
-                    search_conn = psycopg2.connect(search_database, connect_timeout=1)
+                    search_conn = psycopg2.connect(search_database, connect_timeout=5)
                     search_curs = search_conn.cursor()
                     t_elapsed = time.time() - t_start
                     if get_vendors:
