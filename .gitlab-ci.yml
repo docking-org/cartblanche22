@@ -10,7 +10,7 @@ build:
     # - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
     # - docker login ${GITLAB_REGISTRY_URL}
     - docker build -t cartblanche22 .
-    - sudo docker save cartblanche22:latest > /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+    - docker save cartblanche22:latest > /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     # - docker push cartblanche22
 
 .test api:
