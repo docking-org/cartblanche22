@@ -5,10 +5,9 @@ build:
   tags:
     - docker-build
   stage: build
-  before_script:
+  script:
     - mkdir -p $HOME/.docker
     - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
-  script:
     - docker login ${GITLAB_REGISTRY_URL}
     - docker build -t ${GITLAB_REGISTRY_URL}/mar/cartblanche22 .
     - docker push ${GITLAB_REGISTRY_URL}/mar/cartblanche22
@@ -17,7 +16,7 @@ build:
   stage: test
   tags:
     - docker-testing
-  image: 
+  image:
     name: ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     entrypoint: [""]
   before_script:
@@ -70,7 +69,6 @@ deploy epyc2:
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-
 
 deploy n-9-38:
   only:
