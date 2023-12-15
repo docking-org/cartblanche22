@@ -5,6 +5,9 @@ build:
   tags:
     - docker-build
   stage: build
+  before_script:
+    - mkdir -p $HOME/.docker
+    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
     - docker login ${GITLAB_REGISTRY_URL}
     - docker build -t ${GITLAB_REGISTRY_URL}/mar/cartblanche22 .
