@@ -9,8 +9,9 @@ build:
     # - mkdir -p $HOME/.docker
     # - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
     # - docker login ${GITLAB_REGISTRY_URL}
-    - docker build -t cartblanche22 .
-    - docker save cartblanche22:latest > /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+    - cd /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+    - git pull
+    # - docker save cartblanche22:latest > /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     # - docker push cartblanche22
 
 .test api:
@@ -41,7 +42,7 @@ deploy epyc2:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker load < /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+    - docker build -t cartblanche22 /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -84,7 +85,7 @@ deploy n-9-38:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker load < /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+    - docker build -t cartblanche22 /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -127,7 +128,7 @@ deploy n-1-18:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker load < /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+    - docker build -t cartblanche22 /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
