@@ -6,11 +6,12 @@ build:
     - docker-build
   stage: build
   script:
-    - mkdir -p $HOME/.docker
-    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
-    - docker login ${GITLAB_REGISTRY_URL}
-    - docker build -t ${GITLAB_REGISTRY_URL}/mar/cartblanche22 .
-    - docker push ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    # - mkdir -p $HOME/.docker
+    # - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+    # - docker login ${GITLAB_REGISTRY_URL}
+    - docker build -t cartblanche22 .
+    - sudo docker save cartblanche22:latest > /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+    # - docker push cartblanche22
 
 .test api:
   stage: test
@@ -38,8 +39,9 @@ deploy epyc2:
   tags:
     - cartblanche22-epyc2
   script:
-    - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
-    - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
+    # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    - docker load < /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -68,7 +70,8 @@ deploy epyc2:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+      --name ${CI_PROJECT_NAME}
+      # -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
 deploy n-9-38:
   only:
@@ -79,8 +82,9 @@ deploy n-9-38:
   tags:
     - cartblanche22-n-9-38
   script:
-    - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
-    - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
+    # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    - docker load < /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -109,7 +113,8 @@ deploy n-9-38:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+      --name ${CI_PROJECT_NAME}
+      # -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
 deploy n-1-18:
   only:
@@ -120,8 +125,9 @@ deploy n-1-18:
   tags:
     - cartblanche22-n-1-18
   script:
-    - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
-    - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
+    # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+    - docker load < /nfs/mammoth/write_here/gitlab-registry/cartblanche22
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
@@ -150,4 +156,5 @@ deploy n-1-18:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      --name ${CI_PROJECT_NAME} -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
+      --name ${CI_PROJECT_NAME}
+      # -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
