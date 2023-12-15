@@ -6,7 +6,7 @@ build:
     - docker-build
   stage: build
   script:
-    - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS} 
+    - docker login ${GITLAB_REGISTRY_URL}
     - docker build -t ${GITLAB_REGISTRY_URL}/mar/cartblanche22 .
     - docker push ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
