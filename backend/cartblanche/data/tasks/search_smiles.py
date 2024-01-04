@@ -46,37 +46,84 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
     print(zinc20)
     print(zinc22)
 
-    for smile in smilelist:   
+    # sample url "https://sw.docking.org/search/view?smi=c1ccccc1&smi=Clc1ccccc1&db=zinc22-All-070123.smi.anon&fmt=json"
+    results = {}
+  
+    if zinc22:
+        url = "https://swp.docking.org/search/view?"
+        for smile in smilelist:
+            url += "smi={smile}&".format(smile=smile)
+        url += "db=zinc22-All-070123.smi.anon&fmt=tsv&dist={adist}".format(adist=adist)
+        credentials = ('gpcr', 'xtal')
 
-        if zinc22:  
-            processes.append([smile, subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
-                    "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v   " \
-                    #grep from =[0-{dist}]
-                    "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)])
+        r = requests.get(url, auth=credentials)
+        print(r)
+        print(r.text)
+        text = r.text.split('\n')
+        text = text[1:]
+    
+        for line in text:
+            if line:
+                line = line.split('\t')
+                results[line[0].split(' ')[1]] = {
+                    'smiles': line[0].split(' ')[0],
+                    'matched_smiles': line[1],
+                }
+
+    if zinc20:
+        url = "https://sw.docking.org/search/view?"
+        for smile in smilelist:
+            url += "smi={smile}&".format(smile=smile)
+        url += "db=all-zinc.smi.anon&fmt=tsv&dist={adist}".format(adist=adist)
+        credentials = ('gpcr', 'xtal')
+
+        r = requests.get(url, auth=credentials)
+        print(r)
+        print(r.text)
+        text = r.text.split('\n')
+        text = text[1:]
+
+        for line in text:
+            if line:
+                line = line.split('\t')
+                results[line[0].split(' ')[1]] = {
+                    'smiles': line[0].split(' ')[0],
+                    'matched_smiles': line[1],
+                }
+
+
+    # for smile in smilelist:   
+
+
+        # if zinc22:  
+        #     processes.append([smile, subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
+        #             "sim -db "+ Config.SMALLWORLD_MAP_PATH + "/zinc22-All.smi.anon.map -v   " \
+        #             #grep from =[0-{dist}]
+        #             "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)])
 
 
 
-        if zinc20:
-            processes.append([smile, subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
-                    "sim -db "+ Config.SMALLWORLD_PUBLIC_MAP_PATH + "/for-sale.smi.anon.map -v   " \
-                    #grep from =[0-{dist}]
-                    "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)])
+        # if zinc20:
+        #     processes.append([smile, subprocess.Popen("SWDIR="+ Config.SWDIR + " java -jar " + Config.SMALLWORLD_JAR_PATH + "/sw.jar " \
+        #             "sim -db "+ Config.SMALLWORLD_PUBLIC_MAP_PATH + "/for-sale.smi.anon.map -v   " \
+        #             #grep from =[0-{dist}]
+        #             "-n0 -d{adist} -score AtomAlignment '{smiles}' | grep -E '=[0-{dist}] '".format(smiles=smile, adist=adist, dist=dist), shell=True, stdout=subprocess.PIPE)])
 
-    done = 0
-    for process in processes:
-        smile = process[0]
+    # done = 0
+    # for process in processes:
+    #     smile = process[0]
 
-        out, err = process[1].communicate()
+    #     out, err = process[1].communicate()
    
-        for line in out.decode().split('\n'):
-            if 'ZINC' in line:
-                result.append(line + ' ' + smile)
-        done +=1 
-        current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':len(processes)/done, 'projected':len(processes), 'time_elapsed':0})
-    hits = {}
-    for line in result:
-        row = line.split(' ')
+    #     for line in out.decode().split('\n'):
+    #         if 'ZINC' in line:
+    #             result.append(line + ' ' + smile)
+    #     done +=1 
+    #     current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':len(processes)/done, 'projected':len(processes), 'time_elapsed':0})
+    # hits = {}
+    # for line in result:
+    #     row = line.split(' ')
         
-        hits[row[4]] = row[5]
-    print(hits)
-    return hits
+    #     hits[row[4]] = row[5]
+    
+    return results
