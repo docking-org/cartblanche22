@@ -72,6 +72,7 @@ deploy epyc2:
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       --name ${CI_PROJECT_NAME}
+      cartblanche22
       # -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
 deploy n-9-38:
@@ -115,6 +116,7 @@ deploy n-9-38:
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       --name ${CI_PROJECT_NAME}
+      cartblanche22
       # -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
 deploy n-1-18:
@@ -158,4 +160,6 @@ deploy n-1-18:
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       --name ${CI_PROJECT_NAME}
+      cartblanche22
+
       # -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
