@@ -53,7 +53,7 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
         url = "https://swp.docking.org/search/view?"
         for smile in smilelist:
             url += "smi={smile}&".format(smile=smile)
-        url += "db=zinc22-All-070123.smi.anon&fmt=tsv&dist={adist}".format(adist=adist)
+        url += "db=zinc22-All-070123.smi.anon&fmt=tsv&length=1000&dist={adist}&sdist={dist}".format(adist=adist, dist=dist)
         credentials = ('gpcr', 'xtal')
 
         r = requests.get(url, auth=credentials)
@@ -74,7 +74,7 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
         url = "https://sw.docking.org/search/view?"
         for smile in smilelist:
             url += "smi={smile}&".format(smile=smile)
-        url += "db=all-zinc.smi.anon&fmt=tsv&dist={adist}".format(adist=adist)
+        url += "db=all-zinc.smi.anon&fmt=tsv&dist={adist}&length=1000&sdist={dist}".format(adist=adist, dist=dist)
         credentials = ('gpcr', 'xtal')
 
         r = requests.get(url, auth=credentials)
