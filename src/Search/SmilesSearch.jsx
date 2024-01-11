@@ -9,19 +9,19 @@ export default function SmilesSearch(props) {
     //use text box value by default
     const [input, setInput] = React.useState("");
     const { token } = useToken();
-    const[zinc20, setZinc20] = React.useState(false);
-    const[zinc22, setZinc22] = React.useState(true);
-    
+    const [zinc20, setZinc20] = React.useState(false);
+    const [zinc22, setZinc22] = React.useState(true);
+
     useEffect(() => {
         document.title = props.title || "";
     }, [props.title]);
 
 
-        
+
     useEffect(() => {
-        
+
     }, []);
-    
+
 
     function getMolecules() {
         var bodyFormData = new FormData();
@@ -29,15 +29,15 @@ export default function SmilesSearch(props) {
         bodyFormData.append('dist', document.getElementById("distformat").value);
         bodyFormData.append('adist', document.getElementById("adistformat").value);
         let databases = [];
-        if (zinc20){
+        if (zinc20) {
             databases.push("zinc20");
         }
-        if (zinc22){
+        if (zinc22) {
             databases.push("zinc22");
         }
         bodyFormData.append('database', databases.join(","));
 
-        
+
         var file = document.getElementById("smilesfile").files[0];
         if (file) {
             bodyFormData.append('smiles', file);
@@ -87,6 +87,12 @@ export default function SmilesSearch(props) {
                             <option value="2" id="dist-2">
                                 2
                             </option>
+                            <option value="3" id="dist-3">
+                                3
+                            </option>
+                            <option value="4" id="dist-4">
+                                4
+                            </option>
                         </select>
                         &nbsp;
                         <label for="adistformat">anon dist:</label>
@@ -99,6 +105,12 @@ export default function SmilesSearch(props) {
                             </option>
                             <option value="2" id="adist-2">
                                 2
+                            </option>
+                            <option value="3" id="adist-3">
+                                3
+                            </option>
+                            <option value="4" id="adist-4">
+                                4
                             </option>
                         </select>
                         <br></br>

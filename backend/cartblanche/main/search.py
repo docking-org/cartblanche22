@@ -231,8 +231,8 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
 
     submission = ids
     ids = '\n'.join(ids)
-    dist = '2' if int(dist) > 2 else dist
-    adist = '2' if int(dist) > 2 else adist
+    dist = '4' if int(dist) > 4 else dist
+    adist = '4' if int(dist) > 4 else adist
 
     if len(ids) == 0:
         return "No Valid SMILES, please try again", 400
@@ -245,16 +245,11 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
     
     task = start_search_task.delay(task, submission, task_id_progress=task_id_progress)
  
-
-
     if request.method == "POST":
         return {"task": task.id}
     else:
-
         res= task.get()['id']
-        res = AsyncResult(res).get()
-        
-        
+        res = AsyncResult(res).get()       
         results = res['zinc22']
 
         if res.get('zinc20'):
@@ -262,7 +257,6 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
             
         return make_response(formatZincResult(results, format), 200)
     
-  
 @search_bp.route('/substance/random/<jobid>.<format>', methods=["GET"])
 def random_substance_status(jobid, format = "json"):
  
