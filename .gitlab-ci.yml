@@ -1,18 +1,18 @@
-variables:
-  CI_PROJECT_NAME: cartblanche22
+# variables:
+#   CI_PROJECT_NAME: cartblanche22
 
-build:
-  tags:
-    - docker-build
-  stage: build
-  script:
-    # - mkdir -p $HOME/.docker
-    # - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
-    # - docker login ${GITLAB_REGISTRY_URL}
-    - cd /nfs/mammoth/write_here/gitlab-registry/cartblanche22
-    - git pull
-    # - docker save cartblanche22:latest > /nfs/mammoth/write_here/gitlab-registry/cartblanche22
-    # - docker push cartblanche22
+# build:
+#   tags:
+#     - docker-build
+#   stage: build
+#   script:
+#     # - mkdir -p $HOME/.docker
+#     # - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+#     # - docker login ${GITLAB_REGISTRY_URL}
+#     - cd /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+#     - git pull
+#     # - docker save cartblanche22:latest > /nfs/mammoth/write_here/gitlab-registry/cartblanche22
+#     # - docker push cartblanche22
 
 .test api:
   stage: test
