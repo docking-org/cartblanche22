@@ -28,6 +28,7 @@ export default function Results(props) {
     const [submission, setSubmission] = React.useState(undefined);
     const [logs, setLogs] = React.useState(undefined);
     const [noResults, setNoResults] = React.useState(false);
+    const [statusMessage, setStatusMessage] = React.useState("");
     useEffect(() => {
         document.title = props.title || "";
     }, [props.title]);
@@ -70,11 +71,18 @@ export default function Results(props) {
                     setInUCSF(response.data.inUCSF);
                 }
                 else {
+                    if (response.data.status === "PREPROCESS") {
+                        setStatusMessage("Preprocessing...");
+                    }
+
                     if (response.data.status === "PENDING") {
                         setProgress(-1);
                     }
+                    else if (response.data.progress <= 0) {
+                        setProgress(100);
+                    }
 
-                    else if (response.data.progress <= 1) {
+                    else if (response.data.progress <= 1 && !(response.data.status === "PROGRESS")) {
                         setProgress(100);
                     }
 
@@ -170,6 +178,7 @@ export default function Results(props) {
                             className="justify-content-center align-items-center"
 
                         >
+                            {statusMessage && <h3>{statusMessage}</h3>}
                             <ProgressBar key="progress" animated now={progress} label={`${progress}%`} />
                         </div>
                     }

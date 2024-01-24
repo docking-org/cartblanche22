@@ -5,7 +5,7 @@ import requests
 import tempfile
 import time
 import json
-from celery import current_task
+from celery import current_task, group
 from celery.result import AsyncResult, allow_join_result
 from cartblanche import celery
 from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults
@@ -48,48 +48,84 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
 
     # sample url "https://sw.docking.org/search/view?smi=c1ccccc1&smi=Clc1ccccc1&db=zinc22-All-070123.smi.anon&fmt=json"
     results = {}
-  
-    if zinc22:
-        url = "https://swp.docking.org/search/view?"
-        for smile in smilelist:
-            url += "smi={smile}&".format(smile=smile)
-        url += "db=zinc22-All-070123.smi.anon&fmt=tsv&length=1000&dist={adist}&sdist={dist}".format(adist=adist, dist=dist)
-        credentials = ('gpcr', 'xtal')
-
-        r = requests.get(url, auth=credentials)
-        print(r)
-        print(r.text)
-        text = r.text.split('\n')
-        text = text[1:]
+    import urllib.parse
+    search_jobs = []
     
-        for line in text:
-            if line:
-                line = line.split('\t')
-                results[line[0].split(' ')[1]] = {
-                    'smiles': line[0].split(' ')[0],
-                    'matched_smiles': line[1],
-                }
+    if zinc22:
+        for smile in smilelist:
+            search_jobs.append(call_api.s(smile, dist, adist, 'zinc22-All-070123.smi.anon', smile))
 
     if zinc20:
-        url = "https://sw.docking.org/search/view?"
         for smile in smilelist:
-            url += "smi={smile}&".format(smile=smile)
-        url += "db=all-zinc.smi.anon&fmt=tsv&dist={adist}&length=1000&sdist={dist}".format(adist=adist, dist=dist)
-        credentials = ('gpcr', 'xtal')
+            search_jobs.append(call_api.s(smile, dist, adist, 'all-zinc.smi.anon', matched_smiles=smile))        
 
-        r = requests.get(url, auth=credentials)
-        print(r)
-        print(r.text)
-        text = r.text.split('\n')
-        text = text[1:]
+    res = group(search_jobs)()
+    with allow_join_result():
+        while not res.ready():
+            count = res.completed_count()
+            current_task.update_state(task_id=task_id, state='PREPROCESS',meta={'current':count, 'projected':len(smilelist), 'time_elapsed':0})
+            time.sleep(1)
+        res = res.get()
+        for r in res:
+            matched_smiles = r[1]
+            r = r[0]
+            text = r.split('\n')
+            text = text[1:]
+            for line in text:
+                if line:
+                    line = line.split('\t')
+                    results[line[0].split(' ')[1]] = {
+                        'smiles': line[0].split(' ')[0],
+                        'matched_smiles': matched_smiles,
+                    }
 
-        for line in text:
-            if line:
-                line = line.split('\t')
-                results[line[0].split(' ')[1]] = {
-                    'smiles': line[0].split(' ')[0],
-                    'matched_smiles': line[1],
-                }
+
+    # for response in responses:
+    #     response = response.json()
+    #     print(response)
+        # for result in response['results']:
+        #     results[result['smiles']] = {
+        #         'smiles': result['smiles'],
+        #         'matched_smiles': result['matched_smiles'],
+        #     }
+        
+    # url += "db=zinc22-All-070123.smi.anon&fmt=tsv&length=1000&dist={adist}&sdist={dist}".format(adist=adist, dist=dist)
+    #     credentials = ('gpcr', 'xtal')
+
+    #     r = requests.get(url, auth=credentials)
+    #     print(r)
+    #     print(r.text)
+    #     text = r.text.split('\n')
+    #     text = text[1:]
+    
+    #     for line in text:
+    #         if line:
+    #             line = line.split('\t')
+    #             results[line[0].split(' ')[1]] = {
+    #                 'smiles': line[0].split(' ')[0],
+    #                 'matched_smiles': line[1],
+    #             }
+
+    # if zinc20:
+    #     url = "https://sw.docking.org/search/view?"
+    #     for smile in smilelist:
+    #         url += "smi={smile}&".format(smile=smile)
+    #     url += "db=all-zinc.smi.anon&fmt=tsv&dist={adist}&length=1000&sdist={dist}".format(adist=adist, dist=dist)
+    #     credentials = ('gpcr', 'xtal')
+
+    #     r = requests.get(url, auth=credentials)
+    #     print(r)
+    #     print(r.text)
+    #     text = r.text.split('\n')
+    #     text = text[1:]
+
+    #     for line in text:
+    #         if line:
+    #             line = line.split('\t')
+    #             results[line[0].split(' ')[1]] = {
+    #                 'smiles': line[0].split(' ')[0],
+    #                 'matched_smiles': line[1],
+    #             }
 
 
     # for smile in smilelist:   
@@ -127,3 +163,12 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None):
     #     hits[row[4]] = row[5]
     
     return results
+
+@celery.task
+def call_api(smile, dist, adist, db, matched_smiles):
+    credentials = ('gpcr', 'xtal')
+    import urllib.parse
+    smile_text = urllib.parse.quote(smile)
+    url = "https://swp.docking.org/search/view?smi={smile}&db={db}&fmt=tsv&dist={adist}&sdist={dist}".format(smile=smile_text, db=db, adist=adist, dist=dist)
+    r = requests.get(url, auth=credentials)
+    return [r.text, matched_smiles]

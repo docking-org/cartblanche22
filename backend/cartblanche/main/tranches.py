@@ -50,13 +50,19 @@ def WgetDownloader(hac, logp, format, add_url, charge, generation):
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, user = Config.DOWNLOAD_USERNAME_2D, password = Config.DOWNLOAD_PASS_2D)
 
 def PowerShellDownloader(hac, logp, format, add_url, charge, generation):
+    print(hac)
+    print(logp)
+    print(format)
+    print(add_url)
+    print(charge)
+    print(generation)
     if generation != '':
-        return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/ " \
-           "-OutFile {hac}/{hac}{logp}{charge}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url,
+        return "Invoke-WebRequest {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp} " \
+           "-OutFile (New-Item -Path \"{hac}/{logp}/{charge}/{hac}{logp}{charge}{generation}.{format}\" -Force )".format(hac=hac, logp=logp, format=format, base_url=base_url,
                                                                 add_url_2D=add_url, charge=charge, generation=generation)
     else:
-        return "New-Item -path {hac} -type directory; Invoke-WebRequest {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} " \
-           "-OutFile {hac}/{hac}{logp}{charge}.{format}".format(hac=hac, logp=logp, format=format, base_url=base_url,
+        return "Invoke-WebRequest {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} " \
+           "-OutFile (New-Item -Path \"{hac}/{logp}/{hac}{logp}{charge}.{format}\" -Force )".format(hac=hac, logp=logp, format=format, base_url=base_url,
                                                                 add_url_2D=add_url, charge=charge)
                                                 
 def RsyncDownloader(tranches, format):
@@ -285,7 +291,10 @@ def tranches2dDownload():
 
     arr = map(gen_tranches, data_)
     data = '\n'.join(list(arr))
-    download_filename = 'ZINC22-downloader-2D-{}.{}'.format(format, using)
+    if using == "PowerShell":
+        download_filename = 'ZINC22-downloader-2D-{}.ps1'.format(format)    
+    else:
+        download_filename = 'ZINC22-downloader-2D-{}.{}'.format(format, using)
    
     return {
         'data': data,
@@ -335,7 +344,10 @@ def tranches3dDownload():
             for extra, suffix in get3dfiles(generation, hac+logp, charge):
                 suffix = suffix.strip()
                 extra = extra.strip()
-                res.append(prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{dformat}\n")
+                if mimetype != 'application/x-ucsf-zinc-uri-downloadscript-powershell':
+                    res.append(prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{dformat}\n")
+                else:
+                    res.append(prefix + "\n")
         return res
     
     def gen_all_rsyncs(tranches):
