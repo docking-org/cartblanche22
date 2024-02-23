@@ -43,6 +43,7 @@ def _paused_thread():
 
 @celery.task
 def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors=True, matched_smiles=None, task_id_progress=None):
+    
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
     config_curs = config_conn.cursor()
     config_curs.execute("select tranche, host, port from tranche_mappings")
@@ -61,7 +62,7 @@ def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors
             if not zinc_ids_split.get(tranche):
                 zinc_ids_split[tranche] = []
             zinc_ids_split[tranche].append(zinc_id)
-    
+    current_task.update_state(task_id=task_id_progress, state='PROGRESS',meta={'current':0, 'projected':len(zinc_ids_split), 'time_elapsed':0})
     tasks = []
     for tranche in zinc_ids_split:
         tasks.append(getSubstanceList.s(zinc_ids_split[tranche], role, discarded, get_vendors, matched_smiles))
