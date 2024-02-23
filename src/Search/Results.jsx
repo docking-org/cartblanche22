@@ -209,6 +209,16 @@ export default function Results(props) {
                         </div>
                     }
 
+                    {!init &&
+                        <div
+                            style={{ 'marginTop': '35vh' }}
+                            className="justify-content-center align-items-center"
+                        >
+                                <ProgressBar key="loading" animated now={100} label={`Requesting search status...`} />
+                            </div>
+                    }
+
+
 
                     <Card>
 
@@ -221,15 +231,7 @@ export default function Results(props) {
                             }
                         >
 
-                            {!init &&
-                                <div
-                                    style={{ 'marginTop': '35vh' }}
-                                    className="justify-content-center align-items-center"
-                                >
-                                        <ProgressBar key="loading" animated now={100} label={`Requesting search status...`} />
-                                    </div>
-                            }
-
+                         
                             {results.zinc22 && results.zinc22.length > 0 &&
                                 <Tab eventKey="zinc22" title="ZINC22 Results"
                                     key={"zinc22"}
