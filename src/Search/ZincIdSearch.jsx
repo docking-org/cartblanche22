@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useImperativeHandle, forwardRef } from "react";
-import { Card, Container, Table } from "react-bootstrap";
+import { Card, Container, Table, Form } from "react-bootstrap";
 import axios from "axios";
 import useToken from "../utils/useToken";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +22,11 @@ export default function ZincIdSearch(props) {
     function getMolecules() {
         var bodyFormData = new FormData();
         bodyFormData.append('zinc_ids', input);
+        if(document.getElementById("smiles_only").checked){
+            bodyFormData.append('smiles_only', true);
+        }
+            
+
         var file = document.getElementById("zincfile").files[0];
         if (file) {
             bodyFormData.append('zinc_ids', file);
@@ -60,13 +65,21 @@ export default function ZincIdSearch(props) {
                                 name="myTextarea" value={input} onChange={e => setInput(e.target.value)}
                             ></textarea>
                         </div>
-                        <div class="form-group mt-1">
+                        <div class="form-group mt-1 mb-2">
                             <label for="zincfile">OR Upload a File (.txt only):</label>
                             <input type="file" id="zincfile" name="zincfile" class="form-control" accept=".txt" />
+                            
+                            <Form.Check 
+                            type={'checkbox'}
+                            id={`smiles_only`}
+                            label={`Search for SMILES only`}
+                        />
                         </div>
+                        
+
                         <button id="searchZincBtn2" type="submit" onClick={getMolecules}
                             class="btn btn-info m-1">Search</button>
-
+                        
                         <button id="testData" onClick={loadTestData}
                             class="btn btn-secondary m-1">Load Test Data</button>
                     </form>
@@ -133,6 +146,15 @@ export default function ZincIdSearch(props) {
                                     </ul>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>Search for SMILES only</td>
+                                <td>
+                                    <code>-F smiles_only</code>
+                                </td>
+                                
+                                
+                            </tr>
+
                         </tbody>
                     </Table>
                     <p>If you want to learn more about search, please go to <a href="http://wiki.docking.org/index.php/Zinc22:Searching"

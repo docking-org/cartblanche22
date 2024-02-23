@@ -10,7 +10,7 @@ import json
 from flask import jsonify, request, redirect, render_template, make_response
 from flask_restful import Resource
 from celery import chord, current_task, chain, group
-
+from celery.result import allow_join_result
 from flask_login import current_user
 from cartblanche.data.models.default_prices import DefaultPrices
 import pandas as pd 
@@ -42,9 +42,54 @@ def _paused_thread():
         psycopg2.extensions.set_wait_callback(thread)
 
 @celery.task
+def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors=True, matched_smiles=None, task_id_progress=None):
+    config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
+    config_curs = config_conn.cursor()
+    config_curs.execute("select tranche, host, port from tranche_mappings")
+    tranche_map = {}
+    for result in config_curs.fetchall():
+        tranche = result[0]
+        host = result[1]
+        port = result[2]
+        tranche_map[tranche] = ':'.join([host, str(port)])
+
+    zinc_ids_split = {}
+    for zinc_id in zinc_ids:
+        zinc_id = zinc_id.strip()
+        tranche = get_tranche(zinc_id)
+        if tranche in tranche_map:
+            if not zinc_ids_split.get(tranche):
+                zinc_ids_split[tranche] = []
+            zinc_ids_split[tranche].append(zinc_id)
+    
+    tasks = []
+    for tranche in zinc_ids_split:
+        tasks.append(getSubstanceList.s(zinc_ids_split[tranche], role, discarded, get_vendors, matched_smiles))
+    
+    res = group(tasks)()
+    with allow_join_result():
+        while not res.ready():
+            count = res.completed_count()
+            current_task.update_state(task_id=task_id_progress, state='PROGRESS',meta={'current':count, 'projected':len(zinc_ids_split), 'time_elapsed':0})
+            time.sleep(1)
+        result = res.get()
+    #result it a list of dictionaries, we need to merge them into one dictionary
+        merged = {}
+        keys = result[0].keys()
+        for key in keys:
+            merged[key] = []
+            for res in result:
+                merged[key] += res[key]
+        return merged
+            
+
+        
+
+       
+
+@celery.task
 def mergeResults(res, submission = None):
-    for i in res:
-        print(i)
+
     if isinstance(res, list):
         if isinstance(res[0], dict):
             for i in range(1, len(res)):
@@ -68,7 +113,8 @@ def formatZincID(sub_id):
         
 @celery.task
 def zinc20search(zinc20, matched_smiles=None):
-
+    missing = []
+    print(zinc20)
     if len(zinc20) == 0:
         return []
     fixed = []
@@ -78,9 +124,15 @@ def zinc20search(zinc20, matched_smiles=None):
             i = str.upper(i).split('ZINC')[1]
         elif 'C' in str.upper(i):
             i = str.upper(i).split('C')[1]
-        fixed.append(i)
-    zinc20 = fixed
 
+        #if not numeric, then it's not a valid zinc id
+        if not i.isnumeric():
+            missing.append(i)
+        else:
+            fixed.append(i)
+    zinc20 = fixed
+    if len(fixed) == 0:
+        return {'zinc20':[], 'missing': missing}
     db = psycopg2.connect(Config.SQLALCHEMY_BINDS['zinc20'])
     curs = db.cursor()
     
@@ -127,7 +179,7 @@ def zinc20search(zinc20, matched_smiles=None):
         results.append(result[i])
 
         
-    return {'zinc20':results}
+    return {'zinc20':results, 'missing': missing}
    
 @celery.task
 def vendorSearch(vendor_ids, role='public'):
@@ -348,7 +400,7 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
         for zinc_id in zinc_ids:
             zinc_id = zinc_id.strip()
             id_partition = get_tin_partition(zinc_id, tranche_map)
-            if id_partition != 'fake':
+            if id_partition != 'fake' and len(zinc_id) == 16:
                 tf_input.write("{} {}\n".format(zinc_id, id_partition))
                 total_length += 1
             else:
@@ -484,7 +536,7 @@ def get_vendor_results(data_file, search_curs, output_file, tranches_internal):
     search_curs.execute("select smiles, sub_id, tranche_id_orig, supplier_code, catalog.short_name from cb_pairs_output left join catalog on cb_pairs_output.cat_id_fk = catalog.cat_id")
     
     parse_tin_results(search_curs, output_file, tranches_internal)
-    
+
 def get_vendor_results_antimony(data_file, search_curs, output_file, missing_file):
     search_curs.execute("create temporary table tq_in (supplier_code text)")
     with _paused_thread():
@@ -524,7 +576,8 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
         tranches_internal_rev = { t[1] : t[0] for t in tranches_internal.items() }
         
     results = search_curs.fetchmany(5000)
-
+    print(results)
+    print("hii")
     while len(results) > 0:
         for result in results:
             if result[0]:  

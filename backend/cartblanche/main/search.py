@@ -7,7 +7,7 @@ from flask import request, abort, make_response, redirect, url_for, jsonify
 from celery.result import AsyncResult, GroupResult
 from cartblanche import celery
 from cartblanche.data.tasks import start_search_task
-from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults, vendorSearch
+from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults, vendorSearch, paralellizeZincSearch
 from cartblanche.data.tasks.search_smiles import sw_search, filter_sw_results
 from cartblanche.data.tasks.get_random import getRandom
 from cartblanche.helpers.validation import is_zinc22, filter_zinc_ids
@@ -100,7 +100,9 @@ def downloadResult(task, format='json'):
     response = result['zinc22'] 
     if result.get('zinc20'):
         response.extend(result['zinc20'])
-    
+        response.extend(result['missing'])
+    if result.gett('zinc22_missing'):
+        response.extend(result['zinc22_missing'])
 
     return make_response(formatZincResult(response, format), 200)
 
@@ -126,11 +128,15 @@ def search_substance(identifier, data = None, format = 'json'):
 @search_bp.route('/substances.<format>', methods=["POST", "GET"])
 def search_substances(file = None, data = None, format = 'json', ids = [], output_fields=["zinc_id, smiles"]): 
     ids = []
+    getVendors = True
     if 'zinc_ids' in request.files:
         file = request.files['zinc_ids'].read().decode()
         file = [x for x in re.split(r'\n|\r|(\r\n)', file) if x!='' and x!= None]
         ids.extend(file)
-    
+
+    if request.form.get('smiles_only'):
+        getVendors = False
+        
 
     if request.form.get('zinc_ids'):
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', request.form['zinc_ids']) if x!='']
@@ -141,23 +147,25 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
     if len(zinc22) == 0 and len(zinc20) == 0:
         return "No Valid ZINC IDs, please try again", 400
     zinc20tasks = zinc20search.si(zinc20)
+    task_id_progress = uuid.uuid4()
     task = [
-        getSubstanceList.si(zinc22,  getRole(), discarded ), zinc20tasks
+        paralellizeZincSearch.si(zinc22,  getRole(), discarded, getVendors, task_id_progress=task_id_progress ), zinc20tasks
     ] 
     
     callback = mergeResults.s()
 
     if request.method == "POST":
-        task = start_search_task.delay(task,ids, callback)
+        task = start_search_task.delay(task,ids, callback, task_id_progress=task_id_progress)
         return make_response({'task':task.id}, 200)
     else:
         task = start_search_task.delay(task,ids, callback)
         task = AsyncResult(task.id)
         result = task.get()
+
         task = result['id']
         task = AsyncResult(task)
-        #i apologize for these variable names :)
         res = task.get()
+
         result = res['zinc22']
         if res.get('zinc20'):
             result.extend(res['zinc20'])
