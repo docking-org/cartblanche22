@@ -5,7 +5,7 @@ set -o pipefail
 set -m
 
 
-celery -A cartblanche.run_celery.celery worker -l INFO -n worker &
+celery -A cartblanche.run_celery.celery worker -l INFO -n worker --concurrency=25 &
 celery -A cartblanche.run_celery.celery flower &
 gunicorn  -b :5068 --worker-tmp-dir /dev/shm -w 10 --log-level=DEBUG --access-logfile - --error-logfile - application  --timeout 36000 --reload
 
