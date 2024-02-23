@@ -28,6 +28,7 @@ export default function Results(props) {
     const [submission, setSubmission] = React.useState(undefined);
     const [logs, setLogs] = React.useState(undefined);
     const [noResults, setNoResults] = React.useState(false);
+    const [init, setInit] = React.useState(false);
     const [statusMessage, setStatusMessage] = React.useState("");
     useEffect(() => {
         document.title = props.title || "";
@@ -52,6 +53,7 @@ export default function Results(props) {
             timeout: 10000
         })
             .then(response => {
+                setInit(true);
                 if (response.data.status === "SUCCESS") {
 
                     console.log(response.data);
@@ -219,6 +221,14 @@ export default function Results(props) {
                             }
                         >
 
+                            {!init &&
+                                <div
+                                    style={{ 'marginTop': '35vh' }}
+                                    className="justify-content-center align-items-center"
+                                >
+                                        <ProgressBar key="loading" animated now={100} label={`Requesting search status...`} />
+                                    </div>
+                            }
 
                             {results.zinc22 && results.zinc22.length > 0 &&
                                 <Tab eventKey="zinc22" title="ZINC22 Results"
