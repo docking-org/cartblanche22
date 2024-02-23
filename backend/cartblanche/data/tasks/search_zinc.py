@@ -501,7 +501,7 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
                 for line in json.loads(line):
                     if line.get('zinc_id') and matched_smiles:
                         line['matched_smiles'] = matched_smiles[line['zinc_id']]                        
-                    print(line)
+                    
                     result.append(line)
 
             except:
@@ -577,8 +577,7 @@ def parse_tin_results(search_curs, output_file, tranches_internal= None, smiles_
         tranches_internal_rev = { t[1] : t[0] for t in tranches_internal.items() }
         
     results = search_curs.fetchmany(5000)
-    print(results)
-    print("hii")
+  
     while len(results) > 0:
         for result in results:
             if result[0]:  
