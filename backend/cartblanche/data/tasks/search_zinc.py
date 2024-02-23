@@ -374,7 +374,16 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
     logs = []
     current_task.update_state(state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
     # all configuration prepartion
-    config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
+
+    retry = 0
+    while True and retry < 10:
+        try:
+            config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
+            break
+        except:
+            print("failed to connect to zinc22_common, retrying in 1 second")
+            time.sleep(1)
+            retry += 1
     config_curs = config_conn.cursor()
     config_curs.execute("select tranche, host, port from tranche_mappings")
     tranche_map = {}
