@@ -49,7 +49,7 @@ export default function Results(props) {
         axios({
             method: "get",
             url: "/search/result/" + window.location.search.split("=")[1],
-            timeout: 2000
+            timeout: 10000
         })
             .then(response => {
                 if (response.data.status === "SUCCESS") {
