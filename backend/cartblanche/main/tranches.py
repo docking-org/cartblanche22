@@ -302,7 +302,7 @@ def tranches2dDownload():
     }, 200
 
 zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
-zinc22_common_conn = psycopg2.connect(zinc22_common_url)
+zinc22_common_conn = psycopg2.connect(zinc22_common_url  )
 
 def get3dfiles(gen, tranche, charge):
     #zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]

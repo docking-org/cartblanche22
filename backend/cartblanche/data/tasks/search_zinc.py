@@ -376,6 +376,7 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
     # all configuration prepartion
 
     retry = 0
+    config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
     while True and retry < 10:
         try:
             config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
@@ -439,6 +440,7 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
                         get_smiles_results(data_file, search_curs, output_file, tranches_internal)
                         
                 except psycopg2.OperationalError as e:
+                    print(e)
                     message = "failed to connect to {}, the machine is probably down. Going to continue and collect partial results.".format(search_database)
                     print(message)
                     logs.append(message)
@@ -521,8 +523,8 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
         current_task.update_state(state='PROGRESS',meta={'current':total_length, 'projected':total_length, 'time_elapsed':t_elapsed})
 
         getPrices(result, role)
-      
-        return {'zinc22':result, 'zinc22_missing':missing_file.read().split("\n"), 'logs':logs}
+        current_hostname = subprocess.check_output(['hostname']).decode('utf-8').strip()
+        return {'zinc22':result, 'zinc22_missing':missing_file.read().split("\n"), 'logs':logs, 'hostname':current_hostname}
         
 
 
