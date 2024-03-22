@@ -58,12 +58,18 @@ def getRandomFromDB(url, limit, current=None, retries=0):
     try:        
         conn = psycopg2.connect(url)
         curs = conn.cursor()
-        curs.execute('select max(sub_id) from substance;')
-        max = curs.fetchone()[0]
+        # curs.execute('select max(sub_id) from substance;')
+        # max = curs.fetchone()[0]
         
-        curs.execute(
-            ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
-        )
+        # curs.execute(
+        #     ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
+        # )
+        
+        #find limit / 32 to find tablesample fraction
+        limit = limit // 32
+        curs.execute('CREATE EXTENSION IF NOT EXISTS tsm_system_rows;')
+        curs.execute("select * from substance tablesample system_rows({limit}) LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id;".format(limit=limit))
+
         res = curs.fetchall()
         result.append(res)
         
