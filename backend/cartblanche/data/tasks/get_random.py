@@ -56,6 +56,7 @@ subsets = {
 def getRandomFromDB(url, limit, current=None, retries=0):
     result = []
     try:        
+        os.environ['PGOPTIONS'] = '-c statement_timeout=60000'
         conn = psycopg2.connect(url)
         curs = conn.cursor()
         # curs.execute('select max(sub_id) from substance;')
@@ -66,7 +67,9 @@ def getRandomFromDB(url, limit, current=None, retries=0):
         # )
         
         #find limit / 32 to find tablesample fraction
-        limit = limit // 32
+        limit = limit // 32 
+        if limit == 0:
+            limit = 1
         curs.execute('CREATE EXTENSION IF NOT EXISTS tsm_system_rows;')
         curs.execute("select * from substance tablesample system_rows({limit}) LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id;".format(limit=limit))
 
