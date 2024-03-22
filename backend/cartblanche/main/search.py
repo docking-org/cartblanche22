@@ -311,9 +311,9 @@ def random_substance(format = 'json', subset = None):
     if request.method == "POST":
         return {"task": task}
     else:
-        res= task.get()['id']
-        res = AsyncResult(res).get()
-
+        # res= task.get()['id']
+        res = AsyncResult(task).get()
+        res = AsyncResult(res['id']).get()
         return make_response(formatZincResult(res, format), 200)
 
     

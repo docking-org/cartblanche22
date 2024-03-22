@@ -56,7 +56,6 @@ subsets = {
 def getRandomFromDB(url, limit, current=None, retries=0):
     result = []
     try:        
-        os.environ['PGOPTIONS'] = '-c statement_timeout=1000'
         conn = psycopg2.connect(url)
         curs = conn.cursor()
         curs.execute('select max(sub_id) from substance;')
