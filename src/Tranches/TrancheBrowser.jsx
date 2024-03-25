@@ -111,10 +111,10 @@ export default function TrancheBrowser(props) {
         }
         else {
             setActiveSubset(subset);
-            let minCol = subsets[subset][0][0];
-            let maxCol = subsets[subset][0][1];
-            let minRow = subsets[subset][1][0];
-            let maxRow = subsets[subset][1][1];
+            let minCol = subsets[subset][0][0] - 3;
+            let maxCol = subsets[subset][0][1] - 3;
+            let minRow = subsets[subset][1][0] - 3;
+            let maxRow = subsets[subset][1][1] - 3;
 
             tranches.map(tranche => {
                 let row = axes[0].indexOf(tranche['h_num']);
@@ -167,9 +167,9 @@ export default function TrancheBrowser(props) {
         console.log(t);
         let trancheString = "";
         t.map(tranche => trancheString +=
-                (tranche['generation'] !== '-' ? tranche['generation'] : "") +
-                tranche['h_num'] + tranche['p_num'] +
-                (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
+            (tranche['generation'] !== '-' ? tranche['generation'] : "") +
+            tranche['h_num'] + tranche['p_num'] +
+            (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
 
         setTrancheString(trancheString);
     }
@@ -206,7 +206,7 @@ export default function TrancheBrowser(props) {
     return (
         <Container fluid
             className='mt-1 page-wrapper'
-            
+
         >
             {
                 !tranches &&
