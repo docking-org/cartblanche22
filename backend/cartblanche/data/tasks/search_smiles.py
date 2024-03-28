@@ -169,6 +169,6 @@ def call_api(smile, dist, adist, db, matched_smiles):
     credentials = ('gpcr', 'xtal')
     import urllib.parse
     smile_text = urllib.parse.quote(smile)
-    url = "https://swp.docking.org/search/view?smi={smile}&db={db}&fmt=tsv&dist={adist}&sdist={dist}".format(smile=smile_text, db=db, adist=adist, dist=dist)
+    url = "https://swp.docking.org/search/view?smi={smile}&db={db}&fmt=tsv&dist={adist}&sdist={dist}&length=25".format(smile=smile_text, db=db, adist=adist, dist=dist)
     r = requests.get(url, auth=credentials)
     return [r.text, matched_smiles]
