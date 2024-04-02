@@ -7,7 +7,7 @@ import time
 import json
 from celery import current_task, group
 from celery.result import AsyncResult, allow_join_result
-from celery_batches import Batches
+
 from cartblanche import celery
 from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults
 from config import Config
@@ -38,7 +38,7 @@ def filter_sw_results(ids, role, task_id_progress):
         return res
 
 @celery.task
-def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None, base=Batches, rate_limit='5/s', flush_every=100, flush_interval=10):
+def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
       
     current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
    
@@ -86,8 +86,7 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None, b
         i += 1
         current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':i, 'projected':len(smilelist), 'time_elapsed':0})
         time.sleep(5)
-    
-    print(results)
+
     
     return results
 
