@@ -72,22 +72,18 @@ def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors
         while not res.ready():
             count = res.completed_count()
             current_task.update_state(task_id=task_id_progress, state='PROGRESS',meta={'current':count, 'projected':len(zinc_ids_split), 'time_elapsed':0})
-            time.sleep(1)
+            time.sleep(2)
         result = res.get()
     #result it a list of dictionaries, we need to merge them into one dictionary
         merged = {}
-        keys = result[0].keys()
-        for key in keys:
-            merged[key] = []
-            for res in result:
-                merged[key] += res[key]
+        if len(result) > 0:
+            keys = result[0].keys()
+            for key in keys:
+                merged[key] = []
+                for res in result:
+                    merged[key] += res[key]
         return merged
             
-
-        
-
-       
-
 @celery.task
 def mergeResults(res, submission = None):
 

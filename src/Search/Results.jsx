@@ -59,7 +59,7 @@ export default function Results(props) {
                     console.log(response.data);
                     setResults(response.data.result);
 
-                    if (response.data.result.zinc22.length > 0) {
+                    if (response.data.result.zinc22 && (response.data.result.zinc22.length > 0)) {
                         setCurrentTab("zinc22");
                     }
                     else if (response.data.result.zinc20 && (response.data.result.zinc20.length > 0)) {
@@ -96,7 +96,8 @@ export default function Results(props) {
                 }
 
             }).catch(error =>
-                window.location.reload(true)
+                console.log(error)
+                // window.location.reload(true)
             );
     }
 
@@ -214,8 +215,8 @@ export default function Results(props) {
                             style={{ 'marginTop': '35vh' }}
                             className="justify-content-center align-items-center"
                         >
-                                <ProgressBar key="loading" animated now={100} label={`Requesting search status...`} />
-                            </div>
+                            <ProgressBar key="loading" animated now={100} label={`Requesting search status...`} />
+                        </div>
                     }
 
 
@@ -231,7 +232,7 @@ export default function Results(props) {
                             }
                         >
 
-                         
+
                             {results.zinc22 && results.zinc22.length > 0 &&
                                 <Tab eventKey="zinc22" title="ZINC22 Results"
                                     key={"zinc22"}
@@ -336,12 +337,12 @@ export default function Results(props) {
                             </Accordion.Item>
                             {inUCSF &&
                                 <Accordion.Item eventKey="1">
-                                    <Accordion.Header>Search Logs ({logs.length})</Accordion.Header>
+                                    <Accordion.Header>Search Logs ({logs && logs.length})</Accordion.Header>
                                     <Accordion.Body>
                                         <Form.Control as='textarea' rows={6}
                                             editable="false"
                                             disabled={true}
-                                            value={logs.join('\n')}
+                                            value={logs && logs.join('\n')}
                                         />
                                     </Accordion.Body>
                                 </Accordion.Item>
