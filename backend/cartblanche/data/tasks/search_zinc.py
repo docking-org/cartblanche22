@@ -133,7 +133,7 @@ def zinc20search(zinc20, matched_smiles=None):
     db = psycopg2.connect(Config.SQLALCHEMY_BINDS['zinc20'])
     curs = db.cursor()
     
-    curs.execute("select sub_id_fk, supplier_code, catalog.name, catalog.purchasable, smiles from catalog_item\
+    curs.execute("select sub_id_fk, supplier_code, catalog.name, catalog.purchasable, smiles, catalog.item_template from catalog_item\
                   left join catalog on cat_id_fk = cat_id left join substance on sub_id_fk = sub_id where sub_id_fk in %s", (tuple(zinc20),))
     result = {}
     for i in curs.fetchall():
@@ -168,7 +168,8 @@ def zinc20search(zinc20, matched_smiles=None):
             'quantity': 10,
             'shipping': "6 weeks",
             'supplier_code': i[1],
-            'unit': "mg"
+            'unit': "mg",
+            'url': i[5]
             })
         
     results = []

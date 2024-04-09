@@ -375,6 +375,16 @@ export default function Substance() {
                               >
                                 {p.supplier_code}
                               </Button>
+                            ) : isZinc20 ? (
+                              <Button
+                                variant="link btn-sm"
+                                href={String(p.url).replace(
+                                  "%%s",
+                                  p.supplier_code
+                                )}
+                              >
+                                {p.supplier_code}
+                              </Button>
                             ) : (
                               <Button
                                 variant="link btn-sm"
