@@ -235,8 +235,6 @@ def tranches2d():
         'methods': methods_2d
     }, 200)
 
-
-
 @app.route('/tranches/get3d', methods=['GET'])
 def tranches3d():
     tranches = TrancheModel.query.filter(TrancheModel.charge != '-').filter(TrancheModel.generation != '-').all()
@@ -259,7 +257,7 @@ def tranches3d():
     # return render_template('tranches/3D.html', tranches=tranches, axes=axes, cell3D=json.dumps(cell3DNew),
     #                        ticks=ticks, unfilteredSize=unfilteredSize)
     tranches = [i.to_dict() for i in tranches]
-        
+    
     return make_response({
         'tranches': tranches, 
         'axes': full_axes, 
@@ -302,19 +300,48 @@ def tranches2dDownload():
     }, 200
 
 zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
-zinc22_common_conn = psycopg2.connect(zinc22_common_url  )
 
-def get3dfiles(gen, tranche, charge):
+
+def get3dfiles(tranches):
     #zinc22_common_url = Config.SQLALCHEMY_BINDS["zinc22_common"]
     #conn = psycopg2.connect(zinc22_common_url)
+    
+    zinc22_common_conn = psycopg2.connect(zinc22_common_url  )
     curs = zinc22_common_conn.cursor()
+   
+    # gen = tranches[0:1]
+    # hac = tranches[1:4]
+    # logp = tranches[4:8]
+    # charge = tranches[-1]
 
-    curs.execute("select extra, suffix from holdings_3d_new where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
+    # curs.execute("select extra, suffix from holdings_3d_new where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
+    # search by all instead
+    # curs.execute("drop table if exists temp_tranches")
+    
+    curs.execute("create table if not exists temp_tranches (gen text, tranche text, charge text)")
+    
+    psql_query = "insert into temp_tranches (gen, tranche, charge) values "
+    for i in tranches:
+        psql_query += "('{}', '{}', '{}' ), ".format(i[0:1], i[1:8], i[-1])
+    psql_query = psql_query[:-2]
+    curs.execute(psql_query)
+   
+    psql_query = "select holdings_3d_new.extra, holdings_3d_new.suffix, temp_tranches.gen, temp_tranches.tranche, temp_tranches.charge from holdings_3d_new join temp_tranches on holdings_3d_new.gen = temp_tranches.gen and holdings_3d_new.tranche = temp_tranches.tranche and holdings_3d_new.charge = temp_tranches.charge"
+    curs.execute(psql_query)
+
     file_results = []
+ 
     for r in curs.fetchall():
+            
         extra  = r[0]
         suffix = r[1]
-        file_results.append((extra, suffix))
+        gen = r[2]
+        tranche = r[3]
+        charge = r[4]
+        logp = tranche[4:8]
+        hac = tranche[1:4]
+
+        file_results.append((extra, suffix, gen, tranche, charge, logp, hac))
     return file_results
 
 
@@ -332,8 +359,8 @@ def tranches3dDownload():
     dformat = dformat.strip()
 
     tranches_data = sorted(tranches_data)
-    
     def gen_all_tranches(tranches):
+        to_look_up = {}
         res = []
         for tranche in tranches:
             generation = tranche[0:1]
@@ -341,13 +368,24 @@ def tranches3dDownload():
             logp = tranche[4:8]
             charge = tranche[-1]
             prefix = URI_MIMETYPE_TO_FORMATTER[mimetype](hac, logp, dformat, add_url_3D, charge, generation)
-            for extra, suffix in get3dfiles(generation, hac+logp, charge):
-                suffix = suffix.strip()
-                extra = extra.strip()
-                if mimetype != 'application/x-ucsf-zinc-uri-downloadscript-powershell':
-                    res.append(prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{dformat}\n")
-                else:
-                    res.append(prefix + "\n")
+            to_look_up[tranche] = prefix   
+            
+        db_res = get3dfiles(tranches)
+        for extra, suffix, gen, tranche, charge, logp, hac in db_res:
+            suffix = suffix.strip()
+            extra = extra.strip()
+            hac = hac.strip()
+            logp = logp.strip()
+            charge = charge.strip()
+            generation = gen.strip()
+            tranche = tranche.strip()
+            prefix = to_look_up[generation+ tranche + charge]
+            
+            if mimetype != 'application/x-ucsf-zinc-uri-downloadscript-powershell':
+                res.append(prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{dformat}\n")
+            else:
+                res.append(prefix + "\n")
+        
         return res
     
     def gen_all_rsyncs(tranches):
