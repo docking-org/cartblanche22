@@ -316,9 +316,8 @@ def get3dfiles(tranches):
 
     # curs.execute("select extra, suffix from holdings_3d_new where gen = '{}' and tranche = '{}' and charge = '{}'".format(gen, tranche, charge))
     # search by all instead
-    # curs.execute("drop table if exists temp_tranches")
-    
-    curs.execute("create table if not exists temp_tranches (gen text, tranche text, charge text)")
+    curs.execute("drop table if exists temp_tranches")
+    curs.execute("create temporary table if not exists temp_tranches (gen text, tranche text, charge text)")
     
     psql_query = "insert into temp_tranches (gen, tranche, charge) values "
     for i in tranches:
