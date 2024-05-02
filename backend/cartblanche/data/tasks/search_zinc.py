@@ -345,6 +345,7 @@ def vendorSearch(vendor_ids, role='public'):
                 projected_size += 1
                 p_id_prev = p_id
             if projected_size > 0:
+                print(machine_id_map)
                 p_id_prev = machine_id_map[int(p_id_prev)]
                 current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':total_length, 'time_elapsed':t_elapsed})
                 search(p_id_prev, data_file, output_file)
@@ -425,7 +426,7 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
                 try:
                     data_file.flush()
                     data_file.seek(0)
-                  
+                    
                     search_database = get_conn_string(p_id)
                     logs.append("searching "+ search_database)
                     search_conn = psycopg2.connect(search_database, connect_timeout=5)
