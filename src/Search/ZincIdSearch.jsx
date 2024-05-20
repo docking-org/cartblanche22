@@ -6,162 +6,214 @@ import useToken from "../utils/useToken";
 import { useNavigate } from "react-router-dom";
 
 export default function ZincIdSearch(props) {
-    const navigate = useNavigate();
-    const [input, setInput] = React.useState("");
-    const { token, removeToken, setToken, username } = useToken();
+  const navigate = useNavigate();
+  const [input, setInput] = React.useState("");
+  const { token, removeToken, setToken, username } = useToken();
 
-    useEffect(() => {
+  useEffect(() => {}, []);
 
-    }, [])
+  useEffect(() => {
+    document.title = props.title || "";
+  }, [props.title]);
 
-    useEffect(() => {
-        document.title = props.title || "";
-    }, [props.title]);
-
-
-    function getMolecules() {
-        var bodyFormData = new FormData();
-        bodyFormData.append('zinc_ids', input);
-        if(document.getElementById("smiles_only").checked){
-            bodyFormData.append('smiles_only', true);
-        }
-            
-
-        var file = document.getElementById("zincfile").files[0];
-        if (file) {
-            bodyFormData.append('zinc_ids', file);
-        }
-        return axios({
-            method: "post",
-            url: "/substances.json",
-            data: bodyFormData,
-            headers: {
-                "Content-Type": "multipart/form-data",
-                "Authorization": token ? `Bearer ${token}` : "",
-            },
-        })
-            .then(response => {
-                console.log(response.data);
-
-                navigate("/results?task=" + response.data.task);
-            })
+  function getMolecules() {
+    var bodyFormData = new FormData();
+    bodyFormData.append("zinc_ids", input);
+    if (document.getElementById("smiles_only").checked) {
+      bodyFormData.append("smiles_only", true);
     }
 
-    function loadTestData() {
-        setInput("ZINCar0000000p57\nZINCde000000YNim\nZINCms000002NiP3\nZINCqq000005JJSl\nZINCjB000003FXzy\n");
+    var file = document.getElementById("zincfile").files[0];
+    if (file) {
+      bodyFormData.append("zinc_ids", file);
     }
+    return axios({
+      method: "post",
+      url: "/substances.json",
+      data: bodyFormData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    }).then((response) => {
+      console.log(response.data);
 
-    return (
-        <Container className="mt-2 mb-2">
-            <Card>
-                <Card.Header><b>Search by ZINC identifier, one per line</b></Card.Header>
+      navigate("/results?task=" + response.data.task);
+    });
+  }
 
-                <Card.Body>
-                    <form id="data" method="post" enctype="multipart/form-data" onSubmit={(e) => e.preventDefault()}>
-                        <div class="form-group">
-                            <textarea id="zinc_ids"
-                                class="form-control" rows="6" cols="20" placeholder="ZINC IDs"
-                                onLoad={e => setInput(e.target.value)}
-                                name="myTextarea" value={input} onChange={e => setInput(e.target.value)}
-                            ></textarea>
-                        </div>
-                        <div class="form-group mt-1 mb-2">
-                            <label for="zincfile">OR Upload a File (.txt only):</label>
-                            <input type="file" id="zincfile" name="zincfile" class="form-control" accept=".txt" />
-                            
-                            <Form.Check 
-                            type={'checkbox'}
-                            id={`smiles_only`}
-                            label={`Search for SMILES only`}
-                        />
-                        </div>
-                        
+  function loadTestData() {
+    setInput(
+      "ZINCar0000000p57\nZINCde000000YNim\nZINCms000002NiP3\nZINCqq000005JJSl\nZINCjB000003FXzy\n"
+    );
+  }
 
-                        <button id="searchZincBtn2" type="submit" onClick={getMolecules}
-                            class="btn btn-info m-1">Search</button>
-                        
-                        <button id="testData" onClick={loadTestData}
-                            class="btn btn-secondary m-1">Load Test Data</button>
-                    </form>
-                </Card.Body>
-            </Card>
+  return (
+    <Container className="mt-2 mb-2">
+      <Card>
+        <Card.Header>
+          <b>Search by ZINC identifier, one per line</b>
+        </Card.Header>
 
-            <Card className="mt-2">
-                <Card.Header><b>CURL commands for searching multiple ZincIDs</b></Card.Header>
-                <Card.Body>
+        <Card.Body>
+          <form
+            id="data"
+            method="post"
+            enctype="multipart/form-data"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <div class="form-group">
+              <textarea
+                id="zinc_ids"
+                class="form-control"
+                rows="6"
+                cols="20"
+                placeholder="ZINC IDs"
+                onLoad={(e) => setInput(e.target.value)}
+                name="myTextarea"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+              ></textarea>
+            </div>
+            <div class="form-group mt-1 mb-2">
+              <label for="zincfile">OR Upload a File (.txt only):</label>
+              <input
+                type="file"
+                id="zincfile"
+                name="zincfile"
+                class="form-control"
+                accept=".txt"
+              />
 
-                    <p>Example: <code>curl -X GET https://cartblanche22.docking.org/substances.txt -F
-                        zinc_ids=@test.txt -F output_fields='smiles,zinc_id'
-                    </code></p>
-                    <p>
-                        - Results can be formatted in the desired file format.
-                        <br />
-                        - If output_fields are not specified, all available molecule data is returned.
-                        <br />
-                        - The zinc_id and smiles
-                        output fields will be returned by default unless otherwise specified.
-                    </p>
-                    <Table bordered striped hover>
-                        <thead>
-                            <tr>
-                                <th class="col-md-4">Description</th>
-                                <th class="col-md-5">Attributes</th>
-                                <th class="col-md-3">Possible fields</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>To specify return format</td>
-                                <td><code>curl -X GET https://cartblanche22.docking.org/substances<i>.txt</i></code></td>
-                                <td>
-                                    <ul>
-                                        <li>.txt</li>
-                                        <li>.csv</li>
-                                        <li>.json</li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>To add search value</td>
-                                <td> <code>-F zinc_ids=<i>@test.txt</i></code></td>
-                                <td>.txt file with list of zinc identifers</td>
-                            </tr>
-                            <tr>
-                                <td>To specify output fields
-                                    <br />
+              <Form.Check
+                type={"checkbox"}
+                id={`smiles_only`}
+                label={`Search for SMILES only`}
+              />
+            </div>
 
-                                    <small>If no fields are defined, search will return all possible fields</small>
-                                </td>
-                                <td>
-                                    <code>-F output_fields=<i>'smiles,zinc_id'</i></code>
-                                </td>
-                                <td>
-                                    <ul>
-                                        <li>catalogs</li>
-                                        <li>smiles</li>
-                                        <li>sub_id</li>
-                                        <li>tranche</li>
-                                        <li>tranche_details</li>
-                                        <li>zinc_id</li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Search for SMILES only</td>
-                                <td>
-                                    <code>-F smiles_only</code>
-                                </td>
-                                
-                                
-                            </tr>
+            <button
+              id="searchZincBtn2"
+              type="submit"
+              onClick={getMolecules}
+              class="btn btn-info m-1"
+            >
+              Search
+            </button>
 
-                        </tbody>
-                    </Table>
-                    <p>If you want to learn more about search, please go to <a href="http://wiki.docking.org/index.php/Zinc22:Searching"
-                        target="_blank"> Zinc22 documentation on wiki
-                        page</a></p>
-                </Card.Body>
-            </Card>
-        </Container >
-    )
+            <button
+              id="testData"
+              onClick={loadTestData}
+              class="btn btn-secondary m-1"
+            >
+              Load Test Data
+            </button>
+          </form>
+        </Card.Body>
+      </Card>
+
+      <Card className="mt-2">
+        <Card.Header>
+          <b>CURL commands for searching multiple ZincIDs</b>
+        </Card.Header>
+        <Card.Body>
+          <p>
+            Example:{" "}
+            <code>
+              curl -X GET https://cartblanche22.docking.org/substances.txt -F
+              zinc_ids=@test.txt -F output_fields='smiles,zinc_id'
+            </code>
+          </p>
+          <p>
+            - Results can be formatted in the desired file format.
+            <br />
+            - If output_fields are not specified, all available molecule data is
+            returned.
+            <br />- The zinc_id and smiles output fields will be returned by
+            default unless otherwise specified.
+          </p>
+          <Table bordered striped hover>
+            <thead>
+              <tr>
+                <th class="col-md-4">Description</th>
+                <th class="col-md-5">Attributes</th>
+                <th class="col-md-3">Possible fields</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>To specify return format</td>
+                <td>
+                  <code>
+                    curl -X GET https://cartblanche22.docking.org/substances
+                    <i>.txt</i>
+                  </code>
+                </td>
+                <td>
+                  <ul>
+                    <li>.txt</li>
+                    <li>.csv</li>
+                    <li>.json</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td>To add search value</td>
+                <td>
+                  {" "}
+                  <code>
+                    -F zinc_ids=<i>@test.txt</i>
+                  </code>
+                </td>
+                <td>.txt file with list of zinc identifers</td>
+              </tr>
+              <tr>
+                <td>
+                  To specify output fields
+                  <br />
+                  <small>
+                    If no fields are defined, search will return all possible
+                    fields
+                  </small>
+                </td>
+                <td>
+                  <code>
+                    -F output_fields=<i>'smiles,zinc_id'</i>
+                  </code>
+                </td>
+                <td>
+                  <ul>
+                    <li>catalogs</li>
+                    <li>smiles</li>
+                    <li>sub_id</li>
+                    <li>tranche</li>
+                    <li>tranche_details</li>
+                    <li>zinc_id</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Search for SMILES only (search returns zinc_id, smiles){" "}
+                </td>
+                <td>
+                  <code>-F smiles_only=true</code>
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+          <p>
+            If you want to learn more about search, please go to{" "}
+            <a
+              href="http://wiki.docking.org/index.php/Zinc22:Searching"
+              target="_blank"
+            >
+              {" "}
+              Zinc22 documentation on wiki page
+            </a>
+          </p>
+        </Card.Body>
+      </Card>
+    </Container>
+  );
 }
