@@ -36,7 +36,7 @@ def serve(path):
 def add_header(r):
     #allow cache for a month for application/wasm files
     
-    if request.path.endswith('.wasm'):
+    if request.path.endswith('.wasm') or request.path.endswith("RDKit_minimal.js"):
         # r.cache_control.max_age = 2592000
         # r.cache_control.public = True
         r.headers["Cache-Control"] = "public, max-age=2592000"
