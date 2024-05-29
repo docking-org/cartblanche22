@@ -40,6 +40,9 @@ def add_header(r):
         # r.cache_control.max_age = 2592000
         # r.cache_control.public = True
         r.headers["Cache-Control"] = "public, max-age=2592000"
+    if request.path.endswith(".css"):
+        #one day
+        r.headers["Cache-Control"] = "public, max-age=86400"
         
     return r
     
