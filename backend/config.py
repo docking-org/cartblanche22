@@ -40,7 +40,7 @@ class Config(object):
             'tin': os.getenv('TIN_DATABASE'),
             'zinc20': os.getenv('ZINC20_DATABASE'),
         }
-
+        
         DOWNLOAD_PASS_2D = os.getenv('DOWNLOAD_PASS_2D')
         DOWNLOAD_USERNAME_2D = os.getenv('DOWNLOAD_USERNAME_2D')
 

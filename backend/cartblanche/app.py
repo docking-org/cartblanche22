@@ -37,9 +37,10 @@ def add_header(r):
     #allow cache for a month for application/wasm files
     
     if request.path.endswith('.wasm'):
-        r.cache_control.max_age = 2592000
-        r.cache_control.public = True
-
+        # r.cache_control.max_age = 2592000
+        # r.cache_control.public = True
+        r.headers["Cache-Control"] = "public, max-age=2592000"
+        
     return r
     
 def create_app(config_class=Config):
