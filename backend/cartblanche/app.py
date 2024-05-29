@@ -34,10 +34,12 @@ def serve(path):
 
 @app.after_request
 def add_header(r):
-    # r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    # r.headers["Pragma"] = "no-cache"
-    # r.headers["Expires"] = "0"
+    #allow cache for a month for application/wasm files
     
+    if request.path.endswith('.wasm'):
+        r.cache_control.max_age = 2592000
+        r.cache_control.public = True
+
     return r
     
 def create_app(config_class=Config):
