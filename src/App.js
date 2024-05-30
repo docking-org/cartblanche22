@@ -14,8 +14,8 @@ function App() {
             ZINC-22 focuses on make-on-demand ("tangible") compounds from a small
             number of large catalogs: Enamine, WuXi and Mcule. Our sister
             database, <a target='blank' href="https://ZINC20.docking.org">ZINC20</a>
-            &nbsp; focuses on smaller catalogs. ZINC-22 currently has about 37 billion
-            molecules in 2D and 4.5 billion in 3D.
+            &nbsp; focuses on smaller catalogs. ZINC-22 currently has about 54.9 billion molecules 
+            in 2D and 5.9 billion in 3D.
             <br />
             <br />
             Cartblanche allows you to:
