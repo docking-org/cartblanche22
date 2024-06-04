@@ -383,7 +383,7 @@ def tranches3dDownload():
             prefix = to_look_up[generation+ tranche + charge]
             
             if mimetype != 'application/x-ucsf-zinc-uri-downloadscript-powershell':
-                res.append(prefix + f"/{extra}/{hac}{logp}-{charge}-{suffix}.{dformat}\n")
+                res.append(prefix + f"{extra}/H{hac}{logp}-{charge}-{suffix}.{dformat}\n")
             else:
                 res.append(prefix + "\n")
         
