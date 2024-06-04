@@ -64,13 +64,10 @@ def create_app(config_class=Config):
     api.init_app(app)
     cors.init_app(app)
 
-
     from cartblanche.main import application as main_bp
     app.register_blueprint(main_bp)
 
     from cartblanche.main.search import search_bp
     app.register_blueprint(search_bp)
-
-
 
     return app
