@@ -21,7 +21,7 @@ RUN pip install -r requirements.txt
 
 run add-apt-repository ppa:openjdk-r/ppa
 RUN apt-get update && \
-    apt-get install -y openjdk-11-jre-headless && \
+    apt-get install -y default-jre && \
     apt-get clean;
 
 RUN apt-get install -y vim
