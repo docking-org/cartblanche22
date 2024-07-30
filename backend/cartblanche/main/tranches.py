@@ -21,7 +21,7 @@ def BKSLabFormatter(hac, logp, format, add_url, charge, generation):
     return "/nfs/exd/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def AWSFormatter(hac, logp, format, add_url, charge, generation):
-    return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "s3://zinc3d/zinc-22/{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def OCIFormatter(hac, logp, format, add_url, charge, generation):
     return "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idrvm4tkz2a8/b/ZINC/o//zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
