@@ -19,7 +19,6 @@ RUN echo "conda activate cartblanche-rdkit-env" > ~/.bashrc
 ENV PATH /opt/conda/envs/cartblanche-rdkit-env/bin:$PATH
 RUN pip install -r requirements.txt
 
-run add-apt-repository ppa:openjdk-r/ppa
 RUN apt-get update && \
     apt-get install -y default-jre && \
     apt-get clean;
