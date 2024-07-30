@@ -20,7 +20,7 @@ ENV PATH /opt/conda/envs/cartblanche-rdkit-env/bin:$PATH
 RUN pip install -r requirements.txt
 
 RUN apt-get update && \
-    apt-get install -y openjdk-11 && \
+    apt-get install -y openjdk-11-jre && \
     apt-get clean;
 
 RUN apt-get install -y vim
