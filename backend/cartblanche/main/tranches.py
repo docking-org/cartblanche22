@@ -148,17 +148,17 @@ full_axes = [[
 subsets = {
         # 'all': [[0, 61], [0, 62]],
         # 'none': [[0, 0], [0, 0]],
-        'shards': [[0, 41], [4, 10]],
-        'fragments': [[0, 41], [7, 16]],
-        'flagments': [[0, 41], [15, 20]],
-        'lead-like': [[0, 41], [16, 25]],
-        'goldilocks': [[16, 36], [18, 24]],
-        'small-leads': [[0, 41], [16, 20]],
-        'medium-leads': [[0, 41], [20, 23]],
-        'big-leads': [[0, 41], [23, 26]],
-        'lugs': [[0, 46], [26, 30]],
-        'drug-like': [[0, 56], [0, 28]],
-        'big-n-greasy': [[41, 500], [25, 30]]
+        'shards': [[0, 33], [4, 10]],
+        'fragments': [[0, 43], [7, 16]],
+        'flagments': [[0, 43], [15, 20]],
+        'lead-like': [[0, 43], [16, 25]],
+        'goldilocks': [[20, 38], [18, 24]],
+        'small-leads': [[0, 43], [16, 19]],
+        'medium-leads': [[0, 43], [19, 22]],
+        'big-leads': [[0, 43], [22, 25]],
+        'lugs': [[0, 48], [23, 29]],
+        'drug-like': [[0, 58], [0, 28]],
+        'big-n-greasy': [[44, 500], [25, 30]]
 }
 
 charges = {
@@ -204,6 +204,7 @@ methods_2d = {
 
 formats_2d = {
     "SMILES" : "smi.gz",
+    "Purchasing Information": "vendor.smi.gz",
 #    "DOCK37" : "db2.tgz",
 #    "AutoDock" : "pdbqt.tgz",
 #    "Mol2" : "mol2.tgz",
@@ -281,7 +282,11 @@ def tranches2dDownload():
     format = formData['format']
     using = formData['method']
     mimetype = URI_EXTENSION_TO_MIMETYPE[using]
-    add_url_2D = 'zinc22/2d/'
+    if formData['format'] == 'vendor.smi.gz':
+        add_url_2D = 'zinc22/vendors_zincid_map/current/'
+        format = 'smi.gz'
+    else:
+        add_url_2D = 'zinc22/2d/'
 
     def gen_tranches(tranche):
         hac = tranche[0:3]
