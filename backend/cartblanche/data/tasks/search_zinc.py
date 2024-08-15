@@ -195,7 +195,7 @@ def vendorSearch(vendor_ids, role='public'):
         host = result[1]
         port = result[2]
         tranche_map[tranche] = ':'.join([host, str(port)])
-    config_curs.execute("select host, port from database_partitions")
+    config_curs.execute("select machine_id, hostname, port from tin_machines")
     # extra configuration for cartblanche, translates machine_id to host:port
     machine_id_map = {}
     for result in config_curs.fetchall():
