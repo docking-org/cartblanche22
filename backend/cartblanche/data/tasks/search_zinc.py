@@ -195,7 +195,7 @@ def vendorSearch(vendor_ids, role='public'):
         host = result[1]
         port = result[2]
         tranche_map[tranche] = ':'.join([host, str(port)])
-    config_curs.execute("select machine_id, hostname, port from tin_machines")
+    config_curs.execute("select host, port from database_partitions")
     # extra configuration for cartblanche, translates machine_id to host:port
     machine_id_map = {}
     for result in config_curs.fetchall():
@@ -523,7 +523,6 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
         getPrices(result, role)
         current_hostname = subprocess.check_output(['hostname']).decode('utf-8').strip()
         return {'zinc22':result, 'zinc22_missing':missing_file.read().split("\n"), 'logs':logs, 'hostname':current_hostname}
-        
 
 
 
