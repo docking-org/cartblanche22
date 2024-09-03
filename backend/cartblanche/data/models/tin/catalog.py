@@ -23,8 +23,7 @@ class CatalogModel(db.Model):
 
     def json2(self):
         return {
-            '
-            ': self.name,
+            'catalog_name': self.name,
             'version': self.version,
             'short_name': self.short_name,
             'free': self.free,
