@@ -17,3 +17,10 @@ tmux send-keys -t 2 "conda activate cartblanche22 && cd $PROJECT_DIR/backend && 
 
 # Attach to the tmux session
 tmux attach-session -t cartblanche
+
+
+#To switch between the two tmux terminals: control-B + arrow keys
+#To kill the tmux session: tmux kill-server
+#To check processeses that are running: lsof -i :<Port Number>
+#To kill a process: kill -9 <PID>
+#To kill all processes: pkill -f <process_name> 
