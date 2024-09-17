@@ -218,7 +218,9 @@ export default function Navigation() {
                             </Nav.Item>
                             <NavDropdown align="end" title="About" id="basic-nav-dropdown">
                                         <NavDropdown.Item href="https://wiki.docking.org/index.php/Zinc22:Searching">Help</NavDropdown.Item>
-                                        <NavDropdown.Item href="https://forms.gle/LZV1FCmLWxUWznVi9">Contact</NavDropdown.Item>              
+                                        <NavDropdown.Item href="https://forms.gle/LZV1FCmLWxUWznVi9">Contact</NavDropdown.Item>
+                                        <NavDropdown.Item href="https://cartblanche22.docking.org/stats/">Usage</NavDropdown.Item>
+                                        <NavDropdown.Item href="https://wiki.docking.org/index.php/ZINC22:Credits">Acknowledgements</NavDropdown.Item>
                             </NavDropdown>
                         </Nav>
                     </Navbar.Collapse>
