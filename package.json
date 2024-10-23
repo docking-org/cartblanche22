@@ -59,9 +59,5 @@
       "last 1 safari version"
     ]
   },
-<<<<<<< HEAD
   "proxy": "http://127.0.0.1:5007/"
-=======
-  "proxy": "http://127.0.0.1:5001/"
->>>>>>> a02fdebb29d591995db5240cb61b34b3b4a3471e
 }
