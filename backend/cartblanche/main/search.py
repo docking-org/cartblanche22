@@ -148,13 +148,15 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
         return "No Valid ZINC IDs, please try again", 400
     zinc20tasks = zinc20search.si(zinc20)
     task_id_progress = uuid.uuid4()
+    #generates signature objects for each task
     task = [
         paralellizeZincSearch.si(zinc22,  getRole(), discarded, getVendors, task_id_progress=task_id_progress ), zinc20tasks
     ] 
-    
+    #merges the results of the zinc20 and zinc22 searches
     callback = mergeResults.s()
 
     if request.method == "POST":
+        #starts the tasks and returns the task id
         task = start_search_task.delay(task,ids, callback, task_id_progress=task_id_progress)
         return make_response({'task':task.id}, 200)
     else:

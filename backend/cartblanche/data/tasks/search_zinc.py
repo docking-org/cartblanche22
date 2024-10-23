@@ -180,6 +180,7 @@ def zinc20search(zinc20, matched_smiles=None):
     return {'zinc20':results, 'missing': missing}
    
 @celery.task
+#Antimony Search``
 def vendorSearch(vendor_ids, role='public'):
     result = {}
     t_start = time.time()
@@ -364,8 +365,9 @@ def vendorSearch(vendor_ids, role='public'):
 
         return {'zinc22':result, 'zinc22_missing': missing_file.read().split("\n"), 'logs': logs}
     
-    
+#Zinc22 Search
 @celery.task
+#Tin Search
 def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True, matched_smiles=None):
     
     t_start = time.time()

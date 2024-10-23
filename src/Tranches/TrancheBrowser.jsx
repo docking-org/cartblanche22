@@ -57,8 +57,21 @@ export default function TrancheBrowser(props) {
                 setActiveGenerations(Object.keys(data.generations));
             }
             setDownloadFormats(data.formats);
+            //Changing the default format to SMILES -2D
+            //Changing the default format to DOCK38 -3D
+            const smilesKey = Object.keys(data.formats).find(key => key.toUpperCase() === 'SMILES');
+            const dock38Key = Object.keys(data.formats).find(key => key.toUpperCase() === 'DOCK38');
+            if (dock38Key) {
+                setDownloadFormat(dock38Key);
+            } else if (smilesKey) {
+                console.log("Setting default format to:", smilesKey);
+            setDownloadFormat(smilesKey);
+            } else {
+                console.log("SMILES format not found, defaulting to:", Object.keys(data.formats)[0]);
+                setDownloadFormat(Object.keys(data.formats)[0]);
+            }
             setDownloadMethods(data.methods);
-            setDownloadFormat(Object.keys(data.formats)[0]);
+            //setDownloadFormat(Object.keys(data.formats)[1]);
             setDownloadMethod(Object.keys(data.methods)[0]);
             setFilteredTranches(data.tranches);
             setGenerations(data.generations);
@@ -163,15 +176,37 @@ export default function TrancheBrowser(props) {
         if (!ref.current) {
             return "";
         }
+        //New code
         let t = ref.current.getCurrentTranches();
-        console.log(t);
-        let trancheString = "";
-        t.map(tranche => trancheString +=
-            (tranche['generation'] !== '-' ? tranche['generation'] : "") +
-            tranche['h_num'] + tranche['p_num'] +
-            (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
+        console.log("Unsorted tranches:", t);
+
+        // Sort the tranches
+        t.sort((a, b) => {
+            if (a.h_num < b.h_num) return -1;
+            if (a.h_num > b.h_num) return 1;
+        });
+
+        console.log("Sorted tranches:", t);
+
+        let trancheString = t.map(tranche => 
+            (tranche.generation !== '-' ? tranche.generation : "") +
+            tranche.h_num + tranche.p_num +
+            (tranche.charge !== '-' ? tranche.charge : "")
+        ).join(" ");
 
         setTrancheString(trancheString);
+        //old code
+        // let t = ref.current.getCurrentTranches();
+        // console.log("Tranches:", t);
+        // let trancheString = "";
+
+        
+        // t.map(tranche => trancheString +=
+        //     (tranche['generation'] !== '-' ? tranche['generation'] : "") +
+        //     tranche['h_num'] + tranche['p_num'] +
+        //     (tranche['charge'] !== '-' ? tranche['charge'] : "") + " ");
+
+        // setTrancheString(trancheString);
     }
 
     function downloadTranches() {
@@ -401,7 +436,11 @@ export default function TrancheBrowser(props) {
             <Modal
                 show={downloadModal}
                 onHide={() => setDownloadModal(false)}
-                onShow={() => getTrancheString()}
+                onShow={() => {
+                    getTrancheString();
+                    console.log("Modal was opened with:", Object.keys(downloadFormats));
+                    
+                }}
             >
                 <Modal.Header
                     closeButton
@@ -429,11 +468,12 @@ export default function TrancheBrowser(props) {
                         <Form.Group controlId="format">
                             <Form.Label>Format</Form.Label>
                             <Form.Control as="select"
+                                value={downloadFormat}
                                 onChange={(e) => setDownloadFormat(e.target.value)}
                             >
                                 {Object.keys(downloadFormats).map(format => {
                                     return (
-                                        <option key={format}>{format}</option>
+                                        <option key={format} value={format}>{format}</option>
                                     )
                                 }
                                 )}

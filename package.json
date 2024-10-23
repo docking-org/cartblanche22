@@ -36,7 +36,7 @@
     "yarn": "^1.22.21"
   },
   "scripts": {
-    "start": "PORT=3000 react-scripts start",
+    "start": "PORT=3003 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -59,5 +59,9 @@
       "last 1 safari version"
     ]
   },
+<<<<<<< HEAD
   "proxy": "http://127.0.0.1:5007/"
+=======
+  "proxy": "http://127.0.0.1:5001/"
+>>>>>>> a02fdebb29d591995db5240cb61b34b3b4a3471e
 }

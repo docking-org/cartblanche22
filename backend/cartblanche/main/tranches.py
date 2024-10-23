@@ -145,18 +145,20 @@ full_axes = [[
          'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z')
         ]
 
+#Format: 
+#'subset-name': [[row-start, row-end], [col-start, col-end]]
 subsets = {
         # 'all': [[0, 61], [0, 62]],
         # 'none': [[0, 0], [0, 0]],
         'shards': [[0, 33], [4, 10]],
-        'fragments': [[0, 43], [7, 16]],
+        'fragments': [[0, 33], [7, 16]],
         'flagments': [[0, 43], [15, 20]],
         'lead-like': [[0, 43], [16, 25]],
         'goldilocks': [[20, 38], [18, 24]],
         'small-leads': [[0, 43], [16, 19]],
         'medium-leads': [[0, 43], [19, 22]],
         'big-leads': [[0, 43], [22, 25]],
-        'lugs': [[0, 48], [23, 29]],
+        'lugs': [[0, 48], [23, 26]],
         'drug-like': [[0, 58], [0, 28]],
         'big-n-greasy': [[44, 500], [25, 30]]
 }
@@ -175,7 +177,7 @@ charges = {
 
 formats_3d = {
 #    "SMILES" : "smi.tgz",
-    "DOCK37" : "db2.tgz",
+    "DOCK38" : "db2.tgz",
     "AutoDock" : "pdbqt.tgz",
     "Mol2" : "mol2.tgz",
     "SDF" : "sdf.tgz",

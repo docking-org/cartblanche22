@@ -288,7 +288,7 @@ export default function Arthor(props) {
                         }}
                     >
                     <br />
-                    <img src="https://arthor.docking.org/img/arthor_bandit_crop_32x32.png" width="40px" /> Arthor© 2018-2023 NextMove Software Ltd. All Rights Reserved.
+                    <img src="https://arthor.docking.org/img/arthor_bandit_crop_32x32.png" width="40px" /> Arthor© 2018-2024 NextMove Software Ltd. All Rights Reserved.
                     <br />
                  
                     </p>

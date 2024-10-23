@@ -554,7 +554,7 @@ export default function SW(props) {
                         }}
                     >
                     <br />
-                    <img src="https://sw.docking.org/img/logo3_box.svg" width="20px" /> SmallWorld© 2015-2023 NextMove Software Ltd. All Rights Reserved.
+                    <img src="https://sw.docking.org/img/logo3_box.svg" width="20px" /> SmallWorld© 2015-2024 NextMove Software Ltd. All Rights Reserved.
                     <br />
                  
                     </p>
