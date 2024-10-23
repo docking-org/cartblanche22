@@ -47,7 +47,7 @@ const ResultsTable = forwardRef((props, ref) => {
 
         let url = `https://${encodeURIComponent(props.server)}.docking.org/dt/${(props.db)}/search`
         url += `?query=${encodeURI(smi)}`
-        
+
         url += `&start=${(page - 1) * perPage}`;
         url += `&length=${perPage}`;
         url += `&flags=${searchFlag}`;
@@ -56,14 +56,14 @@ const ResultsTable = forwardRef((props, ref) => {
 
         url = encodeURI(url);
 
-        Object.keys(cols).map((key, index) => {
-            url += `&${encodeURIComponent(`columns[${index}][data]`)}=${index}`;
-            url += `&${encodeURIComponent(`columns[${index}][name]`)}=${cols[key].name}`;
-            url += `&${encodeURIComponent(`columns[${index}][orderable]`)}=${cols[key].orderable}`;
-            url += `&${encodeURIComponent(`columns[${index}][searchable]`)}=${cols[key].searchable}`;
-            url += `&${encodeURIComponent(`columns[${index}][search][value]`)}=`;
-            url += `&${encodeURIComponent(`columns[${index}][search][regex]`)}=false`;
-        });
+        // Object.keys(cols).map((key, index) => {
+        //     url += `&${encodeURIComponent(`columns[${index}][data]`)}=${index}`;
+        //     url += `&${encodeURIComponent(`columns[${index}][name]`)}=${cols[key].name}`;
+        //     url += `&${encodeURIComponent(`columns[${index}][orderable]`)}=${cols[key].orderable}`;
+        //     url += `&${encodeURIComponent(`columns[${index}][searchable]`)}=${cols[key].searchable}`;
+        //     url += `&${encodeURIComponent(`columns[${index}][search][value]`)}=`;
+        //     url += `&${encodeURIComponent(`columns[${index}][search][regex]`)}=false`;
+        // });
         let response = await fetch(url, {
             credentials: props.server === "arthor" ? "omit" : "include",
         })
@@ -74,9 +74,10 @@ const ResultsTable = forwardRef((props, ref) => {
             if (response.data) {
                 response.data.map((row, index) => {
                     let newRow = {};
-                    newRow["id"] = row[1].split(" ")[1] || row[1].split("\t")[1] || row[1].split(" ")[0];
-                    newRow["hitSmiles"] = row[1].split(" ")[0] || row[1].split("\t")[0] || row[1].split(" ")[0];
-                    newRow["similarity"] = row[2] ? row[2] : null
+                    console.log(row)
+                    newRow["id"] = row[3]
+                    newRow["hitSmiles"] = row[2]
+                    newRow["similarity"] = searchType === 'Similarity' ? row[5] : null
                     res.push([newRow]);
 
                 });
@@ -204,7 +205,7 @@ const ResultsTable = forwardRef((props, ref) => {
                     <div className="d-flex justify-content-between">
                         <div>
 
-                            {total ? total.toLocaleString('en-US', { maximumFractionDigits: 2 }): '0'} results {props.elapsed === 0 ? null : (`found in ${props.elapsed || elapsed}`)}
+                            {total ? total.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0'} results {props.elapsed === 0 ? null : (`found in ${props.elapsed || elapsed}`)}
                         </div>
                         <div>
 
@@ -247,9 +248,9 @@ const ResultsTable = forwardRef((props, ref) => {
 
 
                             <Button variant="success" id="dropdown-basic"
-                            
+
                                 onClick={() => {
-                                    if(props.arthor){
+                                    if (props.arthor) {
                                         let url = `https://${encodeURIComponent(props.server)}.docking.org/dt/${(props.db)}/search`
                                         url += `?query=${encodeURI(props.smi)}`
                                         url += `&fmt=tsv`;
@@ -258,24 +259,24 @@ const ResultsTable = forwardRef((props, ref) => {
                                         url += `&flags=${props.searchFlag}`;
                                         url += `&qopts=`;
                                         url += `&type=` + props.arthorSearchType;
-                                
+
                                         url = encodeURI(url);
                                         window.open(url, '_blank');
                                     }
-                                    else{
-                                        
-                                    let url = `https://${props.server}.docking.org/search/export?hlid=${props.hlid}`;
-                                    Object.keys(cols).map((key, index) => {
-                                        url += `&${encodeURIComponent(`columns[${index}][data]`)}=${index}`;
-                                        url += `&${encodeURIComponent(`columns[${index}][name]`)}=${cols[key].name}`;
-                                        url += `&${encodeURIComponent(`columns[${index}][orderable]`)}=${cols[key].orderable}`;
-                                    });
-                                    url += `&${encodeURIComponent(`order[0][column]`)}=2`;
-                                    url += `&${encodeURIComponent(`order[0][dir]`)}=desc`;
-                                    url += `&start=0`;
-                                    url += '&length=' + total;
-                                    window.open(url, '_blank');
-                                }
+                                    else {
+
+                                        let url = `https://${props.server}.docking.org/search/export?hlid=${props.hlid}`;
+                                        Object.keys(cols).map((key, index) => {
+                                            url += `&${encodeURIComponent(`columns[${index}][data]`)}=${index}`;
+                                            url += `&${encodeURIComponent(`columns[${index}][name]`)}=${cols[key].name}`;
+                                            url += `&${encodeURIComponent(`columns[${index}][orderable]`)}=${cols[key].orderable}`;
+                                        });
+                                        url += `&${encodeURIComponent(`order[0][column]`)}=2`;
+                                        url += `&${encodeURIComponent(`order[0][dir]`)}=desc`;
+                                        url += `&start=0`;
+                                        url += '&length=' + total;
+                                        window.open(url, '_blank');
+                                    }
                                 }}>
                                 <i className="fa fa-download" aria-hidden="true"></i>
                             </Button>
