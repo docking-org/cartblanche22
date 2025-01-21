@@ -50,12 +50,7 @@ def WgetDownloader(hac, logp, format, add_url, charge, generation):
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, user = Config.DOWNLOAD_USERNAME_2D, password = Config.DOWNLOAD_PASS_2D)
 
 def PowerShellDownloader(hac, logp, format, add_url, charge, generation):
-    print(hac)
-    print(logp)
-    print(format)
-    print(add_url)
-    print(charge)
-    print(generation)
+
     if generation != '':
         return "Invoke-WebRequest {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp} " \
            "-OutFile (New-Item -Path \"{hac}/{logp}/{charge}/{hac}{logp}{charge}{generation}.{format}\" -Force )".format(hac=hac, logp=logp, format=format, base_url=base_url,
@@ -67,7 +62,7 @@ def PowerShellDownloader(hac, logp, format, add_url, charge, generation):
                                                 
 def RsyncDownloader(tranches, format):
     st = "mkdir zinc-22{generation} \npushd zinc-22{generation}\n".format(generation = tranches[0][0:1])
-    print(tranches)
+    
     for tranche in tranches:
         hac = tranche[1:4]
         logp = tranche[4:8]
@@ -93,7 +88,7 @@ URI_MIMETYPE_TO_FORMATTER = {
 
 URI_EXTENSION_TO_MIMETYPE = {
     'uri': 'text/uri-list',
-    'bkslab': 'text/bkslab',
+    'bks': 'text/bkslab',
     'aws': 'text/aws',
     'oci': 'text/oci',
     'wynton': 'text/wynton',
@@ -397,16 +392,8 @@ def tranches3dDownload():
         return res
     
     def gen_all_rsyncs(tranches):
-        res = []
-        for tranche in tranches:
-            util_func = lambda x: x[0]
-            temp = sorted(tranche, key = util_func)
-            res = [list(ele) for i, ele in groupby(temp, util_func)]
-            for x in res:
-                for y in x:
-                    res.append(RsyncDownloader(y, dformat) + '\n')
-                    # yield RsyncDownloader(y, dformat) + '\n'
-        return res
+        return RsyncDownloader(tranches, dformat) + '\n'
+
  
     if mimetype == 'application/x-ucsf-zinc-uri-downloadscript-rsync':
         tranches_iter = gen_all_rsyncs(tranches_data)
