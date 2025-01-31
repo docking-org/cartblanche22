@@ -2,10 +2,10 @@ from flask import Flask, g, current_app, request, send_from_directory
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager, current_user
-from flask_user import UserManager
+
+
 from flask_bootstrap import Bootstrap
-from flask_admin import Admin
+
 from flask_admin.contrib.sqla import ModelView
 from flask_mail import Mail
 from flask_restful import Api
@@ -17,7 +17,6 @@ import os
 
 db = SQLAlchemy()
 migrate = Migrate(compare_type=True)
-login = LoginManager()
 bootstrap = Bootstrap()
 mail = Mail()
 api = Api()
@@ -54,8 +53,6 @@ def create_app(config_class=Config):
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
     
    
-    login.init_app(app)
-    login.login_view = 'main.login'
 
     mail.init_app(app)
     jwt.init_app(app)

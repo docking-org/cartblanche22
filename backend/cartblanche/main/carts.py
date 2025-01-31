@@ -17,8 +17,8 @@ from pandas import DataFrame
 
 from config import Config
 import google.auth
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+
+
 
 
 @app.route('/cart/getCart', methods=['GET',  'POST'])

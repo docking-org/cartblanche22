@@ -9,7 +9,7 @@ from cartblanche.app import db
 import json, requests
 import urllib.request
 from urllib.error import HTTPError
-from werkzeug.urls import url_parse
+
 import requests
 from collections import OrderedDict
 from operator import getitem

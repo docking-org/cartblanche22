@@ -1,6 +1,6 @@
 from cartblanche.data.models.user_roles import UserRoles
 from cartblanche.data.models.roles import Roles
-from cartblanche.app import db, login
+from cartblanche.app import db
 from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -93,7 +93,7 @@ class Users(db.Model, UserMixin):
             return
         return Users.query.get(id)
 
-@login.user_loader
-def load_user(id):
-    return Users.query.get(int(id))
+# @login.user_loader
+# def load_user(id):
+#     return Users.query.get(int(id))
 

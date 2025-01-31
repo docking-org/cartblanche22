@@ -30,7 +30,7 @@ def saveResult(
 
     if task:
         result = task.get()
-        print(result)
+     
         result = result['zinc22'] + (result['zinc20'] if result.get('zinc20') else [])
 
         # for mol in result:
@@ -273,7 +273,7 @@ def random_substance_status(jobid, format = "json"):
     task = AsyncResult(jobid)
     id = task.get()['zinc22progress']
     group = GroupResult.restore(id)
-    print(group)
+    
     if not group.ready():
         total = len(group.children)
         return {'progress':group.completed_count()/total, 'status':'PROGRESS'}
@@ -289,7 +289,7 @@ def random_substance_status(jobid, format = "json"):
         #randomize results
         for i in result:
                 res.extend(i)
-        print(result)
+    
         random.shuffle(res)
         res = formatZincResult(res, format)
        

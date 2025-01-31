@@ -62,21 +62,14 @@ def getRandomFromDB(url, limit, current=None, retries=0):
         # curs.execute('select max(sub_id) from substance;')
         # max = curs.fetchone()[0]
         
-        # curs.execute(
-        #     ("select * from substance LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id where sub_id > random() * {max} limit {limit};").format(max=max, limit = limit)
-        # )
-        
-        #find limit / 32 to find tablesample fraction
-        limit = limit // 32 
-        if limit == 0:
-            limit = 1
+     
         curs.execute('CREATE EXTENSION IF NOT EXISTS tsm_system_rows;')
-        curs.execute("select * from substance tablesample system_rows({limit}) LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id;".format(limit=limit))
+        curs.execute("select * from substance tablesample system_rows({limit}) LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id limit {limit};".format(limit=limit))
 
         res = curs.fetchall()
         result.append(res)
         
-        # current_task.update_state(task_id=current_task.request.id, state='PROGRESS',meta={'current':current_total + len(res), 'projected':to_pull, 'time_elapsed':0})
+     
         conn.close()
     except Exception as e:
         print (e)   
