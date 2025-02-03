@@ -5,7 +5,7 @@ bcrypt==3.1.7
 billiard==3.6.4.0
 blinker==1.4
 botocore==1.29.94
-Bottleneck @ file:///opt/conda/conda-bld/bottleneck_1657175564434/work
+Bottleneck==1.3.5
 cached-property==1.5.2
 cachetools==4.1.0
 celery==5.2.7
@@ -78,18 +78,19 @@ Mako==1.2.2
 MarkupSafe==2.1.2
 marshmallow==3.9.0
 mkl-fft==1.3.1
-mkl-random @ file:///tmp/build/80754af9/mkl_random_1626179032232/work
+mkl-random==1.2.2
 mkl-service==2.4.0
 nest-asyncio==1.5.8
-numexpr @ file:///croot/numexpr_1668713893690/work
+numexpr==2.8.4
 numpy==1.21.6
 oauth2client==4.1.3
 oauthlib==3.1.0
 olefile==0.46
-packaging @ file:///croot/packaging_1671697413597/work
+packaging==22.0
 pandas==1.3.5
 passlib==1.7.1
 Pillow==9.4.0
+pip==22.3.1
 pluggy==1.2.0
 prometheus-client==0.13.1
 prompt-toolkit==3.0.28
@@ -103,13 +104,12 @@ pycryptodome==3.9.4
 PyJWT==2.6.0
 pyOpenSSL==23.2.0
 pyparsing==2.4.7
-pysmallworld @ file:///home/s_mar/cartblanche22/smallworld/python
 pytest==7.4.3
 pytest-celery==0.0.0
-python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+python-dateutil==2.8.2
 python-dotenv==0.14.0
 python-editor==1.0.4
-pytz @ file:///croot/pytz_1671697431263/work
+pytz==2022.7
 redis==3.5.3
 redis-server==6.0.9
 requests==2.28.1
@@ -119,7 +119,8 @@ rfc3986==1.5.0
 rq==1.10.0
 rsa==4.9
 s3transfer==0.4.2
-six @ file:///tmp/build/80754af9/six_1644875935023/work
+setuptools==65.6.3
+six==1.16.0
 SQLAlchemy==2.0.7
 tablib==2.0.0
 tomli==2.0.1
@@ -133,6 +134,7 @@ visitor==0.1.3
 wcwidth==0.2.5
 webassets==2.0
 Werkzeug==2.2.3
+wheel==0.38.4
 WTForms==2.2.1
 xlrd==1.2.0
 xlwt==1.3.0
