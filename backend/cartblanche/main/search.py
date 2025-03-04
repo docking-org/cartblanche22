@@ -125,7 +125,7 @@ def search_substance(identifier, data = None, format = 'json'):
         abort(404)
 
 
-@search_bp.route('/substances.<format>', methods=["POST", "GET"])
+@search_bp.route('/substances.<format>', methods=["POST"])
 def search_substances(file = None, data = None, format = 'json', ids = [], output_fields=["zinc_id, smiles"]): 
     ids = []
     getVendors = True
@@ -147,7 +147,7 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
     if len(zinc22) == 0 and len(zinc20) == 0:
         return "No Valid ZINC IDs, please try again", 400
     zinc20tasks = zinc20search.si(zinc20)
-    task_id_progress = uuid.uuid4()
+    task_id_progress = str(uuid.uuid4())
     #generates signature objects for each task
     task = [
         paralellizeZincSearch.si(zinc22,  getRole(), discarded, getVendors, task_id_progress=task_id_progress ), zinc20tasks
@@ -155,7 +155,7 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
     #merges the results of the zinc20 and zinc22 searches
     callback = mergeResults.s()
 
-    if request.method == "POST":
+    if not request.form.get('synchronous'):
         #starts the tasks and returns the task id
         task = start_search_task.delay(task,ids, callback, task_id_progress=task_id_progress)
         return make_response({'task':task.id}, 200)

@@ -51,8 +51,7 @@ def create_app(config_class=Config):
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}  
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
-    
-   
+
 
     mail.init_app(app)
     jwt.init_app(app)

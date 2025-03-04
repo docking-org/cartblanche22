@@ -3,7 +3,7 @@ import hashlib
 import subprocess, tempfile, io, hashlib, psycopg2
 from urllib.parse import quote
 import time
-
+from collections import defaultdict
 import requests
 import re
 import json
@@ -41,9 +41,12 @@ def _paused_thread():
     finally:
         psycopg2.extensions.set_wait_callback(thread)
 
+
+#parallelizeZincSearch is a function that allows celery tasks to be parallelized, then merged
+#sort of like a chord, but with more control over the individual tasks to keep track  of
+#information submitted
 @celery.task
 def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors=True, matched_smiles=None, task_id_progress=None):
-    
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
     config_curs = config_conn.cursor()
     config_curs.execute("select tranche, host, port from tranche_mappings")
@@ -54,14 +57,13 @@ def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors
         port = result[2]
         tranche_map[tranche] = ':'.join([host, str(port)])
 
-    zinc_ids_split = {}
+    zinc_ids_split = defaultdict(list)
     for zinc_id in zinc_ids:
         zinc_id = zinc_id.strip()
         tranche = get_tranche(zinc_id)
         if tranche in tranche_map:
-            if not zinc_ids_split.get(tranche):
-                zinc_ids_split[tranche] = []
             zinc_ids_split[tranche].append(zinc_id)
+
     current_task.update_state(task_id=task_id_progress, state='PROGRESS',meta={'current':0, 'projected':len(zinc_ids_split), 'time_elapsed':0})
     tasks = []
     for tranche in zinc_ids_split:
@@ -74,12 +76,11 @@ def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors
             current_task.update_state(task_id=task_id_progress, state='PROGRESS',meta={'current':count, 'projected':len(zinc_ids_split), 'time_elapsed':0})
             time.sleep(2)
         result = res.get()
-    #result it a list of dictionaries, we need to merge them into one dictionary
-        merged = {}
+        #result it a list of dictionaries, we need to merge them into one dictionary
+        merged = defaultdict(list)
         if len(result) > 0:
             keys = result[0].keys()
             for key in keys:
-                merged[key] = []
                 for res in result:
                     merged[key] += res[key]
         return merged
@@ -523,10 +524,9 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
         current_task.update_state(state='PROGRESS',meta={'current':total_length, 'projected':total_length, 'time_elapsed':t_elapsed})
 
         getPrices(result, role)
-        current_hostname = subprocess.check_output(['hostname']).decode('utf-8').strip()
+        current_hostname = ''.join(subprocess.check_output(['hostname']).decode('utf-8').strip())
         return {'zinc22':result, 'zinc22_missing':missing_file.read().split("\n"), 'logs':logs, 'hostname':current_hostname}
-
-
+    
 
 def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
     search_curs.execute("create temporary table cb_sub_id_input (sub_id bigint, tranche_id_orig smallint)")

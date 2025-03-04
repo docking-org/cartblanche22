@@ -1,358 +1,372 @@
 import React from "react";
 import { useEffect, useImperativeHandle, forwardRef } from "react";
-import { Container, Table, Tabs, Tab, Card, Button, Toast, Accordion, Form } from "react-bootstrap";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import {
+  Container,
+  Table,
+  Tabs,
+  Tab,
+  Card,
+  Button,
+  Toast,
+  Accordion,
+  Form,
+} from "react-bootstrap";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import SubstanceTable from "./Components/SubstanceTable";
-import ProgressBar from 'react-bootstrap/ProgressBar';
-import './search.css';
+import ProgressBar from "react-bootstrap/ProgressBar";
+import "./search.css";
 import { saveAs } from "file-saver";
 import Cart from "../Cart/Cart";
 import { useRef } from "react";
-import axiosRetry from 'axios-retry';
+import axiosRetry from "axios-retry";
 import NoResults from "../Errors/NoResults";
 
 export default function Results(props) {
+  axiosRetry(axios, {
+    retries: 3,
+    shouldResetTimeout: true,
+    retryCondition: () => true,
+  });
 
-    axiosRetry(axios, { retries: 3, shouldResetTimeout: true, retryCondition: () => true });
+  const childRef = useRef();
+  const { getCart, addToCart, removeFromCart, cartSize, inCart } = Cart();
+  const [results, setResults] = React.useState([]);
+  const [progress, setProgress] = React.useState(0);
+  const [task, setTask] = React.useState(window.location.search.split("=")[1]);
+  const [currentTab, setCurrentTab] = React.useState("zinc22");
+  const [inUCSF, setInUCSF] = React.useState(false);
+  const [load, setLoad] = React.useState(false);
+  const [submission, setSubmission] = React.useState(undefined);
+  const [logs, setLogs] = React.useState(undefined);
+  const [noResults, setNoResults] = React.useState(false);
+  const [init, setInit] = React.useState(false);
+  const [statusMessage, setStatusMessage] = React.useState("");
+  useEffect(() => {
+    document.title = props.title || "";
+  }, [props.title]);
 
-    const childRef = useRef();
-    const { getCart, addToCart, removeFromCart, cartSize, inCart } = Cart();
-    const [results, setResults] = React.useState([]);
-    const [progress, setProgress] = React.useState(0);
-    const [task, setTask] = React.useState(window.location.search.split("=")[1]);
-    const [currentTab, setCurrentTab] = React.useState("zinc22");
-    const [inUCSF, setInUCSF] = React.useState(false);
-    const [load, setLoad] = React.useState(false);
-    const [submission, setSubmission] = React.useState(undefined);
-    const [logs, setLogs] = React.useState(undefined);
-    const [noResults, setNoResults] = React.useState(false);
-    const [init, setInit] = React.useState(false);
-    const [statusMessage, setStatusMessage] = React.useState("");
-    useEffect(() => {
-        document.title = props.title || "";
-    }, [props.title]);
+  function downloadAll(format) {
+    axios({
+      method: "get",
+      url: "/search/result/" + task + "." + format,
+    }).then((response) => {
+      var blob = new Blob([response.data], {
+        type: "text/plain;charset=utf-8",
+      });
+      saveAs(blob, "result." + format);
+    });
+  }
 
-    function downloadAll(format) {
-        axios({
-            method: "get",
-            url: "/search/result/" + task + "." + format,
+  function getResult() {
+    axios({
+      method: "get",
+      url: "/search/result/" + window.location.search.split("=")[1],
+      timeout: 10000,
+    })
+      .then((response) => {
+        setInit(true);
+        if (response.data.status === "SUCCESS") {
+          console.log(response.data);
+          setResults(response.data.result);
 
-        })
-            .then(response => {
-                var blob = new Blob([response.data], { type: "text/plain;charset=utf-8" });
-                saveAs(blob, "result." + format);
-            })
-    }
+          if (
+            response.data.result.zinc22 &&
+            response.data.result.zinc22.length > 0
+          ) {
+            setCurrentTab("zinc22");
+          } else if (
+            response.data.result.zinc20 &&
+            response.data.result.zinc20.length > 0
+          ) {
+            setCurrentTab("zinc20");
+          } else {
+            setNoResults(true);
+          }
+          setSubmission(response.data.submission);
+          setLogs(response.data.result.logs);
+          setInUCSF(response.data.inUCSF);
+        } else if (response.data.status === "Failure") {
+          setNoResults(true);
+        } else {
+          if (response.data.status === "PREPROCESS") {
+            setStatusMessage("Preprocessing...");
+          }
 
-    function getResult() {
-        axios({
-            method: "get",
-            url: "/search/result/" + window.location.search.split("=")[1],
-            timeout: 10000
-        })
-            .then(response => {
-                setInit(true);
-                if (response.data.status === "SUCCESS") {
+          if (response.data.status === "PENDING") {
+            setProgress(-1);
+          } else if (response.data.progress <= 0) {
+            setProgress(100);
+          } else if (
+            response.data.progress <= 1 &&
+            !(response.data.status === "PROGRESS")
+          ) {
+            setProgress(100);
+          } else {
+            setProgress(Math.round(response.data.progress * 100, 2));
+          }
 
-                    console.log(response.data);
-                    setResults(response.data.result);
-
-                    if (response.data.result.zinc22 && (response.data.result.zinc22.length > 0)) {
-                        setCurrentTab("zinc22");
-                    }
-                    else if (response.data.result.zinc20 && (response.data.result.zinc20.length > 0)) {
-                        setCurrentTab("zinc20");
-                    }
-                    else {
-                        setNoResults(true);
-                    }
-                    setSubmission(response.data.submission);
-                    setLogs(response.data.result.logs);
-                    setInUCSF(response.data.inUCSF);
-                }
-                else {
-                    if (response.data.status === "PREPROCESS") {
-                        setStatusMessage("Preprocessing...");
-                    }
-
-                    if (response.data.status === "PENDING") {
-                        setProgress(-1);
-                    }
-                    else if (response.data.progress <= 0) {
-                        setProgress(100);
-                    }
-
-                    else if (response.data.progress <= 1 && !(response.data.status === "PROGRESS")) {
-                        setProgress(100);
-                    }
-
-                    else {
-                        setProgress(Math.round(response.data.progress * 100, 2));
-                    }
-
-                    setTimeout(getResult, 500);
-                }
-
-            }).catch(error =>
-                console.log(error)
-                // window.location.reload(true)
-            );
-    }
-
-    function allInCart(func = null) {
-        let allInCart = true;
-        if (results.zinc20) {
-            results.zinc20.forEach(item => {
-
-                item['inCart'] = inCart(item);
-
-                if (!inCart(item)) {
-                    allInCart = false;
-                }
-
-            })
-
+          setTimeout(getResult, 500);
         }
-        if (results.zinc22) {
-            results.zinc22.forEach(item => {
-                item['inCart'] = inCart(item);
+      })
+      .catch(
+        (error) => console.log(error)
+        // window.location.reload(true)
+      );
+  }
 
-                if (!inCart(item)) {
-                    allInCart = false;
-                }
-            })
+  function allInCart(func = null) {
+    let allInCart = true;
+    if (results.zinc20) {
+      results.zinc20.forEach((item) => {
+        item["inCart"] = inCart(item);
 
+        if (!inCart(item)) {
+          allInCart = false;
         }
+      });
+    }
+    if (results.zinc22) {
+      results.zinc22.forEach((item) => {
+        item["inCart"] = inCart(item);
 
-
-        return allInCart;
+        if (!inCart(item)) {
+          allInCart = false;
+        }
+      });
     }
 
-    useEffect(() => {
-        getResult();
+    return allInCart;
+  }
 
-    }, []);
+  useEffect(() => {
+    getResult();
+  }, []);
 
-    useEffect(() => {
-        //
-    }, [load]);
+  useEffect(() => {
+    //
+  }, [load]);
 
-    function addMol(mol) {
-        addToCart(mol);
+  function addMol(mol) {
+    addToCart(mol);
 
-        allInCart();
-    }
+    allInCart();
+  }
 
-    function removeMol(mol) {
-        removeFromCart(mol);
-        allInCart();
-    }
+  function removeMol(mol) {
+    removeFromCart(mol);
+    allInCart();
+  }
 
-    function showLoadingToast() {
-        toast(
-            <div className='d-flex justify-content-center'>
-                <div className='spinner-border text-primary' role='status'>
-                    <span className='sr-only'>Loading...</span>
-                </div>
+  function showLoadingToast() {
+    toast(
+      <div className="d-flex justify-content-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="sr-only">Loading...</span>
+        </div>
+      </div>,
+      {
+        position: "bottom-left",
+
+        autoClose: false,
+      }
+    );
+  }
+
+  return (
+    <>
+      {noResults && <NoResults submission={submission} />}
+      {!noResults && (
+        <Container className="my-2 page-wrapper" fluid>
+          {progress > 0 &&
+            progress < 100 &&
+            !results.zinc22 &&
+            !results.zinc20 && (
+              <div
+                style={{ marginTop: "35vh" }}
+                className="justify-content-center align-items-center"
+              >
+                {statusMessage && <h3>{statusMessage}</h3>}
+                <ProgressBar
+                  key="progress"
+                  animated
+                  now={progress}
+                  label={`${progress}%`}
+                />
+              </div>
+            )}
+
+          {progress === 100 && !results.zinc22 && !results.zinc20 && (
+            <div
+              style={{ marginTop: "35vh" }}
+              className="justify-content-center align-items-center"
+            >
+              <ProgressBar
+                key="loading"
+                animated
+                now={progress}
+                label={`Searching...`}
+              />
             </div>
-            , {
+          )}
 
-                position: "bottom-left",
+          {progress === -1 && !results.zinc22 && !results.zinc20 && (
+            <div
+              style={{ marginTop: "35vh" }}
+              className="justify-content-center align-items-center"
+            >
+              <ProgressBar
+                key="loading"
+                animated
+                now={100}
+                label={`Processing Results...`}
+              />
+            </div>
+          )}
 
-                autoClose: false,
-            });
-    }
+          {!init && (
+            <div
+              style={{ marginTop: "35vh" }}
+              className="justify-content-center align-items-center"
+            >
+              <ProgressBar
+                key="loading"
+                animated
+                now={100}
+                label={`Requesting search status...`}
+              />
+            </div>
+          )}
 
-    return (
-        <>
-            {noResults &&
-                <NoResults
-                    submission={submission}
-                />}
-            {!noResults &&
-                <Container className="my-2 page-wrapper" fluid>
+          <Card>
+            <Tabs
+              id="results-tab"
+              activeKey={currentTab}
+              onSelect={(key, event) => setCurrentTab(key)}
+            >
+              {results.zinc22 && results.zinc22.length > 0 && (
+                <Tab eventKey="zinc22" title="ZINC22 Results" key={"zinc22"}>
+                  <SubstanceTable
+                    ref={childRef}
+                    molecules={results.zinc22}
+                    load={load}
+                    addMol={addMol}
+                    removeMol={removeMol}
+                    task={task}
+                  />
+                </Tab>
+              )}
 
-                    {progress > 0 && progress < 100 &&
-                        !results.zinc22 && !results.zinc20 &&
+              {results.zinc20 && results.zinc20.length > 0 && (
+                <Tab
+                  eventKey="zinc20"
+                  title="ZINC20 Results"
+                  key="zinc20"
+                  onSelect={(key, event) => setCurrentTab(key)}
+                >
+                  <SubstanceTable
+                    molecules={results.zinc20}
+                    ref={childRef}
+                    load={load}
+                    addMol={addMol}
+                    removeMol={removeMol}
+                    task={task}
+                  />
+                </Tab>
+              )}
+              {(results.zinc20 || results.zinc22) && (
+                <Tab
+                  title={
+                    !allInCart() ? (
+                      <div
+                        size="sm"
+                        onClick={async () => {
+                          let send = [];
+                          if (results.zinc20) {
+                            send = send.concat(results.zinc20);
+                          }
+                          if (results.zinc22) {
+                            send = send.concat(results.zinc22);
+                          }
+                          addToCart(send);
+                        }}
+                      >
                         <div
-                            style={{ 'marginTop': '35vh' }}
-                            className="justify-content-center align-items-center"
-
+                          className="bg-primary rounded text-white p-2"
+                          size="sm"
                         >
-                            {statusMessage && <h3>{statusMessage}</h3>}
-                            <ProgressBar key="progress" animated now={progress} label={`${progress}%`} />
+                          Add all to cart
                         </div>
-                    }
-
-                    {
-                        (progress === 100) &&
-                        !results.zinc22 && !results.zinc20 &&
+                      </div>
+                    ) : (
+                      <div
+                        size="sm"
+                        onClick={async () => {
+                          let send = [];
+                          if (results.zinc20) {
+                            send = send.concat(results.zinc20);
+                          }
+                          if (results.zinc22) {
+                            send = send.concat(results.zinc22);
+                          }
+                          removeFromCart(send);
+                        }}
+                      >
                         <div
-                            style={{ 'marginTop': '35vh' }}
-                            className="justify-content-center align-items-center"
-
+                          className="bg-danger rounded text-white p-2"
+                          size="sm"
                         >
-                            <ProgressBar key="loading" animated now={progress} label={`Searching...`} />
+                          Remove all from cart
                         </div>
-                    }
+                      </div>
+                    )
+                  }
+                  key={"download"}
+                  tabClassName="add-to-cart"
+                ></Tab>
+              )}
+            </Tabs>
+          </Card>
 
-                    {
-                        (progress === -1) &&
-                        !results.zinc22 && !results.zinc20 &&
-                        <div
-                            style={{ 'marginTop': '35vh' }}
-                            className="justify-content-center align-items-center"
-
-                        >
-                            <ProgressBar key="loading" animated now={100} label={`Processing Results...`} />
-                        </div>
-                    }
-
-                    {!init &&
-                        <div
-                            style={{ 'marginTop': '35vh' }}
-                            className="justify-content-center align-items-center"
-                        >
-                            <ProgressBar key="loading" animated now={100} label={`Requesting search status...`} />
-                        </div>
-                    }
-
-
-
-                    <Card>
-
-                        <Tabs
-                            id="results-tab"
-                            activeKey={currentTab}
-
-                            onSelect={
-                                (key, event) => setCurrentTab(key)
-                            }
-                        >
-
-
-                            {results.zinc22 && results.zinc22.length > 0 &&
-                                <Tab eventKey="zinc22" title="ZINC22 Results"
-                                    key={"zinc22"}
-
-
-                                >
-                                    <SubstanceTable
-                                        ref={childRef}
-                                        molecules={results.zinc22}
-                                        load={load}
-                                        addMol={addMol}
-                                        removeMol={removeMol}
-                                        task={task}
-                                    />
-                                </Tab>
-                            }
-
-
-                            {results.zinc20 && results.zinc20.length > 0 &&
-                                <Tab eventKey="zinc20" title="ZINC20 Results"
-                                    key="zinc20"
-                                    onSelect={
-                                        (key, event) => setCurrentTab(key)
-                                    }
-
-                                >
-                                    <SubstanceTable
-                                        molecules={results.zinc20}
-                                        ref={childRef}
-                                        load={load}
-                                        addMol={addMol}
-                                        removeMol={removeMol}
-                                        task={task}
-                                    />
-                                </Tab>
-                            }
-                            {
-                                (results.zinc20 || results.zinc22) &&
-
-                                <Tab
-
-                                    title={
-                                        !allInCart() ?
-
-                                            (<div size="sm"
-                                                onClick={async () => {
-                                                    let send = [];
-                                                    if (results.zinc20) {
-                                                        send = send.concat(results.zinc20);
-                                                    }
-                                                    if (results.zinc22) {
-                                                        send = send.concat(results.zinc22);
-                                                    }
-                                                    addToCart(send)
-                                                }}
-                                            >
-                                                <div className="bg-primary rounded text-white p-2" size="sm">Add all to cart</div>
-
-                                            </div>)
-                                            :
-                                            (<div size="sm"
-                                                onClick={async () => {
-                                                    let send = [];
-                                                    if (results.zinc20) {
-                                                        send = send.concat(results.zinc20);
-                                                    }
-                                                    if (results.zinc22) {
-                                                        send = send.concat(results.zinc22);
-                                                    }
-                                                    removeFromCart(send)
-                                                }
-                                                }
-                                            >
-                                                <div className="bg-danger rounded text-white p-2" size="sm">Remove all from cart</div>
-                                            </div>)
-                                    }
-                                    key={"download"}
-                                    tabClassName="add-to-cart"
-                                >
-                                </Tab>
-                            }
-                        </Tabs>
-
-
-
-                    </Card >
-
-                    <br />
-                    {submission &&
-                        <Accordion className="bottom-0 start-0 "
-                            style={{ width: '100%' }}
-                        >
-                            <Accordion.Item eventKey="0">
-                                <Accordion.Header>Original Submission ({submission.length})</Accordion.Header>
-                                <Accordion.Body>
-                                    <Form.Control as='textarea' rows={6}
-                                        editable="false"
-                                        disabled={true}
-                                        value={submission.join('\n')}
-                                    />
-                                </Accordion.Body>
-                            </Accordion.Item>
-                            {inUCSF &&
-                                <Accordion.Item eventKey="1">
-                                    <Accordion.Header>Search Logs ({logs && logs.length})</Accordion.Header>
-                                    <Accordion.Body>
-                                        <Form.Control as='textarea' rows={6}
-                                            editable="false"
-                                            disabled={true}
-                                            value={logs && logs.join('\n')}
-                                        />
-                                    </Accordion.Body>
-                                </Accordion.Item>
-                            }
-                        </Accordion>
-                    }
-                </Container >
-            }
-            <ToastContainer />
-        </>
-
-    )
+          <br />
+          {submission && (
+            <Accordion className="bottom-0 start-0 " style={{ width: "100%" }}>
+              <Accordion.Item eventKey="0">
+                <Accordion.Header>
+                  Original Submission ({submission.length})
+                </Accordion.Header>
+                <Accordion.Body>
+                  <Form.Control
+                    as="textarea"
+                    rows={6}
+                    editable="false"
+                    disabled={true}
+                    value={submission.join("\n")}
+                  />
+                </Accordion.Body>
+              </Accordion.Item>
+              {inUCSF && (
+                <Accordion.Item eventKey="1">
+                  <Accordion.Header>
+                    Search Logs ({logs && logs.length})
+                  </Accordion.Header>
+                  <Accordion.Body>
+                    <Form.Control
+                      as="textarea"
+                      rows={6}
+                      editable="false"
+                      disabled={true}
+                      value={logs && logs.join("\n")}
+                    />
+                  </Accordion.Body>
+                </Accordion.Item>
+              )}
+            </Accordion>
+          )}
+        </Container>
+      )}
+      <ToastContainer />
+    </>
+  );
 }

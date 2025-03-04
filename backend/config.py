@@ -30,6 +30,7 @@ class Config(object):
 
         CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
         CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+    
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
         BASE_URL = "https://cartblanche22.docking.org"
@@ -43,6 +44,3 @@ class Config(object):
         
         DOWNLOAD_PASS_2D = os.getenv('DOWNLOAD_PASS_2D')
         DOWNLOAD_USERNAME_2D = os.getenv('DOWNLOAD_USERNAME_2D')
-
-
-        

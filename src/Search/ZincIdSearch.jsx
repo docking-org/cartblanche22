@@ -131,6 +131,18 @@ export default function ZincIdSearch(props) {
             returned.
             <br />- The zinc_id and smiles output fields will be returned by
             default unless otherwise specified.
+            <br></br>- The search is asynchronous by default. The submission
+            will return a task ID that can be used to check the status of the
+            search.
+            <br></br>
+            <br></br>Asynchronous results can be retrieved using this url
+            format:
+            <br></br>
+            <code>
+              https://cartblanche22.docking.org/search/result/<b>task_id</b>
+            </code>
+            <br></br>
+            <br></br>
           </p>
           <Table bordered striped hover>
             <thead>
@@ -198,6 +210,14 @@ export default function ZincIdSearch(props) {
                 </td>
                 <td>
                   <code>-F smiles_only=true</code>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Start synchronous search (not recommended for larger searches)
+                </td>
+                <td>
+                  <code>-F synchronous=true</code>
                 </td>
               </tr>
             </tbody>
