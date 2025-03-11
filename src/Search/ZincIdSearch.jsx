@@ -10,7 +10,7 @@ export default function ZincIdSearch(props) {
   const [input, setInput] = React.useState("");
   const { token, removeToken, setToken, username } = useToken();
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
 
   useEffect(() => {
     document.title = props.title || "";
@@ -139,7 +139,7 @@ export default function ZincIdSearch(props) {
             format:
             <br></br>
             <code>
-              curl -X GET http://localhost:5010/search/saveResult/<b>task_id</b>
+              curl -X GET https://cartblanche.docking.org/search/saveResult/<b>task_id</b>
               .txt
             </code>
             <br></br>

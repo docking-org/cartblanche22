@@ -121,7 +121,7 @@ def search_substance(identifier, data = None, format = 'json'):
 
 
 @search_bp.route('/substances.<format>', methods=["POST"])
-def search_substances(file = None, data = None, format = 'json', ids = [], output_fields=["zinc_id", "smiles"]): 
+def search_substances(file = None, data = None, format = 'json', ids = [], output_fields=["smiles", "zinc_id"]): 
     ids = []
     getVendors = True
     if 'zinc_ids' in request.files:

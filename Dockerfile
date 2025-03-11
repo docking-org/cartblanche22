@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.4.0
 
 FROM node:19.9.0 as frontend
 WORKDIR /app
