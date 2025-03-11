@@ -24,29 +24,24 @@ def saveResult(
     format='json'
 ):
     
-    task = AsyncResult(task).get()
-    task = task['id']
     task = AsyncResult(task)
-
     if task:
-        result = task.get()
-     
-        result = result['zinc22'] + (result['zinc20'] if result.get('zinc20') else [])
-
-        # for mol in result:
-        #     best_catalog = None
-        #     #find the best catalog, by shipping time, which is formatted as 'x weeks', so like 6 weeks. split on space, take the first element, convert to int, and sort
-        #     for i in mol['catalogs']:
-        #         if not best_catalog:
-        #             best_catalog = i
-        #         else:
-        #             if i.get('price') and best_catalog.get('price'):
-        #                 if int(i['price']) < int(best_catalog['price']):
-        #                     best_catalog = i
-        #     mol['catalogs'] = best_catalog
-
+        if not task.ready():
+            return {'status':'PENDING'}
         
-        #return file to download
+        wrapper= task.get()
+        output_fields = wrapper['output_fields']
+        wrapper = wrapper['id']
+        
+        wrapper = AsyncResult(wrapper)
+
+        result = wrapper.get()
+        
+        result = result['zinc22'] + (result['zinc20'] if result.get('zinc20') else [])
+        
+        if output_fields:
+            result = [dict((k, v) for k, v in x.items() if k in output_fields) for x in result]
+            
         return make_response(formatZincResult(result, format), 200)
     else:
         abort(404)
@@ -126,7 +121,7 @@ def search_substance(identifier, data = None, format = 'json'):
 
 
 @search_bp.route('/substances.<format>', methods=["POST"])
-def search_substances(file = None, data = None, format = 'json', ids = [], output_fields=["zinc_id, smiles"]): 
+def search_substances(file = None, data = None, format = 'json', ids = [], output_fields=["zinc_id", "smiles"]): 
     ids = []
     getVendors = True
     if 'zinc_ids' in request.files:
@@ -154,10 +149,14 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
     ] 
     #merges the results of the zinc20 and zinc22 searches
     callback = mergeResults.s()
+    if request.form.get('output_fields'):
+        
+        output_fields = request.form.get('output_fields').replace(' ', '').split(',')
 
     if not request.form.get('synchronous'):
         #starts the tasks and returns the task id
-        task = start_search_task.delay(task,ids, callback, task_id_progress=task_id_progress)
+        task = start_search_task.delay(task,ids, callback, task_id_progress=task_id_progress, output_fields=output_fields)
+        print(task.id)
         return make_response({'task':task.id}, 200)
     else:
         task = start_search_task.delay(task,ids, callback)
@@ -172,10 +171,9 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
         if res.get('zinc20'):
             result.extend(res['zinc20'])
 
-        if request.form.get('output_fields'):
-            output_fields = request.form.get('output_fields').replace(' ', '').split(',')
-            print(output_fields)
-            result = [dict((k, v) for k, v in x.items() if k in output_fields) for x in result]
+            if output_fields:
+                print(output_fields)
+                result = [dict((k, v) for k, v in x.items() if k in output_fields) for x in result]
         
         return make_response(formatZincResult(result, format), 200)
     

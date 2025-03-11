@@ -120,7 +120,7 @@ export default function ZincIdSearch(props) {
           <p>
             Example:{" "}
             <code>
-              curl -X GET https://cartblanche22.docking.org/substances.txt -F
+              curl -X POST https://cartblanche22.docking.org/substances.txt -F
               zinc_ids=@test.txt -F output_fields='smiles,zinc_id'
             </code>
           </p>
@@ -139,7 +139,8 @@ export default function ZincIdSearch(props) {
             format:
             <br></br>
             <code>
-              https://cartblanche22.docking.org/search/result/<b>task_id</b>
+              curl -X GET http://localhost:5010/search/saveResult/<b>task_id</b>
+              .txt
             </code>
             <br></br>
             <br></br>
@@ -157,7 +158,7 @@ export default function ZincIdSearch(props) {
                 <td>To specify return format</td>
                 <td>
                   <code>
-                    curl -X GET https://cartblanche22.docking.org/substances
+                    curl -X POST https://cartblanche22.docking.org/substances
                     <i>.txt</i>
                   </code>
                 </td>

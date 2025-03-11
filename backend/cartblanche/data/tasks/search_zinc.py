@@ -46,7 +46,7 @@ def _paused_thread():
 #sort of like a chord, but with more control over the individual tasks to keep track  of
 #information submitted
 @celery.task
-def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors=True, matched_smiles=None, task_id_progress=None):
+def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors=True, matched_smiles=None, task_id_progress=None, output_fields=None):
     config_conn = psycopg2.connect(Config.SQLALCHEMY_BINDS["zinc22_common"])
     config_curs = config_conn.cursor()
     config_curs.execute("select tranche, host, port from tranche_mappings")
@@ -83,6 +83,7 @@ def paralellizeZincSearch(zinc_ids, role='public', discarded = None, get_vendors
             for key in keys:
                 for res in result:
                     merged[key] += res[key]
+        
         return merged
             
 @celery.task

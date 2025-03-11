@@ -6,8 +6,8 @@ from celery import chord, signature, chain, group
 
 #a wrapper for all of the search tasks. This allows keeping track of the job id that will return the final result, the original submission, and the progress of the zinc22 search
 
-@celery.task
-def start_search_task(task, submission, callback=None, children=None, task_id_progress=None, group_tasks=False):
+@celery.task(bind=True)
+def start_search_task(self, task, submission, callback=None, children=None, task_id_progress=None, group_tasks=False, output_fields = None):
     if isinstance(task, list):
         tasks = []
         for i in task:
@@ -33,8 +33,5 @@ def start_search_task(task, submission, callback=None, children=None, task_id_pr
     else:
         task = signature(task)
         task = task.apply_async()
-
-    return({'id':task.id, 'submission':submission, 'zinc22progress': children or task_id_progress})
     
-
-
+    return({'id':task.id, 'submission':submission, 'zinc22progress': children or task_id_progress, 'output_fields': output_fields})
