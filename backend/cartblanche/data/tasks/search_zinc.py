@@ -113,7 +113,7 @@ def formatZincID(sub_id):
 @celery.task
 def zinc20search(zinc20, matched_smiles=None):
     missing = []
-    print(zinc20)
+    
     if len(zinc20) == 0:
         return []
     fixed = []
@@ -348,7 +348,6 @@ def vendorSearch(vendor_ids, role='public'):
                 projected_size += 1
                 p_id_prev = p_id
             if projected_size > 0:
-                print(machine_id_map)
                 p_id_prev = machine_id_map[int(p_id_prev)]
                 current_task.update_state(state='PROGRESS',meta={'current':curr_size, 'projected':total_length, 'time_elapsed':t_elapsed})
                 search(p_id_prev, data_file, output_file)

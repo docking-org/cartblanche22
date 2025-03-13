@@ -9,8 +9,7 @@ def call_api(smile, dist, adist, db, matched_smiles):
     smile_text = urllib.parse.quote(smile)
     url = "https://swp.docking.org/search/view?smi={smile}&db={db}&fmt=tsv&dist={adist}&sdist={dist}&length=25".format(smile=smile_text, db=db, adist=adist, dist=dist)
     r = requests.get(url, auth=credentials)
-    print(matched_smiles)
-    print(r.text)
+    
     if not r.text.split('\n')[1]:
         url = "https://sw.docking.org/search/view?smi={smile}&db=all-zinc.smi.anon&fmt=tsv&dist={adist}&sdist={dist}&length=25".format(smile=smile_text, db=db, adist=adist, dist=dist)
         r = requests.get(url, auth=credentials)

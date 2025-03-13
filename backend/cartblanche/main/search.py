@@ -63,14 +63,12 @@ def getResult(task):
     if task_info.get('zinc22progress'):
         zinc22progress = task_info['zinc22progress']
         zinc22task = AsyncResult(zinc22progress, parent=task)
-        print(zinc22task.status)
         if zinc22task.status == "PROGRESS" or zinc22task.status == "PENDING" and zinc22task.info:
                 return {'progress':(zinc22task.info['current']/zinc22task.info['projected']), 'result':[], 'status':zinc22task.status}
 
     task = AsyncResult(task)
     if task.status == "PROGRESS" or task.status == "PENDING":
         if task.info:
-            print(task.info)
             return {'progress':(task.info['current']/task.info['projected']), 'result':[], 'status':task.status}
        
         return {'progress':0, 'result':[], 'status':task.status}
@@ -156,7 +154,7 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
     if not request.form.get('synchronous'):
         #starts the tasks and returns the task id
         task = start_search_task.delay(task,ids, callback, task_id_progress=task_id_progress, output_fields=output_fields)
-        print(task.id)
+        
         return make_response({'task':task.id}, 200)
     else:
         task = start_search_task.delay(task,ids, callback)
@@ -172,7 +170,7 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
             result.extend(res['zinc20'])
 
             if output_fields:
-                print(output_fields)
+        
                 result = [dict((k, v) for k, v in x.items() if k in output_fields) for x in result]
         
         return make_response(formatZincResult(result, format), 200)
