@@ -49,6 +49,7 @@ deploy epyc2:
     - docker stop redis || true
     - docker rm redis || true
     - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+      -v ${SWDIR}=${SWDIR}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
       -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
@@ -89,6 +90,7 @@ deploy n-9-38:
     - docker rm redis || true
     - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
       -v /dev/null:/dev/null
+      -v ${SWDIR}=${SWDIR}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
       -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
@@ -129,6 +131,7 @@ deploy n-1-18:
     - docker rm redis || true
     - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
       -v /dev/null:/dev/null
+      -v ${SWDIR}=${SWDIR}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
       -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
