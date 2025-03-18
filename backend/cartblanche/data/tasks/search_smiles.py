@@ -55,30 +55,29 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
     
     if zinc22:
         for smile in smilelist:
-            search_jobs.append([smile, dist, adist, 'zinc22-All-070123.smi.anon', smile])
-            swdir = os.environ.get('SWDIR')
-            database = 'zinc22-All-070123.smi.anon'
+            search_jobs.append([smile, dist, adist, 'zinc22-All-070123.smi.anon.map', os.environ.get('SWDIR')    ])
+        
     if zinc20:
         for smile in smilelist:
-            search_jobs.append([smile, dist, adist, 'all-zinc.smi.anon', smile])
-            swdir = os.environ.get('SWDIR_20')
-    
+            search_jobs.append([smile, dist, adist, 'all-zinc.smi.anon.map', os.environ.get('SWDIR_20')])
+
     i = 0
 
     db = pysmallworld.Db()
     
-    if not db.set_swdir(swdir):
-        print("Warning: SWDIR probably not correct:", swdir, file=sys.stderr)
-    if not db.open_map_file('zinc22-All-070123.smi.anon.map'):
-        print("Failed to open database file")
-        return
-    
-   
     for job in search_jobs:
         smiles = job[0]
         dist = job[1]
         adist = job[2]
+        swdb = job[3]
+        swdir = job[4]
         
+        if not db.set_swdir(swdir):
+            print("Warning: SWDIR probably not correct:", swdir, file=sys.stderr)
+        if not db.open_map_file(swdb):
+            print("Failed to open database file")
+            continue
+       
         qry = db.new_query()
         qry.add_smiles(smiles)        
         qry.set_max_dist(dist)

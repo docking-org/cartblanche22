@@ -48,7 +48,11 @@ deploy epyc2:
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
     - docker rm redis || true
-    - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+    - docker run -d --restart unless-stopped --network host
+      -v /dev/null:/dev/null
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH_20}
+      -v ${SWDIR_20}:${SWDIR_20}
       -v ${SWDIR}:${SWDIR}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
@@ -88,8 +92,11 @@ deploy n-9-38:
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
     - docker rm redis || true
-    - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+    - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH_20}
+      -v ${SWDIR_20}:${SWDIR_20}
       -v ${SWDIR}:${SWDIR}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
@@ -129,8 +136,11 @@ deploy n-1-18:
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
     - docker rm redis || true
-    - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+    - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH_20}
+      -v ${SWDIR_20}:${SWDIR_20}
       -v ${SWDIR}:${SWDIR}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
