@@ -42,7 +42,7 @@ deploy epyc2:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
+    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO} --build-arg SWDIR=${SWDIR}
       -t cartblanche22 .
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
@@ -81,7 +81,7 @@ deploy n-9-38:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
+    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO} --build-arg SWDIR=${SWDIR}
       -t cartblanche22 .
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
@@ -121,7 +121,7 @@ deploy n-1-18:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
+    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO} --build-arg SWDIR=${SWDIR}
       -t cartblanche22 .
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
