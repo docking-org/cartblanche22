@@ -43,11 +43,8 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
       
     current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
    
-    result = []
     smilelist = smilelist.split('\n')
-    processes = []
-   
-
+    
     # sample url "https://sw.docking.org/search/view?smi=c1ccccc1&smi=Clc1ccccc1&db=zinc22-All-070123.smi.anon&fmt=json"
     results = {}
 

@@ -237,8 +237,8 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
 
     submission = ids
     ids = '\n'.join(ids)
-    dist = 4 if int(dist) > 4 else int(dist)
-    adist = 4 if int(dist) > 4 else int(adist)
+    dist = 3 if int(dist) > 3 else int(dist)
+    adist = 3 if int(dist) > 3 else int(adist)
 
     if len(ids) == 0:
         return "No Valid SMILES, please try again", 400
