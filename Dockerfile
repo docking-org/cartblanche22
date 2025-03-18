@@ -32,7 +32,7 @@ ARG SW_GIT_REPO=$SW_GIT_REPO
 ARG SW_GIT_KEY=$SW_GIT_KEY
 
 RUN git clone https://oauth2:${SW_GIT_KEY}@${SW_GIT_REPO} smallworld 
-ENV SW_INSTAL_DIR=/home/cartblanche22/smallworld
+ENV SW_INSTALL_DIR=/home/cartblanche22/smallworld
 RUN pip install /home/cartblanche22/smallworld/python
 
 COPY --from=frontend /app/build ../build
