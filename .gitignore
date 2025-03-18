@@ -22,6 +22,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+smallworld/
 lib/
 lib64/
 parts/

@@ -42,19 +42,13 @@ deploy epyc2:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker build -t cartblanche22 .
+    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
+      -t cartblanche22 .
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
     - docker rm redis || true
     - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
-      -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
-      -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
-      -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-      -v ${SMALLWORLD_PUBLIC_MAP_PATH}:${SMALLWORLD_PUBLIC_MAP_PATH}
-      -v /dev/null:/dev/null
-      -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
-      -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
       -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
@@ -87,19 +81,14 @@ deploy n-9-38:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker build -t cartblanche22 .
+    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
+      -t cartblanche22 .
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
     - docker rm redis || true
     - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
-      -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
-      -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
-      -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-      -v ${SMALLWORLD_PUBLIC_MAP_PATH}:${SMALLWORLD_PUBLIC_MAP_PATH}
       -v /dev/null:/dev/null
-      -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
-      -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
       -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
@@ -132,19 +121,14 @@ deploy n-1-18:
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
-    - docker build -t cartblanche22 .
+    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
+      -t cartblanche22 .
     - docker stop ${CI_PROJECT_NAME} || true
     - docker rm ${CI_PROJECT_NAME} || true
     - docker stop redis || true
     - docker rm redis || true
     - docker run -d --restart unless-stopped --network host -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
-      -v ${SMALLWORLD_JAR_PATH}:${SMALLWORLD_JAR_PATH}
-      -v ${SMALLWORLD_CONFIG_PATH}:${SMALLWORLD_CONFIG_PATH}
-      -v ${SMALLWORLD_MAP_PATH}:${SMALLWORLD_MAP_PATH}
-      -v ${SMALLWORLD_PUBLIC_MAP_PATH}:${SMALLWORLD_PUBLIC_MAP_PATH}
       -v /dev/null:/dev/null
-      -e SMALLWORLD_MAP_PATH=${SMALLWORLD_MAP_PATH}
-      -e SMALLWORLD_JAR_PATH=${SMALLWORLD_JAR_PATH}
       -e SWDIR=${SWDIR}
       -e CELERY_BROKER_URL=${CELERY_BROKER_URL}
       -e CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}

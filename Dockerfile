@@ -25,6 +25,15 @@ RUN apt-get update && \
 
 RUN apt-get install -y vim
 RUN apt-get install -y rabbitmq-server
+RUN apt-get install gcc g++ -y
+RUN apt-get install git -y
+
+ARG SW_REPO=$SW_GIT_REPO
+ARG GIT_TOKEN=$SW_GIT_KEY
+
+RUN git clone https://oauth2:${GIT_TOKEN}@${SW_REPO} smallworld 
+ENV SW_INSTAL_DIR=/home/cartblanche22/smallworld
+RUN pip install /home/cartblanche22/smallworld/python
 
 COPY --from=frontend /app/build ../build
 ADD backend ./

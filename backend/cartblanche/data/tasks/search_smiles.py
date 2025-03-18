@@ -7,7 +7,8 @@ import time
 import json
 from celery import current_task, group
 from celery.result import AsyncResult, allow_join_result
-
+import pysmallworld
+import sys
 from cartblanche import celery
 from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, mergeResults
 from config import Config
@@ -55,53 +56,49 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
     if zinc22:
         for smile in smilelist:
             search_jobs.append([smile, dist, adist, 'zinc22-All-070123.smi.anon', smile])
-
+            swdir = os.environ.get('SWDIR')
+            database = 'zinc22-All-070123.smi.anon'
     if zinc20:
         for smile in smilelist:
             search_jobs.append([smile, dist, adist, 'all-zinc.smi.anon', smile])
+            swdir = os.environ.get('SWDIR_20')
     
     i = 0
+
+    db = pysmallworld.Db()
+    
+    if not db.set_swdir(swdir):
+        print("Warning: SWDIR probably not correct:", swdir, file=sys.stderr)
+    if not db.open_map_file('zinc22-All-070123.smi.anon.map'):
+        print("Failed to open database file")
+        return
+    
+   
     for job in search_jobs:
-        smile = job[0]
+        smiles = job[0]
         dist = job[1]
         adist = job[2]
-        db = job[3]
-        matched_smiles = job[4]
         
-        res = call_api(smile, dist, adist, db, matched_smiles)
-    
+        qry = db.new_query()
+        qry.add_smiles(smiles)        
+        qry.set_max_dist(dist)
         
-        matched_smiles = res[1]
-        r = res[0]
-        print(r)
-        text = r.split('\n')
-        text = text[1:]
-        for line in text:
-            if line:
-                line = line.split('\t')
-                results[line[0].split(' ')[1]] = {
-                    'smiles': line[0].split(' ')[0],
-                    'matched_smiles': matched_smiles,
-                }
+        scorer = pysmallworld.AtomTypeScoreFunc(qry)
+        score = pysmallworld.AlignedScore()
+        
+        for hit in db.search_query(qry):
+            if not scorer.score(score, hit):
+                continue
+            if score.dist > dist:
+                continue
+            
+            adis = score.fmt(hit.vector).split('=')[1]
+            if float(adis) > adist:
+                continue
+
+            id = hit.smiles.split(' ')[1]
+            results[id] = smiles
         i += 1
         current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':i, 'projected':len(smilelist), 'time_elapsed':0})
-        time.sleep(5)
-
     
     return results
-
-@celery.task
-def call_api(smile, dist, adist, db, matched_smiles):
-    credentials = ('gpcr', 'xtal')
-    import urllib.parse
-    smile_text = urllib.parse.quote(smile)
-    url = "https://swp.docking.org/search/view?smi={smile}&db={db}&fmt=tsv&dist={adist}&sdist={dist}&length=25".format(smile=smile_text, db=db, adist=adist, dist=dist)
-    
-    r = requests.get(url, auth=credentials)
-    
-    if not r.text.split('\n')[1]:
-        url = "https://sw.docking.org/search/view?smi={smile}&db=all-zinc.smi.anon&fmt=tsv&dist={adist}&sdist={dist}&length=25".format(smile=smile_text, db=db, adist=adist, dist=dist)
-        r = requests.get(url, auth=credentials)
-       
-        
-    return [r.text, matched_smiles]
