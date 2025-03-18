@@ -55,16 +55,16 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
     
     if zinc22:
         for smile in smilelist:
-            search_jobs.append([smile, dist, adist, 'zinc22-All-070123.smi.anon.map', os.environ.get('SWDIR')    ])
+            swdir = os.environ.get('SWDIR')
+            search_jobs.append([smile, dist, adist, 'zinc22-All-070123.smi.anon.map', swdir])
         
     if zinc20:
         for smile in smilelist:
-            search_jobs.append([smile, dist, adist, 'all-zinc.smi.anon.map', os.environ.get('SWDIR_20')])
+            swdir = os.environ.get('SWDIR_20')
+            search_jobs.append([smile, dist, adist, 'all-zinc.smi.anon.map', swdir])
 
     i = 0
 
-    db = pysmallworld.Db()
-    
     for job in search_jobs:
         smiles = job[0]
         dist = job[1]
@@ -72,6 +72,7 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
         swdb = job[3]
         swdir = job[4]
         
+        db = pysmallworld.Db()
         if not db.set_swdir(swdir):
             print("Warning: SWDIR probably not correct:", swdir, file=sys.stderr)
         if not db.open_map_file(swdb):
