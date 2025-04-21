@@ -53,4 +53,3 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "Successfully renamed $main_css_file_name to build.css in $index_html_file"
-# Print the success message

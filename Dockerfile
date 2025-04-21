@@ -38,12 +38,15 @@ RUN pip install /home/cartblanche22/smallworld/python
 COPY --from=frontend /app/build ../build
 ADD backend ./
 ADD backend/boot-test.sh backend/boot.sh ./
+ADD rename.sh ./
+RUN chmod +x rename.sh
+RUN ./rename.sh
 
 ARG BOOT_SCRIPT=$BOOT_SCRIPT
 ENV BOOT_SCRIPT=$BOOT_SCRIPT
 
 RUN chmod +x boot.sh
-RUN chmod +x boot-test.sh
+
 EXPOSE 5000
 EXPOSE 5555
 ENTRYPOINT "./boot.sh"
