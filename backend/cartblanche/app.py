@@ -53,6 +53,7 @@ def add_header(r):
     if request.path.endswith('.json'):
         r.headers["Content-Type"] = "application/json"  
         
+        
     return r
     
 def create_app(config_class=Config):
