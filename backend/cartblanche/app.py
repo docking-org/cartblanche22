@@ -42,6 +42,16 @@ def add_header(r):
     if request.path.endswith(".css"):
         #one day
         r.headers["Cache-Control"] = "public, max-age=86400"
+    
+    #set content type for js, wasm, css files
+    if request.path.endswith('.wasm'):
+        r.headers["Content-Type"] = "application/wasm"
+    if request.path.endswith('.js'):
+        r.headers["Content-Type"] = "application/javascript"
+    if request.path.endswith('.css'):
+        r.headers["Content-Type"] = "text/css"
+    if request.path.endswith('.json'):
+        r.headers["Content-Type"] = "application/json"  
         
     return r
     
