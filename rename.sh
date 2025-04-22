@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#this is dumb but I don't have time to install webpack which gives you the option to rename the bundle files lol
+
 # Get the main.*.js file name from /home/build/js/
 main_js_file=$(ls /home/build/static/js/main.*.js 2>/dev/null)
 if [ -z "$main_js_file" ]; then

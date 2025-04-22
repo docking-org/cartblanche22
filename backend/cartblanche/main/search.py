@@ -250,19 +250,30 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
     task = [sw_search.s(ids, dist, adist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
     
     task = start_search_task.delay(task, submission, task_id_progress=task_id_progress)
- 
-    if request.method == "POST":
-        return {"task": task.id}
+    
+    if not request.form.get('synchronous'):
+        #starts the tasks and returns the task id
+        return make_response({'task':task.id}, 200)
     else:
-        res= task.get()['id']
-        res = AsyncResult(res).get()       
-        results = res['zinc22']
-
+        task = start_search_task.delay(task, submission)
+        task = AsyncResult(task.id)
+        res = task.get()
+        task = res['id']
+        task = AsyncResult(task)
+        
+        #get the results
+        res = task.get()
+        
+        if res.get('zinc22'):
+            results = res['zinc22']
+        else:
+            results = []
+        
         if res.get('zinc20'):
             results.extend(res['zinc20'])
-            
+        
         return make_response(formatZincResult(results, format), 200)
-    
+   
 @search_bp.route('/substance/random/<jobid>.<format>', methods=["GET"])
 def random_substance_status(jobid, format = "json"):
  

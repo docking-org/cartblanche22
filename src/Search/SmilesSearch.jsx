@@ -177,8 +177,25 @@ export default function SmilesSearch(props) {
 
           <p>
             - Results can be formatted in the desired file format.
-            <br />- If output_fields are not specified, all available molecule
-            data is returned.
+            <br />
+            - If output_fields are not specified, all available molecule data is
+            returned.
+            <br />- The zinc_id and smiles output fields will be returned by
+            default unless otherwise specified.
+            <br></br>- The search is asynchronous by default. The submission
+            will return a task ID that can be used to check the status of the
+            search.
+            <br></br>
+            <br></br>Asynchronous results can be retrieved using this url
+            format:
+            <br></br>
+            <code>
+              curl -X GET https://cartblanche.docking.org/search/saveResult/
+              <b>task_id</b>
+              .txt
+            </code>
+            <br></br>
+            <br></br>
           </p>
           <Table bordered striped hover>
             <thead>
@@ -235,6 +252,15 @@ export default function SmilesSearch(props) {
                   </code>
                 </td>
                 <td>Number</td>
+              </tr>
+              <tr>
+                <td>
+                  Start synchronous search. Retrieves results immediately (not
+                  recommended for larger searches).
+                </td>
+                <td>
+                  <code>-F synchronous=true</code>
+                </td>
               </tr>
             </tbody>
           </Table>
