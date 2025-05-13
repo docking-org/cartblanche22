@@ -4,6 +4,8 @@ import axios from "axios";
 import { Container, Row, Col, Form, Navbar, Nav, NavDropdown, Modal, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export default function Footer() {
+    const currentYear = new Date().getFullYear();
+
     return (
         <div className="footer bg-dark">
             <Container fluid className="text-center">
@@ -29,7 +31,7 @@ export default function Footer() {
                     Arthor/Smallworld by <a href="https://www.nextmovesoftware.com/">NextMove Software Ltd. </a>
                 </div>
                 <div style={{ marginTop: "15px", fontSize: "0.9em" }}>
-                    © 1991-2025 UCSF DOCK team and the UC Regents, Department of Pharmaceutical Chemistry, UCSF
+                    © 1991-{currentYear} UCSF DOCK team and the UC Regents, Department of Pharmaceutical Chemistry, UCSF
                 </div>
                 <div style={{ fontSize: "0.8em", marginTop: "5px" }}>
                     This is not an official UCSF website. The opinions or statements expressed herein should not be taken as a position of or endorsement by the University of California, San Francisco.
