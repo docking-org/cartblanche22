@@ -62,8 +62,8 @@ export default function SW(props) {
     const { smiles } = query.get("smiles") ? query.get("smiles") : "";
 
     if (smiles) {
-        setSmi(smiles);
-        setSmilesText(smiles);
+        setSmi(decodeURIComponent(smiles));
+        setSmilesText(decodeURIComponent(smiles));
     }
 
 
