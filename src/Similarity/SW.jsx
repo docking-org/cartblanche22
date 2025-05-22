@@ -2,6 +2,7 @@ import React from 'react';
 import {
     useParams,
     Link,
+    useLocation
 } from "react-router-dom";
 import { Container, Table, Tabs, Tab, Card, Row, Col, InputGroup, OverlayTrigger, Tooltip, Button, ButtonGroup, Dropdown, DropdownButton, Accordion } from "react-bootstrap";
 
@@ -21,7 +22,12 @@ import initRDKit from '../utils/initRDKit';
 import { Jsme } from 'jsme-react';
 
 export default function SW(props) {
-
+    const useQuery = () => {
+        return new URLSearchParams(useLocation().search);
+      };
+    const query = useQuery();
+    const { smiles } = query.get("smiles") ? query.get("smiles") : "";
+    document.getElementById("inputSmiles").value = smiles;
 
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
@@ -387,6 +393,7 @@ export default function SW(props) {
                         <input
                             className="form-control"
                             value={smilesText}
+                            id="inputSmiles"
                             onChange={(e) => {
                                 submitSearch(e.target.value, false, true);
                             }}
