@@ -22,12 +22,7 @@ import initRDKit from '../utils/initRDKit';
 import { Jsme } from 'jsme-react';
 
 export default function SW(props) {
-    const useQuery = () => {
-        return new URLSearchParams(useLocation().search);
-      };
-    const query = useQuery();
-    const { smiles } = query.get("smiles") ? query.get("smiles") : "";
-    document.getElementById("inputSmiles").value = smiles;
+    
 
     const { findAndAdd } = Cart();
     const [cols] = React.useState({
@@ -59,6 +54,17 @@ export default function SW(props) {
     const [daylight, setDaylight] = React.useState(true);
     const [rdKit, setRDKit] = React.useState(null);
     const [smilesText, setSmilesText] = React.useState(smi);
+
+    const useQuery = () => {
+        return new URLSearchParams(useLocation().search);
+      };
+    const query = useQuery();
+    const { smiles } = query.get("smiles") ? query.get("smiles") : "";
+
+    if (smiles) {
+        setSmi(smiles);
+        setSmilesText(smiles);
+    }
 
 
     const minDistance = 0;
