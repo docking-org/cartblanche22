@@ -7,7 +7,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-
 import App from './App';
 import Navigation from './Navbar';
 
@@ -63,7 +62,6 @@ const router = createBrowserRouter([
         />,
       }
     ]
-
   },
   {
     path: "/results",
@@ -81,7 +79,6 @@ const router = createBrowserRouter([
     element: <TrancheBrowser
       title="Tranche Browser - Cartblanche22"
     />,
-
   },
   {
     path: "/carts",
@@ -130,18 +127,19 @@ const router = createBrowserRouter([
   }
 ]);
 
+// Create a layout component that wraps the router and ensures footer is at bottom
+const Layout = () => {
+  return (
+    <div className="app-container">
+      <Navigation />
+      <div className="content-container">
+        <RouterProvider router={router} />
+      </div>
+      <Footer />
+    </div>
+  );
+};
 
+root.render(<Layout />);
 
-root.render(
-  <div>
-    <Navigation />
-    <RouterProvider router={router} />
-    <Footer></Footer>
-  </div>
-
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
