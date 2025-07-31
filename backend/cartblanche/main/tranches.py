@@ -34,10 +34,10 @@ def DBFormatter(hac, logp, format, add_url, charge, generation):
 
 def CurlDownloader(hac, logp, format, add_url, charge, generation):
     if generation != '':
-        return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}". \
+        return "curl --retry 3 --retry-delay 1 --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, generation=generation)
     else:
-        return "curl  --user '{user}:{password}' --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format}". \
+        return "curl  --user '{user}:{password}'  --retry 3 --retry-delay 1 --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format}". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, user = Config.DOWNLOAD_USERNAME_2D, password = Config.DOWNLOAD_PASS_2D)
 
 
