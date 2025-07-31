@@ -2,7 +2,7 @@
 
 ## Conda environment
 
-`conda create -f environment.yml`
+`conda create env -f environment.yml`
 
 ## Start Flask
 
