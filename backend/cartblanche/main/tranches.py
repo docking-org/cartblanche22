@@ -24,7 +24,7 @@ def AWSFormatter(hac, logp, format, add_url, charge, generation):
     return "s3://zinc3d/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def OCIFormatter(hac, logp, format, add_url, charge, generation):
-    return "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idrvm4tkz2a8/b/ZINC/o//zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
+    return "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idrvm4tkz2a8/b/ZINC/o/zinc-22{generation}/{hac}/{hac}{logp}".format(base_url=base_url, add_url=add_url, hac=hac, logp= logp, charge=charge, format=format, generation=generation)    
 
 def DBFormatter(hac, logp, format, add_url, charge, generation):
     if generation != "":
@@ -34,7 +34,7 @@ def DBFormatter(hac, logp, format, add_url, charge, generation):
 
 def CurlDownloader(hac, logp, format, add_url, charge, generation):
     if generation != '':
-        return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}/". \
+        return "curl --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp}". \
         format(hac=hac, logp=logp, format=format, base_url=base_url, add_url=add_url, charge=charge, generation=generation)
     else:
         return "curl  --user '{user}:{password}' --remote-time --fail --create-dirs -o {hac}/{hac}{logp}{charge}.{format} {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format}". \
@@ -99,7 +99,7 @@ URI_EXTENSION_TO_MIMETYPE = {
     'rsync': 'application/x-ucsf-zinc-uri-downloadscript-rsync',
 }
 
-base_url = 'http://files.docking.org/'
+base_url = 'https://files.docking.org/'
 
 axes = [('H04', 'H05', 'H06', 'H07', 'H08', 'H09', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
          'H16', 'H17',
