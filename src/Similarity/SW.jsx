@@ -398,6 +398,7 @@ export default function SW(props) {
                         <InputGroup.Text>SMILES</InputGroup.Text>
                         <input
                             className="form-control"
+                            aria-labelledby="smilesText"
                             value={smilesText}
                             id="inputSmiles"
                             onChange={(e) => {
@@ -414,6 +415,7 @@ export default function SW(props) {
                         <select
                             className="form-control"
                             value={db}
+                            aria-labelledby="selectDatabase" 
                             onChange={(e) => {
 
                                 setDB(e.target.value);
@@ -483,7 +485,7 @@ export default function SW(props) {
                                                             onChange={handleSliderChangeDual}
                                                             onChangeCommitted={handleSliderCommit}
                                                             valueLabelDisplay="auto"
-                                                            aria-labelledby="range-slider"
+                                                            aria-labelledby={`${slider.name}-slider`}
                                                             min={slider.min}
                                                             max={slider.max}
                                                          
@@ -567,7 +569,7 @@ export default function SW(props) {
                         }}
                     >
                     <br />
-                    <img src="https://sw.docking.org/img/logo3_box.svg" width="20px" /> SmallWorld© 2015-2024 NextMove Software Ltd. All Rights Reserved.
+                    <img src="https://sw.docking.org/img/logo3_box.svg" width="20px" alt="NextMove Software logo" /> SmallWorld© 2015-2024 NextMove Software Ltd. All Rights Reserved.
                     <br />
                  
                     </p>

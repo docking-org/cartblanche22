@@ -146,6 +146,7 @@ export default function Arthor(props) {
                         <input
                             className="form-control"
                             value={smilesText}
+                            aria-labelledby="smilesText"
                             onChange={(e) => {
                                 submitSearch(e.target.value, false, true);
                             }}
@@ -159,6 +160,7 @@ export default function Arthor(props) {
                         <select
                             className="form-control"
                             value={params.db}
+                            aria-labelledby="selectDatabase"
                             onChange={(e) => {
                                 setParams((prev) => {
                                     return { ...prev, db: e.target.value }
@@ -194,12 +196,14 @@ export default function Arthor(props) {
                                 disabled
                                 size="sm"
                                 variant="secondary"
+                                aria-lebelledby="searchType"
                                 style={{ "font-size": "0.7vw" }}
                             >
                                 Search Type
                             </Button>
                             <Button
                                 onClick={() => setArthorSearchType("Similarity")}
+                                aria-labelledby="selectSimilarity"
                                 variant={arthorSearchType === "Similarity" ? 'primary' : 'secondary'}
                                 style={{ "font-size": "1vw" }}
                             >
@@ -207,6 +211,7 @@ export default function Arthor(props) {
                             </Button>
                             <Button
                                 onClick={() => setArthorSearchType("Substructure")}
+                                aria-labelledby="selectSubstructure"
                                 variant={arthorSearchType === "Substructure" ? 'primary' : 'secondary'}
                                 style={{ "font-size": "1vw" }}
                             >
@@ -214,6 +219,7 @@ export default function Arthor(props) {
                             </Button>
                             <Button
                                 style={{ "font-size": "1vw" }}
+                                aria-labelledby="selectSMARTS"
                                 onClick={() => {
                                     setArthorSearchType("SMARTS")
                                 }}
@@ -288,7 +294,7 @@ export default function Arthor(props) {
                         }}
                     >
                     <br />
-                    <img src="https://arthor.docking.org/img/arthor_bandit_crop_32x32.png" width="40px" /> Arthor© 2018-2024 NextMove Software Ltd. All Rights Reserved.
+                    <img src="https://arthor.docking.org/img/arthor_bandit_crop_32x32.png" width="40px" alt="NextMove Software logo"/> Arthor© 2018-2024 NextMove Software Ltd. All Rights Reserved.
                     <br />
                  
                     </p>
