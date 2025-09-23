@@ -156,7 +156,7 @@ export default function RandomSearch(props) {
             </Card>
 
             <Card className="mt-2" role="heading" aria-level="1">
-                <Card.Header><b>CURL commands for dowloading random molecules</b></Card.Header>
+                <Card.Header><b>CURL commands for downloading random molecules</b></Card.Header>
                 <Card.Body>
 
                     <p>Example:
