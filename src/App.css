@@ -59,3 +59,7 @@
   color: white;
   text-decoration: none;
 }
+
+code {
+  line-height : 1.5;
+}
