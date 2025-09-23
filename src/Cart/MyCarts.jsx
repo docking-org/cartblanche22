@@ -43,6 +43,7 @@ export default function MyCarts(props) {
                     You have <b>{carts.length}</b> carts &nbsp;
                     <Button
                         onClick={() => setAddModal(true)}
+                        aria-label="Create new cart"
                     >
                         <i class="fas fa-plus"></i>
                     </Button>
@@ -69,8 +70,10 @@ export default function MyCarts(props) {
                                     <td>{cart.active ?
                                         <Button
                                             variant="outline-primary"
+                                            aria-labelledby="Active cart"
                                         ><i class="fas fa-check"></i></Button> :
                                         <Button
+                                            aria-label="Activate cart"
                                             onClick={() =>
                                                 activateCart(cart.DT_RowId, cart.name).then((response) => {
                                                     loadCarts();
@@ -121,6 +124,7 @@ export default function MyCarts(props) {
                         <Form.Group>
                             <Form.Label>Cart Name</Form.Label>
                             <Form.Control
+                                aria-labelledby="Enter cart name"
                                 onChange={(e) => setNewCartName(e.target.value)}
                                 value={newCartName}
                                 type="text" placeholder="Enter cart name" />
@@ -128,7 +132,7 @@ export default function MyCarts(props) {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary">Close</Button>
+                    <Button variant="secondary" aria-label="Close cart">Close</Button>
                     <Button variant="primary"
                         onClick={() => {
                             createCart(newCartName).then((response) => {
@@ -154,6 +158,7 @@ export default function MyCarts(props) {
                 <Modal.Footer>
                     <Button variant="secondary">Close</Button>
                     <Button variant="primary"
+                        aria-label="Delete cart"
                         onClick={() => {
                             deleteCart(deleteCartId).then((response) => {
                                 loadCarts();

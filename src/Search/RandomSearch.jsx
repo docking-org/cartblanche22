@@ -102,7 +102,7 @@ export default function RandomSearch(props) {
                     <form id='data' class="form-inline">
                         <div class="form-group">
                             <label for="fname">Subset: &nbsp;</label>
-                            <select name="subset" class="btn btn-info" id="subset">
+                            <select name="subset" class="btn btn-info" id="subset" aria-labelledby="Select subset">
                                 <option value="none" id="subset-none" selected>
                                     None
                                 </option>
@@ -117,7 +117,7 @@ export default function RandomSearch(props) {
 
                                 <Col sm={12} lg={3}>
                                     <label for="fname">Number of molecules: &nbsp;</label>
-                                    <input name="amount" class="form-control" id="amountformat" ></input>
+                                    <input name="amount" class="form-control" id="amountformat" aria-labelledby="Input number of molecules"></input>
                                 </Col>
                             </Row>
 
@@ -125,7 +125,7 @@ export default function RandomSearch(props) {
                             <br />
                             <label for="fname">Output Format: &nbsp;</label>
 
-                            <select name="format" class="btn btn-info" id="format">
+                            <select name="format" class="btn btn-info" id="format" aria-labelledby="Select output format">
                                 <option value="txt" id="format-txt" selected>
                                     .txt
                                 </option>
@@ -139,6 +139,7 @@ export default function RandomSearch(props) {
                             <br />
                             <br />
                             <button class="btn btn-primary" type="submit"
+                                aria-labelledby="Download random molecules"
                                 onClick={
 
                                     (e) => {
