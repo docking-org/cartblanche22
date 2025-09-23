@@ -243,7 +243,7 @@ export default function Navigation() {
                         <Form.Group className="mb-3" controlId="">
                             <Form.Label>Username</Form.Label>
 
-                            <Form.Control type="text" placeholder="Enter username"
+                            <Form.Control type="text" placeholder="Enter username" aria-label="Enter username"
                                 id="username" />
 
                         </Form.Group>
@@ -252,6 +252,7 @@ export default function Navigation() {
                                 Password
                             </Form.Label>
                             <Form.Control type="password"
+                                aria-label="Enter password"
                                 id="password"
                             ></Form.Control>
                         </Form.Group>
@@ -260,14 +261,14 @@ export default function Navigation() {
 
                 <Modal.Footer>
                     <Col>
-                        <Button variant="outline-primary btn-sm" onClick={handleRegister}>
+                        <Button variant="outline-primary btn-sm" aria-label="Register" onClick={handleRegister}>
                             New to Cartblanche?
                         </Button>
                     </Col>
-                    <Button variant="secondary btn-sm " onClick={handleForgot}>
+                    <Button variant="secondary btn-sm " aria-label="Forgot password" onClick={handleForgot}>
                         Forgot Password?
                     </Button>
-                    <Button variant="primary btn-sm" onClick={handleLogin}>
+                    <Button variant="primary btn-sm" aria-label="Sign in" onClick={handleLogin}>
                         Sign In
                     </Button>
                 </Modal.Footer>
@@ -286,13 +287,13 @@ export default function Navigation() {
                         <Form.Group className="mb-3" controlId="">
                             <Form.Label>Username</Form.Label>
 
-                            <Form.Control type="text" placeholder="Enter username"
+                            <Form.Control type="text" placeholder="Enter username" aria-label="Enter username"
                                 onChange={(e) => { setForm({ ...form, username: e.target.value }) }}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label>Email address</Form.Label>
-                            <Form.Control type="email" placeholder="Enter email"
+                            <Form.Control type="email" placeholder="Enter email" aria-label="Enter email"
                                 onChange={(e) => { setForm({ ...form, email: e.target.value }) }}
                             />
 
@@ -304,6 +305,7 @@ export default function Navigation() {
                             </Form.Label>
                             <Form.Control
                                 type="password"
+                                aria-label="Enter password"
                                 onChange={(e) => { setForm({ ...form, password: e.target.value }) }}
                             ></Form.Control>
                         </Form.Group>
@@ -312,7 +314,7 @@ export default function Navigation() {
                                 Confirm Password
                             </Form.Label>
                             <Form.Control type="password"
-
+                                aria-label="Confirm password"
                                 isInvalid={form.confirmPassword !== "" && form.password !== form.confirmPassword}
 
                                 onChange={(e) => { setForm({ ...form, confirmPassword: e.target.value }) }}
@@ -325,13 +327,11 @@ export default function Navigation() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Col>
-                        <Button variant="outline-primary btn-sm" onClick={handleShow}>
+                        <Button variant="outline-primary btn-sm" aria-label="Sign in" onClick={handleShow}>
                             Already have an account?
                         </Button>
                     </Col>
-                    <Button variant="primary btn-sm" onClick=
-                        {handleRegisterSubmit}
-                    >
+                    <Button variant="primary btn-sm" onClick={handleRegisterSubmit} aria-label="Submit registration">
                         Register
                     </Button>
                 </Modal.Footer>
@@ -348,6 +348,7 @@ export default function Navigation() {
                         <Form.Group className="mb-3" controlId="">
                             <Form.Label>Email</Form.Label>
                             <Form.Control type="email" placeholder="Enter email"
+                                aria-label="Enter email"
                                 onChange={(e) => { setForm({ ...form, email: e.target.value }) }}
                             />
                         </Form.Group>
@@ -355,11 +356,11 @@ export default function Navigation() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Col>
-                        <Button variant="outline-primary btn-sm" onClick={handleShow}>
+                        <Button variant="outline-primary btn-sm" aria-label="back to sign in" onClick={handleShow} >
                             Back to Sign In
                         </Button>
                     </Col>
-                    <Button variant="primary btn-sm" onClick={handleForgotSubmit}>
+                    <Button variant="primary btn-sm" aria-label="request password reset" onClick={handleForgotSubmit}>
                         Request Password Reset
                     </Button>
                 </Modal.Footer>

@@ -139,6 +139,7 @@ export default function Arthor(props) {
                         }}
                         smiles={rdKit ? rdKit.get_mol(smi).get_smiles() : ''}
                         options={"noautoez,newlook,nocanonize,multipart,zoom"}
+                        aria-labelledby="jsme"
                     />
 
                     <InputGroup className='mb-1 mt-1'>

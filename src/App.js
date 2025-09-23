@@ -34,10 +34,10 @@ function App() {
         </div>
         <div class="col-md-6">
           <p>
-            Cartblanche is provided by the <a target="_blank" href="http://irwinlab.compbio.ucsf.edu">Irwin</a>
-            and <a target="_blank" href="http://bkslab.org">Shoichet</a> Laboratories in the
+            Cartblanche is provided by the <a target="_blank" href="https://irwinlab.compbio.ucsf.edu">Irwin</a> 
+            and <a target="_blank" href="https://bkslab.org">Shoichet</a> Laboratories in the
             Department of Pharmaceutical Chemistry at the University of California, San Francisco (UCSF).
-            We thank <a target="_blank" href="http://www.nigms.nih.gov">NIGMS</a> for financial support (GM71896 and
+            We thank <a target="_blank" href="https://www.nigms.nih.gov">NIGMS</a> for financial support (GM71896 and
             GM133836).
           </p>
           <p>
@@ -49,8 +49,8 @@ function App() {
               target="_blank">https://pubs.acs.org/doi/10.1021/acs.jcim.0c00675</a>.
             <br />
             Or Sterling and Irwin, <em>J. Chem. Inf. Model, 2015</em>
-            <em><a href="http://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559"
-              target="_blank">http://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559</a></em>.
+            <em><a href="https://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559"
+              target="_blank">https://pubs.acs.org/doi/abs/10.1021/acs.jcim.5b00559</a></em>.
           </p>
 
           <br />
