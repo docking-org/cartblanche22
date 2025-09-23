@@ -283,7 +283,7 @@ export default function Checkout(props) {
     return (
         <Container className='mt-2 mb-2'>
             <Card>
-                <Card.Header>
+                <Card.Header role="heading" aria-level="1">
                     <b>Checkout</b>
                 </Card.Header>
                 <Card.Body
