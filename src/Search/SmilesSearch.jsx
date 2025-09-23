@@ -267,7 +267,7 @@ export default function SmilesSearch(props) {
           <p>
             If you want to learn more about search, please go to{" "}
             <a
-              href="http://wiki.docking.org/index.php/Zinc22:Searching"
+              href="https://wiki.docking.org/index.php/Zinc22:Searching"
               target="_blank"
             >
               {" "}

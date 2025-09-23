@@ -96,7 +96,7 @@ export default function RandomSearch(props) {
     return (
         <Container className="mt-2 mb-2">
             <Card>
-                <Card.Header><b>Download Random Molecules</b></Card.Header>
+                <Card.Header role="heading" aria-level="1"><b>Download Random Molecules</b></Card.Header>
 
                 <Card.Body>
                     <form id='data' class="form-inline">
@@ -112,9 +112,7 @@ export default function RandomSearch(props) {
                             </select>
                             <br /><br />
 
-
                             <Row>
-
                                 <Col sm={12} lg={3}>
                                     <label for="fname">Number of molecules: &nbsp;</label>
                                     <input name="amount" class="form-control" id="amountformat" aria-labelledby="Input number of molecules"></input>
@@ -139,7 +137,7 @@ export default function RandomSearch(props) {
                             <br />
                             <br />
                             <button class="btn btn-primary" type="submit"
-                                aria-labelledby="Download random molecules"
+                                
                                 onClick={
 
                                     (e) => {
@@ -157,7 +155,7 @@ export default function RandomSearch(props) {
                 </Card.Body>
             </Card>
 
-            <Card className="mt-2">
+            <Card className="mt-2" role="heading" aria-level="1">
                 <Card.Header><b>CURL commands for dowloading random molecules</b></Card.Header>
                 <Card.Body>
 
@@ -217,7 +215,7 @@ export default function RandomSearch(props) {
                             </tr>
                         </tbody>
                     </Table>
-                    <p>If you want to learn more about search, please go to <a href="http://wiki.docking.org/index.php/Zinc22:Searching"
+                    <p>If you want to learn more about search, please go to <a href="https://wiki.docking.org/index.php/Zinc22:Searching"
                         target="_blank"> Zinc22 documentation on wiki
                         page</a></p>
                 </Card.Body>

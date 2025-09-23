@@ -169,7 +169,7 @@ def punchoutStart(token):
 
 def genProlog(cXMLvers, randStr):
     vers = "1.2.014";
-    sysID = "http://xml.cXML.org/schemas/cXML/" + vers + "/cXML.dtd";
+    sysID = "https://xml.cXML.org/schemas/cXML/" + vers + "/cXML.dtd";
     dt = datetime.datetime.now()
     nowNum = int(round(time() * 1000))
     timeStr = dt.strftime("%y-%m-%dT%H:%M:%S")
