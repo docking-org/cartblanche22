@@ -46,7 +46,7 @@ const ResultsTable = forwardRef((props, ref) => {
         console.log("getArthorResults");
 
         let url = `https://${encodeURIComponent(props.server)}.docking.org/dt/${(props.db)}/search`
-        url += `?query=${encodeURI(smi)}`
+        url += `?query=${smi}` // smiles no longer encoded here to allow for SMARTS queries
 
         url += `&start=${(page - 1) * perPage}`;
         url += `&length=${perPage}`;
