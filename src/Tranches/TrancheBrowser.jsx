@@ -280,6 +280,7 @@ export default function TrancheBrowser(props) {
           {/* 
                          a navbar that says heavy atom count in  the middle, and generation on the far right
                          */}
+            <h1 className="text-center">{url.toUpperCase()} Tranche Browser</h1>
           <Navbar className="top-bar">
             <Container fluid>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -406,6 +407,7 @@ export default function TrancheBrowser(props) {
                       </DropdownMenu>
                     </Dropdown>
                   )}
+                  
                   <Nav.Item className="">
                     <Button
                       variant="outline-dark"
@@ -418,7 +420,7 @@ export default function TrancheBrowser(props) {
               </Navbar.Collapse>
             </Container>
           </Navbar>
-
+        
           <TrancheTable
             tranches={filteredTranches}
             axes={axes}
