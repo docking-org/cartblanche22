@@ -219,7 +219,7 @@ const TrancheTable = forwardRef((props, ref) => {
 
     return (
         <div style={{ display: 'flex' }}>
-            <h1>2D Tranche Browser</h1>
+            {/* <h1>2D Tranche Browser</h1> */}
             <div className="left-bar">
                 <p className="title-text" style={{ transform: 'rotate(-90deg)', top: '21em', position: 'sticky' }}>LogP</p>
             </div>
