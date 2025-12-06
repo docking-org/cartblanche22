@@ -4,15 +4,15 @@ from cartblanche.data.tasks.search_zinc import getSubstanceList, zinc20search, m
 
 from cartblanche.data.models.users import Users
 def find_molecule(identifier, data=None, db=None, smiles=None):
-    
     if is_zinc22(identifier) :
         task = getSubstanceList.delay([identifier], getRole())
         res = task.get()
+        print(res)
     
         logs = res['zinc22']
 
         if len(res['zinc22']) == 0:
-            return None
+            return []
         data = res['zinc22'][0]
     elif 'ZINC' in identifier:
         sub_id = identifier.split('ZINC')[1]
