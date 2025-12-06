@@ -193,10 +193,10 @@ def is_zinc22(identifier):
         return False
    
     elif identifier[0:4].upper() == 'ZINC':
-        if identifier[4:6].isnumeric():
-            return False
-        else:
-            return True
+        # if identifier[4:6].isnumeric(): # fasle for some zinc22 ids start with numeric chars
+        #     return False
+        # else:
+        return True
     else:
         return None
 
