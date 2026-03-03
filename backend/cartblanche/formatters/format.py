@@ -6,11 +6,11 @@ def formatZincResult(data, format):
     if format == "csv":
         results = formatZincResultCSV(data)
         res = DataFrame(results)
-        return res.to_csv(encoding='utf-8', index=False, sep=",", lineterminator='\n')
+        return res.to_csv(encoding='utf-8', index=False, sep=",")
     if format == "txt":
         results = formatZincResultCSV(data)
         res = DataFrame(results)
-        return res.to_csv(encoding='utf-8', index=False, sep=" ", lineterminator='\n')
+        return res.to_csv(encoding='utf-8', index=False, sep=" ")
     if format == "json":
         return json.dumps(data)
     

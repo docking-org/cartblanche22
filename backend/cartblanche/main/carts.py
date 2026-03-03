@@ -268,13 +268,13 @@ def downloadCart():
         if format == 'csv' :
             
             res = DataFrame(items)
-            res = res.to_csv(encoding='utf-8', index=False, sep=",", lineterminator='\n')
+            res = res.to_csv(encoding='utf-8', index=False, sep=",")
             return make_response(res, 200)
         elif format == 'json':
             return make_response(jsonify(items), 200)
         elif format == 'tsv':
             res = DataFrame(items)
-            res = res.to_csv(encoding='utf-8', index=False, sep="\t", lineterminator='\n')
+            res = res.to_csv(encoding='utf-8', index=False, sep="\t")
             return make_response(res, 200)
 
 
