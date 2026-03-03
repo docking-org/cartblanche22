@@ -10,7 +10,7 @@ class Config(object):
         SECRET_KEY = os.environ.get('SECRET_KEY')
         SECURITY_PASSWORD_SALT = os.getenv("nemeltdavs")
         
-        ZINC_SMALL_WORLD_SERVER = os.getenv('ZINC_SMALL_WORLD_SERVER') or "http://swp.docking.org"    
+        ZINC_SMALL_WORLD_SERVER = os.getenv('ZINC_SMALL_WORLD_SERVER') or "https://swp.docking.org"    
         TEMPLATES_AUTO_RELOAD = True
         
         SQLALCHEMY_TRACK_MODIFICATIONS = False
