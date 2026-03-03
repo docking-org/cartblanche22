@@ -1,7 +1,7 @@
 import re
 import uuid
 from flask import Blueprint
-
+import random
 from flask import request, abort, make_response, redirect, url_for, jsonify
 
 from celery.result import AsyncResult, GroupResult
@@ -15,7 +15,7 @@ from cartblanche.formatters.format import formatZincResult
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from cartblanche.helpers.common import find_molecule, getRole
 from cartblanche.helpers.validation import base62
-import random 
+
 search_bp = Blueprint('search', __name__)
 
 @search_bp.route('/search/saveResult/<task>.<format>', methods=["GET"])
@@ -24,25 +24,58 @@ def saveResult(
     format='json'
 ):
     
-    task = AsyncResult(task)
-    if task:
-        if not task.ready():
+    
+    task_result = AsyncResult(task)
+    if task_result:
+        if not task_result.ready():
             return {'status':'PENDING'}
         
-        wrapper= task.get()
-        output_fields = wrapper['output_fields']
-        wrapper = wrapper['id']
+        wrapper = task_result.get()
+        output_fields = wrapper.get('output_fields')
+        task_id = wrapper['id']
         
-        wrapper = AsyncResult(wrapper)
-
-        result = wrapper.get()
-        
-        result = result['zinc22'] + (result['zinc20'] if result.get('zinc20') else [])
+        # Check if this is a random substance task (has zinc22progress pointing to a GroupResult)
+        if wrapper.get('zinc22progress') and wrapper['zinc22progress'] == task_id:
+            # This is a random substance task - use GroupResult
+            group = GroupResult.restore(task_id, app=celery)
+            
+            if group is None:
+                print("GroupResult.restore returned None")
+                return {'status': 'ERROR', 'message': 'Could not restore group result'}
+            
+            result = group.get()
+            
+            # Flatten the results from the group
+            data = []
+            for i in result:
+                if isinstance(i, list):
+                    data.extend(i)
+                else:
+                    data.append(i)
+            random.shuffle(data)
+        else:
+            # Regular task - use AsyncResult
+            inner_task = AsyncResult(task_id)
+            result = inner_task.get()
+            
+            # Handle different result structures
+            if isinstance(result, dict):
+                data = result.get('zinc22', [])
+                if result.get('zinc20'):
+                    data.extend(result['zinc20'])
+                if result.get('missing'):
+                    data.extend(result['missing'])
+                if result.get('zinc22_missing'):
+                    data.extend(result['zinc22_missing'])
+            elif isinstance(result, list):
+                data = result
+            else:
+                data = []
         
         if output_fields:
-            result = [dict((k, v) for k, v in x.items() if k in output_fields) for x in result]
+            data = [dict((k, v) for k, v in x.items() if k in output_fields) for x in data]
             
-        return make_response(formatZincResult(result, format), 200)
+        return make_response(formatZincResult(data, format), 200)
     else:
         abort(404)
 
@@ -82,6 +115,7 @@ def getResult(task):
 def downloadResult(task, format='json'):
     #wrapper contains {task:task, submission:submission}
     wrapper = AsyncResult(task)
+    print("hi")
 
     task_info = wrapper.get()
     
@@ -94,7 +128,7 @@ def downloadResult(task, format='json'):
     if result.get('zinc20'):
         response.extend(result['zinc20'])
         response.extend(result['missing'])
-    if result.gett('zinc22_missing'):
+    if result.get('zinc22_missing'):
         response.extend(result['zinc22_missing'])
 
     return make_response(formatZincResult(response, format), 200)
@@ -283,6 +317,7 @@ def random_substance_status(jobid, format = "json"):
     
     if not group.ready():
         total = len(group.children)
+        print(group.completed_count()/total)
         return {'progress':group.completed_count()/total, 'status':'PROGRESS'}
 
     else:
@@ -299,6 +334,7 @@ def random_substance_status(jobid, format = "json"):
     
         random.shuffle(res)
         res = formatZincResult(res, format)
+        print(res)
        
         return { 'result':res, 'status':'SUCCESS'}
     
@@ -325,5 +361,5 @@ def random_substance(format = 'json', subset = None):
         res = AsyncResult(res['id']).get()
         return make_response(formatZincResult(res, format), 200)
 
-    
-    
+
+
