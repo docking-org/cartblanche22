@@ -404,7 +404,7 @@ class CsvOutputBuffer(ObjectFormatter, BufferedOutput):
         'header': True,
         'joiner': ';',
     }
-    CSV_OPTIONS = ('delimiter', 'line_terminator', 'quotechar', 'quoting')
+    CSV_OPTIONS = ('delimiter', 'lineterminator', 'quotechar', 'quoting')
 
     def __init__(self, fields, options=None, extractor=extract_fields, **buffer_args):
         ObjectFormatter.__init__(self, fields=fields, extractor=extractor)
