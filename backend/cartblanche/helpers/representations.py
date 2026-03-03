@@ -459,7 +459,7 @@ class CsvFormatter(CsvOutputBuffer):
 class TxtFormatter(CsvOutputBuffer):
     OPTIONS = {
         'delimiter': '\t',
-        'line_terminator': '\n',
+        'lineterminator': '\n',
         'quotechar': '',
         'header': False,
         'quoting': csv.QUOTE_NONE,

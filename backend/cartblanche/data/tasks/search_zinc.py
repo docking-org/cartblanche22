@@ -525,7 +525,7 @@ def getSubstanceList(zinc_ids, role='public', discarded = None, get_vendors=True
 
         getPrices(result, role)
         current_hostname = ''.join(subprocess.check_output(['hostname']).decode('utf-8').strip())
-        return {'zinc22':result, 'zinc22_missing':missing_file.read().split("\n"), 'logs':logs, 'hostname':current_hostname}
+        return {'zinc22':result, 'zinc22_missing':missing_file.read().split("\n"), 'logs':logs, 'hostname': ''.join(current_hostname)}
     
 
 def get_smiles_results(data_file, search_curs, output_file, tranches_internal):
