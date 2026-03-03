@@ -435,7 +435,7 @@ class CsvOutputBuffer(ObjectFormatter, BufferedOutput):
         for field, value in list(data.items()):
             if isinstance(value, str):
                 value = value.replace(self.options['delimiter'], '')
-                value = value.replace(self.options['line_terminator'], '')
+                value = value.replace(self.options['lineterminator'], '')
                 value = value or self.options['joiner'] or ' '
                 data[field] = value
         return data
