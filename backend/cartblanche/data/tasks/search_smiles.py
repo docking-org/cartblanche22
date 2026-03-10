@@ -40,7 +40,7 @@ def filter_sw_results(ids, role, task_id_progress):
 
 @celery.task
 def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
-      
+    print("hi")
     current_task.update_state(task_id=task_id, state='PROGRESS',meta={'current':0, 'projected':100, 'time_elapsed':0})
    
     smilelist = smilelist.split('\n')
@@ -63,6 +63,7 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
     i = 0
 
     for job in search_jobs:
+        print(job)
         smiles = job[0]
         dist = job[1]
         adist = job[2]

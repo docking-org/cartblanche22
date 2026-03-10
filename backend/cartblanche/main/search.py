@@ -23,27 +23,48 @@ def saveResult(
     task,
     format='json'
 ):
+    task_result = AsyncResult(task, app=celery)
+    print(f"Task status: {task_result.status}")
     
+    # Check if task exists and is not in a failed/unknown state
+    if task_result.status == 'PENDING':
+        return {'status': 'PENDING'}
     
-    task_result = AsyncResult(task)
-    if task_result:
-        if not task_result.ready():
-            return {'status':'PENDING'}
+    if task_result.status == 'FAILURE':
+        return {'status': 'ERROR', 'message': str(task_result.result)}, 500
+    
+    if not task_result.ready():
+        return {'status': 'PENDING'}
+    
+    try:
+        wrapper = task_result.get(timeout=10)
+    except Exception as e:
+        print(f"Error getting task result: {e}")
+        return {'status': 'ERROR', 'message': str(e)}, 500
+    
+    output_fields = wrapper.get('output_fields')
+    task_id = wrapper['id']
+    
+    # Check if this has a group (zinc22progress)
+    group_id = wrapper.get('zinc22progress')
+    if group_id:
+        group = GroupResult.restore(group_id, app=celery)
         
-        wrapper = task_result.get()
-        output_fields = wrapper.get('output_fields')
-        task_id = wrapper['id']
-        
-        # Check if this is a random substance task (has zinc22progress pointing to a GroupResult)
-        if wrapper.get('zinc22progress') and wrapper['zinc22progress'] == task_id:
-            # This is a random substance task - use GroupResult
-            group = GroupResult.restore(task_id, app=celery)
+        if group is None:
+            print(f"GroupResult.restore returned None for {group_id}")
+            # Try as regular AsyncResult
+            inner_task = AsyncResult(group_id, app=celery)
+            if inner_task.ready():
+                result = inner_task.get(timeout=30)
+                data = result if isinstance(result, list) else []
+            else:
+                return {'status': 'PROGRESS', 'message': 'Group result not available yet'}
+        else:
+            if not group.ready():
+                total = len(group.children) if group.children else 1
+                return {'progress': group.completed_count() / total, 'status': 'PROGRESS'}
             
-            if group is None:
-                print("GroupResult.restore returned None")
-                return {'status': 'ERROR', 'message': 'Could not restore group result'}
-            
-            result = group.get()
+            result = group.get(timeout=60)
             
             # Flatten the results from the group
             data = []
@@ -53,38 +74,39 @@ def saveResult(
                 else:
                     data.append(i)
             random.shuffle(data)
-        else:
-            # Regular task - use AsyncResult
-            inner_task = AsyncResult(task_id)
-            result = inner_task.get()
-            
-            # Handle different result structures
-            if isinstance(result, dict):
-                data = result.get('zinc22', [])
-                if result.get('zinc20'):
-                    data.extend(result['zinc20'])
-                if result.get('missing'):
-                    data.extend(result['missing'])
-                if result.get('zinc22_missing'):
-                    data.extend(result['zinc22_missing'])
-            elif isinstance(result, list):
-                data = result
-            else:
-                data = []
-        
-        if output_fields:
-            data = [dict((k, v) for k, v in x.items() if k in output_fields) for x in data]
-            
-        return make_response(formatZincResult(data, format), 200)
     else:
-        abort(404)
+        # Regular task - use AsyncResult
+        inner_task = AsyncResult(task_id, app=celery)
+        if not inner_task.ready():
+            return {'status': 'PENDING'}
+        
+        result = inner_task.get(timeout=30)
+        
+        # Handle different result structures
+        if isinstance(result, dict):
+            data = result.get('zinc22', [])
+            if result.get('zinc20'):
+                data.extend(result['zinc20'])
+            if result.get('missing'):
+                data.extend(result['missing'])
+            if result.get('zinc22_missing'):
+                data.extend(result['zinc22_missing'])
+        elif isinstance(result, list):
+            data = result
+        else:
+            data = []
+    
+    if output_fields:
+        data = [dict((k, v) for k, v in x.items() if k in output_fields) for x in data]
+        
+    return make_response(formatZincResult(data, format), 200)
 
 
 @search_bp.route('/search/result/<task>', methods=["GET"])
 def getResult(task):
     #wrapper contains {task:task, submission:submission}
     inucsf = request.access_route[-1][0:3] == '10.' or  request.access_route[-1][0:8] == '169.230.' or request.access_route[-1][0:8] == '128.218.' or request.access_route[0] == '127.0.0.1'
-    wrapper = AsyncResult(task)
+    wrapper = AsyncResult(task, app=celery)
     try:
         task_info = wrapper.get(timeout=60)
     except:
@@ -95,11 +117,11 @@ def getResult(task):
 
     if task_info.get('zinc22progress'):
         zinc22progress = task_info['zinc22progress']
-        zinc22task = AsyncResult(zinc22progress, parent=task)
+        zinc22task = AsyncResult(zinc22progress, parent=task, app=celery)
         if zinc22task.status == "PROGRESS" or zinc22task.status == "PENDING" and zinc22task.info:
                 return {'progress':(zinc22task.info['current']/zinc22task.info['projected']), 'result':[], 'status':zinc22task.status}
 
-    task = AsyncResult(task)
+    task = AsyncResult(task, app=celery)
     if task.status == "PROGRESS" or task.status == "PENDING":
         if task.info:
             return {'progress':(task.info['current']/task.info['projected']), 'result':[], 'status':task.status}
@@ -114,17 +136,18 @@ def getResult(task):
 @search_bp.route('/search/result/<task>.<format>', methods=["GET"])
 def downloadResult(task, format='json'):
     #wrapper contains {task:task, submission:submission}
-    wrapper = AsyncResult(task)
+    wrapper = AsyncResult(task, app=celery)
     print("hi")
 
     task_info = wrapper.get()
     
     task = task_info['id']
     submission = task_info['submission']
-    task = AsyncResult(task)
+    task = AsyncResult(task, app=celery)
     result = task.get()
 
-    response = result['zinc22'] 
+    response = result['zinc22']
+    print(response) 
     if result.get('zinc20'):
         response.extend(result['zinc20'])
         response.extend(result['missing'])
@@ -192,11 +215,11 @@ def search_substances(file = None, data = None, format = 'json', ids = [], outpu
         return make_response({'task':task.id}, 200)
     else:
         task = start_search_task.delay(task,ids, callback)
-        task = AsyncResult(task.id)
+        task = AsyncResult(task.id, app=celery)
         result = task.get()
 
         task = result['id']
-        task = AsyncResult(task)
+        task = AsyncResult(task, app=celery)
         res = task.get()
 
         result = res['zinc22']
@@ -234,8 +257,7 @@ def search_catitems(ids=[], data = None, format = 'json', file = None):
         return {"task": task.id}
     else:
         res= task.get()['id']
-        res = AsyncResult(res).get()
-        res  = res['zinc22']
+        res = AsyncResult(res, app=celery).get("zinc22")
         return make_response(formatZincResult(res, format), 200)
 
 
@@ -268,8 +290,8 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
     else:
         zinc20 = False
         zinc22 = True
-
     submission = ids
+ 
     ids = '\n'.join(ids)
     dist = 3 if int(dist) > 3 else int(dist)
     adist = 3 if int(dist) > 3 else int(adist)
@@ -278,7 +300,7 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
         return "No Valid SMILES, please try again", 400
 
     #this task id is used to track the progress of the search, between the sw search and the zinc22 search. need to add zinc20 search progress
-    task_id_progress = uuid.uuid4()
+    task_id_progress = str(uuid.uuid4())
     
     # sw search => filter results => zinc22/20 search
     task = [sw_search.s(ids, dist, adist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
@@ -290,10 +312,10 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
         return make_response({'task':task.id}, 200)
     else:
         task = start_search_task.delay(task, submission)
-        task = AsyncResult(task.id)
-        res = task.get()
+        task = AsyncResult(task.id, app=celery)
+        res = task.get("id")
         task = res['id']
-        task = AsyncResult(task)
+        task = AsyncResult(task, app=celery)
         
         #get the results
         res = task.get()
@@ -310,33 +332,38 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
    
 @search_bp.route('/substance/random/<jobid>.<format>', methods=["GET"])
 def random_substance_status(jobid, format = "json"):
- 
-    task = AsyncResult(jobid)
-    id = task.get()['zinc22progress']
-    group = GroupResult.restore(id)
+
+    task = AsyncResult(jobid, app=celery)
+    if not task.ready():
+        return {'progress':0, 'status':task.status}
+    
+    result = task.get()
+    id = result.get('zinc22progress')
+    if not id:
+        return {'progress':0, 'status':'ERROR', 'message':'No group id found for this task'}
+    group = GroupResult.restore(id, app=celery)
+
+    if group is None:
+        print("GroupResult.restore returned None")
+        return {'status': 'ERROR', 'message': 'Could not restore group result'}
     
     if not group.ready():
         total = len(group.children)
         print(group.completed_count()/total)
         return {'progress':group.completed_count()/total, 'status':'PROGRESS'}
-
-    else:
-        result = task.get()
-        id = result['zinc22progress']
-        task = GroupResult.restore(id)
-        
-        result = task.get()
-     
-        res = []
-        #randomize results
-        for i in result:
-                res.extend(i)
     
-        random.shuffle(res)
-        res = formatZincResult(res, format)
-        print(res)
-       
-        return { 'result':res, 'status':'SUCCESS'}
+    result = group.get()
+    print(result)
+    
+    res = []
+    #randomize results
+    for i in result:
+            res.extend(i)
+
+    random.shuffle(res)
+    res = formatZincResult(res, format)
+    
+    return { 'result':res, 'status':'SUCCESS'}
     
     # return {'progress':0, 'status':task.status}
 
@@ -357,8 +384,8 @@ def random_substance(format = 'json', subset = None):
         return {"task": task}
     else:
         # res= task.get()['id']
-        res = AsyncResult(task).get()
-        res = AsyncResult(res['id']).get()
+        res = AsyncResult(task, app=celery).get()
+        res = AsyncResult(res['id'], app=celery).get()
         return make_response(formatZincResult(res, format), 200)
 
 

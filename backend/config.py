@@ -28,8 +28,20 @@ class Config(object):
         SMALLWORLD_MAP_PATH = os.getenv("SMALLWORLD_MAP_PATH")
         SWDIR = os.getenv("SWDIR")
 
+        ENV=os.getenv('ENV', 'production')
+
         CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
         CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+        CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+            'master_name': 'cartblanche-master',
+            'sentinel_kwargs': {},
+            'key_prefix': f'celery-task-{ENV}-',
+        }
+        CELERY_BROKER_TRANSPORT_OPTIONS = {
+            'master_name': 'cartblanche-master',
+            'sentinel_kwargs': {},
+        }
+        
     
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
         GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
