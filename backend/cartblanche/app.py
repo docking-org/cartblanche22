@@ -2,8 +2,6 @@ from flask import Flask, g, current_app, request, send_from_directory
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-
-
 from flask_bootstrap import Bootstrap
 
 from flask_admin.contrib.sqla import ModelView

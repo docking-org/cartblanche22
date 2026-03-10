@@ -1,9 +1,11 @@
+import os
 from celery import Celery
 from kombu import Queue
+from config import Config
 
 celery = Celery(__name__, 
-                result_backend_transport_options={'master_name': 'cartblanche-master'},
-                broker_transport_options={ 'master_name': "cartblanche-master" },
+                broker=Config.CELERY_BROKER_URL,
+                backend=Config.CELERY_RESULT_BACKEND,
                 result_extended=True,
                 include=[
                            'cartblanche.data.tasks',
@@ -13,6 +15,18 @@ celery = Celery(__name__,
                          ]
                 )
 
+# Only set sentinel transport options if using sentinel backend
+if Config.CELERY_RESULT_BACKEND and 'sentinel' in Config.CELERY_RESULT_BACKEND:
+    celery.conf.update(
+        result_backend_transport_options={
+            'master_name': 'cartblanche-master',
+            'sentinel_kwargs': {},
+        },
+        broker_transport_options={
+            'master_name': 'cartblanche-master',
+            'sentinel_kwargs': {},
+        },
+    )
 # celery.conf.task_default_queue = 'default'
 # celery.conf.task_queues = (
 #     Queue('default',    routing_key='task.#'),
