@@ -54,11 +54,11 @@ def PowerShellDownloader(hac, logp, format, add_url, charge, generation):
     if generation != '':
         return "Invoke-WebRequest {base_url}zinc22/zinc-22{generation}/{hac}/{hac}{logp} " \
            "-OutFile (New-Item -Path \"{hac}/{logp}/{charge}/{hac}{logp}{charge}{generation}.{format}\" -Force )".format(hac=hac, logp=logp, format=format, base_url=base_url,
-                                                                add_url_2D=add_url, charge=charge, generation=generation)
+                                                                add_url=add_url, charge=charge, generation=generation)
     else:
         return "Invoke-WebRequest {base_url}{add_url}{hac}/{hac}{logp}{charge}.{format} " \
            "-OutFile (New-Item -Path \"{hac}/{logp}/{hac}{logp}{charge}.{format}\" -Force )".format(hac=hac, logp=logp, format=format, base_url=base_url,
-                                                                add_url_2D=add_url, charge=charge)
+                                                                add_url=add_url, charge=charge)
                                                 
 def RsyncDownloader(tranches, format):
     st = "mkdir zinc-22{generation} \npushd zinc-22{generation}\n".format(generation = tranches[0][0:1])
