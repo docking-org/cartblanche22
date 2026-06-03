@@ -7,7 +7,7 @@ COPY package.json ./
 RUN npm install
 COPY ./src ./src
 COPY ./public ./public
-RUN yarn build
+RUN npm run build
 
 FROM continuumio/anaconda3:latest as backend
 
@@ -34,6 +34,7 @@ ARG SW_GIT_KEY=$SW_GIT_KEY
 RUN git clone https://oauth2:${SW_GIT_KEY}@${SW_GIT_REPO} smallworld 
 ENV SW_INSTALL_DIR=/home/cartblanche22/smallworld
 RUN pip install /home/cartblanche22/smallworld/python
+
 
 COPY --from=frontend /app/build ../build
 ADD backend ./

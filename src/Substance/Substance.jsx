@@ -343,12 +343,12 @@ export default function Substance() {
                         placement="top"
                         overlay={
                           <Tooltip id="tooltip">
-                            All prices listed below are estimated. Please check
+                            Please check
                             with vendors directly to confirm the price.
                           </Tooltip>
                         }
                       >
-                        <th>Price (USD) *</th>
+                        <th>Price</th>
                       </OverlayTrigger>
                     </tr>
                   </thead>
@@ -400,7 +400,8 @@ export default function Substance() {
                             {p.quantity} {p.unit}
                           </td>
                           <td> {p.shipping} </td>
-                          <td> {p.price} </td>
+                          {/* <td> {p.price} </td>  */}
+                          <td>Contact vendor</td>
                         </tr>
                       </tbody>
                     ))
