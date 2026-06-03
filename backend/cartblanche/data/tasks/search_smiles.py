@@ -53,7 +53,8 @@ def sw_search(smilelist, dist, adist, zinc22, zinc20, task_id, file_type=None,):
     if zinc22:
         for smile in smilelist:
             swdir = os.environ.get('SWDIR')
-            search_jobs.append([smile, dist, adist, 'zinc22-All-070123.smi.anon.map', swdir])
+            # search_jobs.append([smile, dist, adist, 'zinc22-All-070123.smi.anon.map', swdir])
+            search_jobs.append([smile, dist, adist, 'zinc22-2025ZINC-22-2025-96B.smi.anon.map', swdir])
         
     if zinc20:
         for smile in smilelist:
