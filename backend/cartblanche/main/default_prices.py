@@ -19,7 +19,8 @@ def getDefaultPrices():
         vendor['supplier_code'] = d.category_name
         vendor['quantity'] = d.quantity
         vendor['unit'] = d.unit
-        vendor['price'] = d.price
+        # vendor['price'] = d.price 
+        vendor['price'] = 0 # set price to 0 to encourage users to contact vendors for accurate pricing
         vendor['shipping'] = d.shipping
         vendor['organization'] = d.organization
         vendor['assigned'] = False

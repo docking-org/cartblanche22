@@ -82,10 +82,15 @@ export default function Arthor(props) {
     }, []);
 
     async function getMaps() {
-        let res = await fetch(`https://${server}.docking.org/dt/data`,
-            {
-                credentials: server === "arthor" ? "omit" : "include",
-            }
+        // let res = await fetch(`https://${server}.docking.org/dt/data`,
+        let res = await fetch(`/arthor/get_maps?server=${server}`,
+            // {
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Allow-Control-Allow-Origin': '*',
+            //     },
+            //     credentials: server === "arthor" ? "omit" : "include",
+            // }
         )
         res = await res.json();
         setMaps(res);
