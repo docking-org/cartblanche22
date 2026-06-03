@@ -238,7 +238,8 @@ export default function Checkout(props) {
                 "smiles": item.smile,
                 "db": item.db,
                 "catalog_name": item.vendors[0] ? item.vendors[0].catalog_name : null,
-                "price": item.vendors[0] ? item.vendors[0].price : null,
+                // "price": item.vendors[0] ? item.vendors[0].price : null,
+                "price": "Contact Vendor",
                 "quantity": item.vendors[0] ? item.vendors[0].quantity : null,
                 "shipping": item.vendors[0] ? item.vendors[0].shipping : null,
                 "short_name": item.vendors[0] ? item.vendors[0].short_name : null,
@@ -340,7 +341,8 @@ export default function Checkout(props) {
 
                             <Navbar.Text>
                                 <Button variant="success" disabled>
-                                    Total Price: ${getTotalPrice().toLocaleString()}
+                                    {/* Total Price: ${getTotalPrice().toLocaleString()} */}
+                                    Total Price : NA
                                 </Button>
                             </Navbar.Text>
                             &nbsp;
@@ -348,7 +350,7 @@ export default function Checkout(props) {
                                 <Button onClick={() => setDownloadModal(true)}>Download</Button>
                             </Navbar.Text>
                             &nbsp;
-                            <Navbar.Text>
+                            {/* <Navbar.Text>
                                 <Button
                                     onClick={() => {
                                         createSpreadsheet();
@@ -356,7 +358,7 @@ export default function Checkout(props) {
                                 >
                                     Send to Google Sheets
                                 </Button>
-                            </Navbar.Text>
+                            </Navbar.Text> */}
 
                             {/* &nbsp;
                             <Navbar.Text>
@@ -483,7 +485,8 @@ export default function Checkout(props) {
                                                                 <td
                                                                     width={70}
                                                                 >
-                                                                    {vendor.price === 0 ? "" : parseFloat(vendor.price).toFixed(2)}
+                                                                    {/* {vendor.price === 0 ? "" : parseFloat(vendor.price).toFixed(2)} */}
+                                                                    Contact vendor
                                                                 </td>
                                                                 <td
                                                                     width={80}
@@ -499,9 +502,10 @@ export default function Checkout(props) {
                                                                 <td
                                                                     width={10}
                                                                 >
-                                                                    {vendor.price === 0 ? "" :
+                                                                    0
+                                                                    {/* {vendor.price === 0 ? "C" :
 
-                                                                        parseFloat(vendor.price * vendor.purchase).toFixed(2)}
+                                                                        parseFloat(vendor.price * vendor.purchase).toFixed(2)} */}
 
                                                                 </td>
                                                             </>
