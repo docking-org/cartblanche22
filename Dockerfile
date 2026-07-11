@@ -1,18 +1,13 @@
 # syntax=docker/dockerfile:1.4.0
 
-FROM node:latest as frontend
+FROM node:18-alpine as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
-COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
-# jsme-react dist is gitignored; build it manually with ESM config fix
-RUN cd node_modules/jsme-react && \
-    npm install --ignore-scripts --legacy-peer-deps && \
-    mv rollup.config.js rollup.config.mjs && \
-    ./node_modules/.bin/rollup -c rollup.config.mjs
+COPY package.json ./
+RUN npm install
 COPY ./src ./src
 COPY ./public ./public
-RUN npm run build
+RUN yarn build
 
 FROM continuumio/anaconda3:latest as backend
 
