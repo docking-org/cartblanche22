@@ -4,7 +4,7 @@ FROM node:19.9.0 as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 COPY ./src ./src
 COPY ./public ./public
 RUN npm run build
