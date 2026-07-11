@@ -7,7 +7,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 # jsme-react dist is gitignored; build it manually with ESM config fix
 RUN cd node_modules/jsme-react && \
-    npm install --ignore-scripts && \
+    npm install --ignore-scripts --legacy-peer-deps && \
     mv rollup.config.js rollup.config.mjs && \
     ./node_modules/.bin/rollup -c rollup.config.mjs
 COPY ./src ./src
