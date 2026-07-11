@@ -3,8 +3,8 @@
 FROM node:19.9.0 as frontend
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY ./src ./src
 COPY ./public ./public
 RUN npm run build
