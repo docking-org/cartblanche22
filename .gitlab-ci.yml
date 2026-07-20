@@ -204,6 +204,7 @@ deploy dev epyc2:
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       -e ENV=development
       -e PORT=5069
+      -e CELERY_WORKER_NAME=worker-dev
       --name ${CI_PROJECT_NAME}-dev
       cartblanche22-dev
 
@@ -244,6 +245,7 @@ deploy dev n-9-38:
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       -e ENV=development
       -e PORT=5069
+      -e CELERY_WORKER_NAME=worker-dev
       --name ${CI_PROJECT_NAME}-dev
       cartblanche22-dev
 
@@ -284,5 +286,6 @@ deploy dev n-1-18:
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
       -e ENV=development
       -e PORT=5069
+      -e CELERY_WORKER_NAME=worker-dev
       --name ${CI_PROJECT_NAME}-dev
       cartblanche22-dev
