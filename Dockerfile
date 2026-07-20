@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.4.0
-
 FROM node:18-alpine as frontend
 WORKDIR /app
 
