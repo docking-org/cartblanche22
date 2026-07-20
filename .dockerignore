@@ -1,0 +1,39 @@
+.git
+.gitignore
+.gitlab-ci.yml
+.claude
+.idea
+.vscode
+.DS_Store
+
+# Python
+__pycache__
+*.py[cod]
+*.so
+venv/
+venv2/
+envs/
+*.egg-info/
+.eggs/
+htmlcov/
+.coverage
+.coverage.*
+.cache
+*.log
+
+# Pre-built frontend (Docker rebuilds from source)
+build/
+
+# Node
+node_modules/
+
+# Dev/test artifacts
+dump.rdb
+*.sqlite
+smallworld/
+migrations
+migrationsPsql
+deployment/
+
+# Docs
+README.md
