@@ -4,6 +4,7 @@ set -o errexit
 set -o pipefail
 set -m
 
+export RABBITMQ_NODENAME=rabbit@localhost
 rabbitmq-server -detached &
 
 until rabbitmqctl status > /dev/null 2>&1; do
