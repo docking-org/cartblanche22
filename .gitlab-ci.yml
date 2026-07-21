@@ -31,14 +31,14 @@
     - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 --detach
     - pytest tests
 
-deploy epyc2:
+deploy n-9-36:
   only:
     - master
   stage: deploy
   services:
     - redis:latest
   tags:
-    - cartblanche22-epyc2
+    - cartblanche22-n-9-36
   script:
     # - docker login ${GITLAB_REGISTRY_URL} -u ${GITLAB_REGISTRY_USER} -p ${GITLAB_REGISTRY_PASS}
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
@@ -167,12 +167,12 @@ deploy n-1-18:
 
       # -d ${GITLAB_REGISTRY_URL}/mar/cartblanche22
 
-deploy dev epyc2:
+deploy dev n-9-36:
   except:
     - master
   stage: deploy
   tags:
-    - cartblanche22-epyc2
+    - cartblanche22-n-9-36
   script:
     - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
       -t cartblanche22-dev .
