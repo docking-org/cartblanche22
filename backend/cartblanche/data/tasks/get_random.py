@@ -16,14 +16,16 @@ logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P07
 logp_range={e:i for i, e in enumerate(logp_range)}
 
 def getRandom(subset, count,timeout=10):
-    
-    
+
+    if subset is not None and subset not in subsets:
+        raise ValueError(f"Unknown subset '{subset}'. Valid subsets: {list(subsets.keys())}")
+
     total = 0
     result = []
     to_pull = int(count)
     dbcount = 0
-    
-    population, distribution = getDistribution(subset)    
+
+    population, distribution = getDistribution(subset)
     results = []     
     tasks = []  
     

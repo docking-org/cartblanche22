@@ -378,7 +378,10 @@ def random_substance(format = 'json', subset = None):
     if subset == 'none':
         subset = None
     
-    task = getRandom(subset, count)
+    try:
+        task = getRandom(subset, count)
+    except ValueError as e:
+        return {"error": str(e)}, 400
 
     if request.method == "POST":
         return {"task": task}

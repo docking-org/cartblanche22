@@ -19,9 +19,12 @@ def get_maps():
     if server == 'arthorp':
         url = os.getenv('ARTHOR_PRIVATE_URL')
     else:
-        url = os.environ.get('ARTHOR_PUBLIC_URL')
+        url = os.getenv('ARTHOR_PUBLIC_URL')
 
-    # get maps data
+    if not url:
+        env_var = 'ARTHOR_PRIVATE_URL' if server == 'arthorp' else 'ARTHOR_PUBLIC_URL'
+        return {'error': f'{env_var} is not configured'}, 500
+
     raw = requests.get(f"{url}/dt/data").json()
     return raw
     
