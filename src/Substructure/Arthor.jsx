@@ -93,6 +93,10 @@ export default function Arthor(props) {
             // }
         )
         res = await res.json();
+        if (!Array.isArray(res) || !res[1]) {
+            console.error("Arthor get_maps returned unexpected data:", res);
+            return;
+        }
         setMaps(res);
         setParams((prev) => {
             return { ...prev, db: res[1].displayName }
