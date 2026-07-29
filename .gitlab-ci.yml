@@ -176,8 +176,7 @@ deploy dev n-9-36:
   script:
     - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
       -t cartblanche22-dev .
-    - docker stop ${CI_PROJECT_NAME}-dev || true
-    - docker rm ${CI_PROJECT_NAME}-dev || true
+    - docker rm -f ${CI_PROJECT_NAME}-dev || true
     - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
       -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
@@ -202,6 +201,8 @@ deploy dev n-9-36:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
+      -e ARTHOR_PUBLIC_URL=${ARTHOR_PUBLIC_URL}
+      -e ARTHOR_PRIVATE_URL=${ARTHOR_PRIVATE_URL}
       -e ENV=development
       -e PORT=5069
       -e CELERY_WORKER_NAME=worker-dev
@@ -217,8 +218,7 @@ deploy dev n-9-38:
   script:
     - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
       -t cartblanche22-dev .
-    - docker stop ${CI_PROJECT_NAME}-dev || true
-    - docker rm ${CI_PROJECT_NAME}-dev || true
+    - docker rm -f ${CI_PROJECT_NAME}-dev || true
     - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
       -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
@@ -243,6 +243,8 @@ deploy dev n-9-38:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
+      -e ARTHOR_PUBLIC_URL=${ARTHOR_PUBLIC_URL}
+      -e ARTHOR_PRIVATE_URL=${ARTHOR_PRIVATE_URL}
       -e ENV=development
       -e PORT=5069
       -e CELERY_WORKER_NAME=worker-dev
@@ -258,8 +260,7 @@ deploy dev n-1-18:
   script:
     - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
       -t cartblanche22-dev .
-    - docker stop ${CI_PROJECT_NAME}-dev || true
-    - docker rm ${CI_PROJECT_NAME}-dev || true
+    - docker rm -f ${CI_PROJECT_NAME}-dev || true
     - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
       -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
@@ -284,6 +285,8 @@ deploy dev n-1-18:
       -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
       -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
+      -e ARTHOR_PUBLIC_URL=${ARTHOR_PUBLIC_URL}
+      -e ARTHOR_PRIVATE_URL=${ARTHOR_PRIVATE_URL}
       -e ENV=development
       -e PORT=5069
       -e CELERY_WORKER_NAME=worker-dev
