@@ -6,6 +6,43 @@ from dotenv import load_dotenv
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
+def _parse_sentinel_url(url):
+    """Return (single_sentinel_url, sentinels_list) from a semicolon-separated sentinel URL.
+
+    urllib.parse cannot handle sentinel://h1:p1;h2:p2;h3:p3 — it treats
+    '26379;h2:p2...' as the port and raises ValueError.  We split out the
+    extra hosts and return them as a list of (host, port) tuples so they can
+    be passed via transport_options['sentinels'] instead.
+    """
+    if not url or 'sentinel://' not in url:
+        return url, None
+
+    rest = url[len('sentinel://'):]
+    # strip optional /db suffix
+    db_suffix = ''
+    if '/' in rest:
+        hosts_part, db_part = rest.rsplit('/', 1)
+        db_suffix = '/' + db_part
+    else:
+        hosts_part = rest
+
+    sentinels = []
+    for entry in hosts_part.split(';'):
+        entry = entry.strip()
+        if ':' in entry:
+            host, port = entry.rsplit(':', 1)
+            sentinels.append((host, int(port)))
+        elif entry:
+            sentinels.append((entry, 26379))
+
+    if not sentinels:
+        return url, None
+
+    first_host, first_port = sentinels[0]
+    single_url = f'sentinel://{first_host}:{first_port}{db_suffix}'
+    return single_url, sentinels
+
+
 class Config(object):
         SECRET_KEY = os.environ.get('SECRET_KEY')
         SECURITY_PASSWORD_SALT = os.getenv("nemeltdavs")
@@ -30,17 +67,32 @@ class Config(object):
 
         ENV=os.getenv('ENV', 'production')
 
-        CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
-        CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
-        CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+        _broker_url_raw = os.getenv('CELERY_BROKER_URL')
+        _result_backend_raw = os.getenv('CELERY_RESULT_BACKEND')
+
+        _broker_url, _broker_sentinels = _parse_sentinel_url(_broker_url_raw)
+        _backend_url, _backend_sentinels = _parse_sentinel_url(_result_backend_raw)
+
+        CELERY_BROKER_URL = _broker_url
+        CELERY_RESULT_BACKEND = _backend_url
+
+        _broker_transport_opts = {
+            'master_name': 'cartblanche-master',
+            'sentinel_kwargs': {},
+        }
+        if _broker_sentinels:
+            _broker_transport_opts['sentinels'] = _broker_sentinels
+
+        _backend_transport_opts = {
             'master_name': 'cartblanche-master',
             'sentinel_kwargs': {},
             'key_prefix': f'celery-task-{ENV}-',
         }
-        CELERY_BROKER_TRANSPORT_OPTIONS = {
-            'master_name': 'cartblanche-master',
-            'sentinel_kwargs': {},
-        }
+        if _backend_sentinels:
+            _backend_transport_opts['sentinels'] = _backend_sentinels
+
+        CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = _backend_transport_opts
+        CELERY_BROKER_TRANSPORT_OPTIONS = _broker_transport_opts
         
     
         GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
