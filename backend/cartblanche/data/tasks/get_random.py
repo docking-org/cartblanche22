@@ -15,6 +15,10 @@ from cartblanche.data.tasks.search_zinc import mergeResults
 logp_range="M500 M400 M300 M200 M100 M000 P000 P010 P020 P030 P040 P050 P060 P070 P080 P090 P100 P110 P120 P130 P140 P150 P160 P170 P180 P190 P200 P210 P220 P230 P240 P250 P260 P270 P280 P290 P300 P310 P320 P330 P340 P350 P360 P370 P380 P390 P400 P410 P420 P430 P440 P450 P460 P470 P480 P490 P500 P600 P700 P800 P900".split(" ")
 logp_range={e:i for i, e in enumerate(logp_range)}
 
+# Track which DB URLs already have tsm_system_rows confirmed so we don't
+# attempt CREATE EXTENSION on every task invocation (requires superuser).
+_tsm_extension_ready = set()
+
 def getRandom(subset, count,timeout=10):
 
     if subset is not None and subset not in subsets:
@@ -57,24 +61,29 @@ subsets = {
 @celery.task
 def getRandomFromDB(url, limit, current=None, retries=0):
     result = []
-    try:        
-        os.environ['PGOPTIONS'] = '-c statement_timeout=60000'
-        conn = psycopg2.connect(url)
+    try:
+        # connect_timeout prevents indefinite blocking when a DB host is unreachable
+        conn_url = url + ('&' if '?' in url else '?') + 'connect_timeout=10'
+        conn = psycopg2.connect(conn_url)
         curs = conn.cursor()
-        # curs.execute('select max(sub_id) from substance;')
-        # max = curs.fetchone()[0]
-        
-     
-        curs.execute('CREATE EXTENSION IF NOT EXISTS tsm_system_rows;')
+        # statement_timeout caps slow tablesample queries; set after connect so it
+        # applies regardless of whether PGOPTIONS was inherited from the environment
+        curs.execute('SET statement_timeout = 60000')
+        # Ensure the sampling extension exists — done once per worker process per URL
+        if url not in _tsm_extension_ready:
+            try:
+                curs.execute('CREATE EXTENSION IF NOT EXISTS tsm_system_rows')
+                conn.commit()
+            except Exception:
+                conn.rollback()
+            _tsm_extension_ready.add(url)
         curs.execute("select * from substance tablesample system_rows({limit}) LEFT JOIN tranches ON substance.tranche_id = tranches.tranche_id limit {limit};".format(limit=limit))
 
         res = curs.fetchall()
         result.append(res)
-        
-     
         conn.close()
     except Exception as e:
-        print (e)   
+        print(e)
         return []
     res = current or []
     for x in result:

@@ -366,27 +366,22 @@ def random_substance_status(jobid, format = "json"):
 
 @search_bp.route('/substance/random.<format>', methods=["GET", "POST"])
 def random_substance(format = 'json', subset = None):
-    count = request.form['count']
-  
-    if request.form.get('subset'):
+    count = request.values.get('count')
+    if not count:
+        return {"error": "count parameter required"}, 400
 
-        subset = request.form['subset']
+    if request.values.get('subset'):
+        subset = request.values['subset']
 
     if subset == 'none':
         subset = None
-    
+
     try:
         task = getRandom(subset, count)
     except ValueError as e:
         return {"error": str(e)}, 400
 
-    if request.method == "POST":
-        return {"task": task}
-    else:
-        # res= task.get()['id']
-        res = AsyncResult(task, app=celery).get()
-        res = AsyncResult(res['id'], app=celery).get()
-        return make_response(formatZincResult(res, format), 200)
+    return {"task": task}
 
 
 
