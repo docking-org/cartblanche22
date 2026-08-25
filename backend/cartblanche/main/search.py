@@ -271,18 +271,18 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
         file = [x for x in re.split(r'\n|\r|(\r\n)', file) if x!='' and x!= None]
         ids.extend(file)
     
-    if request.form.get('smiles'):
-        data = request.form['smiles']
+    if request.values.get('smiles'):
+        data = request.values['smiles']
         textDataList = [x for x in re.split(' |, |,|\n, |\r, |\r\n', data) if x!='']
         ids.extend(textDataList)
 
-    if request.form.get('adist'):
-        adist = request.form['adist']
-    if request.form.get('dist'):
-        dist = request.form['dist']
+    if request.values.get('adist'):
+        adist = request.values['adist']
+    if request.values.get('dist'):
+        dist = request.values['dist']
 
-    if request.form.get('database'):
-        database = request.form['database']
+    if request.values.get('database'):
+        database = request.values['database']
         if 'zinc20' in database:
             zinc20 = True
         if 'zinc22' in database:
@@ -291,7 +291,7 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
         zinc20 = False
         zinc22 = True
     submission = ids
- 
+
     ids = '\n'.join(ids)
     dist = 3 if int(dist) > 3 else int(dist)
     adist = 3 if int(dist) > 3 else int(adist)
@@ -301,33 +301,30 @@ def search_smiles(ids=[], data = None, format = 'json', file = None, adist = 0, 
 
     #this task id is used to track the progress of the search, between the sw search and the zinc22 search. need to add zinc20 search progress
     task_id_progress = str(uuid.uuid4())
-    
+
     # sw search => filter results => zinc22/20 search
     task = [sw_search.s(ids, dist, adist, zinc22, zinc20, task_id_progress), filter_sw_results.s(getRole(), task_id_progress=task_id_progress)]
-    
+
     task = start_search_task.delay(task, submission, task_id_progress=task_id_progress)
-    
-    if not request.form.get('synchronous'):
+
+    if not request.values.get('synchronous'):
         #starts the tasks and returns the task id
         return make_response({'task':task.id}, 200)
     else:
-        task = start_search_task.delay(task, submission)
-        task = AsyncResult(task.id, app=celery)
-        res = task.get("id")
-        task = res['id']
-        task = AsyncResult(task, app=celery)
-        
-        #get the results
+        # task is the AsyncResult from start_search_task — wait for it, then
+        # follow the inner task ID it returns (the filter_sw_results chain result)
         res = task.get()
-        
+        inner_task = AsyncResult(res['id'], app=celery)
+        res = inner_task.get()
+
         if res.get('zinc22'):
             results = res['zinc22']
         else:
             results = []
-        
+
         if res.get('zinc20'):
             results.extend(res['zinc20'])
-        
+
         return make_response(formatZincResult(results, format), 200)
    
 @search_bp.route('/substance/random/<jobid>.<format>', methods=["GET"])
