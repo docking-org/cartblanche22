@@ -1,5 +1,5 @@
-# variables:
-#   CI_PROJECT_NAME: cartblanche22
+variables:
+  CI_PROJECT_NAME: cartblanche22
 
 # build:
 #   tags:
@@ -44,10 +44,8 @@ deploy n-9-36:
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
       -t cartblanche22 .
-    - docker stop ${CI_PROJECT_NAME} || true
-    - docker rm ${CI_PROJECT_NAME} || true
-    - docker stop redis || true
-    - docker rm redis || true
+    - docker rm -f ${CI_PROJECT_NAME} || true
+    - docker rm -f redis || true
     - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
       -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
@@ -91,10 +89,8 @@ deploy n-9-38:
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
       -t cartblanche22 .
-    - docker stop ${CI_PROJECT_NAME} || true
-    - docker rm ${CI_PROJECT_NAME} || true
-    - docker stop redis || true
-    - docker rm redis || true
+    - docker rm -f ${CI_PROJECT_NAME} || true
+    - docker rm -f redis || true
     - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
       -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
@@ -138,10 +134,8 @@ deploy n-1-18:
     # - docker pull ${GITLAB_REGISTRY_URL}/mar/cartblanche22
     - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
       -t cartblanche22 .
-    - docker stop ${CI_PROJECT_NAME} || true
-    - docker rm ${CI_PROJECT_NAME} || true
-    - docker stop redis || true
-    - docker rm redis || true
+    - docker rm -f ${CI_PROJECT_NAME} || true
+    - docker rm -f redis || true
     - docker run -d --restart unless-stopped --network host
       -v /dev/null:/dev/null
       -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
