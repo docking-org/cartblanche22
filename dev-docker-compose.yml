@@ -12,7 +12,7 @@ services:
         SW_GIT_REPO: ${SW_GIT_REPO}
     restart: unless-stopped
     ports:
-      - "${PORT:-5068}:${PORT:-5068}"
+      - "${PORT:-5069}:${PORT:-5069}"
     env_file: backend/.env
     environment:
       CELERY_BROKER_URL: redis://redis:6379/0
