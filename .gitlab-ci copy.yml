@@ -174,36 +174,40 @@ deploy dev n-9-36:
   tags:
     - cartblanche22-n-9-36
   script:
-    - |
-      cat > backend/.env <<EOF
-      ENV=development
-      PORT=5069
-      CELERY_WORKER_NAME=worker-dev
-      CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
-      COMMON_DATABASE=${COMMON_DATABASE}
-      ZINC22_DATABASE=${ZINC22_DATABASE}
-      ZINC20_DATABASE=${ZINC20_DATABASE}
-      TIN_DATABASE=${TIN_DATABASE}
-      MAIL_PASSWORD=${MAIL_PASSWORD}
-      MAIL_USERNAME=${MAIL_USERNAME}
-      MAIL_SERVER=${MAIL_SERVER}
-      SECRET_KEY=${SECRET_KEY}
-      GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
-      DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
-      ARTHOR_PUBLIC_URL=${ARTHOR_PUBLIC_URL}
-      ARTHOR_PRIVATE_URL=${ARTHOR_PRIVATE_URL}
-      ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER}
-      SMALLWORLD_PUBLIC_MAP_PATH=${SMALLWORLD_PUBLIC_MAP_PATH}
-      SWDIR=${SWDIR}
-      SWDIR_20=${SWDIR_20}
-      SW_DB_VIRTUAL_PATH=${SW_DB_VIRTUAL_PATH}
-      EOF
-    - docker compose build
-    - docker compose down || true
-    - docker compose up -d
+    - docker build --build-arg SW_GIT_KEY=${SW_GIT_KEY} --build-arg SW_GIT_REPO=${SW_GIT_REPO}
+      -t cartblanche22-dev .
+    - docker rm -f ${CI_PROJECT_NAME}-dev || true
+    - docker run -d --restart unless-stopped --network host
+      -v /dev/null:/dev/null
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH}
+      -v ${SMALLWORLD_DATABASE}:${SW_DB_VIRTUAL_PATH_20}
+      -v ${SWDIR_20}:${SWDIR_20}
+      -v ${SWDIR}:${SWDIR}
+      -e SWDIR=${SWDIR}
+      -e SWDIR_20=${SWDIR_20}
+      -e "CELERY_BROKER_URL=${CELERY_BROKER_URL}"
+      -e "CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}"
+      -e COMMON_DATABASE=${COMMON_DATABASE}
+      -e MAIL_PASSWORD=${MAIL_PASSWORD}
+      -e SMALLWORLD_PUBLIC_MAP_PATH=${SMALLWORLD_PUBLIC_MAP_PATH}
+      -e ZINC20_DATABASE=${ZINC20_DATABASE}
+      -e MAIL_SERVER=${MAIL_SERVER}
+      -e MAIL_USERNAME=${MAIL_USERNAME}
+      -e SECRET_KEY=${SECRET_KEY}
+      -e TIN_DATABASE=${TIN_DATABASE}
+      -e ZINC_SMALL_WORLD_SERVER=${ZINC_SMALL_WORLD_SERVER}
+      -e ZINC22_DATABASE=${ZINC22_DATABASE}
+      -e GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      -e DOWNLOAD_PASS_2D=${DOWNLOAD_PASS_2D}
+      -e DOWNLOAD_USERNAME_2D=${DOWNLOAD_USERNAME_2D}
+      -e ARTHOR_PUBLIC_URL=${ARTHOR_PUBLIC_URL}
+      -e ARTHOR_PRIVATE_URL=${ARTHOR_PRIVATE_URL}
+      -e ENV=development
+      -e PORT=5069
+      -e CELERY_WORKER_NAME=worker-dev
+      --name ${CI_PROJECT_NAME}-dev
+      cartblanche22-dev
 
 # deploy dev n-9-38:
 #   except:
