@@ -67,7 +67,7 @@ deploy dev n-9-36:
       EOF
     - docker compose build
     - docker compose down || true
-    - docker compose up -d -f dev-docker-compose.yml
+    - docker compose -f dev-docker-compose.yml up -d 
 
 # deploy n-9-36:
 #   only:
@@ -241,7 +241,7 @@ deploy dev n-9-36:
       EOF
     - docker compose build
     - docker compose down || true
-    - docker compose up -d -f docker-compose.yml
+    - docker compose -f docker-compose.yml up -d 
 
 # deploy dev n-9-38:
 #   except:
