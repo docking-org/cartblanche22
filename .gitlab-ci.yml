@@ -31,8 +31,8 @@ variables:
     - celery -A cartblanche.run_celery.celery worker -l INFO -n worker3 --concurrency=5 --detach
     - pytest tests
 
-deploy dev n-9-36:
-  except:
+deploy n-9-36:
+  only:
     - master
   stage: deploy
   tags:
@@ -40,9 +40,9 @@ deploy dev n-9-36:
   script:
     - |
       cat > backend/.env <<EOF
-      ENV=development
+      ENV=production
       PORT=5068
-      CELERY_WORKER_NAME=worker-dev
+      CELERY_WORKER_NAME=worker
       CELERY_BROKER_URL=${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       COMMON_DATABASE=${COMMON_DATABASE}
@@ -65,9 +65,10 @@ deploy dev n-9-36:
       SWDIR_20=${SWDIR_20}
       SW_DB_VIRTUAL_PATH=${SW_DB_VIRTUAL_PATH}
       EOF
+    - export PORT=5068
     - docker compose build
     - docker compose down || true
-    - docker compose -f dev-docker-compose.yml up -d 
+    - docker compose up -d
 
 # deploy n-9-36:
 #   only:
@@ -239,9 +240,10 @@ deploy dev n-9-36:
       SWDIR_20=${SWDIR_20}
       SW_DB_VIRTUAL_PATH=${SW_DB_VIRTUAL_PATH}
       EOF
+    - export PORT=5069
     - docker compose build
     - docker compose down || true
-    - docker compose -f docker-compose.yml up -d 
+    - docker compose up -d
 
 # deploy dev n-9-38:
 #   except:
