@@ -15,18 +15,10 @@ celery = Celery(__name__,
                          ]
                 )
 
-# Only set sentinel transport options if using sentinel backend
-if Config.CELERY_RESULT_BACKEND and 'sentinel' in Config.CELERY_RESULT_BACKEND:
-    celery.conf.update(
-        result_backend_transport_options={
-            'master_name': 'cartblanche-master',
-            'sentinel_kwargs': {},
-        },
-        broker_transport_options={
-            'master_name': 'cartblanche-master',
-            'sentinel_kwargs': {},
-        },
-    )
+celery.conf.update(
+    result_backend_transport_options=Config.CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS,
+    broker_transport_options=Config.CELERY_BROKER_TRANSPORT_OPTIONS,
+)
 # celery.conf.task_default_queue = 'default'
 # celery.conf.task_queues = (
 #     Queue('default',    routing_key='task.#'),
