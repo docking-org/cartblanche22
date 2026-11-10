@@ -1,13 +1,14 @@
-FROM node:18-alpine as frontend
+FROM node:20-alpine as frontend
 WORKDIR /app
 
 ENV PATH /app/node_modules/.bin:$PATH
 RUN apk add --no-cache git
 COPY package.json ./
 RUN npm install
+COPY index.html vite.config.js ./
 COPY ./src ./src
 COPY ./public ./public
-RUN DISABLE_ESLINT_PLUGIN=true yarn build
+RUN npm run build
 
 FROM continuumio/anaconda3:latest as backend
 
