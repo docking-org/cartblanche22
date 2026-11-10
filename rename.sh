@@ -3,7 +3,7 @@
 #this is dumb but I don't have time to install webpack which gives you the option to rename the bundle files lol
 
 # Get the main.*.js file name from /home/build/js/
-main_js_file=$(ls /home/build/static/js/main.*.js 2>/dev/null)
+main_js_file=$(ls /home/build/static/js/main.*.jsx 2>/dev/null)
 if [ -z "$main_js_file" ]; then
     echo "No main.*.js file found in /home/build/static/js/"
     exit 1
